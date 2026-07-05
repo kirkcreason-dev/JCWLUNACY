@@ -1,0 +1,572 @@
+{
+ "bruce": {
+  "idle": {
+   "file": "sprites/bruce/idle.png",
+   "w": 89,
+   "h": 160
+  },
+  "jump": {
+   "file": "sprites/bruce/jump.png",
+   "w": 120,
+   "h": 160
+  },
+  "fallen": {
+   "file": "sprites/bruce/fallen.png",
+   "w": 110,
+   "h": 70
+  },
+  "walkL": [
+   {
+    "file": "sprites/bruce/walkL_0.png",
+    "w": 97,
+    "h": 160
+   },
+   {
+    "file": "sprites/bruce/walkL_1.png",
+    "w": 85,
+    "h": 160
+   },
+   {
+    "file": "sprites/bruce/walkL_2.png",
+    "w": 96,
+    "h": 160
+   },
+   {
+    "file": "sprites/bruce/walkL_3.png",
+    "w": 96,
+    "h": 160
+   }
+  ],
+  "walkR": [
+   {
+    "file": "sprites/bruce/walkR_0.png",
+    "w": 100,
+    "h": 160
+   },
+   {
+    "file": "sprites/bruce/walkR_1.png",
+    "w": 100,
+    "h": 160
+   },
+   {
+    "file": "sprites/bruce/walkR_2.png",
+    "w": 95,
+    "h": 160
+   },
+   {
+    "file": "sprites/bruce/walkR_3.png",
+    "w": 88,
+    "h": 160
+   }
+  ],
+  "elbowL": [
+   {
+    "file": "sprites/bruce/elbowL_0.png",
+    "w": 112,
+    "h": 160
+   },
+   {
+    "file": "sprites/bruce/elbowL_1.png",
+    "w": 153,
+    "h": 160
+   },
+   {
+    "file": "sprites/bruce/elbowL_2.png",
+    "w": 91,
+    "h": 160
+   }
+  ],
+  "elbowR": [
+   {
+    "file": "sprites/bruce/elbowR_0.png",
+    "w": 104,
+    "h": 160
+   },
+   {
+    "file": "sprites/bruce/elbowR_1.png",
+    "w": 134,
+    "h": 160
+   },
+   {
+    "file": "sprites/bruce/elbowR_2.png",
+    "w": 103,
+    "h": 160
+   }
+  ]
+ },
+ "atiba": {
+  "idle": {
+   "file": "sprites/atiba/idle.png",
+   "w": 105,
+   "h": 160
+  },
+  "jump": {
+   "file": "sprites/atiba/jump.png",
+   "w": 121,
+   "h": 160
+  },
+  "fallen": {
+   "file": "sprites/atiba/fallen.png",
+   "w": 163,
+   "h": 70
+  },
+  "walkL": [
+   {
+    "file": "sprites/atiba/walkL_0.png",
+    "w": 92,
+    "h": 160
+   },
+   {
+    "file": "sprites/atiba/walkL_1.png",
+    "w": 88,
+    "h": 160
+   },
+   {
+    "file": "sprites/atiba/walkL_2.png",
+    "w": 85,
+    "h": 160
+   },
+   {
+    "file": "sprites/atiba/walkL_3.png",
+    "w": 85,
+    "h": 160
+   }
+  ],
+  "walkR": [
+   {
+    "file": "sprites/atiba/walkR_0.png",
+    "w": 90,
+    "h": 160
+   },
+   {
+    "file": "sprites/atiba/walkR_1.png",
+    "w": 91,
+    "h": 160
+   },
+   {
+    "file": "sprites/atiba/walkR_2.png",
+    "w": 91,
+    "h": 160
+   },
+   {
+    "file": "sprites/atiba/walkR_3.png",
+    "w": 88,
+    "h": 160
+   }
+  ],
+  "elbowL": [
+   {
+    "file": "sprites/atiba/elbowL_0.png",
+    "w": 110,
+    "h": 160
+   },
+   {
+    "file": "sprites/atiba/elbowL_1.png",
+    "w": 92,
+    "h": 160
+   },
+   {
+    "file": "sprites/atiba/elbowL_2.png",
+    "w": 138,
+    "h": 160
+   }
+  ],
+  "elbowR": [
+   {
+    "file": "sprites/atiba/elbowR_0.png",
+    "w": 97,
+    "h": 160
+   },
+   {
+    "file": "sprites/atiba/elbowR_1.png",
+    "w": 118,
+    "h": 160
+   },
+   {
+    "file": "sprites/atiba/elbowR_2.png",
+    "w": 142,
+    "h": 160
+   }
+  ]
+ },
+ "bishop": {
+  "idle": {
+   "file": "sprites/bishop/idle.png",
+   "w": 87,
+   "h": 160
+  },
+  "jump": {
+   "file": "sprites/bishop/jump.png",
+   "w": 120,
+   "h": 160
+  },
+  "fallen": {
+   "file": "sprites/bishop/fallen.png",
+   "w": 235,
+   "h": 70
+  },
+  "walkL": [
+   {
+    "file": "sprites/bishop/walkL_0.png",
+    "w": 97,
+    "h": 160
+   },
+   {
+    "file": "sprites/bishop/walkL_1.png",
+    "w": 92,
+    "h": 160
+   },
+   {
+    "file": "sprites/bishop/walkL_2.png",
+    "w": 85,
+    "h": 160
+   },
+   {
+    "file": "sprites/bishop/walkL_3.png",
+    "w": 99,
+    "h": 160
+   }
+  ],
+  "walkR": [
+   {
+    "file": "sprites/bishop/walkR_0.png",
+    "w": 100,
+    "h": 160
+   },
+   {
+    "file": "sprites/bishop/walkR_1.png",
+    "w": 88,
+    "h": 160
+   },
+   {
+    "file": "sprites/bishop/walkR_2.png",
+    "w": 88,
+    "h": 160
+   },
+   {
+    "file": "sprites/bishop/walkR_3.png",
+    "w": 99,
+    "h": 160
+   }
+  ],
+  "elbowL": [
+   {
+    "file": "sprites/bishop/elbowL_0.png",
+    "w": 114,
+    "h": 160
+   },
+   {
+    "file": "sprites/bishop/elbowL_1.png",
+    "w": 111,
+    "h": 160
+   },
+   {
+    "file": "sprites/bishop/elbowL_2.png",
+    "w": 116,
+    "h": 160
+   }
+  ],
+  "elbowR": [
+   {
+    "file": "sprites/bishop/elbowR_0.png",
+    "w": 111,
+    "h": 160
+   },
+   {
+    "file": "sprites/bishop/elbowR_1.png",
+    "w": 107,
+    "h": 160
+   },
+   {
+    "file": "sprites/bishop/elbowR_2.png",
+    "w": 124,
+    "h": 160
+   }
+  ]
+ },
+ "bronson": {
+  "idle": {
+   "file": "sprites/bronson/idle.png",
+   "w": 95,
+   "h": 160
+  },
+  "jump": {
+   "file": "sprites/bronson/jump.png",
+   "w": 127,
+   "h": 160
+  },
+  "fallen": {
+   "file": "sprites/bronson/fallen.png",
+   "w": 201,
+   "h": 70
+  },
+  "walkL": [
+   {
+    "file": "sprites/bronson/walkL_0.png",
+    "w": 106,
+    "h": 160
+   },
+   {
+    "file": "sprites/bronson/walkL_1.png",
+    "w": 89,
+    "h": 160
+   },
+   {
+    "file": "sprites/bronson/walkL_2.png",
+    "w": 94,
+    "h": 160
+   },
+   {
+    "file": "sprites/bronson/walkL_3.png",
+    "w": 105,
+    "h": 160
+   }
+  ],
+  "walkR": [
+   {
+    "file": "sprites/bronson/walkR_0.png",
+    "w": 107,
+    "h": 160
+   },
+   {
+    "file": "sprites/bronson/walkR_1.png",
+    "w": 107,
+    "h": 160
+   },
+   {
+    "file": "sprites/bronson/walkR_2.png",
+    "w": 109,
+    "h": 160
+   },
+   {
+    "file": "sprites/bronson/walkR_3.png",
+    "w": 110,
+    "h": 160
+   }
+  ],
+  "elbowL": [
+   {
+    "file": "sprites/bronson/elbowL_0.png",
+    "w": 125,
+    "h": 160
+   },
+   {
+    "file": "sprites/bronson/elbowL_1.png",
+    "w": 112,
+    "h": 160
+   },
+   {
+    "file": "sprites/bronson/elbowL_2.png",
+    "w": 133,
+    "h": 160
+   }
+  ],
+  "elbowR": [
+   {
+    "file": "sprites/bronson/elbowR_0.png",
+    "w": 133,
+    "h": 160
+   },
+   {
+    "file": "sprites/bronson/elbowR_1.png",
+    "w": 141,
+    "h": 160
+   },
+   {
+    "file": "sprites/bronson/elbowR_2.png",
+    "w": 145,
+    "h": 160
+   }
+  ]
+ },
+ "dani": {
+  "idle": {
+   "file": "sprites/dani/idle.png",
+   "w": 82,
+   "h": 160
+  },
+  "jump": {
+   "file": "sprites/dani/jump.png",
+   "w": 104,
+   "h": 160
+  },
+  "fallen": {
+   "file": "sprites/dani/fallen.png",
+   "w": 93,
+   "h": 70
+  },
+  "walkL": [
+   {
+    "file": "sprites/dani/walkL_0.png",
+    "w": 89,
+    "h": 160
+   },
+   {
+    "file": "sprites/dani/walkL_1.png",
+    "w": 79,
+    "h": 160
+   },
+   {
+    "file": "sprites/dani/walkL_2.png",
+    "w": 99,
+    "h": 160
+   },
+   {
+    "file": "sprites/dani/walkL_3.png",
+    "w": 90,
+    "h": 160
+   }
+  ],
+  "walkR": [
+   {
+    "file": "sprites/dani/walkR_0.png",
+    "w": 91,
+    "h": 160
+   },
+   {
+    "file": "sprites/dani/walkR_1.png",
+    "w": 95,
+    "h": 160
+   },
+   {
+    "file": "sprites/dani/walkR_2.png",
+    "w": 94,
+    "h": 160
+   },
+   {
+    "file": "sprites/dani/walkR_3.png",
+    "w": 94,
+    "h": 160
+   }
+  ],
+  "elbowL": [
+   {
+    "file": "sprites/dani/elbowL_0.png",
+    "w": 90,
+    "h": 160
+   },
+   {
+    "file": "sprites/dani/elbowL_1.png",
+    "w": 87,
+    "h": 160
+   },
+   {
+    "file": "sprites/dani/elbowL_2.png",
+    "w": 129,
+    "h": 160
+   }
+  ],
+  "elbowR": [
+   {
+    "file": "sprites/dani/elbowR_0.png",
+    "w": 116,
+    "h": 160
+   },
+   {
+    "file": "sprites/dani/elbowR_1.png",
+    "w": 89,
+    "h": 160
+   },
+   {
+    "file": "sprites/dani/elbowR_2.png",
+    "w": 130,
+    "h": 160
+   }
+  ]
+ },
+ "caleb": {
+  "idle": {
+   "file": "sprites/caleb/idle.png",
+   "w": 87,
+   "h": 160
+  },
+  "jump": {
+   "file": "sprites/caleb/jump.png",
+   "w": 130,
+   "h": 160
+  },
+  "fallen": {
+   "file": "sprites/caleb/fallen.png",
+   "w": 219,
+   "h": 70
+  },
+  "walkL": [
+   {
+    "file": "sprites/caleb/walkL_0.png",
+    "w": 96,
+    "h": 160
+   },
+   {
+    "file": "sprites/caleb/walkL_1.png",
+    "w": 94,
+    "h": 160
+   },
+   {
+    "file": "sprites/caleb/walkL_2.png",
+    "w": 108,
+    "h": 160
+   },
+   {
+    "file": "sprites/caleb/walkL_3.png",
+    "w": 94,
+    "h": 160
+   }
+  ],
+  "walkR": [
+   {
+    "file": "sprites/caleb/walkR_0.png",
+    "w": 93,
+    "h": 160
+   },
+   {
+    "file": "sprites/caleb/walkR_1.png",
+    "w": 94,
+    "h": 160
+   },
+   {
+    "file": "sprites/caleb/walkR_2.png",
+    "w": 95,
+    "h": 160
+   },
+   {
+    "file": "sprites/caleb/walkR_3.png",
+    "w": 98,
+    "h": 160
+   }
+  ],
+  "elbowL": [
+   {
+    "file": "sprites/caleb/elbowL_0.png",
+    "w": 113,
+    "h": 160
+   },
+   {
+    "file": "sprites/caleb/elbowL_1.png",
+    "w": 127,
+    "h": 160
+   },
+   {
+    "file": "sprites/caleb/elbowL_2.png",
+    "w": 137,
+    "h": 160
+   }
+  ],
+  "elbowR": [
+   {
+    "file": "sprites/caleb/elbowR_0.png",
+    "w": 104,
+    "h": 160
+   },
+   {
+    "file": "sprites/caleb/elbowR_1.png",
+    "w": 130,
+    "h": 160
+   },
+   {
+    "file": "sprites/caleb/elbowR_2.png",
+    "w": 132,
+    "h": 160
+   }
+  ]
+ }
+}
