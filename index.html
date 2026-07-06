@@ -82,7 +82,12 @@ nav.top a.on::after{content:"";position:absolute;left:10px;right:10px;bottom:2px
 .est{font-family:'Rubik Distressed',system-ui,sans-serif;font-weight:700;text-transform:uppercase;padding-right:.18em;
   letter-spacing:.34em;font-size:clamp(11px,1.5vw,14px);color:var(--gold);
   display:inline-flex;align-items:center;gap:14px;cursor:default;user-select:none;width:max-content;}
-.est::before,.est::after{content:"";width:44px;height:2px;background:var(--blood);}
+.est::before,.est::after{content:"";width:44px;height:2px;background:var(--blood);flex:none;}
+@media (max-width:720px){
+  .est{display:block;width:auto;max-width:100%;letter-spacing:.14em;font-size:11px;
+    white-space:normal;text-align:center;line-height:1.7;padding:0 10px;}
+  .est::before,.est::after{display:none;}
+}
 .wordmark{font-family:'Rubik Distressed',system-ui,sans-serif;text-transform:uppercase;line-height:.84;
   font-size:clamp(60px,16vw,210px);letter-spacing:.005em;margin:6px 0 10px;
   color:var(--bone);
