@@ -284,7 +284,9 @@ h2.head em{font-style:normal;color:var(--gold);}
 .era:nth-of-type(4) .wr:hover{border-color:var(--purple);}
 .era:nth-of-type(5) .wr:hover{border-color:var(--cyan);}
 .era .tag::after{content:"";flex:1;height:1px;background:var(--seam);}
-.crew{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
+.crew{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;
+  justify-content:start;align-items:start;}
+.crew .wr{max-width:100%;}
 @media (max-width:640px){.crew{grid-template-columns:repeat(2,1fr);gap:10px;}.wr h3{font-size:16px;}}
 .wr{border:1px solid var(--seam);background:var(--plate);padding:18px 16px;position:relative;
   user-select:none;cursor:default;transition:border-color .2s,transform .15s;}
@@ -1180,6 +1182,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <div class="wr" data-line="UNDER ORDERS FROM BIG VITO"><div class="pic"><img src="roster/steven-flowe.jpg" alt="Steven Flowe" loading="lazy" onerror="this.remove()"><span class="mono">SF</span></div><div class="role">JCW Roster</div><h3>Steven Flowe</h3></div>
         
         <div class="wr" data-line="VINCENZO &middot; JCW LUNACY"><div class="pic"><img src="roster/vincenzo.jpg" alt="Vincenzo" loading="lazy" onerror="this.remove()"><span class="mono">V</span></div><div class="role">JCW Roster</div><h3>Vincenzo</h3></div>
+        <div class="wr" data-line="ZACH GOWEN &middot; JCW LUNACY"><div class="pic"><span class="mono">ZG</span></div><div class="role">JCW Roster</div><h3>Zach Gowen</h3></div>
         <div class="wr" data-line="WILLIE MACK DIDN&rsquo;T BLINK"><div class="pic"><img src="roster/willie-mack.jpg" alt="Willie Mack" loading="lazy" onerror="this.remove()"><span class="mono">WM</span></div><div class="role">JCW Roster</div><h3>Willie Mack</h3>
         
         </div>
@@ -1187,7 +1190,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     </div>
 
     <div class="era rev">
-      <div class="wr" data-line="ZACH GOWEN &middot; JCW LUNACY"><div class="pic"><span class="mono">ZG</span></div><div class="role">JCW Roster</div><h3>Zach Gowen</h3></div><div class="tag">Owners, Voices &amp; Officials</div>
+      <div class="tag">Owners, Voices &amp; Officials</div>
       <div class="crew eggable">
         <div class="wr" data-line="VIOLENT J &middot; JCW LUNACY"><div class="pic"><img src="roster/violent-j.jpg" alt="Violent J" loading="lazy" onerror="this.remove()"><span class="mono">VJ</span></div><div class="role">Owner</div><h3>Violent J</h3></div>
         <div class="wr" data-line="VINCE RUSSO &middot; JCW LUNACY"><div class="pic"><img src="roster/vince-russo.jpg" alt="Vince Russo" loading="lazy" onerror="this.remove()"><span class="mono">VR</span></div><div class="role">Owner</div><h3>Vince Russo</h3></div>
@@ -1885,7 +1888,7 @@ function observeReveals(){
   const bioBack=document.getElementById('bio-back');
   let bioHold=false;
   /* ================= ENTRANCE THEMES (gated on clearance) ================= */
-  const THEMES_CLEARED=false; // set true once JCW confirms entrance music is cleared for the website
+  const THEMES_CLEARED=true; // JCW confirmed entrance music cleared
   const THEME_SET=["amazing-maria", "barnabas-the-bizarre", "beast-man", "big-vito", "cokane", "dani-mo", "disco-ray", "facade", "father-bronson", "hollyhood-haley-j", "j-rod", "james-storm", "jasmin-st-claire", "jeeves", "luigi-primo", "matt-cross", "mecha-wolf", "mickie-knuckles", "mosh-pit-mike", "mr-anderson", "ninja-mack", "pco", "sewacide", "shane-mercer", "sophia-rose", "steven-flowe", "the-green-phantom", "the-outbreak", "vince-russo", "violent-j", "willie-mack"];
   function themeSlug(name){
     return name.toLowerCase().replace(/holly ?hood/,'hollyhood').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
