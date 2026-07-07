@@ -456,7 +456,8 @@ body.game-lock{overflow:hidden;}
 #view-episodes h2.head em{color:var(--purple);}
 .ep-player{display:none;border:1px solid var(--purple);background:#000;margin-bottom:22px;position:relative;}
 .ep-player.on{display:block;}
-.ep-player iframe{display:block;width:100%;aspect-ratio:16/9;border:0;background:#000;}
+.ep-player .ifw{position:relative;height:0;padding-bottom:56.25%;}
+.ep-player iframe{position:absolute;inset:0;display:block;width:100%;height:100%;border:0;background:#000;}
 .ep-player .now{padding:10px 14px;font-family:'Rubik Distressed',system-ui,sans-serif;font-weight:700;
   text-transform:uppercase;letter-spacing:.1em;font-size:13px;color:var(--gold);border-top:1px solid var(--seam);}
 .ep-tools{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:20px;}
@@ -465,11 +466,12 @@ body.game-lock{overflow:hidden;}
 .ep-tools input:focus{border-color:var(--purple);}
 .ep-tools .count{font-family:'Rubik Distressed',system-ui,sans-serif;font-weight:700;text-transform:uppercase;
   letter-spacing:.12em;font-size:12.5px;color:var(--steel);}
-.eps{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;}
+.eps{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+@media (max-width:640px){.eps{grid-template-columns:repeat(2,1fr);gap:10px;}.ep .nm{font-size:12px;}}
 .ep{border:1px solid var(--seam);background:var(--plate);cursor:pointer;transition:border-color .2s,transform .15s;}
 .ep:hover{border-color:var(--purple);transform:translateY(-2px);}
-.ep .th{position:relative;aspect-ratio:16/9;background:#000;overflow:hidden;}
-.ep .th img{width:100%;height:100%;object-fit:cover;display:block;}
+.ep .th{position:relative;height:0;padding-bottom:56.25%;background:#000;overflow:hidden;}
+.ep .th img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
 .ep .th::after{content:"\25B6";position:absolute;inset:0;display:grid;place-items:center;
   font-size:26px;color:#fff;background:rgba(0,0,0,.28);opacity:0;transition:opacity .2s;}
 .ep:hover .th::after{opacity:1;}
@@ -495,8 +497,8 @@ body.game-lock{overflow:hidden;}
 .prods{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;}
 .prod{border:1px solid var(--seam);background:var(--plate);display:block;transition:border-color .2s,transform .15s;}
 .prod:hover{border-color:var(--acid);transform:translateY(-2px);}
-.prod .im{aspect-ratio:1/1;background:#111;overflow:hidden;}
-.prod .im img{width:100%;height:100%;object-fit:contain;display:block;}
+.prod .im{position:relative;height:0;padding-bottom:100%;background:#111;overflow:hidden;}
+.prod .im img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;}
 .prod .in{padding:10px 12px 12px;}
 .prod .in h4{font-family:'Rubik Distressed',system-ui,sans-serif;font-weight:700;text-transform:uppercase;
   letter-spacing:.05em;font-size:13.5px;color:var(--bone);line-height:1.25;}
@@ -516,9 +518,8 @@ body.game-lock{overflow:hidden;}
 
 /* crew portraits */
 .wr{padding:0 0 16px;}
-.wr .pic{position:relative;aspect-ratio:4/5;background:#000;overflow:hidden;border-bottom:1px solid var(--seam);margin-bottom:14px;}
-.wr .pic img{position:relative;z-index:2;}
-.wr .pic img{width:100%;height:100%;object-fit:cover;filter:saturate(1.05) contrast(1.05);}
+.wr .pic{position:relative;height:0;padding-bottom:125%;background:#000;overflow:hidden;border-bottom:1px solid var(--seam);margin-bottom:14px;}
+.wr .pic img{position:absolute;inset:0;z-index:2;width:100%;height:100%;object-fit:cover;filter:saturate(1.05) contrast(1.05);}
 .wr .pic .mono{position:absolute;inset:0;display:grid;place-items:center;
   font-family:'Rubik Distressed',system-ui,sans-serif;font-size:clamp(44px,7vw,64px);color:rgba(245,238,221,.92);
   text-shadow:0 3px 0 rgba(0,0,0,.6);letter-spacing:.02em;
@@ -627,7 +628,9 @@ img.hm-mast{margin-bottom:20px;}
 .hub .hd{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--cyan);}
 .hub .mrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:10px;}
 .hub .mrow a{display:block;border:1px solid var(--seam);}
-.hub .mrow img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#111;display:block;}
+.hub .mrow a{position:relative;}
+.hub .mrow .imw{position:relative;height:0;padding-bottom:100%;background:#111;}
+.hub .mrow img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;}
 .hub .mrow b{display:block;font-size:12px;color:var(--bone);padding:6px 8px;text-transform:uppercase;letter-spacing:.05em;}
 .hub .nx{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;}
 .cd{display:flex;gap:12px;justify-content:flex-start;flex-wrap:wrap;margin:16px 0;}
@@ -1120,18 +1123,20 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <div class="wr" data-line="ALICE CROWLEY &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_0fe5609210a644919c6ca2596194cf80~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Alice Crowley" loading="lazy" onerror="this.remove()"><span class="mono">AC</span></div><div class="role">JCW Roster</div><h3>Alice Crowley</h3></div>
         <div class="wr" data-line="BACKSEAT BOYZ &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_538e0a90307f49da932afbabb6758bc8~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Backseat Boyz" loading="lazy" onerror="this.remove()"><span class="mono">BB</span></div><div class="role">JCW Roster</div><h3>Backseat Boyz</h3></div>
         <div class="wr" data-line="THE BIZARRE ONE HAS A FAMILY MATTER"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_2943296651254ad68f30a8a2573ffdeb~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Barnabas the Bizarre" loading="lazy" onerror="this.remove()"><span class="mono">BT</span></div><div class="role">JCW Roster</div><h3>Barnabas the Bizarre</h3></div>
-        <div class="wr" data-line="BEAST MAN &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_9e0e5f2cbaa043de88ef80b3e5a74cf8~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Beast Man" loading="lazy" onerror="this.remove()"><span class="mono">BM</span></div><div class="role">JCW Roster</div><h3>Beast Man</h3></div>
+        
         <div class="wr" data-line="TAKE OUT COKANE &mdash; OR ELSE"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_e73eceec38174c43b3c382e53715b067~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Big Vito" loading="lazy" onerror="this.remove()"><span class="mono">BV</span></div><div class="role">JCW Roster</div><h3>Big Vito</h3></div>
+        <div class="wr" data-line="BIGFOOT &middot; JCW LUNACY"><div class="pic"><span class="mono">BF</span></div><div class="role">JCW Roster</div><h3>Bigfoot</h3></div>
         <div class="wr" data-line="BREYER WELLINGTON &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_1820f5a2dcd744799c60d6cc9257544b~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Breyer Wellington" loading="lazy" onerror="this.remove()"><span class="mono">BW</span></div><div class="role">JCW Roster</div><h3>Breyer Wellington</h3></div>
         <div class="wr" data-line="BROTHERS OF FUNSTRUCTION &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_c708e2022f80486082413e4d39b80968~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Brothers of Funstruction" loading="lazy" onerror="this.remove()"><span class="mono">BO</span></div><div class="role">JCW Roster</div><h3>Brothers of Funstruction</h3></div>
         
         
         <div class="wr" data-line="THE DEVIL&rsquo;S FAVORITE DEALER"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_f1e96faae4c24e8fa177a5a96ec8a505~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Cokane" loading="lazy" onerror="this.remove()"><span class="mono">C</span></div><div class="role">JCW Roster</div><h3>Cokane</h3></div>
         
-        <div class="wr" data-line="COLBY CORINO &middot; JCW LUNACY"><div class="pic"><span class="mono">CC</span></div><div class="role">JCW Roster</div><h3>Colby Corino</h3></div>
-        <div class="wr" data-line="OFFICER COLT CABANA &middot; JCW LUNACY"><div class="pic"><span class="mono">OC</span></div><div class="role">JCW Roster</div><h3>Officer Colt Cabana</h3></div>
-        <div class="wr" data-line="DEPUTY DICKHEAD &middot; JCW LUNACY"><div class="pic"><span class="mono">DD</span></div><div class="role">JCW Roster</div><h3>Deputy Dickhead</h3></div>
-        <div class="wr" data-line="DISCO RAY &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_20482f1975e749d7b28cd77ed2712568~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Disco Ray" loading="lazy" onerror="this.remove()"><span class="mono">DR</span></div><div class="role">JCW Roster</div><h3>Disco Ray</h3></div>
+        
+        
+        
+        
+        <div class="wr" data-line="DONOVAN DIJAK &middot; JCW LUNACY"><div class="pic"><span class="mono">DD</span></div><div class="role">JCW Roster</div><h3>Donovan Dijak</h3></div>
         <div class="wr" data-line="EC3 &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_c1cccb17b20b45e8bf2a7c917027274d~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="EC3" loading="lazy" onerror="this.remove()"><span class="mono">E</span></div><div class="role">JCW Roster</div><h3>EC3</h3></div>
         <div class="wr" data-line="FACADE &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_5a9fca59986649dfbd81f54f58a3fa80~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Facade" loading="lazy" onerror="this.remove()"><span class="mono">F</span></div><div class="role">JCW Roster</div><h3>Facade</h3></div>
         
@@ -1141,7 +1146,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <div class="wr" data-line="POWER SLAP &middot; DARK CARNIVAL"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_2d2b77e0379a47fab415f48dd19681ab~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Hollyhood Haley J" loading="lazy" onerror="this.remove()"><span class="mono">HH</span></div><div class="role">JCW Roster</div><h3>Hollyhood Haley J</h3></div>
         <div class="wr" data-line="BIG AL IS STILL LOOKING FOR HIM"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_129563b8f60f4100a624fc6252047f87~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Hokane" loading="lazy" onerror="this.remove()"><span class="mono">H</span></div><div class="role">JCW Roster</div><h3>Hokane</h3></div>
         <div class="wr" data-line="J-ROD &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_32d43a57b9e543cca1d3d772cdaafa3e~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="J-Rod" loading="lazy" onerror="this.remove()"><span class="mono">J</span></div><div class="role">JCW Roster</div><h3>J-Rod</h3></div>
-        <div class="wr" data-line="JAKE CRIST &middot; JCW LUNACY"><div class="pic"><span class="mono">JC</span></div><div class="role">JCW Roster</div><h3>Jake Crist</h3></div>
+        
         <div class="wr" data-line="JAMES STORM &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_9f4daea251e9445fa2a3ce015545d58d~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="James Storm" loading="lazy" onerror="this.remove()"><span class="mono">JS</span></div><div class="role">JCW Roster</div><h3>James Storm</h3></div>
         <div class="wr" data-line="WHO&rsquo;S THE FATHER?"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_b52a154f82024cf3870d32a47f4ca84e~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Jasmin St. Claire" loading="lazy" onerror="this.remove()"><span class="mono">JS</span></div><div class="role">JCW Roster</div><h3>Jasmin St. Claire</h3></div>
         <div class="wr" data-line="JEEVES &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_45f7196f110a49a5ae2d5506600695f6~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Jeeves" loading="lazy" onerror="this.remove()"><span class="mono">J</span></div><div class="role">JCW Roster</div><h3>Jeeves</h3></div>
@@ -1156,12 +1161,14 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <div class="wr" data-line="MECHA WOLF &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_ea8d047aef514063b39f41f59c9c3fe6~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Mecha Wolf" loading="lazy" onerror="this.remove()"><span class="mono">MW</span></div><div class="role">JCW Roster</div><h3>Mecha Wolf</h3></div>
         <div class="wr" data-line="MICKIE KNUCKLES &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_c2ab771d3f9445a9a7d5c2285f8163a1~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Mickie Knuckles" loading="lazy" onerror="this.remove()"><span class="mono">MK</span></div><div class="role">JCW Roster</div><h3>Mickie Knuckles</h3></div>
         <div class="wr" data-line="MOSH PIT MIKE &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_62c5f868a126447a8e8b739d2850ca06~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Mosh Pit Mike" loading="lazy" onerror="this.remove()"><span class="mono">MP</span></div><div class="role">JCW Roster</div><h3>Mosh Pit Mike</h3></div>
-        <div class="wr" data-line="MR. 50S &middot; JCW LUNACY"><div class="pic"><span class="mono">M5</span></div><div class="role">JCW Roster</div><h3>Mr. 50s</h3></div>
+        
+        <div class="wr" data-line="MR. ANDERSON &middot; JCW LUNACY"><div class="pic"><span class="mono">MA</span></div><div class="role">JCW Roster</div><h3>Mr. Anderson</h3></div>
         <div class="wr" data-line="MR. HAPPY &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_8992ff73d50444c18dbf1bb929e494e3~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Mr. Happy" loading="lazy" onerror="this.remove()"><span class="mono">MH</span></div><div class="role">JCW Roster</div><h3>Mr. Happy</h3></div>
         <div class="wr" data-line="NIC NEMETH &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_1355305043a54c909b2c1624ae11e923~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Nic Nemeth" loading="lazy" onerror="this.remove()"><span class="mono">NN</span></div><div class="role">JCW Roster</div><h3>Nic Nemeth</h3></div>
         <div class="wr" data-line="NINJA MACK KEEPS FLYING"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_7af169e51e1c47ef899b8a6a456c2c45~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Ninja Mack" loading="lazy" onerror="this.remove()"><span class="mono">NM</span></div><div class="role">JCW Roster</div><h3>Ninja Mack</h3></div>
         <div class="wr" data-line="THE OUTBREAK &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_bc6c4c5faf7342b7afbc0fc021878aaa~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="The Outbreak" loading="lazy" onerror="this.remove()"><span class="mono">O</span></div><div class="role">JCW Roster</div><h3>The Outbreak</h3></div>
-        <div class="wr" data-line="PCO &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_1c7cbd51ede340cc896ae2756fb3bf19~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="PCO" loading="lazy" onerror="this.remove()"><span class="mono">P</span></div><div class="role">JCW Roster</div><h3>PCO</h3></div>
+        
+        <div class="wr" data-line="7 FOOT TALL PAINFUL PAUL &middot; JCW LUNACY"><div class="pic"><span class="mono">PP</span></div><div class="role">JCW Roster</div><h3>7 Foot Tall Painful Paul</h3></div>
         <div class="wr" data-line="RICKY MORTON &middot; JCW LUNACY"><div class="pic"><span class="mono">RM</span></div><div class="role">JCW Roster</div><h3>Ricky Morton</h3></div>
         <div class="wr" data-line="THE RING RAT &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_427899e0db7148df807597ffcad97f9c~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="The Ring Rat" loading="lazy" onerror="this.remove()"><span class="mono">RR</span></div><div class="role">JCW Roster</div><h3>The Ring Rat</h3></div>
         <div class="wr" data-line="SALLY BOY &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_adf0dc81d6d14e4c8482d8f7e9659fad~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Sally Boy" loading="lazy" onerror="this.remove()"><span class="mono">SB</span></div><div class="role">JCW Roster</div><h3>Sally Boy</h3></div>
@@ -1169,18 +1176,18 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <div class="wr" data-line="SHANE MERCER &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_a1fd1e07d3d44af29c298b05063b65e9~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Shane Mercer" loading="lazy" onerror="this.remove()"><span class="mono">SM</span></div><div class="role">JCW Roster</div><h3>Shane Mercer</h3></div>
         <div class="wr" data-line="SONNY KISS &middot; JCW LUNACY"><div class="pic"><span class="mono">SK</span></div><div class="role">JCW Roster</div><h3>Sonny Kiss</h3></div>
         <div class="wr" data-line="SOPHIA ROSE &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_141c5820dd294cc8a1f172c48d3f40e3~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Sophia Rose" loading="lazy" onerror="this.remove()"><span class="mono">SR</span></div><div class="role">JCW Roster</div><h3>Sophia Rose</h3></div>
-        <div class="wr" data-line="SOUTHERN SIX &middot; JCW LUNACY"><div class="pic"><span class="mono">S6</span></div><div class="role">JCW Roster</div><h3>Southern Six</h3></div>
+        
         <div class="wr" data-line="UNDER ORDERS FROM BIG VITO"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_dfb1fee5e89e4246be95be3c5846a0d9~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Steven Flowe" loading="lazy" onerror="this.remove()"><span class="mono">SF</span></div><div class="role">JCW Roster</div><h3>Steven Flowe</h3></div>
-        <div class="wr" data-line="TARZAN DURAN &middot; JCW LUNACY"><div class="pic"><span class="mono">TD</span></div><div class="role">JCW Roster</div><h3>Tarzan Duran</h3></div>
+        
         <div class="wr" data-line="VINCENZO &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_6a434654c236463d91298f6efa6abf65~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Vincenzo" loading="lazy" onerror="this.remove()"><span class="mono">V</span></div><div class="role">JCW Roster</div><h3>Vincenzo</h3></div>
-        <div class="wr" data-line="WILLIE MACK DIDN&rsquo;T BLINK"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_c4ef8e15005946f59f370163aeb243ec~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Willie Mack" loading="lazy" onerror="this.remove()"><span class="mono">WM</span></div><div class="role">JCW Roster</div><h3>Willie Mack</h3><div class="wr" data-line="THE WRAITH &middot; JCW LUNACY"><div class="pic"><span class="mono">TW</span></div><div class="role">JCW Roster</div><h3>The Wraith</h3></div>
-        <div class="wr" data-line="YOUNG ALTER BOYS &middot; JCW LUNACY"><div class="pic"><span class="mono">YA</span></div><div class="role">JCW Roster</div><h3>Young Alter Boys</h3></div>
+        <div class="wr" data-line="WILLIE MACK DIDN&rsquo;T BLINK"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_c4ef8e15005946f59f370163aeb243ec~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Willie Mack" loading="lazy" onerror="this.remove()"><span class="mono">WM</span></div><div class="role">JCW Roster</div><h3>Willie Mack</h3>
+        
         </div>
       </div>
     </div>
 
     <div class="era rev">
-      <div class="tag">Owners, Voices &amp; Officials</div>
+      <div class="wr" data-line="ZACH GOWEN &middot; JCW LUNACY"><div class="pic"><span class="mono">ZG</span></div><div class="role">JCW Roster</div><h3>Zach Gowen</h3></div><div class="tag">Owners, Voices &amp; Officials</div>
       <div class="crew eggable">
         <div class="wr" data-line="VIOLENT J &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_d117421cb4b94396b755a06af4d5fa29~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Violent J" loading="lazy" onerror="this.remove()"><span class="mono">VJ</span></div><div class="role">Owner</div><h3>Violent J</h3></div>
         <div class="wr" data-line="VINCE RUSSO &middot; JCW LUNACY"><div class="pic"><img src="https://static.wixstatic.com/media/3c1ee6_08b01b5bac944c878e1424780c62c189~mv2.jpg/v1/fill/w_420,h_520,q_82/c.jpg" alt="Vince Russo" loading="lazy" onerror="this.remove()"><span class="mono">VR</span></div><div class="role">Owner</div><h3>Vince Russo</h3></div>
@@ -1203,12 +1210,12 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <div class="wr" data-line="THE IRON SHEIK WAS ON THE FIRST CARD"><div class="pic"><span class="mono">IS</span></div><div class="role">Night One &middot; 1999</div><h3>The Iron Sheik</h3></div>
         <div class="wr" data-line="KING KONG BUNDY &middot; FIVE COUNT ONLY"><div class="pic"><span class="mono">KB</span></div><div class="role">Night One &middot; 1999</div><h3>King Kong Bundy</h3></div>
         <div class="wr" data-line="ABDULLAH THE BUTCHER BROUGHT THE FORK"><div class="pic"><span class="mono">AB</span></div><div class="role">Night One &middot; 1999</div><h3>Abdullah the Butcher</h3></div>
-        <div class="wr" data-line="TWO CLOWNS BEAT TWO CLOWNS"><div class="pic"><span class="mono">IC</span></div><div class="role">Founders &middot; First Tag Champs</div><h3>Insane Clown Posse</h3></div>
+        <div class="wr" data-line="TWO CLOWNS BEAT TWO CLOWNS"><div class="pic"><span class="mono">IC</span></div><div class="role">Founders &middot; First Tag Champs</div><h3>Handsome Harley Guestella &amp; Diamond Donovan Douglas</h3></div>
         <div class="wr" data-line="EVIL DEAD &middot; FIRST CHAMP, 12.19.1999"><span class="hof">HOF &rsquo;13</span><div class="pic"><span class="mono">ED</span></div><div class="role">First Champion</div><h3>Evil Dead</h3></div>
         <div class="wr" data-line="CORPORAL ROBINSON REPORTS FOR DUTY"><div class="pic"><span class="mono">CR</span></div><div class="role">Original &middot; Creative</div><h3>Corporal Robinson</h3></div>
         <div class="wr" data-line="RUDE BOY IS WATCHING"><div class="pic"><span class="mono">RB</span></div><div class="role">JCW Legend</div><h3>The Rude Boy</h3></div>
         <div class="wr" data-line="VAMPIRO TOOK THE GOLD TO NITRO &middot; 8.21.2000"><div class="pic"><span class="mono">VA</span></div><div class="role">Champion &middot; Consultant</div><h3>Vampiro</h3></div>
-        <div class="wr" data-line="ZACH GOWEN &middot; ONE LEG, ZERO FEAR"><div class="pic"><span class="mono">ZG</span></div><div class="role">SlamTV! Era</div><h3>Zach Gowen</h3></div>
+        
         <div class="wr" data-line="NECRO BUTCHER FEELS NOTHING"><div class="pic"><span class="mono">NB</span></div><div class="role">Vol. 3 &middot; 2003</div><h3>Necro Butcher</h3></div>
         <div class="wr" data-line="HUMAN TORNADO TOUCHED DOWN"><div class="pic"><span class="mono">HT</span></div><div class="role">SlamTV! Era</div><h3>Human Tornado</h3></div>
         <div class="wr" data-line="TRENT ACID &middot; PHILLY FOREVER"><div class="pic"><span class="mono">TA</span></div><div class="role">PWU Alliance</div><h3>Trent Acid</h3></div>
@@ -1217,7 +1224,35 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <div class="wr" data-line="HEY YO. &middot; EXEC CONSULTANT, 2011"><div class="pic"><span class="mono">SH</span></div><div class="role">Executive Consultant</div><h3>Scott Hall</h3></div>
         <div class="wr" data-line="RAVEN &middot; QUOTE THE SLAM TV TOUR"><div class="pic"><span class="mono">RA</span></div><div class="role">2008 Arrival</div><h3>Raven</h3></div>
         <div class="wr" data-line="SCOTT D&rsquo;AMORE MANAGES THE CHAOS"><div class="pic"><span class="mono">SD</span></div><div class="role">Manager &middot; 2008</div><h3>Scott D&rsquo;Amore</h3></div>
-        <div class="wr" data-line="KEVIN CANADY BUILDS THE NEXT CLASS"><div class="pic"><span class="mono">KC</span></div><div class="role">Head Trainer</div><h3>Kevin Canady</h3></div>
+        <div class="wr" data-line="OFFICER COLT CABANA &middot; JCW LUNACY"><div class="pic"><span class="mono">OC</span></div><div class="role">Legends &amp; Alumni</div><h3>Officer Colt Cabana</h3></div>
+        <div class="wr" data-line="CASH FLO &middot; JCW"><div class="pic"><span class="mono">CF</span></div><div class="role">Legends &amp; Alumni</div><h3>Cash Flo</h3></div>
+        <div class="wr" data-line="ROB CONWAY &middot; JCW"><div class="pic"><span class="mono">RC</span></div><div class="role">Legends &amp; Alumni</div><h3>Rob Conway</h3></div>
+        <div class="wr" data-line="JWO &middot; JCW"><div class="pic"><span class="mono">JW</span></div><div class="role">Legends &amp; Alumni</div><h3>JWO</h3></div>
+        <div class="wr" data-line="KEVIN NASH &middot; JCW"><div class="pic"><span class="mono">KN</span></div><div class="role">Legends &amp; Alumni</div><h3>Kevin Nash</h3></div>
+        <div class="wr" data-line="SEAN WALTMAN &middot; JCW"><div class="pic"><span class="mono">SW</span></div><div class="role">Legends &amp; Alumni</div><h3>Sean Waltman</h3></div>
+        <div class="wr" data-line="THE WEEDMAN &middot; JCW"><div class="pic"><span class="mono">WM</span></div><div class="role">Legends &amp; Alumni</div><h3>The Weedman</h3></div>
+        <div class="wr" data-line="VANILLA ICE &middot; JCW"><div class="pic"><span class="mono">VI</span></div><div class="role">Legends &amp; Alumni</div><h3>Vanilla Ice</h3></div>
+        <div class="wr" data-line="TERRY FUNK &middot; JCW"><div class="pic"><span class="mono">TF</span></div><div class="role">Legends &amp; Alumni</div><h3>Terry Funk</h3></div>
+        <div class="wr" data-line="DUSTY RHODES &middot; JCW"><div class="pic"><span class="mono">DR</span></div><div class="role">Legends &amp; Alumni</div><h3>Dusty Rhodes</h3></div>
+        <div class="wr" data-line="PAT TANAKA &middot; JCW"><div class="pic"><span class="mono">PT</span></div><div class="role">Legends &amp; Alumni</div><h3>Pat Tanaka</h3></div>
+        <div class="wr" data-line="THE RING RYDERS &middot; JCW"><div class="pic"><span class="mono">RR</span></div><div class="role">Legends &amp; Alumni</div><h3>The Ring Ryders</h3></div>
+        <div class="wr" data-line="THE THOMASELLI BROTHERS &middot; JCW"><div class="pic"><span class="mono">TB</span></div><div class="role">Legends &amp; Alumni</div><h3>The Thomaselli Brothers</h3></div>
+        <div class="wr" data-line="HOLLYWOOD CHUCK HOGAN &middot; JCW"><div class="pic"><span class="mono">CH</span></div><div class="role">Legends &amp; Alumni</div><h3>Hollywood Chuck Hogan</h3></div>
+        <div class="wr" data-line="TRACY SMOTHERS &middot; JCW"><div class="pic"><span class="mono">TS</span></div><div class="role">Legends &amp; Alumni</div><h3>Tracy Smothers</h3></div>
+        <div class="wr" data-line="STEVE CORINO &middot; JCW"><div class="pic"><span class="mono">SC</span></div><div class="role">Legends &amp; Alumni</div><h3>Steve Corino</h3></div>
+        <div class="wr" data-line="ROWDY RODDY PIPER &middot; JCW"><div class="pic"><span class="mono">RP</span></div><div class="role">Legends &amp; Alumni</div><h3>&ldquo;Rowdy&rdquo; Roddy Piper</h3></div>
+        <div class="wr" data-line="GREG THE HAMMER VALENTINE &middot; JCW"><div class="pic"><span class="mono">GV</span></div><div class="role">Legends &amp; Alumni</div><h3>Greg &ldquo;The Hammer&rdquo; Valentine</h3></div>
+        <div class="wr" data-line="KAMALA &middot; JCW"><div class="pic"><span class="mono">KA</span></div><div class="role">Legends &amp; Alumni</div><h3>Kamala</h3></div>
+        <div class="wr" data-line="TITO SANTANA &middot; JCW"><div class="pic"><span class="mono">TS</span></div><div class="role">Legends &amp; Alumni</div><h3>Tito Santana</h3></div>
+        <div class="wr" data-line="KID KASH &middot; JCW"><div class="pic"><span class="mono">KK</span></div><div class="role">Legends &amp; Alumni</div><h3>Kid Kash</h3></div>
+        <div class="wr" data-line="MONTY BROWN &middot; JCW"><div class="pic"><span class="mono">MB</span></div><div class="role">Legends &amp; Alumni</div><h3>Monty Brown</h3></div>
+        <div class="wr" data-line="KEVIN THORN &middot; JCW"><div class="pic"><span class="mono">KT</span></div><div class="role">Legends &amp; Alumni</div><h3>Kevin Thorn</h3></div>
+        <div class="wr" data-line="BOBBY LASHLEY &middot; JCW"><div class="pic"><span class="mono">BL</span></div><div class="role">Legends &amp; Alumni</div><h3>Bobby Lashley</h3></div>
+        <div class="wr" data-line="BALLS MAHONEY &middot; JCW"><div class="pic"><span class="mono">BM</span></div><div class="role">Legends &amp; Alumni</div><h3>Balls Mahoney</h3></div>
+        <div class="wr" data-line="IAN ROTTEN &middot; JCW"><div class="pic"><span class="mono">IR</span></div><div class="role">Legends &amp; Alumni</div><h3>Ian Rotten</h3></div>
+        <div class="wr" data-line="BULL PAIN &middot; JCW"><div class="pic"><span class="mono">BP</span></div><div class="role">Legends &amp; Alumni</div><h3>Bull Pain</h3></div>
+        <div class="wr" data-line="SABU &middot; JCW"><div class="pic"><span class="mono">SB</span></div><div class="role">Legends &amp; Alumni</div><h3>Sabu</h3></div>
+        <div class="wr" data-line="KEVIN GILL &middot; JCW"><div class="pic"><span class="mono">KG</span></div><div class="role">Legends &amp; Alumni</div><h3>Kevin Gill</h3></div>
       </div>
     </div>
   </section>
@@ -1509,7 +1544,7 @@ function observeReveals(){
       const c=e.target.closest('.ep');if(!c)return;
       const watch='https://www.youtube.com/watch?v='+c.dataset.id;
       if(location.protocol==='file:'){window.open(watch,'_blank');return;}
-      frameWrap.innerHTML=`<iframe src="https://www.youtube.com/embed/${c.dataset.id}?autoplay=1&rel=0&playsinline=1" referrerpolicy="origin" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+      frameWrap.innerHTML=`<div class="ifw"><iframe src="https://www.youtube.com/embed/${c.dataset.id}?autoplay=1&rel=0&playsinline=1" referrerpolicy="origin" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
       nowEl.innerHTML='Now playing \u00b7 '+c.dataset.t+' &nbsp;\u00b7&nbsp; <a href="'+watch+'" target="_blank" rel="noopener" style="color:var(--cyan);">Open on YouTube \u2197</a>';
       hubShow(c.dataset.id,c.dataset.t);
       player.classList.add('on');
@@ -1587,7 +1622,7 @@ function observeReveals(){
     const hub=document.getElementById('ep-hub');if(!hub)return;
     const CDN2='https://cdn.shopify.com/s/files/1/0689/2588/2682/files/';
     document.getElementById('hub-merch').innerHTML=HUB_M.map(m=>
-      `<a href="https://psychopathicvault.com/products/${m[0]}" target="_blank" rel="noopener"><img loading="lazy" src="${CDN2}${m[2]}?width=240" alt=""><b>${m[1]}</b></a>`).join('');
+      `<a href="https://psychopathicvault.com/products/${m[0]}" target="_blank" rel="noopener"><span class="imw"><img loading="lazy" src="${CDN2}${m[2]}?width=240" alt=""></span><b>${m[1]}</b></a>`).join('');
     const i=EPS.findIndex(e=>e[0]===id);
     let nx='';
     if(i>0)nx+=`<button class="btn line" data-ep="${EPS[i-1][0]}" data-t="${EPS[i-1][1]}">&larr; ${EPS[i-1][1]}</button>`;
@@ -1600,7 +1635,7 @@ function observeReveals(){
   if(hubNextEl)hubNextEl.addEventListener('click',e=>{
     const b=e.target.closest('button[data-ep]');if(!b)return;
     const frameWrap=document.getElementById('ep-frame');
-    frameWrap.innerHTML=`<iframe src="https://www.youtube.com/embed/${b.dataset.ep}?autoplay=1&rel=0&playsinline=1" referrerpolicy="origin" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+    frameWrap.innerHTML=`<div class="ifw"><iframe src="https://www.youtube.com/embed/${b.dataset.ep}?autoplay=1&rel=0&playsinline=1" referrerpolicy="origin" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
     document.getElementById('ep-now').innerHTML='Now playing \u00b7 '+b.dataset.t;
     hubShow(b.dataset.ep,b.dataset.t);
   });
@@ -1723,6 +1758,39 @@ function observeReveals(){
 
   /* ================= BIOS ================= */
   const BIOS={
+    'Cash Flo':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Rob Conway':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Kevin Nash':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Sean Waltman':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'The Weedman':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Vanilla Ice':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Terry Funk':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Dusty Rhodes':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Pat Tanaka':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'The Ring Ryders':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'The Thomaselli Brothers':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Hollywood Chuck Hogan':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Tracy Smothers':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Steve Corino':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Kamala':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Tito Santana':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Kid Kash':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Monty Brown':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Kevin Thorn':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Bobby Lashley':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Balls Mahoney':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Ian Rotten':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Bull Pain':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Sabu':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Kevin Gill':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    '\u201cRowdy\u201d Roddy Piper':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    'Greg \u201cThe Hammer\u201d Valentine':{f:['Legends & Alumni'],t:'JCW alumni.'},
+    '7 Foot Tall Painful Paul':{f:['Monster Corporation'],t:'Member of the St. Claire Monster Corporation.'},
+    'Bigfoot':{f:['JCW Roster'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
+    'Donovan Dijak':{f:['JCW Roster'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
+    'Mr. Anderson':{f:['JCW Roster'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
+    'Handsome Harley Guestella & Diamond Donovan Douglas':{f:['Founders'],t:'Violent J and Shaggy 2 Dope under their JCW ring names. Founded JCW and won the first Tag Team Championship on night one, defeating two Doink the Clowns.'},
+    'JWO':{f:['Juggalo World Order'],t:'The Juggalo World Order. Formed in 2007.'},
     '2 Tuff Tony':{f:["Nickname: The Louisville Town Drunk", "Height: 6'0\"", "Weight: 240 lbs", "Hometown: Louisville, KY", "Finisher: Meteorite"],t:'2 Tuff Tony’s place in JCW history is etched in stone. The same crusty, bloodstained slab the company was built on, probably behind a Waffle House somewhere. A true-to-life JCW Day 1’nner, Tony was there when the ring was still half duct-tape and dreams.\n\nAs both a JCW and Louisville Pro Wrestling Hall of Famer, and a former 5-time JCW World Champion, plus tag team and American Champ, Tony’s legacy is that of a battle-scarred road warrior who earned every belt, every bruise, and every busted beer bottle to the dome. He’s the walking, brawling embodiment of that Juggalo spirit uncompromising, hard-hitting, and always down for a backyard rumble or a parking lot BBQ brawl.\n\nA day one clown soldier, Tony’s shown the world there ain’t nothing scarier than a man who’s danced with fire, drank with devils, and still walks out carrying two bottles of Bacardi Rum one for him, and one for the poor soul catching an elbow to the face.\n\nFor 2 Tuff Tony, this ain’t just wrestling it’s a full-blown lifestyle. A non-stop death match with destiny, a beer-soaked saga of survival. And as long as Tony\'s still breathing (and chugging), his legend grows stronger than a stale Faygo bottle under a summer sun.\n\nHis work ethic? Ridiculous. His adaptability? Like a ninja in cargo shorts. His risk-taking? Let’s just say gravity’s caught more hands from Tony than half the JCW roster. That Grand Slam wasn’t just a win it was the payoff to years of blood, sweat, and hardcore carnage. Tony didn’t just collect titles…he broke the mold, shattered expectations, and redefined what it means to be the top dog in the underground circus of JCW.\n\nInstagram: @2TuffTony4Real\n\nX: @2TuffTony4Real\n\nFacebook.com/2.Tuff.Tony'},
     'Backseat Boyz':{f:["Nickname: Tommy 2 Dope & Violent JP", "Height: 5’8” & 5’7”", "Weight: 175 & 180", "Hometown: Rockland County, NY", "Finisher: T Gimmick Double Crucifix Power Bomb"],t:'The Backseat Boyz originally with Johnny Kashmere and the late, great Trent Acid were one of the illest tag teams to blaze through the 2000s like a Faygo-fueled tornado. After Trent took that last ride to the Big Top in the sky in 2010, the team hit pause. But like a zombie clown at a midnight carnival, you can\'t keep a Backseat Boy down for long.\n\nFast forward to 2023, and Johnny Kashmere resurrected the Backseat Boyz back from the dead like a wicked necromancer, linkin’ up with the wild-as-hell Grayson brothers, JP and Tommy. Formerly known as The Amazing Graysons, these two debuted at Harpos in Detroit aka the Juggalo coliseum and straight-up jacked the JCW Tag Team Titles on sight marking the start of a powerful new chapter in the Backseat legacy.\n\nNow rebranded and reborn as The Backseat Boyz 2.0, they ain’t just your average tag team, they’re Psychopathic. That’s right: they\'ve partnered up with none other than Psychopathic Records, diving face first into music vids, event hosting, and whatever other flavor of chaos comes with that hatchet hustle.\n\nAnd here’s where it gets even more whoop worthy: Violent J himself - yes, The Duke of the Wicked has taken on the role of ringside manager, guiding the Graysons through the tag team trenches. With J in their corner, these ninja warriors have defended the JCW Tag Titles coast-to-coast like it’s a nationwide Faygo spraying campaign.\n\nToday, The Backseat Boyz are more than wrestlers they\'re rock stars with wrestling boots, Juggalos with powerbombs, and the torchbearers of a legacy that screams chaos, charisma, and clown love.\n\nInstagram: @The.BackSeatBoyz, @JPGrayson1, @TommyGrayson94\n\nX: @Backseat_Boyz, @TommyGrayson94\n\nTik Tok: @JPGrayson1, @TommyGraysonbsb\n\nFacebook.com/TheBackSeatBoyz\n\nOnlyWrestlers.com/TheBackSeatBoyz'},
     'Barnabas the Bizarre':{f:["Nickname: Purveyor of Peculiar & The Twins of Salem", "Height: All 6’1”", "Weight: 220 & 175 & 175"],t:'Home Town: Splatter House, USA\n\nFinisher: Fascination Street\n\nTraveling across the stateside, a pre-vaudeville act began to capture the imagination of the masses. A unique blend of contortionism, acrobatics and showmanship made this pair of strapping young lads an instant hit amongst young and old alike. Especially on the United State’s East Coast, more specifically, Salem, Massachusetts. Dubbed the “Twins of Salem”, Jacksyn & Abel entertained the rich and poor, the sick and depraved, taking away the audiences troubles, even if just for a little while, with their astonishing acts of dare. That is, until fear and paranoia swept this quaint little town.\n\nAccusations of witch craft arose, leading the Twins to be subject to a public execution for all to see. But before their lifeless bodies could be disposed, a rather peculiar on-looker intervened. A student of the occult, a practicing voodoo priestess, Elizabeth Laveau commandeered their lifeless bodies before desecration. The Twins were provided a ritualistic burial within the same New Orleans graveyard that would later become the final resting place of Elizabeth’s lineage, the Voodoo Queen herself, Marie Laveau.\n\nEnter Barnabas the Bizarre, a collector, a historian of the odd, the different, the strange. Within his traveling Odditorium, he was in search of his next great “special attraction”. But within an era where the modern audience had in essence “seen everything”, Barnabas looked back to the past, to resurrect an act the world had not seen in hundreds of years. After paying a rather handsome sum to the descendants of the Laveau dynasty, the graves of the Twins of Salem were exhumed. A ritual to reanimate their lifeless corpses began, only, things took an unexpected turn for the worse. Instead of full reanimation, Jacksyn and Abel remain in an undead state, neither fully alive or dead. They exist merely to feast on the flesh, the brain matter of the living. And the only one who can control their insatiable hunger, is he who dared to dabble in the dark arts, all in the name of everlasting entertainment. A true carny through and through, Barnabas now presents the infected, the undead Twins of Salem, rechristened…The OUTBREAK\n\nInstagram: @David_Barnabas_Spector, @SSJCrowley, @TheAbelBooker\n\nX: @SSJCrowley\n\nFacebook.com/David.Spector.735\n\nFacebook.com/Jacksyn.Crowley.3, Facebook.comAbel.Booker.50'},
