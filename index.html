@@ -1701,7 +1701,15 @@ function observeReveals(){
 
   /* ================= LUNACY CHAT ================= */
   // Paste your Firebase config here to take chat + votes live for everyone:
-  const JCW_FB = null; /* e.g. {apiKey:"...",databaseURL:"https://xxx.firebaseio.com",projectId:"..."} */
+  const JCW_FB = {
+    apiKey:"AIzaSyCDCfMShCyyFZSC3qp1t75Rx_0fOfH3L_U",
+    authDomain:"jcw-lunacy.firebaseapp.com",
+    databaseURL:"https://jcw-lunacy-default-rtdb.firebaseio.com",
+    projectId:"jcw-lunacy",
+    storageBucket:"jcw-lunacy.firebasestorage.app",
+    messagingSenderId:"743418158514",
+    appId:"1:743418158514:web:d167d515509974fbf5d8ab"
+  };
   const chPanel=document.getElementById('chat-panel'),chFab=document.getElementById('chat-fab');
   const chChat=document.getElementById('ch-chat'),chMsg=document.getElementById('ch-msg');
   let fbDB=null;
