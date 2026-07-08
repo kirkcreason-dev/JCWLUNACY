@@ -1728,7 +1728,7 @@ function observeReveals(){
   }
   document.getElementById('ch-send').addEventListener('click',chSend);
   chMsg.addEventListener('keydown',e=>{if(e.key==='Enter')chSend();});
-  chFab.addEventListener('click',()=>{chPanel.classList.add('on');chRender(chLocal());});
+  chFab.addEventListener('click',()=>{chPanel.classList.add('on');if(!fbDB)chRender(chLocal());});
   document.getElementById('ch-x').addEventListener('click',()=>chPanel.classList.remove('on'));
   document.querySelectorAll('.ch-tabs button').forEach(b=>b.addEventListener('click',()=>{
     document.querySelectorAll('.ch-tabs button').forEach(x=>x.classList.toggle('on',x===b));
@@ -1773,8 +1773,9 @@ function observeReveals(){
     s2.onload=()=>{
       firebase.initializeApp(JCW_FB);fbDB=firebase.database();
       document.getElementById('ch-note').textContent='LIVE \u00b7 you\u2019re chatting with everybody.';
-      fbDB.ref('chat').limitToLast(60).on('value',snap=>{
-        const l=[];snap.forEach(c=>l.push(c.val()));chRender(l);
+      fbDB.ref('chat').limitToLast(80).on('value',snap=>{
+        const l=[];snap.forEach(c=>{const v=c.val();if(v&&v.t)l.push(v);});
+        window.__chatLive=l; chRender(l);
       });
       fbDB.ref('polls').on('value',snap=>{
         const P=pollGet();P.t=snap.val()||{};localStorage.setItem('jcw_polls',JSON.stringify(P));pollRender();
