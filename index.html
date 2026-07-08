@@ -966,6 +966,22 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <h2 class="head">Your <em>locker</em></h2>
     <p class="lede">Earn points for watching episodes, playing the game and calling your shots. Stored on this device &mdash; online accounts and leaderboards coming.</p>
     <div class="lk-grid">
+      <div class="lk rev" id="lk-account"><h3>Account</h3>
+        <div id="lk-signedout">
+          <input id="au-email" type="email" placeholder="Email" autocomplete="email">
+          <input id="au-pass" type="password" placeholder="Password" autocomplete="current-password">
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="btn gold" id="au-login" style="flex:1;">Log in</button>
+            <button class="btn line" id="au-register" style="flex:1;">Sign up</button>
+          </div>
+          <p id="au-msg" style="min-height:16px;"></p>
+        </div>
+        <div id="lk-signedin" style="display:none;">
+          <p>Signed in as</p><div class="big" id="au-who" style="font-size:20px;word-break:break-all;"></div>
+          <button class="btn line" id="au-logout" style="margin-top:12px;">Log out</button>
+          <p>Your points sync across every device.</p>
+        </div>
+      </div>
       <div class="lk rev"><h3>Points</h3><div class="big" id="lk-pts">0</div><p id="lk-rank">Fresh Face</p></div>
       <div class="lk rev"><h3>Profile</h3>
         <input id="lk-name" maxlength="20" placeholder="Your name">
@@ -1607,7 +1623,7 @@ function observeReveals(){
   /* ================= JUGGALO LOCKER ================= */
   const LK_KEY='jcw_locker';
   function lkGet(){try{return JSON.parse(localStorage.getItem(LK_KEY))||{}}catch(e){return{}}}
-  function lkSet(d){try{localStorage.setItem(LK_KEY,JSON.stringify(d))}catch(e){}}
+  function lkSet(d){try{localStorage.setItem(LK_KEY,JSON.stringify(d))}catch(e){} if(typeof lkCloudPush==='function')lkCloudPush();}
   function lkAward(pts,badge,histLine){
     const d=lkGet();
     d.pts=(d.pts||0)+pts;
@@ -1643,6 +1659,36 @@ function observeReveals(){
     if(e.target.id==='lk-name'){const d=lkGet();d.name=e.target.value;lkSet(d);}
     if(e.target.id==='lk-fav'){const d=lkGet();d.fav=e.target.value;lkSet(d);lkAward(5,'fan');}
   });
+
+  /* ---- locker auth UI ---- */
+  function lkAuthRender(){
+    const out=document.getElementById('lk-signedout'),ins=document.getElementById('lk-signedin');
+    if(!out||!ins)return;
+    if(lkUser){out.style.display='none';ins.style.display='block';
+      document.getElementById('au-who').textContent=lkUser.email||'Juggalo';}
+    else{out.style.display='block';ins.style.display='none';}
+  }
+  document.addEventListener('click',e=>{
+    const msg=document.getElementById('au-msg');
+    const email=()=>document.getElementById('au-email').value.trim();
+    const pass=()=>document.getElementById('au-pass').value;
+    if(e.target.id==='au-login'){
+      if(!fbAuth){msg.textContent='Connecting\u2026 try again in a second.';return;}
+      msg.textContent='Logging in\u2026';
+      fbAuth.signInWithEmailAndPassword(email(),pass())
+        .then(()=>{msg.textContent='';})
+        .catch(err=>{msg.textContent=err.message.replace('Firebase: ','');});
+    }
+    if(e.target.id==='au-register'){
+      if(!fbAuth){msg.textContent='Connecting\u2026 try again in a second.';return;}
+      msg.textContent='Creating account\u2026';
+      fbAuth.createUserWithEmailAndPassword(email(),pass())
+        .then(()=>{msg.textContent='';lkCloudPush();})
+        .catch(err=>{msg.textContent=err.message.replace('Firebase: ','');});
+    }
+    if(e.target.id==='au-logout'){ if(fbAuth)fbAuth.signOut(); }
+  });
+
   lkAward(5,'first','Checked in');
 
   /* ================= EPISODE HUB ================= */
@@ -1712,7 +1758,8 @@ function observeReveals(){
   };
   const chPanel=document.getElementById('chat-panel'),chFab=document.getElementById('chat-fab');
   const chChat=document.getElementById('ch-chat'),chMsg=document.getElementById('ch-msg');
-  let fbDB=null;
+  let fbDB=null,fbAuth=null,lkUser=null;
+  function lkCloudPush(){ if(fbAuth&&lkUser&&fbDB){ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:d.pts||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',picks:d.picks||{}}); } }
   function chName(){const d=lkGet();return (d.name&&d.name.trim())||('Juggalo'+(d.uid||(d.uid=Math.floor(1000+Math.random()*9000),lkSet(d),d.uid)));}
   function chRender(list){
     chChat.innerHTML=list.map(m=>`<div class="ch-msg"><b>${(m.n||'?').replace(/</g,'&lt;')}</b>${(m.t||'').replace(/</g,'&lt;')}</div>`).join('');
@@ -1767,11 +1814,12 @@ function observeReveals(){
 
   /* ---- Firebase live mode: activates itself when JCW_FB is filled ---- */
   if(JCW_FB){
-    const s1=document.createElement('script');s1.src='https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js';
-    const s2=document.createElement('script');s2.src='https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js';
-    s1.onload=()=>document.head.appendChild(s2);
-    s2.onload=()=>{
-      firebase.initializeApp(JCW_FB);fbDB=firebase.database();
+    const load=(src)=>new Promise(r=>{const s=document.createElement('script');s.src=src;s.onload=r;document.head.appendChild(s);});
+    (async()=>{
+      await load('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+      await load('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js');
+      await load('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js');
+      firebase.initializeApp(JCW_FB);fbDB=firebase.database();fbAuth=firebase.auth();
       document.getElementById('ch-note').textContent='LIVE \u00b7 you\u2019re chatting with everybody.';
       fbDB.ref('chat').limitToLast(80).on('value',snap=>{
         const l=[];snap.forEach(c=>{const v=c.val();if(v&&v.t)l.push(v);});
@@ -1780,8 +1828,24 @@ function observeReveals(){
       fbDB.ref('polls').on('value',snap=>{
         const P=pollGet();P.t=snap.val()||{};localStorage.setItem('jcw_polls',JSON.stringify(P));pollRender();
       });
-    };
-    document.head.appendChild(s1);
+      // ---- AUTH: sync locker to cloud when signed in ----
+      fbAuth.onAuthStateChanged(user=>{
+        lkUser=user;
+        lkAuthRender();
+        if(user){
+          fbDB.ref('lockers/'+user.uid).on('value',snap=>{
+            const cloud=snap.val();
+            if(cloud){ // merge cloud into local, cloud wins on points
+              const d=lkGet();
+              const merged=Object.assign({},d,cloud);
+              merged.badges=[...new Set([...(d.badges||[]),...(cloud.badges||[])])];
+              merged.pts=Math.max(d.pts||0,cloud.pts||0);
+              lkSet(merged);lkRender();
+            } else { lkCloudPush(); }
+          });
+        }
+      });
+    })();
   }
 
 
