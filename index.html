@@ -1781,11 +1781,15 @@ function observeReveals(){
     chChat.scrollTop=chChat.scrollHeight;
   }
   function chLocal(){try{return JSON.parse(localStorage.getItem('jcw_chat'))||[]}catch(e){return[]}}
+  function chSaveLocal(m){const l=chLocal();l.push(m);localStorage.setItem('jcw_chat',JSON.stringify(l.slice(-60)));chRender(chLocal());}
+  function chGoLocal(){fbDB=null;try{document.getElementById('ch-note').textContent='Device mode \u2014 messages stay on this device.';}catch(e){}chRender(chLocal());}
   function chSend(){
     const t=chMsg.value.trim();if(!t)return;chMsg.value='';
     const m={n:chName(),t,ts:Date.now()};
-    if(fbDB){fbDB.ref('chat').push(m);}
-    else{const l=chLocal();l.push(m);localStorage.setItem('jcw_chat',JSON.stringify(l.slice(-60)));chRender(chLocal());}
+    if(fbDB){
+      try{const pr=fbDB.ref('chat').push(m);if(pr&&pr.catch)pr.catch(()=>{chGoLocal();chSaveLocal(m);});}
+      catch(e){chGoLocal();chSaveLocal(m);}
+    } else {chSaveLocal(m);}
     lkAward(1,null,null);
   }
   document.getElementById('ch-send').addEventListener('click',chSend);
@@ -1829,20 +1833,23 @@ function observeReveals(){
 
   /* ---- Firebase live mode: activates itself when JCW_FB is filled ---- */
   if(JCW_FB){
-    const load=(src)=>new Promise(r=>{const s=document.createElement('script');s.src=src;s.onload=r;document.head.appendChild(s);});
+    const load=(src)=>new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('load '+src));document.head.appendChild(s);});
+    chRender(chLocal()); /* show device messages while we try to connect */
     (async()=>{
+      try{
       await load('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
       await load('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js');
       await load('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js');
       firebase.initializeApp(JCW_FB);fbDB=firebase.database();fbAuth=firebase.auth();
-      document.getElementById('ch-note').textContent='LIVE \u00b7 you\u2019re chatting with everybody.';
       fbDB.ref('chat').limitToLast(80).on('value',snap=>{
         const l=[];snap.forEach(c=>{const v=c.val();if(v&&v.t)l.push(v);});
-        window.__chatLive=l; chRender(l);
-      });
+        window.__chatLive=l;
+        try{document.getElementById('ch-note').textContent='LIVE \u00b7 you\u2019re chatting with everybody.';}catch(e){}
+        chRender(l);
+      }, err=>{ chGoLocal(); });
       fbDB.ref('polls').on('value',snap=>{
         const P=pollGet();P.t=snap.val()||{};localStorage.setItem('jcw_polls',JSON.stringify(P));pollRender();
-      });
+      }, ()=>{});
       // ---- AUTH: sync locker to cloud when signed in ----
       fbAuth.onAuthStateChanged(user=>{
         lkUser=user;
@@ -1861,6 +1868,7 @@ function observeReveals(){
           });
         }
       });
+      }catch(e){ chGoLocal(); }
     })();
   }
 
