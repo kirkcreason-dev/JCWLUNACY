@@ -983,6 +983,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         </div>
       </div>
       <div class="lk rev"><h3>Points</h3><div class="big" id="lk-pts">0</div><p id="lk-rank">Fresh Face</p></div>
+      <div class="lk rev"><h3>Game Record</h3><div class="big" id="lk-wins">0</div><p>Match wins in JCW Lunacy: The Game</p></div>
       <div class="lk rev"><h3>Profile</h3>
         <input id="lk-name" maxlength="20" placeholder="Your name">
         <select id="lk-fav"><option value="">Favorite wrestler&hellip;</option></select>
@@ -1634,13 +1635,25 @@ function observeReveals(){
   }
   const LK_BADGES=[['first','First Blood \u00b7 showed up'],['fan','Down With the Clown \u00b7 set a favorite'],
     ['binge','Binge \u00b7 watched 5 episodes'],['gamer','In the Ring \u00b7 played the game'],
-    ['prophet','Prophet \u00b7 made your picks']];
+    ['prophet','Prophet \u00b7 made your picks'],['winner','Winner \u00b7 won a match'],
+    ['champ','Champion \u00b7 10 match wins']];
+  function lkAddWin(){
+    const d=lkGet(); d.wins=(d.wins||0)+1;
+    d.badges=d.badges||[]; if(!d.badges.includes('winner'))d.badges.push('winner');
+    if(d.wins>=10&&!d.badges.includes('champ'))d.badges.push('champ');
+    lkSet(d); lkAward(15,null,'Won a match in JCW Lunacy: The Game');
+  }
+  window.jcwReportWin=lkAddWin; // game calls this on a win
+  window.addEventListener('message',ev=>{
+    if(ev.data&&ev.data.type==='jcw-win'){lkAddWin();}
+  });
   function lkRank(p){return p>=300?'Certified Freak':p>=150?'Dark Carnival Regular':p>=50?'Front Row':'Fresh Face';}
   function lkRender(){
     const d=lkGet();
     const el=document.getElementById('lk-pts');if(!el)return;
     el.textContent=d.pts||0;
     document.getElementById('lk-rank').textContent=lkRank(d.pts||0);
+    const wEl=document.getElementById('lk-wins');if(wEl)wEl.textContent=d.wins||0;
     document.getElementById('lk-badges').innerHTML=LK_BADGES.map(([k,t])=>
       `<span class="badge2 ${(d.badges||[]).includes(k)?'got':''}">${t}</span>`).join('');
     document.getElementById('lk-hist').innerHTML=(d.hist&&d.hist.length)?d.hist.map(x=>'&raquo; '+x).join('<br>'):'Nothing yet. Hit the episodes.';
@@ -1759,7 +1772,7 @@ function observeReveals(){
   const chPanel=document.getElementById('chat-panel'),chFab=document.getElementById('chat-fab');
   const chChat=document.getElementById('ch-chat'),chMsg=document.getElementById('ch-msg');
   let fbDB=null,fbAuth=null,lkUser=null;
-  function lkCloudPush(){ if(fbAuth&&lkUser&&fbDB){ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:d.pts||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',picks:d.picks||{}}); } }
+  function lkCloudPush(){ if(fbAuth&&lkUser&&fbDB){ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:d.pts||0,wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',picks:d.picks||{}}); } }
   function chName(){const d=lkGet();return (d.name&&d.name.trim())||('Juggalo'+(d.uid||(d.uid=Math.floor(1000+Math.random()*9000),lkSet(d),d.uid)));}
   function chRender(list){
     chChat.innerHTML=list.map(m=>`<div class="ch-msg"><b>${(m.n||'?').replace(/</g,'&lt;')}</b>${(m.t||'').replace(/</g,'&lt;')}</div>`).join('');
@@ -1840,6 +1853,7 @@ function observeReveals(){
               const merged=Object.assign({},d,cloud);
               merged.badges=[...new Set([...(d.badges||[]),...(cloud.badges||[])])];
               merged.pts=Math.max(d.pts||0,cloud.pts||0);
+              merged.wins=Math.max(d.wins||0,cloud.wins||0);
               lkSet(merged);lkRender();
             } else { lkCloudPush(); }
           });
