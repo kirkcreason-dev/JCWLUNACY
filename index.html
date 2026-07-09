@@ -96,6 +96,10 @@ nav.top a.on::after{content:"";position:absolute;left:10px;right:10px;bottom:2px
 .wordmark .lu1{color:var(--acid);}
 .wordmark .lu2{color:var(--cyan);transform:skewX(-8deg) translateY(-.02em);}
 .wordmark .lu3{color:var(--gold);}
+.jcw-logo{font-family:'Rubik Distressed',system-ui,sans-serif;font-weight:700;font-style:normal;letter-spacing:-.01em;white-space:nowrap;text-transform:uppercase;}
+.jcw-logo>.j{color:var(--acid);}
+.jcw-logo>.c{color:var(--hot);}
+.jcw-logo>.w{color:var(--gold);}
 .wordmark .lu4{color:var(--tang);transform:skewX(-8deg) translateY(.02em);}
 .wordmark .lu5{color:var(--purple);}
 .wordmark .lu6{color:var(--acid);transform:skewX(-8deg) translateY(-.015em);}
@@ -464,6 +468,12 @@ body.game-lock{overflow:hidden;}
 .ep-player iframe{position:absolute;inset:0;display:block;width:100%;height:100%;border:0;background:#000;}
 .ep-player .now{padding:10px 14px;font-family:'Rubik Distressed',system-ui,sans-serif;font-weight:700;
   text-transform:uppercase;letter-spacing:.1em;font-size:13px;color:var(--cyan);border-top:1px solid var(--seam);}
+.ep-player .yt-actions{display:flex;gap:10px;flex-wrap:wrap;padding:12px 14px 14px;border-top:1px solid var(--seam);}
+.ep-player .yt-actions a{font-family:'Rubik Distressed',system-ui,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:13px;padding:9px 16px;display:inline-flex;align-items:center;gap:7px;}
+.ep-player .yt-actions .yt-like{border:1px solid var(--seam);color:var(--bone);background:transparent;}
+.ep-player .yt-actions .yt-like:hover{border-color:var(--acid);color:var(--acid);}
+.ep-player .yt-actions .yt-sub{background:#ff0000;color:#fff;}
+.ep-player .yt-actions .yt-sub:hover{background:#cc0000;}
 .ep-tools{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:20px;}
 .ep-tools input{flex:1;min-width:200px;background:var(--plate);border:1px solid var(--seam);color:var(--bone);
   font-family:'Rubik Distressed',system-ui,sans-serif;font-size:14px;padding:12px 14px;outline:none;}
@@ -925,7 +935,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <section class="blk">
     <div class="kick">The Archive</div>
     <h2 class="head">Every <em>episode</em></h2>
-    <div class="ep-player" id="ep-player"><div id="ep-frame"></div><div class="now" id="ep-now"></div></div>
+    <div class="ep-player" id="ep-player"><div id="ep-frame"></div><div class="now" id="ep-now"></div><div class="yt-actions" id="yt-actions"></div></div>
     <div class="hub" id="ep-hub">
       <div class="hd">Rep the show</div>
       <div class="mrow" id="hub-merch"></div>
@@ -1597,6 +1607,7 @@ function observeReveals(){
       frameWrap.innerHTML=`<div class="ifw"><iframe src="https://www.youtube.com/embed/${c.dataset.id}?autoplay=1&rel=0&playsinline=1" referrerpolicy="origin" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
       nowEl.innerHTML='Now playing \u00b7 '+c.dataset.t+' &nbsp;\u00b7&nbsp; <a href="'+watch+'" target="_blank" rel="noopener" style="color:var(--cyan);">Open on YouTube \u2197</a>';
       hubShow(c.dataset.id,c.dataset.t);
+      ytActions(c.dataset.id);
       player.classList.add('on');
       player.scrollIntoView({behavior:'smooth',block:'start'});
     });
@@ -1711,6 +1722,20 @@ function observeReveals(){
     ["black-jcw-lunacy-embroidered-hoodie","Lunacy Hoodie","Photoroom_20260310_122048.png"],
     ["black-jcw-lunacy-snapback-hat","Lunacy Snapback","Photoroom_20260310_122210.png"],
     ["jcw-lunacy-12-beanie","Lunacy Beanie","Photoroom_20260310_122151.png"]];
+  /* always show the merch strip under the player on the Episodes page */
+  (function(){
+    const hub=document.getElementById('ep-hub'),host=document.getElementById('hub-merch');
+    if(!hub||!host)return;
+    const CDN2='https://cdn.shopify.com/s/files/1/0689/2588/2682/files/';
+    host.innerHTML=HUB_M.map(m=>`<a href="https://psychopathicvault.com/products/${m[0]}" target="_blank" rel="noopener"><span class="imw"><img loading="lazy" src="${CDN2}${m[2]}?width=240" alt=""></span><b>${m[1]}</b></a>`).join('');
+    hub.classList.add('on');
+  })();
+  function ytActions(id){
+    const host=document.getElementById('yt-actions');if(!host)return;
+    host.innerHTML=
+      '<a class="yt-like" href="https://www.youtube.com/watch?v='+id+'" target="_blank" rel="noopener">\uD83D\uDC4D Like on YouTube</a>'+
+      '<a class="yt-sub" href="https://www.youtube.com/@Psychopathic_Records?sub_confirmation=1" target="_blank" rel="noopener">Subscribe</a>';
+  }
   function hubShow(id,title){
     const hub=document.getElementById('ep-hub');if(!hub)return;
     const CDN2='https://cdn.shopify.com/s/files/1/0689/2588/2682/files/';
@@ -1731,6 +1756,7 @@ function observeReveals(){
     frameWrap.innerHTML=`<div class="ifw"><iframe src="https://www.youtube.com/embed/${b.dataset.ep}?autoplay=1&rel=0&playsinline=1" referrerpolicy="origin" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
     document.getElementById('ep-now').innerHTML='Now playing \u00b7 '+b.dataset.t;
     hubShow(b.dataset.ep,b.dataset.t);
+    ytActions(b.dataset.ep);
   });
 
   /* ================= LIVE EVENT MODE ================= */
@@ -1872,6 +1898,38 @@ function observeReveals(){
     })();
   }
 
+
+  /* ---- swap plain "JCW" text for the tricolor logo everywhere ---- */
+  (function(){
+    const SKIP={SCRIPT:1,STYLE:1,NOSCRIPT:1,INPUT:1,TEXTAREA:1,SELECT:1,OPTION:1,IMG:1};
+    function walk(el){
+      const kids=Array.prototype.slice.call(el.childNodes);
+      for(const n of kids){
+        if(n.nodeType===3){
+          if(n.nodeValue.indexOf('JCW')>-1){
+            const parts=n.nodeValue.split('JCW');
+            const frag=document.createDocumentFragment();
+            parts.forEach((pt,i)=>{
+              if(i>0){
+                const lg=document.createElement('span');
+                lg.className='jcw-logo';lg.setAttribute('aria-label','JCW');
+                lg.innerHTML='<span class="j">J</span><span class="c">C</span><span class="w">W</span>';
+                frag.appendChild(lg);
+              }
+              if(pt)frag.appendChild(document.createTextNode(pt));
+            });
+            n.parentNode.replaceChild(frag,n);
+          }
+        }else if(n.nodeType===1){
+          if(SKIP[n.tagName])continue;
+          if(n.classList&&n.classList.contains('jcw-logo'))continue;
+          if(n.closest&&n.closest('.wordmark'))continue;
+          walk(n);
+        }
+      }
+    }
+    try{walk(document.body);}catch(e){}
+  })();
 
   /* bigfoot easter egg */
   (function(){
