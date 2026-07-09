@@ -11,7 +11,8 @@
 <meta name="description" content="JCW Lunacy — the complete history, the gold, the crew, the broadcasts, and the world order of Juggalo Championship Wrestling. Est. 12.19.1999, St. Andrew's Hall, Detroit." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rubik+Distressed&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rubik+Distressed&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
 <style>
 :root{
   --pit:#000000;--plate:#0c0c0e;--plate-2:#131316;--seam:#3d2f52;
@@ -1621,6 +1622,7 @@ function observeReveals(){
   }
 
 
+  let fbDB=null,fbAuth=null,lkUser=null; /* moved up: avoids TDZ error when lkAward->lkSet->lkCloudPush runs at load */
   /* ================= JUGGALO LOCKER ================= */
   const LK_KEY='jcw_locker';
   function lkGet(){try{return JSON.parse(localStorage.getItem(LK_KEY))||{}}catch(e){return{}}}
@@ -1771,7 +1773,7 @@ function observeReveals(){
   };
   const chPanel=document.getElementById('chat-panel'),chFab=document.getElementById('chat-fab');
   const chChat=document.getElementById('ch-chat'),chMsg=document.getElementById('ch-msg');
-  let fbDB=null,fbAuth=null,lkUser=null;
+  /* fbDB/fbAuth/lkUser declared earlier (before first lkAward call) */
   function lkCloudPush(){ if(fbAuth&&lkUser&&fbDB){ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:d.pts||0,wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',picks:d.picks||{}}); } }
   function chName(){const d=lkGet();return (d.name&&d.name.trim())||('Juggalo'+(d.uid||(d.uid=Math.floor(1000+Math.random()*9000),lkSet(d),d.uid)));}
   function chRender(list){
