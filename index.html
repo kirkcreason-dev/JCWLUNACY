@@ -958,9 +958,9 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <section class="blk">
     <div class="kick">Straight off TikTok</div>
     <h2 class="head"><em>Clips</em></h2>
-    <p class="lede">The best moments from JCW Lunacy on TikTok. <a id="clip-follow" href="https://www.tiktok.com/@jcwlunacy" target="_blank" rel="noopener" style="color:var(--cyan);">Follow on TikTok &rarr;</a></p>
+    <p class="lede">The best moments from <b>#jcwlunacy</b> on TikTok. <a id="clip-follow" href="https://www.tiktok.com/tag/jcwlunacy" target="_blank" rel="noopener" style="color:var(--cyan);">See all #jcwlunacy on TikTok &rarr;</a></p>
     <div class="clip-grid" id="clip-grid"></div>
-    <p class="clip-empty" id="clip-empty" style="color:var(--steel);margin-top:20px;">No clips added yet &mdash; paste TikTok links into the CLIPS list in the code.</p>
+    <p class="clip-empty" id="clip-empty" style="color:var(--steel);margin-top:20px;">No clips pinned yet &mdash; add TikTok video links in the admin (Clips tab), or tap &ldquo;See all #jcwlunacy on TikTok&rdquo; above.</p>
   </section>
 </main>
 
@@ -1840,7 +1840,12 @@ function observeReveals(){
   }
   function chLocal(){try{return JSON.parse(localStorage.getItem('jcw_chat'))||[]}catch(e){return[]}}
   function chSaveLocal(m){const l=chLocal();l.push(m);localStorage.setItem('jcw_chat',JSON.stringify(l.slice(-60)));chRender(chLocal());}
-  function chGoLocal(){fbDB=null;try{document.getElementById('ch-note').textContent='Device mode \u2014 messages stay on this device.';}catch(e){}chRender(chLocal());}
+  function fbReason(err){var c=((err&&(err.code||err.message))||'').toString().toLowerCase();
+    if(c.indexOf('permission')>-1)return 'database rules block access';
+    if(c.indexOf('load ')>-1||c.indexOf('network')>-1)return 'Firebase blocked or offline';
+    if(c.indexOf('not exist')>-1||c.indexOf('404')>-1||c.indexOf('database')>-1)return 'no Realtime Database at this URL / wrong region';
+    return err?((err.code||err.message)+''):'backend not reachable';}
+  function chGoLocal(reason){fbDB=null;try{document.getElementById('ch-note').textContent='Device mode'+(reason?(' \u2014 '+reason):'')+'.';}catch(e){}try{if(reason)console.warn('[JCW chat] live disabled:',reason);}catch(e){}chRender(chLocal());}
   function chSend(){
     const t=chMsg.value.trim();if(!t)return;chMsg.value='';
     const m={n:chName(),t,ts:Date.now()};
@@ -1904,7 +1909,7 @@ function observeReveals(){
         window.__chatLive=l;
         try{document.getElementById('ch-note').textContent='LIVE \u00b7 you\u2019re chatting with everybody.';}catch(e){}
         chRender(l);
-      }, err=>{ chGoLocal(); });
+      }, err=>{ chGoLocal(fbReason(err)); });
       fbDB.ref('polls').on('value',snap=>{
         const P=pollGet();P.t=snap.val()||{};localStorage.setItem('jcw_polls',JSON.stringify(P));pollRender();
       }, ()=>{});
@@ -1926,7 +1931,7 @@ function observeReveals(){
           });
         }
       });
-      }catch(e){ chGoLocal(); }
+      }catch(e){ chGoLocal(fbReason(e)); }
     })();
   }
 
@@ -1935,10 +1940,11 @@ function observeReveals(){
      Paste TikTok video links into CLIPS below. They render with TikTok's
      official player. Example: 'https://www.tiktok.com/@jcwlunacy/video/7412345678901234567' */
   let TIKTOK_HANDLE='therealjcw';
+  let TIKTOK_TAG='https://www.tiktok.com/tag/jcwlunacy';
   let CLIPS=[];
   function renderClips(){
     const grid=document.getElementById('clip-grid'),empty=document.getElementById('clip-empty'),fl=document.getElementById('clip-follow');
-    if(fl)fl.href='https://www.tiktok.com/@'+TIKTOK_HANDLE;
+    if(fl)fl.href=TIKTOK_TAG;
     if(!grid)return;
     const list=CLIPS.map(u=>{const m=String(u).match(/video\/(\d+)/);return m?{u:u,id:m[1]}:null;}).filter(Boolean);
     if(!list.length){if(empty)empty.style.display='block';grid.innerHTML='';return;}
@@ -1951,7 +1957,7 @@ function observeReveals(){
     fetch('clips.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(d){
       if(!d)return;
       if(Array.isArray(d)){CLIPS=d;}
-      else{ if(d.handle)TIKTOK_HANDLE=d.handle; if(Array.isArray(d.clips))CLIPS=d.clips; }
+      else{ if(d.handle)TIKTOK_HANDLE=d.handle; if(d.tagUrl)TIKTOK_TAG=d.tagUrl; if(Array.isArray(d.clips))CLIPS=d.clips; }
       renderClips();
     }).catch(function(){});
   } }catch(e){}

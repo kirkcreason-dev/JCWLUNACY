@@ -75,6 +75,7 @@
       <button data-tab="clips">Clips</button>
       <button data-tab="merch">Merch</button>
       <button data-tab="colors">Colors</button>
+      <button data-tab="text">Site Text</button>
     </div>
 
     <!-- EPISODES -->
@@ -124,6 +125,13 @@
       <div class="card"><div class="colorgrid" id="colorGrid"></div></div>
     </div>
 
+    <!-- SITE TEXT -->
+    <div class="pane" id="pane-text">
+      <div class="card muted">Edit <b>any text</b> on the site. Each box below is a piece of text pulled straight from your page. Search to find it, change it, then <b>Publish</b>. (Episodes, clips and merch have their own tabs; this covers all the headings, taglines and copy.)</div>
+      <div class="card"><input id="textSearch" placeholder="Search your site text…"><div class="muted" id="textCount" style="margin-top:6px"></div></div>
+      <div id="textList"></div>
+    </div>
+
     <div class="bar">
       <button class="gold" id="publishBtn">Publish changes to live site</button>
       <button class="ghost" id="reloadBtn">Reload from GitHub</button>
@@ -139,6 +147,7 @@
   let conn={owner:'',repo:'',branch:'main',token:''};
   let data={episodes:[],clips:{handle:'therealjcw',clips:[]},merch:{items:[],featured:[]},config:{colors:{}}};
   let shas={};
+  let idxDoc=null, idxNodes=[], idxDirty=false, idxRaw="";
   const CDN='https://cdn.shopify.com/s/files/1/0689/2588/2682/files/';
   const COLOR_LABELS={pit:'Background',plate:'Panel',['plate-2']:'Panel 2',seam:'Borders',blood:'Blood',hot:'Hot pink',gold:'Gold (headings)',['gold-hi']:'Gold hi',bone:'Heading text',steel:'Body text',acid:'Acid green',purple:'Purple',cyan:'Cyan',tang:'Orange'};
   const DEFAULT_COLORS={pit:'#000000',plate:'#0c0c0e',['plate-2']:'#131316',seam:'#3d2f52',blood:'#cc1483',hot:'#ff3fa4',gold:'#ffd028',['gold-hi']:'#ffe066',bone:'#ffd028',steel:'#5bd62b',acid:'#5bd62b',purple:'#a54fe0',cyan:'#ff3fa4',tang:'#ff7a1a'};
@@ -184,6 +193,44 @@
     if(!r.ok)throw new Error(path+': '+r.status+' '+(await r.text()).slice(0,160));
     const j=await r.json(); shas[path]=j.content.sha; return true;
   }
+  async function loadRaw(path){
+    const r=await gh(path,'GET');
+    if(!r.ok)throw new Error(path+': '+r.status);
+    const j=await r.json(); shas[path]=j.sha; return unb64(j.content);
+  }
+  async function putRaw(path,str,msg){
+    const body={message:msg||('Update '+path),content:b64(str),branch:conn.branch};
+    if(shas[path])body.sha=shas[path];
+    const r=await gh(path,'PUT',body);
+    if(!r.ok)throw new Error(path+': '+r.status+' '+(await r.text()).slice(0,160));
+    const j=await r.json(); shas[path]=j.content.sha; return true;
+  }
+  async function loadIndexHtml(){
+    try{
+      idxRaw=await loadRaw('index.html');
+      idxDoc=new DOMParser().parseFromString(idxRaw,'text/html');
+      idxNodes=[]; const skip={SCRIPT:1,STYLE:1,NOSCRIPT:1};
+      (function walk(el){for(var n=el.firstChild;n;n=n.nextSibling){if(n.nodeType===3){if(n.nodeValue&&n.nodeValue.trim())idxNodes.push(n);}else if(n.nodeType===1){if(!skip[n.tagName])walk(n);}}})(idxDoc.documentElement);
+      idxDirty=false; renderText('');
+    }catch(e){ $('textCount')&&($('textCount').textContent='Could not load index.html: '+e.message); }
+  }
+  function renderText(filter){
+    const host=$('textList'); if(!host)return; host.innerHTML=''; const f=(filter||'').toLowerCase(); let shown=0;
+    idxNodes.forEach(function(n,i){
+      const txt=n.nodeValue; if(f && txt.toLowerCase().indexOf(f)<0)return; shown++;
+      const parent=n.parentNode, tag=parent?parent.tagName.toLowerCase():''; const ctx=(parent&&parent.id)?('#'+parent.id):tag;
+      const d=document.createElement('div'); d.className='item';
+      d.innerHTML='<div class="grip muted" style="margin-bottom:4px">&lt;'+esc(ctx)+'&gt;</div>';
+      const ta=document.createElement('textarea'); ta.rows=(txt.length>70?2:1); ta.value=txt; ta.dataset.tx=i;
+      d.appendChild(ta); host.appendChild(d);
+    });
+    $('textCount').textContent=shown+' of '+idxNodes.length+' text snippets'+(f?(' matching "'+filter+'"'):'');
+  }
+  function collectText(){
+    if(!idxDoc)return;
+    document.querySelectorAll('[data-tx]').forEach(function(el){var i=+el.dataset.tx; if(idxNodes[i]&&idxNodes[i].nodeValue!==el.value){idxNodes[i].nodeValue=el.value; idxDirty=true;}});
+  }
+  function serializeDoc(){ return '<!doctype html>\n'+idxDoc.documentElement.outerHTML; }
 
   // ---- load everything ----
   async function connect(){
@@ -198,6 +245,7 @@
       data.merch   =await loadFile('merch.json',{items:[],featured:[]});
       data.config  =await loadFile('config.json',{colors:{}});
       if(!data.config.colors)data.config.colors={};
+      await loadIndexHtml();
       renderAll();
       $('editor').style.display='block';
       $('who').textContent=conn.owner+'/'+conn.repo+' @'+conn.branch;
@@ -286,6 +334,7 @@
     // colors
     data.config.colors=data.config.colors||{};
     document.querySelectorAll('[data-col]').forEach(el=>{data.config.colors[el.dataset.col]=el.value;});
+    collectText();
   }
 
   // ---- publish ----
@@ -297,6 +346,7 @@
       await putFile('clips.json',data.clips,'Update clips via admin');
       await putFile('merch.json',data.merch,'Update merch via admin');
       await putFile('config.json',data.config,'Update colors via admin');
+      if(idxDirty){ await putRaw('index.html',serializeDoc(),'Update site text via admin'); idxDirty=false; }
       status('saveStatus','Published! Live site rebuilds in ~1 minute.','ok');
     }catch(e){status('saveStatus','Publish failed: '+e.message,'err');}
   }
@@ -306,6 +356,7 @@
   $('reloadBtn').onclick=connect;
   $('forgetBtn').onclick=()=>{conn.token='';$('token').value='';saveConn();status('connStatus','Token cleared from this browser.','ok');};
   $('publishBtn').onclick=publish;
+  document.addEventListener('input',function(e){ if(e.target.id==='textSearch'){ collectText(); renderText(e.target.value); } });
   document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
     document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
     document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='pane-'+b.dataset.tab));
