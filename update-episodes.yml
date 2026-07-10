@@ -1,0 +1,70 @@
+name: Update episodes from YouTube
+
+# Auto-refreshes episodes.json from the Psychopathic Records channel feed,
+# keeping only JCW Lunacy episodes and your full archive.
+# Setup: Repo -> Settings -> Actions -> General -> Workflow permissions
+#        -> enable "Read and write permissions".
+# Runs hourly; also runnable manually from the Actions tab.
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      FEED_URL: "https://www.youtube.com/feeds/videos.xml?channel_id=UC976cmBIr3xFimgrzPjc8pg"
+      ONLY_MATCH: "lunacy"   # only add videos whose title contains this word (case-insensitive)
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch feed and merge into episodes.json
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const FEED = process.env.FEED_URL;
+          const ONLY = (process.env.ONLY_MATCH || '').toLowerCase();
+          const clean = (t) => {
+            t = t.replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
+            const q = t.match(/[“"]([^”"]+)[”"]/);      // prefer the quoted part, e.g. "Episode 90"
+            if (q) return q[1].trim();
+            return t.replace(/^.*lunacy\s*/i, '').trim() || t;          // else strip the show-name prefix
+          };
+          (async () => {
+            const res = await fetch(FEED, { headers: { 'User-Agent': 'jcw-episode-bot' } });
+            if (!res.ok) { console.log('Feed fetch failed:', res.status); process.exit(0); }
+            const xml = await res.text();
+            const entries = xml.split('<entry>').slice(1);
+            const feed = [];
+            for (const e of entries) {
+              const id = (e.match(/<yt:videoId>([^<]+)<\/yt:videoId>/) || [])[1];
+              const rawTitle = (e.match(/<title>([^<]*)<\/title>/) || [])[1] || '';
+              if (!id) continue;
+              if (ONLY && !rawTitle.toLowerCase().includes(ONLY)) continue;  // JCW Lunacy only
+              feed.push([id, clean(rawTitle)]);
+            }
+            let eps = [];
+            try { eps = JSON.parse(fs.readFileSync('episodes.json','utf8')); } catch (_) {}
+            const have = new Set(eps.map(x => x[0]));
+            const fresh = feed.filter(x => !have.has(x[0])).reverse();      // feed is newest-first; append oldest-first
+            if (!fresh.length) { console.log('No new Lunacy episodes.'); return; }
+            eps = eps.concat(fresh);
+            fs.writeFileSync('episodes.json', '[\n' + eps.map(e => '  ' + JSON.stringify(e)).join(',\n') + '\n]\n');
+            console.log('Added', fresh.length, 'new:', fresh.map(f => f[1]).join(' | '));
+          })();
+          NODE
+      - name: Commit if changed
+        run: |
+          if [ -n "$(git status --porcelain episodes.json)" ]; then
+            git config user.name  "jcw-episode-bot"
+            git config user.email "actions@users.noreply.github.com"
+            git add episodes.json
+            git commit -m "Auto-update JCW Lunacy episodes from YouTube"
+            git push
+          else
+            echo "Nothing to commit."
+          fi

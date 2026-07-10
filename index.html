@@ -100,6 +100,8 @@ nav.top a.on::after{content:"";position:absolute;left:10px;right:10px;bottom:2px
 .jcw-logo>.j{color:var(--acid);}
 .jcw-logo>.c{color:var(--hot);}
 .jcw-logo>.w{color:var(--gold);}
+.clip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;margin-top:8px;align-items:start;}
+.clip-grid blockquote.tiktok-embed{margin:0 auto!important;width:100%!important;min-width:0!important;}
 .wordmark .lu4{color:var(--tang);transform:skewX(-8deg) translateY(.02em);}
 .wordmark .lu5{color:var(--purple);}
 .wordmark .lu6{color:var(--acid);transform:skewX(-8deg) translateY(-.015em);}
@@ -763,6 +765,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <a href="#home" data-r="home">Home</a>
   <a href="#news" data-r="news">Updates</a>
   <a href="#episodes" data-r="episodes">Episodes</a>
+  <a href="#clips" data-r="clips">Clips</a>
   <a href="#story" data-r="story">The Story</a>
   <a href="#events" data-r="events">Events</a>
   <a href="#crew" data-r="crew">Roster</a>
@@ -946,6 +949,18 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
       <span class="count" id="ep-count"></span>
     </div>
     <div class="eps" id="ep-grid"></div>
+  </section>
+</main>
+
+
+<!-- ==================== CLIPS ==================== -->
+<main id="view-clips" class="view">
+  <section class="blk">
+    <div class="kick">Straight off TikTok</div>
+    <h2 class="head"><em>Clips</em></h2>
+    <p class="lede">The best moments from JCW Lunacy on TikTok. <a id="clip-follow" href="https://www.tiktok.com/@jcwlunacy" target="_blank" rel="noopener" style="color:var(--cyan);">Follow on TikTok &rarr;</a></p>
+    <div class="clip-grid" id="clip-grid"></div>
+    <p class="clip-empty" id="clip-empty" style="color:var(--steel);margin-top:20px;">No clips added yet &mdash; paste TikTok links into the CLIPS list in the code.</p>
   </section>
 </main>
 
@@ -1159,7 +1174,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <section class="blk">
     <div class="kick">The Roster</div>
     <h2 class="head">Legends of the <em>lunacy</em></h2>
-    <p class="lede">The full official roster. <b>Tap a name for the bio.</b> Hold one down and see what happens.</p>
+    <p class="lede">The full official roster. <b>Tap a name for the bio.</b></p>
 
     <div class="era rev">
       <div class="tag">JCW Champions</div>
@@ -1419,7 +1434,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
 
 <script>
 /* ================= ROUTER ================= */
-const ROUTES=['home','news','episodes','story','events','crew','games','merch','vault','locker'];
+const ROUTES=['home','news','episodes','clips','story','events','crew','games','merch','vault','locker'];
 function route(){
   let r=(location.hash||'#home').slice(1);
   if(!ROUTES.includes(r)) r='home';
@@ -1585,7 +1600,7 @@ function observeReveals(){
 
 
   /* ================= EPISODES ================= */
-  const EPS=[["YZWJwm2JmTk", "Episode 1"], ["lxGoZY8CVHk", "Episode 2"], ["uoh_iT8XU_4", "Episode 3"], ["mr0yPRmqHtk", "Episode 4"], ["zZWzPuQxmgs", "Episode 5"], ["OOQPcSVwj8s", "Episode 6"], ["zN907ySdszs", "Episode 7"], ["j9dZK-sKbf8", "Episode 8"], ["bs0SabnHf0o", "Nashville 10/23"], ["rsAZvyaugQA", "Birmingham 10/24"], ["v5vUkwZQskk", "Little Rock 10/25"], ["GTsdVZhU-yc", "Columbia, MO 10/26"], ["aPJN20rxS64", "St. Louis 10/27"], ["A1wLIwmJWfg", "Milwaukee 10/28"], ["rIMUrp5jIFk", "Joliet 10/29"], ["z_RdoVtB-gY", "Detroit 10/31"], ["0d6aHVEy6Dk", "Spanks Givin' 2024"], ["5JlCpnUQBf0", "Little Rock 12/4"], ["N4LFBR7rsBA", "St. Louis 12/5"], ["03RpH6jSoAQ", "Deck the Jaws"], ["cBxbQSaeQQY", "Episode 19"], ["oQKiiIOmLKM", "Episode 20"], ["LNMQCAOu2Yw", "Episode 21"], ["iUhmaXAvyL0", "Episode 22"], ["mMh3L5VTl40", "Episode 23"], ["2wBSD_rnwSE", "Episode 24"], ["3cig-98Kh7I", "Episode 25"], ["0qFEflV2O9k", "Episode 26"], ["ywD8BbJCvIk", "Episode 27"], ["e3JkV39gI8g", "Episode 28"], ["0SxfODYHjZc", "Episode 29"], ["e3AwvVov_fc", "Episode 30"], ["gRWRracqq_o", "Episode 31"], ["UL03FY4U8UY", "Episode 32"], ["_obgIuRSDsE", "Episode 33"], ["6Xq9Zcnr1QA", "Episode 34"], ["rEGpLdGOhzI", "Episode 35"], ["eOmhz4U8coY", "Episode 36"], ["hlfPEffocsE", "Episode 37"], ["zNbkLzt2D2Q", "Episode 38"], ["mJQKz0Q_xHE", "Episode 39"], ["tRE_G7BtGeE", "Episode 40"], ["X5cYQuoOQVA", "Episode 41"], ["A5f6L6_oBGc", "Episode 42"], ["qkVRtZg38Ik", "Episode 43"], ["TlKyiJW8m4c", "Episode 44"], ["KiZ78rXvl_c", "Episode 45"], ["LP6-6OqDicU", "Episode 46"], ["eMkTN2bEnow", "Episode 47"], ["8BtBjewkJfQ", "Powder Keg"], ["0UCyl_pDHR4", "JCW vs. GCW: 2 Day War — Night 1"], ["48elq7Or4O8", "JCW vs. GCW: 2 Day War — Night 2"], ["sqXCDdCFEhU", "Episode 49 — San Antonio"], ["KcP4ULp4CWM", "Episode 50 — South Padre Island"], ["X5qDbM9t2N8", "Episode 51"], ["gHNj4fGVCSc", "Episode 52 — Houston Heat"], ["8Bd-98tqn0g", "Episode 53"], ["EYSDRIK-npE", "Episode 54"], ["eSJ2TXRkaQw", "Episode 55 — 2 Tuff Country"], ["UB0WlZnUhxM", "Episode 56"], ["GQHnKnCFqoY", "Episode 57 — Friends Forced to Fight"], ["-sn9kPSkv6A", "Episode 58"], ["qBiqfty4_ys", "Episode 59"], ["o_YGWZr7Fq4", "Episode 60"], ["TxVt-PfXCzw", "Episode 61"], ["mBQW_J_yZ8k", "Episode 62"], ["oTohclO6Jnc", "Episode 63"], ["2OnhMyzsW2w", "Episode 64"], ["DZ6wNE1Qxy0", "2025 Year's End Award Show"], ["9tWyyMIzFcc", "Episode 65"], ["HfSpJQgTuQI", "Episode 66"], ["rd5H2gETzEk", "Episode 67"], ["5njFG9ChEk4", "Episode 68"], ["roXOQk3uckg", "Episode 69"], ["76FNoNnh7gk", "Episode 70"], ["HXC9H59lpbs", "Episode 71"], ["6n_8B1Yh7xo", "Episode 72"], ["8cxBNrYCF-s", "Episode 73"], ["YxhF2D4c0LA", "Episode 74"], ["bNts3D4NblE", "Episode 75"], ["db6e9r31uEY", "The Panic Zone"], ["FHhrfdjBpr0", "Episode 76"], ["4PH6EFlDbl4", "Episode 77"], ["bB_k_nfeUPE", "Episode 78"], ["YiSlwqSUZXU", "Episode 79"], ["FAhm9PJlTn0", "Strangle-Mania: Viva Las Violence"], ["Tyzby8Rj6OM", "Episode 80"], ["8qKxZ2-JWW4", "Episode 81"], ["d8PYYX2MDnc", "Episode 82"], ["o_5-_qKTsVA", "Episode 83 — The Assault"], ["l51MorhPj2w", "Episode 84"], ["ZCrl439PNAs", "Episode 85"], ["684RfMLfw0g", "Episode 86"], ["0FMRsqVMMVA", "Episode 87"], ["8Em2w7Ddg6g", "Episode 88"], ["O2JaBg6vAfg", "Episode 89"]];
+  let EPS=[["YZWJwm2JmTk", "Episode 1"], ["lxGoZY8CVHk", "Episode 2"], ["uoh_iT8XU_4", "Episode 3"], ["mr0yPRmqHtk", "Episode 4"], ["zZWzPuQxmgs", "Episode 5"], ["OOQPcSVwj8s", "Episode 6"], ["zN907ySdszs", "Episode 7"], ["j9dZK-sKbf8", "Episode 8"], ["bs0SabnHf0o", "Nashville 10/23"], ["rsAZvyaugQA", "Birmingham 10/24"], ["v5vUkwZQskk", "Little Rock 10/25"], ["GTsdVZhU-yc", "Columbia, MO 10/26"], ["aPJN20rxS64", "St. Louis 10/27"], ["A1wLIwmJWfg", "Milwaukee 10/28"], ["rIMUrp5jIFk", "Joliet 10/29"], ["z_RdoVtB-gY", "Detroit 10/31"], ["0d6aHVEy6Dk", "Spanks Givin' 2024"], ["5JlCpnUQBf0", "Little Rock 12/4"], ["N4LFBR7rsBA", "St. Louis 12/5"], ["03RpH6jSoAQ", "Deck the Jaws"], ["cBxbQSaeQQY", "Episode 19"], ["oQKiiIOmLKM", "Episode 20"], ["LNMQCAOu2Yw", "Episode 21"], ["iUhmaXAvyL0", "Episode 22"], ["mMh3L5VTl40", "Episode 23"], ["2wBSD_rnwSE", "Episode 24"], ["3cig-98Kh7I", "Episode 25"], ["0qFEflV2O9k", "Episode 26"], ["ywD8BbJCvIk", "Episode 27"], ["e3JkV39gI8g", "Episode 28"], ["0SxfODYHjZc", "Episode 29"], ["e3AwvVov_fc", "Episode 30"], ["gRWRracqq_o", "Episode 31"], ["UL03FY4U8UY", "Episode 32"], ["_obgIuRSDsE", "Episode 33"], ["6Xq9Zcnr1QA", "Episode 34"], ["rEGpLdGOhzI", "Episode 35"], ["eOmhz4U8coY", "Episode 36"], ["hlfPEffocsE", "Episode 37"], ["zNbkLzt2D2Q", "Episode 38"], ["mJQKz0Q_xHE", "Episode 39"], ["tRE_G7BtGeE", "Episode 40"], ["X5cYQuoOQVA", "Episode 41"], ["A5f6L6_oBGc", "Episode 42"], ["qkVRtZg38Ik", "Episode 43"], ["TlKyiJW8m4c", "Episode 44"], ["KiZ78rXvl_c", "Episode 45"], ["LP6-6OqDicU", "Episode 46"], ["eMkTN2bEnow", "Episode 47"], ["8BtBjewkJfQ", "Powder Keg"], ["0UCyl_pDHR4", "JCW vs. GCW: 2 Day War — Night 1"], ["48elq7Or4O8", "JCW vs. GCW: 2 Day War — Night 2"], ["sqXCDdCFEhU", "Episode 49 — San Antonio"], ["KcP4ULp4CWM", "Episode 50 — South Padre Island"], ["X5qDbM9t2N8", "Episode 51"], ["gHNj4fGVCSc", "Episode 52 — Houston Heat"], ["8Bd-98tqn0g", "Episode 53"], ["EYSDRIK-npE", "Episode 54"], ["eSJ2TXRkaQw", "Episode 55 — 2 Tuff Country"], ["UB0WlZnUhxM", "Episode 56"], ["GQHnKnCFqoY", "Episode 57 — Friends Forced to Fight"], ["-sn9kPSkv6A", "Episode 58"], ["qBiqfty4_ys", "Episode 59"], ["o_YGWZr7Fq4", "Episode 60"], ["TxVt-PfXCzw", "Episode 61"], ["mBQW_J_yZ8k", "Episode 62"], ["oTohclO6Jnc", "Episode 63"], ["2OnhMyzsW2w", "Episode 64"], ["DZ6wNE1Qxy0", "2025 Year's End Award Show"], ["9tWyyMIzFcc", "Episode 65"], ["HfSpJQgTuQI", "Episode 66"], ["rd5H2gETzEk", "Episode 67"], ["5njFG9ChEk4", "Episode 68"], ["roXOQk3uckg", "Episode 69"], ["76FNoNnh7gk", "Episode 70"], ["HXC9H59lpbs", "Episode 71"], ["6n_8B1Yh7xo", "Episode 72"], ["8cxBNrYCF-s", "Episode 73"], ["YxhF2D4c0LA", "Episode 74"], ["bNts3D4NblE", "Episode 75"], ["db6e9r31uEY", "The Panic Zone"], ["FHhrfdjBpr0", "Episode 76"], ["4PH6EFlDbl4", "Episode 77"], ["bB_k_nfeUPE", "Episode 78"], ["YiSlwqSUZXU", "Episode 79"], ["FAhm9PJlTn0", "Strangle-Mania: Viva Las Violence"], ["Tyzby8Rj6OM", "Episode 80"], ["8qKxZ2-JWW4", "Episode 81"], ["d8PYYX2MDnc", "Episode 82"], ["o_5-_qKTsVA", "Episode 83 — The Assault"], ["l51MorhPj2w", "Episode 84"], ["ZCrl439PNAs", "Episode 85"], ["684RfMLfw0g", "Episode 86"], ["0FMRsqVMMVA", "Episode 87"], ["8Em2w7Ddg6g", "Episode 88"], ["O2JaBg6vAfg", "Episode 89"], ["72QVBcW2iXk", "Episode 90"]];
   const grid=document.getElementById('ep-grid');
   if(grid){
     const q=document.getElementById('ep-q'),count=document.getElementById('ep-count');
@@ -1599,6 +1614,12 @@ function observeReveals(){
       count.textContent=f?(list.length+' episodes'):'All episodes';
     }
     renderEps('');
+    /* auto-update: pull the latest episode list written by the GitHub Action */
+    try{ if(typeof fetch==='function'){
+      fetch('episodes.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(d){
+        if(d&&Array.isArray(d)&&d.length){EPS=d.filter(function(x){return Array.isArray(x)&&x[0];}).map(function(x){return [x[0],x[1]||'Episode'];});renderEps(q&&q.value?q.value:'');}
+      }).catch(function(){});
+    } }catch(e){}
     q.addEventListener('input',()=>renderEps(q.value));
     grid.addEventListener('click',e=>{
       const c=e.target.closest('.ep');if(!c)return;
@@ -1898,6 +1919,24 @@ function observeReveals(){
     })();
   }
 
+
+  /* ================= CLIPS (TikTok) =================
+     Paste TikTok video links into CLIPS below. They render with TikTok's
+     official player. Example: 'https://www.tiktok.com/@jcwlunacy/video/7412345678901234567' */
+  const TIKTOK_HANDLE='jcwlunacy';
+  const CLIPS=[
+    // 'https://www.tiktok.com/@jcwlunacy/video/XXXXXXXXXXXXXXXXXXX',
+  ];
+  (function(){
+    const grid=document.getElementById('clip-grid'),empty=document.getElementById('clip-empty'),fl=document.getElementById('clip-follow');
+    if(fl)fl.href='https://www.tiktok.com/@'+TIKTOK_HANDLE;
+    if(!grid)return;
+    const list=CLIPS.map(u=>{const m=String(u).match(/video\/(\d+)/);return m?{u:u,id:m[1]}:null;}).filter(Boolean);
+    if(!list.length){if(empty)empty.style.display='block';return;}
+    if(empty)empty.style.display='none';
+    grid.innerHTML=list.map(c=>'<blockquote class="tiktok-embed" cite="'+c.u+'" data-video-id="'+c.id+'" style="max-width:605px;min-width:325px;"><section></section></blockquote>').join('');
+    const s=document.createElement('script');s.async=true;s.src='https://www.tiktok.com/embed.js';document.body.appendChild(s);
+  })();
 
   /* ---- swap plain "JCW" text for the tricolor logo everywhere ---- */
   (function(){
