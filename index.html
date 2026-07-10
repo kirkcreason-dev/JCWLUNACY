@@ -441,7 +441,8 @@ body.jcw-mode #jcw-ropes{display:block;}
 .shot:nth-child(6n+6){border-color:rgba(240,127,30,.45);}
 
 
-.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px;}
+.games{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
+@media (max-width:640px){.games{grid-template-columns:1fr;}}
 .game{border:1px solid var(--seam);background:var(--plate);padding:26px 24px;position:relative;}
 .game.playable{grid-column:1/-1;background:
   radial-gradient(100% 140% at 0% 0%, rgba(165,79,224,.22), transparent 55%),var(--plate-2);
