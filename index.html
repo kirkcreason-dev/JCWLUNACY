@@ -814,7 +814,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <li><span class="t">Next</span><b>Bloodymania 19</b> &mdash; two nights at the Gathering, August 20&ndash;21. Every road leads there.</li>
       </ul>
       <div style="padding:0 22px 22px;display:flex;flex-wrap:wrap;gap:12px;">
-        <a class="btn gold" href="https://youtu.be/O2JaBg6vAfg" target="_blank" rel="noopener">Watch the latest</a>
+        <a class="btn gold" id="latest-ep-link" href="https://youtu.be/72QVBcW2iXk" target="_blank" rel="noopener">Watch the latest</a>
         <a class="btn line" href="#news">All updates</a>
       </div>
     </div>
@@ -1357,7 +1357,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <h3>JCW Lunacy: The Game</h3>
         <div class="sub">2D fighting &middot; Free &middot; No download &middot; Online multiplayer</div>
         <p>The official JCW Lunacy fighting game &mdash; take the champions of the roster into the ring &mdash; combos, weapons and pinfalls. Play solo against the AI or hit <b>Quick Match</b> for online battles, right on this page.</p>
-        <button class="btn gold" id="play-bmr">Play now</button>
+        <button class="btn gold" id="play-bmr">Coming Soon</button>
       </div>
       <div class="game rev">
         <span class="badge">Roster</span>
@@ -1608,6 +1608,7 @@ function observeReveals(){
         <div class="th"><img loading="lazy" src="https://i.ytimg.com/vi/${e[0]}/hqdefault.jpg" alt=""></div>
         <div class="nm">${e[1]}</div></div>`).join('');
       count.textContent=f?(list.length+' episodes'):'All episodes';
+      var lel=document.getElementById('latest-ep-link');if(lel&&EPS.length)lel.href='https://youtu.be/'+EPS[EPS.length-1][0];
     }
     renderEps('');
     /* auto-update: pull the latest episode list written by the GitHub Action */
