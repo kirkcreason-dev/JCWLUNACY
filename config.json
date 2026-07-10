@@ -1,0 +1,18 @@
+{
+  "colors": {
+    "pit": "#000000",
+    "plate": "#0c0c0e",
+    "plate-2": "#131316",
+    "seam": "#3d2f52",
+    "blood": "#cc1483",
+    "hot": "#ff3fa4",
+    "gold": "#ffd028",
+    "gold-hi": "#ffe066",
+    "bone": "#ffd028",
+    "steel": "#5bd62b",
+    "acid": "#5bd62b",
+    "purple": "#a54fe0",
+    "cyan": "#ff3fa4",
+    "tang": "#ff7a1a"
+  }
+}
