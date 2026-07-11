@@ -301,6 +301,7 @@ h2.head em{font-style:normal;color:var(--acid);}
   justify-content:start;align-items:stretch;}
 .crew .wr{max-width:100%;}
 @media (max-width:640px){.crew{grid-template-columns:repeat(2,1fr);gap:10px;}.wr h3{font-size:16px;}.crew .wr:last-child:nth-child(odd){grid-column:1/-1;}}
+#view-crew .era:first-of-type .crew{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));justify-content:center;}
 .wr{border:1px solid var(--seam);background:var(--plate);padding:18px 16px;position:relative;
   user-select:none;cursor:default;transition:border-color .2s,transform .15s;}
 .wr:active{transform:scale(.985);}
@@ -369,6 +370,10 @@ footer.site .fnav{display:flex;flex-wrap:wrap;gap:6px 20px;justify-content:cente
 footer.site .fnav a{font-family:'Rubik Distressed',system-ui,sans-serif;font-weight:700;text-transform:uppercase;
   letter-spacing:.1em;font-size:12px;color:var(--steel);}
 footer.site .fnav a:hover{color:var(--gold);}
+footer.site .ss-lbl{font-family:'Rubik Distressed',system-ui,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.16em;font-size:11px;color:var(--steel);margin-top:22px;}
+footer.site .sister{margin-top:6px;}
+footer.site .sister a{color:var(--gold);}
+footer.site .sister a:hover{color:var(--acid);}
 
 /* ============ EGG UI ============ */
 .jcw-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(8px);
@@ -1331,6 +1336,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <div class="fnav">
     <a href="#home">Home</a><a href="#news">Updates</a><a href="#episodes">Episodes</a><a href="#events">Events</a>
     <a href="#crew">Roster</a><a href="#games">Games</a><a href="#merch">Merch</a><a href="#locker">Locker</a>
+  </div>
+  <div class="ss-lbl">Sister Sites</div>
+  <div class="fnav sister">
+    <a href="https://www.psychopathicrecords.com" target="_blank" rel="noopener">Psychopathic Records</a>
+    <a href="https://juggalogathering.com" target="_blank" rel="noopener">Gathering of the Juggalos</a>
   </div>
 </footer>
 
