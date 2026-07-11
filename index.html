@@ -301,7 +301,7 @@ h2.head em{font-style:normal;color:var(--acid);}
   justify-content:start;align-items:start;}
 .crew .wr{max-width:100%;}
 @media (max-width:640px){.crew{grid-template-columns:repeat(2,1fr);gap:10px;}.wr h3{font-size:16px;}.crew .wr:last-child:nth-child(odd){grid-column:1/-1;}}
-#view-crew .era:first-of-type .crew{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));justify-content:center;}
+@media (min-width:641px){#view-crew .era:first-of-type .crew{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));justify-content:center;}}
 .wr{border:1px solid var(--seam);background:var(--plate);padding:18px 16px;position:relative;
   user-select:none;cursor:default;transition:border-color .2s,transform .15s;}
 .wr:active{transform:scale(.985);}
@@ -537,7 +537,7 @@ body.game-lock{overflow:hidden;}
 /* crew portraits */
 .wr{padding:0 0 16px;}
 .wr .pic{position:relative;height:0;padding-bottom:125%;background:#000;overflow:hidden;border-bottom:1px solid var(--seam);margin-bottom:14px;}
-.wr .pic img{position:absolute;inset:0;z-index:2;width:100%;height:100%;object-fit:cover;filter:saturate(1.05) contrast(1.05);}
+.wr .pic img{position:absolute;inset:0;z-index:2;width:100%;height:100%;object-fit:contain;filter:saturate(1.05) contrast(1.05);}
 .wr .pic .mono{position:absolute;inset:0;display:grid;place-items:center;
   font-family:'Rubik Distressed',system-ui,sans-serif;font-size:clamp(44px,7vw,64px);color:rgba(245,238,221,.92);
   text-shadow:0 3px 0 rgba(0,0,0,.6);letter-spacing:.02em;
@@ -1114,7 +1114,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         
         
         
-        <div class="wr" data-line="DONOVAN DIJAK &middot; JCW LUNACY"><div class="pic"><span class="mono">DD</span></div><div class="role">JCW Roster</div><h3>Donovan Dijak</h3></div>
+        <div class="wr" data-line="DONOVAN DIJAK &middot; JCW LUNACY"><div class="pic"><img src="roster/donovan-dijak.jpg" alt="Donovan Dijak" loading="lazy" onerror="this.remove()"><span class="mono">DD</span></div><div class="role">JCW Roster</div><h3>Donovan Dijak</h3></div>
         <div class="wr" data-line="EC3 &middot; JCW LUNACY"><div class="pic"><img src="roster/ec3.jpg" alt="EC3" loading="lazy" onerror="this.remove()"><span class="mono">E</span></div><div class="role">JCW Roster</div><h3>EC3</h3></div>
         <div class="wr" data-line="FACADE &middot; JCW LUNACY"><div class="pic"><img src="roster/facade.jpg" alt="Facade" loading="lazy" onerror="this.remove()"><span class="mono">F</span></div><div class="role">JCW Roster</div><h3>Facade</h3></div>
         
@@ -1132,7 +1132,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         
         <div class="wr" data-line="KERRY MORTON &middot; JCW LUNACY"><div class="pic"><img src="roster/kerry-morton.jpg" alt="Kerry Morton" loading="lazy" onerror="this.remove()"><span class="mono">KM</span></div><div class="role">JCW Roster</div><h3>Kerry Morton</h3></div>
         <div class="wr" data-line="THE MONSTER&rsquo;S MONSTER"><div class="pic"><img src="roster/kongo-kong.jpg" alt="Kongo Kong" loading="lazy" onerror="this.remove()"><span class="mono">KK</span></div><div class="role">JCW Roster</div><h3>Kongo Kong</h3></div>
-        <div class="wr" data-line="KRUEL &middot; JCW LUNACY"><div class="pic"><img src="roster/kruel.jpg" alt="Kruel" loading="lazy" onerror="this.remove()"><span class="mono">K</span></div><div class="role">JCW Roster</div><h3>Kruel</h3></div>
+        <div class="wr" data-line="KRULE &middot; JCW LUNACY"><div class="pic"><img src="roster/krule.jpg" alt="Krule" loading="lazy" onerror="this.remove()"><span class="mono">K</span></div><div class="role">JCW Roster</div><h3>Krule</h3></div>
         <div class="wr" data-line="TOSSED MORE TIMES THAN LUIGI&rsquo;S PIZZA DOUGH"><div class="pic"><img src="roster/luigi-primo.jpg" alt="Luigi Primo" loading="lazy" onerror="this.remove()"><span class="mono">LP</span></div><div class="role">JCW Roster</div><h3>Luigi Primo</h3></div>
         <div class="wr" data-line="MAD MAN PONDO HAS ENTERED THE BUILDING"><div class="pic"><img src="roster/mad-man-pondo.jpg" alt="Mad Man Pondo" loading="lazy" onerror="this.remove()"><span class="mono">MM</span></div><div class="role">JCW Roster</div><h3>Mad Man Pondo</h3></div>
         <div class="wr" data-line="MATT CROSS &middot; JCW LUNACY"><div class="pic"><img src="roster/matt-cross.jpg" alt="Matt Cross" loading="lazy" onerror="this.remove()"><span class="mono">MC</span></div><div class="role">JCW Roster</div><h3>Matt Cross</h3></div>
@@ -1146,19 +1146,19 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <div class="wr" data-line="NINJA MACK KEEPS FLYING"><div class="pic"><img src="roster/ninja-mack.jpg" alt="Ninja Mack" loading="lazy" onerror="this.remove()"><span class="mono">NM</span></div><div class="role">JCW Roster</div><h3>Ninja Mack</h3></div>
         <div class="wr" data-line="THE OUTBREAK &middot; JCW LUNACY"><div class="pic"><img src="roster/outbreak.jpg" alt="The Outbreak" loading="lazy" onerror="this.remove()"><span class="mono">O</span></div><div class="role">JCW Roster</div><h3>The Outbreak</h3></div>
         
-        <div class="wr" data-line="7 FOOT TALL PAINFUL PAUL &middot; JCW LUNACY"><div class="pic"><span class="mono">PP</span></div><div class="role">JCW Roster</div><h3>7 Foot Tall Painful Paul</h3></div>
-        <div class="wr" data-line="RICKY MORTON &middot; JCW LUNACY"><div class="pic"><span class="mono">RM</span></div><div class="role">JCW Roster</div><h3>Ricky Morton</h3></div>
+        <div class="wr" data-line="7 FOOT TALL PAINFUL PAUL &middot; JCW LUNACY"><div class="pic"><img src="roster/7-foot-tall-painful-paul.jpg" alt="7 Foot Tall Painful Paul" loading="lazy" onerror="this.remove()"><span class="mono">PP</span></div><div class="role">JCW Roster</div><h3>7 Foot Tall Painful Paul</h3></div>
+        <div class="wr" data-line="RICKY MORTON &middot; JCW LUNACY"><div class="pic"><img src="roster/ricky-morton.jpg" alt="Ricky Morton" loading="lazy" onerror="this.remove()"><span class="mono">RM</span></div><div class="role">JCW Roster</div><h3>Ricky Morton</h3></div>
         <div class="wr" data-line="THE RING RAT &middot; JCW LUNACY"><div class="pic"><img src="roster/the-ring-rat.jpg" alt="The Ring Rat" loading="lazy" onerror="this.remove()"><span class="mono">RR</span></div><div class="role">JCW Roster</div><h3>The Ring Rat</h3></div>
         <div class="wr" data-line="SALLY BOY &middot; JCW LUNACY"><div class="pic"><img src="roster/sally-boy.jpg" alt="Sally Boy" loading="lazy" onerror="this.remove()"><span class="mono">SB</span></div><div class="role">JCW Roster</div><h3>Sally Boy</h3></div>
         <div class="wr" data-line="SEWACIDE &middot; JCW LUNACY"><div class="pic"><img src="roster/sewacide.jpg" alt="Sewacide" loading="lazy" onerror="this.remove()"><span class="mono">S</span></div><div class="role">JCW Roster</div><h3>Sewacide</h3></div>
         <div class="wr" data-line="SHANE MERCER &middot; JCW LUNACY"><div class="pic"><img src="roster/shane-mercer.jpg" alt="Shane Mercer" loading="lazy" onerror="this.remove()"><span class="mono">SM</span></div><div class="role">JCW Roster</div><h3>Shane Mercer</h3></div>
-        <div class="wr" data-line="SONNY KISS &middot; JCW LUNACY"><div class="pic"><span class="mono">SK</span></div><div class="role">JCW Roster</div><h3>Sonny Kiss</h3></div>
+        <div class="wr" data-line="SONNY KISS &middot; JCW LUNACY"><div class="pic"><img src="roster/sonny-kiss.jpg" alt="Sonny Kiss" loading="lazy" onerror="this.remove()"><span class="mono">SK</span></div><div class="role">JCW Roster</div><h3>Sonny Kiss</h3></div>
         <div class="wr" data-line="SOPHIA ROSE &middot; JCW LUNACY"><div class="pic"><img src="roster/sohpia-rose.jpg" alt="Sophia Rose" loading="lazy" onerror="this.remove()"><span class="mono">SR</span></div><div class="role">JCW Roster</div><h3>Sophia Rose</h3></div>
         
         <div class="wr" data-line="UNDER ORDERS FROM BIG VITO"><div class="pic"><img src="roster/steven-flowe.jpg" alt="Steven Flowe" loading="lazy" onerror="this.remove()"><span class="mono">SF</span></div><div class="role">JCW Roster</div><h3>Steven Flowe</h3></div>
         
         <div class="wr" data-line="VINCENZO &middot; JCW LUNACY"><div class="pic"><img src="roster/vincenzo.jpg" alt="Vincenzo" loading="lazy" onerror="this.remove()"><span class="mono">V</span></div><div class="role">JCW Roster</div><h3>Vincenzo</h3></div>
-        <div class="wr" data-line="ZACH GOWEN &middot; JCW LUNACY"><div class="pic"><span class="mono">ZG</span></div><div class="role">JCW Roster</div><h3>Zach Gowen</h3></div>
+        <div class="wr" data-line="ZACH GOWEN &middot; JCW LUNACY"><div class="pic"><img src="roster/zach-gowen.jpg" alt="Zach Gowen" loading="lazy" onerror="this.remove()"><span class="mono">ZG</span></div><div class="role">JCW Roster</div><h3>Zach Gowen</h3></div>
         <div class="wr" data-line="WILLIE MACK DIDN&rsquo;T BLINK"><div class="pic"><img src="roster/willie-mack.jpg" alt="Willie Mack" loading="lazy" onerror="this.remove()"><span class="mono">WM</span></div><div class="role">JCW Roster</div><h3>Willie Mack</h3>
         
         </div>
@@ -1172,7 +1172,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <div class="wr" data-line="VINCE RUSSO &middot; JCW LUNACY"><div class="pic"><img src="roster/vince-russo.jpg" alt="Vince Russo" loading="lazy" onerror="this.remove()"><span class="mono">VR</span></div><div class="role">Owner</div><h3>Vince Russo</h3></div>
         <div class="wr" data-line="JOE DOMBROWSKI &middot; JCW LUNACY"><div class="pic"><img src="roster/joe-dombrowski.jpg" alt="Joe Dombrowski" loading="lazy" onerror="this.remove()"><span class="mono">JD</span></div><div class="role">Commentary</div><h3>Joe Dombrowski</h3></div>
         <div class="wr" data-line="MARK ROBERTS &middot; JCW LUNACY"><div class="pic"><img src="roster/mark-roberts.jpg" alt="Mark Roberts" loading="lazy" onerror="this.remove()"><span class="mono">MR</span></div><div class="role">Commentary</div><h3>Mark Roberts</h3></div>
-        <div class="wr" data-line="DJ CLAY &middot; JCW LUNACY"><div class="pic"><img src="roster/dj-clay.jpg" alt="DJ Clay" loading="lazy" onerror="this.remove()"><span class="mono">DC</span></div><div class="role">Commentary</div><h3>DJ Clay</h3></div>
+        <div class="wr" data-line="DJ CLAY &middot; JCW LUNACY"><div class="pic"><img src="roster/dj-clay.jpg" alt="DJ Clay" loading="lazy" onerror="this.remove()"><span class="mono">DC</span></div><div class="role">House DJ</div><h3>DJ Clay</h3></div>
         <div class="wr" data-line="VEDA SCOTT &middot; JCW LUNACY"><div class="pic"><img src="roster/veda-scott.jpg" alt="Veda Scott" loading="lazy" onerror="this.remove()"><span class="mono">VS</span></div><div class="role">Commentary</div><h3>Veda Scott</h3></div>
         <div class="wr" data-line="ZAC AMICO &middot; JCW LUNACY"><div class="pic"><img src="roster/zac-amico.jpg" alt="Zac Amico" loading="lazy" onerror="this.remove()"><span class="mono">ZA</span></div><div class="role">Commentary</div><h3>Zac Amico</h3></div>
         <div class="wr" data-line="MAC DAVIS &middot; JCW LUNACY"><div class="pic"><img src="roster/mac-davis.jpg" alt="Mac Davis" loading="lazy" onerror="this.remove()"><span class="mono">MD</span></div><div class="role">Roving Reporter</div><h3>Mac Davis</h3></div>
@@ -2028,7 +2028,7 @@ function observeReveals(){
     'Forty Winks':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
     'The Green Phantom':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
     'J-Rod':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
-    'Kruel':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
+    'Krule':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
     'The Ring Rat':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
     'Sally Boy':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
     'Sewacide':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
@@ -2076,7 +2076,7 @@ function observeReveals(){
     if(!THEME_SET.includes(s))return '';
     return `<button class="btn line theme-btn" data-theme="${s}" style="margin-top:14px;">\u25B6 Entrance theme</button>`;
   }
-  const STATS={"Alice Crowley": [8, 6, 8, 9, "Uni-Lariat"], "Josh Bishop": [10, 6, 7, 9, "Exit 187"], "Dani Mo": [6, 8, 8, 8, "Moon Mist Twist"], "Kerry Morton": [7, 8, 10, 7, "Kiss It Goodbye"], "Caleb Konley": [7, 8, 9, 8, "Burning Hammer"], "2 Tuff Tony": [8, 5, 6, 10, "The Meteorite"], "Big Vito": [9, 5, 6, 10, "Implant DDT"], "Cokane": [7, 8, 10, 7, "Coke Slam"], "Disco Ray": [5, 8, 6, 6, ""], "EC3": [8, 6, 8, 8, "One Percenter"], "Facade": [5, 10, 8, 7, ""], "Father Bronson": [8, 6, 7, 8, "Texas Cloverleaf"], "Hokane": [8, 6, 6, 8, ""], "Hollyhood Haley J": [6, 7, 8, 9, ""], "J-Rod": [9, 6, 7, 8, ""], "Jeeves": [5, 7, 7, 6, ""], "Kongo Kong": [10, 5, 7, 9, ""], "Kruel": [10, 5, 6, 9, ""], "Luigi Primo": [6, 7, 8, 7, ""], "Matt Cross": [6, 10, 9, 6, "Shooting Star Press"], "Mecha Wolf": [7, 7, 7, 7, ""], "Mickie Knuckles": [8, 5, 6, 9, ""], "Mosh Pit Mike": [6, 6, 7, 8, "Snapmare Powerbomb"], "Mr. Happy": [10, 4, 6, 8, ""], "The Ring Rat": [7, 5, 5, 7, ""], "Sally Boy": [7, 8, 5, 7, ""], "Shane Mercer": [10, 6, 7, 8, "MoonSault and Battery"], "Sophia Rose": [7, 6, 7, 7, ""], "Steven Flowe": [6, 10, 8, 7, "Steven Flowesion"], "The Green Phantom": [7, 6, 6, 6, ""], "Vincenzo": [8, 5, 6, 7, ""], "Willie Mack": [7, 7, 9, 8, "Stunner"]};
+  const STATS={"Alice Crowley": [8, 6, 8, 9, "Uni-Lariat"], "Josh Bishop": [10, 6, 7, 9, "Exit 187"], "Dani Mo": [6, 8, 8, 8, "Moon Mist Twist"], "Kerry Morton": [7, 8, 10, 7, "Kiss It Goodbye"], "Caleb Konley": [7, 8, 9, 8, "Burning Hammer"], "2 Tuff Tony": [8, 5, 6, 10, "The Meteorite"], "Big Vito": [9, 5, 6, 10, "Implant DDT"], "Cokane": [7, 8, 10, 7, "Coke Slam"], "Disco Ray": [5, 8, 6, 6, ""], "EC3": [8, 6, 8, 8, "One Percenter"], "Facade": [5, 10, 8, 7, ""], "Father Bronson": [8, 6, 7, 8, "Texas Cloverleaf"], "Hokane": [8, 6, 6, 8, ""], "Hollyhood Haley J": [6, 7, 8, 9, ""], "J-Rod": [9, 6, 7, 8, ""], "Jeeves": [5, 7, 7, 6, ""], "Kongo Kong": [10, 5, 7, 9, ""], "Krule": [10, 5, 6, 9, ""], "Luigi Primo": [6, 7, 8, 7, ""], "Matt Cross": [6, 10, 9, 6, "Shooting Star Press"], "Mecha Wolf": [7, 7, 7, 7, ""], "Mickie Knuckles": [8, 5, 6, 9, ""], "Mosh Pit Mike": [6, 6, 7, 8, "Snapmare Powerbomb"], "Mr. Happy": [10, 4, 6, 8, ""], "The Ring Rat": [7, 5, 5, 7, ""], "Sally Boy": [7, 8, 5, 7, ""], "Shane Mercer": [10, 6, 7, 8, "MoonSault and Battery"], "Sophia Rose": [7, 6, 7, 7, ""], "Steven Flowe": [6, 10, 8, 7, "Steven Flowesion"], "The Green Phantom": [7, 6, 6, 6, ""], "Vincenzo": [8, 5, 6, 7, ""], "Willie Mack": [7, 7, 9, 8, "Stunner"]};
   function statBars(name){
     const s=STATS[name];if(!s)return '';
     const labs=['Power','Speed','Technique','Toughness'];
