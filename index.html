@@ -298,7 +298,7 @@ h2.head em{font-style:normal;color:var(--acid);}
 .era:nth-of-type(4) .wr:hover{border-color:var(--purple);}
 .era .tag::after{content:"";flex:1;height:1px;background:var(--seam);}
 .crew{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;
-  justify-content:start;align-items:stretch;}
+  justify-content:start;align-items:start;}
 .crew .wr{max-width:100%;}
 @media (max-width:640px){.crew{grid-template-columns:repeat(2,1fr);gap:10px;}.wr h3{font-size:16px;}.crew .wr:last-child:nth-child(odd){grid-column:1/-1;}}
 #view-crew .era:first-of-type .crew{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));justify-content:center;}
@@ -1231,7 +1231,6 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <div class="wr" data-line="IAN ROTTEN &middot; JCW"><div class="pic"><span class="mono">IR</span></div><div class="role">Legends &amp; Alumni</div><h3>Ian Rotten</h3></div>
         <div class="wr" data-line="BULL PAIN &middot; JCW"><div class="pic"><span class="mono">BP</span></div><div class="role">Legends &amp; Alumni</div><h3>Bull Pain</h3></div>
         <div class="wr" data-line="SABU &middot; JCW"><div class="pic"><span class="mono">SB</span></div><div class="role">Legends &amp; Alumni</div><h3>Sabu</h3></div>
-        <div class="wr" data-line="KEVIN GILL &middot; JCW"><div class="pic"><span class="mono">KG</span></div><div class="role">Legends &amp; Alumni</div><h3>Kevin Gill</h3></div>
       </div>
     </div>
   </section>
@@ -1374,7 +1373,7 @@ function observeReveals(){
   if(!('IntersectionObserver' in window)){els.forEach(e=>e.classList.add('in'));return;}
   if(!io) io=new IntersectionObserver(es=>es.forEach(e=>{
     if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}
-  }),{threshold:0,rootMargin:'0px 0px -40px 0px'});
+  }),{threshold:.12});
   els.forEach(e=>io.observe(e));
 }
 
@@ -1962,7 +1961,6 @@ function observeReveals(){
     'Ian Rotten':{f:['Legends & Alumni'],t:'JCW alumni.'},
     'Bull Pain':{f:['Legends & Alumni'],t:'JCW alumni.'},
     'Sabu':{f:['Legends & Alumni'],t:'JCW alumni.'},
-    'Kevin Gill':{f:['Legends & Alumni'],t:'JCW alumni.'},
     '\u201cRowdy\u201d Roddy Piper':{f:['Legends & Alumni'],t:'JCW alumni.'},
     'Greg \u201cThe Hammer\u201d Valentine':{f:['Legends & Alumni'],t:'JCW alumni.'},
     '7 Foot Tall Painful Paul':{f:['Monster Corporation'],t:'Member of the St. Claire Monster Corporation.'},
@@ -2011,11 +2009,11 @@ function observeReveals(){
     'The Wraith':{f:["Nickname: Death", "Height: 5'8\" Weight 195", "Hometown: The Abyss", "Finisher: The Sedative"],t:'The WRAITH is an enigma wrapped in shadow, a reflection of the Sixth Jokers Card—The Wraith, also known as Death. This dark and malevolent figure is not\n\nmerely a wrestler, but a living embodiment of the impending reckoning that comes to collect those who have spent their lives consumed by guilt and regret.\n\nHe is a harbinger, a final messenger of judgment, a chilling force of nature that only appears to those who are at the end of their road. The WRAITH emerged from the shadows of the dark carnival, a place where time holds no sway, to bring justice to the unjust, and to ensure that the guilty will face their eternal punishment.\n\nSome say The WRAITH is a spirit, cursed to wander between the realms of the living and the dead. Others believe he is a man, one who has seen the ugliness of the world and been irrevocably transformed by it. His sole mission: To remind the world that every sin will be paid for in the end.\n\nThe WRAITH is not just a man—he is a storm, and his fighting style is a blend of vicious, relentless strikes, mind games, and eerie psychological warfare. The WRAITH is known for his psychological domination in the ring, often using his eerie presence and cryptic taunts to unnerve his opponents before unleashing brutal and calculated violence.\n\nInsaneClownPosse.com'},
     'Young Alter Boys':{f:["Nickname: The Preachers Pets", "Height: Both 6’1”", "Weight: Both 180", "Hometown: The Promised land", "Finisher: Holy Spirit"],t:'Since the beginning of their careers in 2019, Bang and Matthews have been teaming together across the country, spreading dropkicks and questionable fashion choices wherever they roam. They\'ve popped up in GCW, ROH, and even AEW Collision basically everywhere except your mom’s backyard (but that’s probably next).\n\nWhile normally cheered, in JCW Bang and Matthews weren’t quite as loved by the Juggalo fanbase. Turns out, painting your faces and preaching about salvation doesn’t go over too well when half the crowd’s still recovering from Faygo showers and wicked clown rituals. So Bang and Matthews did what any rational tag team would do they went full holy roller and set out to save every Juggalo soul from its dark carnival destiny.\n\nAfter scrapping with the BackSeat Boyz all up and down the Train of Terror tour, Bang and Matthews decided fists weren’t enough. So they busted out a Bible l, not to read, but to smite. One holy thump later, they were the new JCW tag team champions. And in the most unholy twist of fate, Johnny Kashmere betrayed the BackSeat Boyz, joined the unholy duo, and dubbed them the Young Alter Boys.\n\nNow that the Young Alter Boys have had a taste of JCW gold (which they definitely didn’t bless first), they’re hell-bent on getting it back and saving the souls of Juggalos one backbreaker and awkward baptism at a time.\n\nInstagram: @DaveyBang, @Getauggie\n\nX: @DaveyBang, @August_Matthewz'},
     'Josh Bishop':{f:['World Heavyweight Champion'],t:'JCW World Heavyweight Champion, carrying the lineage that began with Evil Dead at St. Andrew\u2019s Hall in 1999.'},
-    'Father Bronson':{f:['American Champion'],t:'Reigning JCW American Champion.'},
+    'Father Bronson':{f:['American Champion'],t:'He\'s taught us how to make hot tea, how to get rid of problems, how to make candles and lotions, and how to turn a bully into a friend. However there is much unknown about the mysterious Father Bronson. He claims to have learned patience through "Red Love" ever since he was a child, bouncing from home to home due to not having parents in his life.\n\nWhile he portrays himself as someone delivering a positive message, there appears to be dark secrets hidden in the many sermons of "Red Love". While many wonder what exactly "Red Love" is all about, some of those answers may be best left in the past.'},
     'Choppa City':{f:['World Tag Team Champions'],t:'Reigning JCW World Tag Team Champions.'},
     'Hollyhood Haley J':{f:['Second Generation'],t:'Second-generation superstar and former Women\u2019s Champion. Faced Alice Crowley at 2 Tuff Country.'},
     'Big Vito':{f:['Lunacy Era'],t:'Ordered Steven Flowe to take out Cokane at Friends Forced to Fight.'},
-    'Hokane':{f:['Lunacy Era'],t:'Pursued by Big Al in the current Lunacy storyline.'},
+    'Hokane':{f:['Lunacy Era'],t:'Hokane arrived in JCW as Cokane\'s #1 fan, sitting in the front row cheering on her favorite wrestler behind a mask of her own. One night following a victory, Cokane noticed her in the crowd and rewarded her fandom by giving her a giant bag of powder from his stash. What was a kind gesture from a wrestler to their fan quickly turned into a parasocial obsession. Hokane became jealous over a professional bond between Cokane and Alice Crowley, breaking into the backstage area and attacking Crowley on several occasions.\n\nAfter failing to gain affection from Cokane and left gasping for air by a beat down from Crowley, Barnabas the Bizarre welcomed Hokane into his family as she now looks to carve her own path in JCW.'},
     'Ninja Mack':{f:['Lunacy Era'],t:'Faced Matt Cross at Friends Forced to Fight and Caleb Konley at 2 Tuff Country.'},
     'EC3':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
     'James Storm':{f:['The Cowboy'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
@@ -2065,7 +2063,7 @@ function observeReveals(){
   let bioHold=false;
   /* ================= ENTRANCE THEMES (gated on clearance) ================= */
   const THEMES_CLEARED=true; // JCW confirmed entrance music cleared
-  const THEME_SET=["amazing-maria", "barnabas-the-bizarre", "beast-man", "big-vito", "cokane", "dani-mo", "disco-ray", "facade", "father-bronson", "hollyhood-haley-j", "j-rod", "james-storm", "jasmin-st-claire", "jeeves", "luigi-primo", "matt-cross", "mecha-wolf", "mickie-knuckles", "mosh-pit-mike", "mr-anderson", "ninja-mack", "pco", "sewacide", "shane-mercer", "sophia-rose", "steven-flowe", "the-green-phantom", "the-outbreak", "vince-russo", "violent-j", "willie-mack"];
+  const THEME_SET=["2-tuff-tony", "7-foot-tall-painful-paul", "backseat-boyz", "barnabas-the-bizarre", "big-vito", "bigfoot", "brothers-of-funstruction", "caleb-konley", "choppa-city", "cokane", "dani-mo", "ec3", "facade", "father-bronson", "gisele-shaw", "hollyhood-haley-j", "j-rod", "james-storm", "jeeves", "kongo-kong", "luigi-primo", "matt-cross", "mecha-wolf", "mickie-knuckles", "mosh-pit-mike", "mr-anderson", "mr-happy", "nic-nemeth", "ninja-mack", "officer-colt-cabana", "ricky-morton", "shane-mercer", "sonny-kiss", "sophia-rose", "steven-flowe", "the-green-phantom", "tracy-smothers", "vampiro", "vince-russo", "violent-j", "willie-mack", "zach-gowen"];
   function themeSlug(name){
     return name.toLowerCase().replace(/holly ?hood/,'hollyhood').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
   }
