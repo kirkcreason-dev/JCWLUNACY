@@ -298,7 +298,7 @@ h2.head em{font-style:normal;color:var(--acid);}
 .era:nth-of-type(4) .wr:hover{border-color:var(--purple);}
 .era .tag::after{content:"";flex:1;height:1px;background:var(--seam);}
 .crew{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;
-  justify-content:start;align-items:start;}
+  justify-content:start;align-items:stretch;}
 .crew .wr{max-width:100%;}
 @media (max-width:640px){.crew{grid-template-columns:repeat(2,1fr);gap:10px;}.wr h3{font-size:16px;}.crew .wr:last-child:nth-child(odd){grid-column:1/-1;}}
 .wr{border:1px solid var(--seam);background:var(--plate);padding:18px 16px;position:relative;
@@ -1364,7 +1364,7 @@ function observeReveals(){
   if(!('IntersectionObserver' in window)){els.forEach(e=>e.classList.add('in'));return;}
   if(!io) io=new IntersectionObserver(es=>es.forEach(e=>{
     if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}
-  }),{threshold:.12});
+  }),{threshold:0,rootMargin:'0px 0px -40px 0px'});
   els.forEach(e=>io.observe(e));
 }
 
