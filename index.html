@@ -1262,11 +1262,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
 
     <div class="games">
       <div class="game playable rev">
-        <span class="badge">Play in browser</span>
-        <h3>JCW Lunacy: The Game</h3>
+        <span class="badge">Unlock at 500 points</span>
+        <h3>Lunacy Unlocked</h3>
         <div class="sub">2D fighting &middot; Free &middot; No download &middot; Online multiplayer</div>
-        <p>The official JCW Lunacy fighting game &mdash; take the champions of the roster into the ring &mdash; combos, weapons and pinfalls. Play solo against the AI or hit <b>Quick Match</b> for online battles, right on this page.</p>
-        <button class="btn gold" id="play-bmr">Coming Soon</button>
+        <p>The official JCW Lunacy fighting game &mdash; take the champions of the roster into the ring &mdash; combos, weapons and pinfalls. Play solo against the AI or hit <b>Quick Match</b> for online battles, right on this page. <b>Earn 500 points</b> in your <a href="#locker" style="color:var(--acid);">Juggalo Locker</a> to unlock the Lunacy &mdash; watching episodes, calling your shots and finding secrets all pay out.</p>
+        <button class="btn gold" id="play-bmr">&#128274; Locked &middot; 500 points</button>
       </div>
       <div class="game rev">
         <span class="badge">Roster</span>
@@ -1490,7 +1490,14 @@ function observeReveals(){
   const playBtn=document.getElementById('play-bmr');
   const gOverlay=document.getElementById('game-overlay');
   if(playBtn&&gOverlay){
+    function gameLockUI(){const d=lkGet(),p=d.pts||0,un=p>=500||(d.badges||[]).includes('unlocked');
+      playBtn.innerHTML=un?'Press start':'&#128274; Locked \u00b7 '+Math.min(p,500)+' / 500 points';}
+    window.jcwGameLockUI=gameLockUI;gameLockUI();
     playBtn.addEventListener('click',()=>{
+      const _d=lkGet(),_p=_d.pts||0;
+      if(_p<500&&!(_d.badges||[]).includes('unlocked')){toast('LOCKED \u00b7 '+_p+' / 500 POINTS \u00b7 EARN POINTS IN YOUR LOCKER',3400);return;}
+      if(!(_d.badges||[]).includes('unlocked'))lkAward(0,'unlocked','Lunacy Unlocked \u00b7 hit 500 points');
+      gameLockUI();
       if(!gOverlay.querySelector('iframe')){
         const f=document.createElement('iframe');
         f.src='https://kirkcreason-dev.github.io/juggalochampionshipwrestling/';
@@ -1591,7 +1598,8 @@ function observeReveals(){
   const LK_BADGES=[['first','First Blood \u00b7 showed up'],['fan','Down With the Clown \u00b7 set a favorite'],
     ['binge','Binge \u00b7 watched 5 episodes'],['gamer','In the Ring \u00b7 played the game'],
     ['prophet','Prophet \u00b7 made your picks'],['winner','Winner \u00b7 won a match'],
-    ['champ','Champion \u00b7 10 match wins']];
+    ['champ','Champion \u00b7 10 match wins'],
+    ['bigfoot','Squatch Hunter \u00b7 found Bigfoot \u00b7 250 pts'],['unlocked','Lunacy Unlocked \u00b7 hit 500 points']];
   function lkAddWin(){
     const d=lkGet(); d.wins=(d.wins||0)+1;
     d.badges=d.badges||[]; if(!d.badges.includes('winner'))d.badges.push('winner');
@@ -1599,10 +1607,15 @@ function observeReveals(){
     lkSet(d); lkAward(15,null,'Won a match in JCW Lunacy: The Game');
   }
   window.jcwReportWin=lkAddWin; // game calls this on a win
+  window.jcwFoundBigfoot=function(){
+    const d=lkGet();if((d.badges||[]).includes('bigfoot'))return;
+    lkAward(250,'bigfoot','Found Bigfoot \u00b7 +250 points');
+    toast('YOU FOUND BIGFOOT \u00b7 +250 POINTS',3400);
+  };
   window.addEventListener('message',ev=>{
     if(ev.data&&ev.data.type==='jcw-win'){lkAddWin();}
   });
-  function lkRank(p){return p>=300?'Certified Freak':p>=150?'Dark Carnival Regular':p>=50?'Front Row':'Fresh Face';}
+  function lkRank(p){return p>=500?'Lunacy Unlocked':p>=300?'Certified Freak':p>=150?'Dark Carnival Regular':p>=50?'Front Row':'Fresh Face';}
   function lkRender(){
     const d=lkGet();
     const el=document.getElementById('lk-pts');if(!el)return;
@@ -1622,6 +1635,7 @@ function observeReveals(){
     if(fv&&d.fav)fv.value=d.fav;
     const w=(d.hist||[]).filter(x=>x.startsWith('Watched')).length;
     if(w>=5&&!(d.badges||[]).includes('binge')){d.badges.push('binge');lkSet(d);}
+    if(window.jcwGameLockUI)window.jcwGameLockUI();
   }
   document.addEventListener('input',e=>{
     if(e.target.id==='lk-name'){const d=lkGet();d.name=e.target.value;lkSet(d);}
@@ -1965,7 +1979,7 @@ function observeReveals(){
     '7 Foot Tall Painful Paul':{f:['Monster Corporation'],t:'Member of the St. Claire Monster Corporation.'},
     'Bigfoot':{f:['JCW Roster'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
     'Donovan Dijak':{f:['JCW Roster'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
-    'Mr. Anderson':{f:['JCW Roster'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
+    'Mr. Anderson':{f:['First JCW Lunacy World Champion'],t:'Mr. Anderson holds the honor of being the first ever JCW Lunacy World Champion, defeating James Storm in the Championship\'s inaugural bout.\n\nWhen Team Violent J was unable to compete against Team Big Vito, JCW Owner Vince Russo put together a new team comprised of Anderson, Nic Nemeth, and Cokane. Anderson and company were victorious in the giant six man battle, allowing Violent J to gain ownership back in JCW.\n\nFollowing a spontaneous match against Cokane where he lost the JCW Lunacy World Championship, Anderson stepped away from JCW for a few months to regroup. Fresh and revitalized, Anderson is back in JCW, looking to once again be on top.'},
     'Handsome Harley Guestella & Diamond Donovan Douglas':{f:['Founders'],t:'Violent J and Shaggy 2 Dope under their JCW ring names. Founded JCW and won the first Tag Team Championship on night one, defeating two Doink the Clowns.'},
     'JWO':{f:['Juggalo World Order'],t:'The Juggalo World Order. Formed in 2007.'},
     '2 Tuff Tony':{f:["Nickname: The Louisville Town Drunk", "Height: 6'0\"", "Weight: 240 lbs", "Hometown: Louisville, KY", "Finisher: Meteorite"],t:'2 Tuff Tony’s place in JCW history is etched in stone. The same crusty, bloodstained slab the company was built on, probably behind a Waffle House somewhere. A true-to-life JCW Day 1’nner, Tony was there when the ring was still half duct-tape and dreams.\n\nAs both a JCW and Louisville Pro Wrestling Hall of Famer, and a former 5-time JCW World Champion, plus tag team and American Champ, Tony’s legacy is that of a battle-scarred road warrior who earned every belt, every bruise, and every busted beer bottle to the dome. He’s the walking, brawling embodiment of that Juggalo spirit uncompromising, hard-hitting, and always down for a backyard rumble or a parking lot BBQ brawl.\n\nA day one clown soldier, Tony’s shown the world there ain’t nothing scarier than a man who’s danced with fire, drank with devils, and still walks out carrying two bottles of Bacardi Rum one for him, and one for the poor soul catching an elbow to the face.\n\nFor 2 Tuff Tony, this ain’t just wrestling it’s a full-blown lifestyle. A non-stop death match with destiny, a beer-soaked saga of survival. And as long as Tony\'s still breathing (and chugging), his legend grows stronger than a stale Faygo bottle under a summer sun.\n\nHis work ethic? Ridiculous. His adaptability? Like a ninja in cargo shorts. His risk-taking? Let’s just say gravity’s caught more hands from Tony than half the JCW roster. That Grand Slam wasn’t just a win it was the payoff to years of blood, sweat, and hardcore carnage. Tony didn’t just collect titles…he broke the mold, shattered expectations, and redefined what it means to be the top dog in the underground circus of JCW.\n\nInstagram: @2TuffTony4Real\n\nX: @2TuffTony4Real\n\nFacebook.com/2.Tuff.Tony'},
@@ -2014,22 +2028,22 @@ function observeReveals(){
     'Big Vito':{f:['The Luciano Family','Lunacy Era'],t:'Big Vito has been a problem for JCW and Violent J since the moment he walked in the door. Sent by new JCW investor Vince Russo to "protect the investment", Vito quickly took matters into his own hands by misrepresenting his authority and being a complete prick to anyone he crossed paths with. Vito\'s mission was clear. He wanted the Juggalos removed from JCW. No more clown makeup. No more Faygo. No more Violent J. There would be rules and respect.\n\nAfter failing to gain Violent J\'s power for himself after what he considers a betrayal by Russo, Vito decided to bring in the family \u2014 his family \u2014 The Luciano Family. With his right hand man Vincenzo and his nephew Sally Boy by his side, Vito has a renewed focus with everyone in JCW in his crosshairs.\n\nOh, and that dress business? He was under investigation.'},
     'Hokane':{f:['Lunacy Era'],t:'Hokane arrived in JCW as Cokane\'s #1 fan, sitting in the front row cheering on her favorite wrestler behind a mask of her own. One night following a victory, Cokane noticed her in the crowd and rewarded her fandom by giving her a giant bag of powder from his stash. What was a kind gesture from a wrestler to their fan quickly turned into a parasocial obsession. Hokane became jealous over a professional bond between Cokane and Alice Crowley, breaking into the backstage area and attacking Crowley on several occasions.\n\nAfter failing to gain affection from Cokane and left gasping for air by a beat down from Crowley, Barnabas the Bizarre welcomed Hokane into his family as she now looks to carve her own path in JCW.'},
     'Ninja Mack':{f:['Lunacy Era'],t:'Faced Matt Cross at Friends Forced to Fight and Caleb Konley at 2 Tuff Country.'},
-    'EC3':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
+    'EC3':{f:['The Top 1%'],t:'Ethan Carter III is no stranger to having family members inside the wrestling business. With his second cousin Jeeves already here, the duo struck a deal with Violent J to bring "The Top 1%" to JCW.\n\nHe made an immediate impact as the Special Guest Referee for the JCW Lunacy World Championship match at Strangle-Mania, while earning a bullseye on his back courtesy of Vince Russo and "The Chosen One" Caleb Konley. EC3 has been fighting an uphill battle to stay healthy and competitive in JCW ever since with Russo doing everything he can to send him packing.\n\nHaving the determination and work ethic that few possess, EC3 will not stop until he is World Champion once again — this time in JCW, no matter what Russo puts in his way.'},
     'James Storm':{f:['The Cowboy'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
-    'Nic Nemeth':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
+    'Nic Nemeth':{f:['The Wanted Man'],t:'Nic Nemeth is the definition of a professional, inside and out of the ring. A World Champion in multiple organizations, Nemeth would love to add the JCW Lunacy World Championship to his resume.\n\n"The Wanted Man" has flown the JCW flag high and proud since he became part of the family, fighting for JCW in The 2 Day War against GCW as well as for Team Violent J against Team Vito.'},
     'PCO':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
     'Mecha Wolf':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
-    'Gisele Shaw':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
+    'Gisele Shaw':{f:['The Quintessential Diva'],t:'A multi-time Champion around the globe, Gisele Shaw earned a contract in JCW by winning a Best-of-Three series against Freya the Slaya, who was being used by "Broke Ass" Breyer Wellington for his own personal gain.\n\nShaw\'s first order of business as a member of the JCW Roster was taking on Wellington, who she defeated. Now, "The Quintessential Diva" has her sights set on the JCW Women\'s World Championship.'},
     'Vincenzo':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
-    'Joel Gertner':{f:['Lunacy Era'],t:'Featured in the current Lunacy storyline alongside Vince Russo.'},
+    'Joel Gertner':{f:['The Quintessential Stud Muffin'],t:'He\'s the Quintessential Stud Muffin and an ECW Legend. WWE named him one of the 50 Greatest Talkers of all-time. But that\'s not enough for Joel Gertner because he wants to add some Lunacy to his Legacy.\n\nStill recovering from a neck injury he suffered in 1997, Gertner arrived in JCW with former JCW World Champion Josh Bishop, dubbing him "Big Money" and making the claim that he is still a rightful World Champion after he was stripped of his Championship years ago by Violent J.\n\nGertner may have a big mouth, but he backs up his talk. With Big Money and Legacy driving him forward in JCW, we\'re about to see his biggest successes yet in his monumental career.'},
     'Beast Man':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
     'Disco Ray':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
-    'Forty Winks':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
-    'The Green Phantom':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
-    'J-Rod':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
-    'Krule':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
+    'Forty Winks':{f:['Lunacy Era'],t:'We\'ve heard of wrestlers sleeping through their matches before, but nobody does that as literal as Forty Winks. Always prepared for when the Z\'s strike, Forty Winks wrestles in pajamas with his blanket and pillow close by.\n\nJust be sure not to sleep on him, or you might find yourself looking up at the lights.'},
+    'The Green Phantom':{f:['Get With The Green'],t:'After weeks of very expensive buildup asking everyone to "Get with The Green", the hero that was coming to save JCW was nothing more than a fart in the breeze, briefly stinking up the place before fizzling out with the wind.\n\nThe Green Phantom couldn\'t win a single match. With his introductory vignettes getting more airtime than his matches, Violent J had no choice but to cut his losses. The Green Phantom was fired for poor performance, ending the JCW career of perhaps the company\'s biggest financial bust.\n\nHowever weeks later, to the surprise of everyone, The Purple Phantom debuted in JCW with a very familiar outfit, body type, and voice. Somehow The Green Phantom was able to get back into JCW under a different color mask. New color but same results, as The Purple Phantom also blew his chance at staying on the JCW roster.\n\nHave we seen the last of The Phantom? That probably depends on how many different colors of masks he has.'},
+    'J-Rod':{f:['The Ultimate Athlete'],t:'“The Ultimate Athlete”. An American Gladiator. J-Rod is one of the most impressive athletic specimens in professional wrestling. She made an immediate impact in JCW by becoming the JCW Women\'s World Champion at Strangle-Mania in Las Vegas after being in the company for less than three months.\n\nAlthough she possesses a physique and physical gifts that most athletes would be jealous of, J-Rod has no issue taking shortcuts behind the referee\'s back, earning many victories with the use of brass knuckles. This combined with her arrogance has earned her zero friends in the JCW Locker Room other than her on-again/off-again bestie Sophia Rose.\n\nAttendees of JCW events have reported seeing J-Rod wandering around the crowd insulting every fan she comes in contact with.'},
+    'Krule':{f:['The Atrocity'],t:'Not much is known about this masked monster. Rumors have swirled that Krule will take down anyone in his way, whether they are a wrestler or not.\n\nOriginally brought in by JCW Co-Owner Violent J as one of Caleb Konley\'s opponents in "Four Weeks of Hell", Krule impressed the other Co-Owner Vince Russo who had watched his "Chosen One" battle it out with the 6\'8" behemoth.\n\nNow a part of the JCW Roster, "The Atrocity" seems fully entrenched in camp Russo. Will he be satisfied being the additional muscle for Caleb Konley, or does Krule have JCW Championship aspirations of his own?'},
     'The Ring Rat':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
-    'Sally Boy':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
+    'Sally Boy':{f:['The Luciano Family'],t:'Young, arrogant, and easily distracted by women, Sally Boy joined JCW on the orders of The Don of the Luciano Family — his uncle Big Vito. Raised by a single mother (Vito\'s sister), Sally Boy hasn\'t had much of a father figure in his life until he started working for his uncle.\n\nThings have not gone smooth for Sally Boy in JCW as he frequently makes mistakes due to losing control of his temper, lets his guard down too easily around women, and has even questioned his Uncle Vito\'s ability to lead the Family.\n\nWill Sally Boy fall in line, or will he challenge his Uncle Vito\'s place at the top of the Family?'},
     'Sewacide':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
     'Sophia Rose':{f:['Lunacy Era'],t:'Official JCW roster member. Catch them every Thursday night on JCW Lunacy.'},
     'Vince Russo':{f:['Owner'],t:'Co-owner of JCW. Featured in the current Lunacy storyline alongside Joel Gertner.'},
@@ -2075,18 +2089,25 @@ function observeReveals(){
     if(!THEME_SET.includes(s))return '';
     return `<button class="btn line theme-btn" data-theme="${s}" style="margin-top:14px;">\u25B6 Entrance theme</button>`;
   }
-  const STATS={"Alice Crowley": [8, 6, 8, 9, "Uni-Lariat"], "Josh Bishop": [10, 6, 7, 9, "Exit 187"], "Dani Mo": [6, 8, 8, 8, "Moon Mist Twist"], "Kerry Morton": [7, 8, 10, 7, "Kiss It Goodbye"], "Caleb Konley": [7, 8, 9, 8, "Burning Hammer"], "2 Tuff Tony": [8, 5, 6, 10, "The Meteorite"], "Big Vito": [9, 5, 6, 10, "Implant DDT"], "Cokane": [7, 8, 10, 7, "Coke Slam"], "Disco Ray": [5, 8, 6, 6, ""], "EC3": [8, 6, 8, 8, "One Percenter"], "Facade": [5, 10, 8, 7, ""], "Father Bronson": [8, 6, 7, 8, "Texas Cloverleaf"], "Hokane": [8, 6, 6, 8, ""], "Hollyhood Haley J": [6, 7, 8, 9, ""], "J-Rod": [9, 6, 7, 8, ""], "Jeeves": [5, 7, 7, 6, ""], "Kongo Kong": [10, 5, 7, 9, ""], "Krule": [10, 5, 6, 9, ""], "Luigi Primo": [6, 7, 8, 7, ""], "Matt Cross": [6, 10, 9, 6, "Shooting Star Press"], "Mecha Wolf": [7, 7, 7, 7, ""], "Mickie Knuckles": [8, 5, 6, 9, ""], "Mosh Pit Mike": [6, 6, 7, 8, "Snapmare Powerbomb"], "Mr. Happy": [10, 4, 6, 8, ""], "The Ring Rat": [7, 5, 5, 7, ""], "Sally Boy": [7, 8, 5, 7, ""], "Shane Mercer": [10, 6, 7, 8, "MoonSault and Battery"], "Sophia Rose": [7, 6, 7, 7, ""], "Steven Flowe": [6, 10, 8, 7, "Steven Flowesion"], "The Green Phantom": [7, 6, 6, 6, ""], "Vincenzo": [8, 5, 6, 7, ""], "Willie Mack": [7, 7, 9, 8, "Stunner"]};
-  function statBars(name){
-    const s=STATS[name];if(!s)return '';
+  const STATS={"Alice Crowley": [8, 6, 8, 9, "Uni-Lariat"], "Josh Bishop": [10, 6, 7, 9, "Exit 187"], "Dani Mo": [6, 8, 8, 8, "Moon Mist Twist"], "Kerry Morton": [7, 8, 10, 7, "Kiss It Goodbye"], "Caleb Konley": [7, 8, 9, 8, "Burning Hammer"], "2 Tuff Tony": [8, 5, 6, 10, "The Meteorite"], "Big Vito": [9, 5, 6, 10, "Implant DDT"], "Cokane": [7, 8, 10, 7, "Coke Slam"], "Disco Ray": [5, 8, 6, 6, ""], "EC3": [8, 6, 8, 8, "One Percenter"], "Facade": [5, 10, 8, 7, ""], "Father Bronson": [8, 6, 7, 8, "The Red Bloom"], "Hokane": [8, 6, 6, 8, ""], "Hollyhood Haley J": [6, 7, 8, 9, ""], "J-Rod": [9, 6, 7, 8, ""], "Jeeves": [5, 7, 7, 6, "Heads Bangers Balls"], "Kongo Kong": [10, 5, 7, 9, ""], "Krule": [10, 5, 6, 9, ""], "Luigi Primo": [6, 7, 8, 7, ""], "Matt Cross": [6, 10, 9, 6, "Shooting Star Press"], "Sophia Rose": [7, 6, 7, 7, "Split-Legged Stunner"], "Mecha Wolf": [7, 7, 7, 7, ""], "Mickie Knuckles": [8, 5, 6, 9, ""], "Mosh Pit Mike": [6, 6, 7, 8, "Snapmare Powerbomb"], "Mr. Happy": [10, 4, 6, 8, ""], "The Ring Rat": [7, 5, 5, 7, "Stunner"], "Sally Boy": [7, 8, 5, 7, "Hook Kick"], "Shane Mercer": [10, 6, 7, 8, "MoonSault and Battery"], "Steven Flowe": [6, 10, 8, 7, "Steven Flowesion"], "The Green Phantom": [7, 6, 6, 6, ""], "Vincenzo": [8, 5, 6, 7, ""], "Willie Mack": [7, 7, 9, 8, "Stunner"], "Bruce Wayans": [9, 5, 7, 8, "Sucka Busta (Tag)"], "Atiba": [6, 8, 8, 7, "Sucka Busta (Tag)"], "Abel": [7, 6, 7, 8, "As Above So Below (Tag)"], "Jacksyn": [6, 7, 7, 8, "As Above So Below (Tag)"], "JP Grayson": [5, 9, 8, 7, "T-Gimmick (Tag)"], "Tommy Grayson": [5, 9, 8, 7, "T-Gimmick (Tag)"], "Ruffo the Clown": [8, 7, 7, 8, ""], "Yabo the Clown": [7, 8, 7, 8, ""]};
+  const TEAMSTATS={'Choppa City':['Bruce Wayans','Atiba'],'The Outbreak':['Abel','Jacksyn'],'Backseat Boyz':['JP Grayson','Tommy Grayson'],'Brothers of Funstruction':['Ruffo the Clown','Yabo the Clown']};
+  function statBlock(s,who){
     const labs=['Power','Speed','Technique','Toughness'];
     const cols=['var(--tang)','var(--cyan)','var(--acid)','var(--purple)'];
-    let out='<div class="stt">'+labs.map((l,i)=>`<div class="str"><i>${l}</i><b><u style="width:${s[i]*10}%;background:${cols[i]}"></u></b><em>${s[i]}</em></div>`).join('');
+    let out=(who?`<div class="fin" style="margin-bottom:4px;">${who}</div>`:'')+labs.map((l,i)=>`<div class="str"><i>${l}</i><b><u style="width:${s[i]*10}%;background:${cols[i]}"></u></b><em>${s[i]}</em></div>`).join('');
     if(s[4]) out+=`<div class="fin">Finisher \u00b7 <b>${s[4]}</b></div>`;
-    return out+'</div>';
+    return out;
+  }
+  function statBars(name){
+    if(STATS[name])return '<div class="stt">'+statBlock(STATS[name])+'</div>';
+    const t=TEAMSTATS[name];
+    if(t&&t.every(m=>STATS[m]))return '<div class="stt">'+t.map(m=>statBlock(STATS[m],m)).join('<div style="height:12px"></div>')+'</div>';
+    return '';
   }
   function openBio(card){
     const name=card.querySelector('h3').textContent;
     const b=BIOS[name];if(!b)return;
+    if(name==='Bigfoot'&&window.jcwFoundBigfoot)window.jcwFoundBigfoot();
     document.getElementById('bio-name').textContent=name;
     document.getElementById('bio-role').textContent=card.querySelector('.role').textContent;
     stopTheme();
