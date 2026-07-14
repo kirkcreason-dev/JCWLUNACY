@@ -46,6 +46,15 @@
   <div class="card"><label>Episodes watched</label><div id="statEps" class="muted">—</div></div>
   <div class="card"><label>Vote results</label><div id="statPolls" class="muted">—</div></div>
   <div class="card"><label>Favorite wrestlers <span class="muted">(set in the Juggalo Locker)</span></label><div id="statFavs" class="muted">—</div></div>
+  <div class="card"><label>Award points</label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <input id="awardName" placeholder="Locker name (e.g. Digital Duke)" style="flex:2;min-width:180px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+      <input id="awardPts" type="number" placeholder="Points" style="flex:0 0 110px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+      <button id="awardBtn">Award</button>
+      <span class="status" id="awardStatus"></span>
+    </div>
+    <div class="muted" style="margin-top:8px">Adds points to a signed-in Juggalo's cloud locker — updates the leaderboard and syncs to their device next time they open the site. Use a negative number to take points away.</div>
+  </div>
   <div class="card"><label>Top Juggalo Lockers</label><div id="statLockers" class="muted">—</div></div>
   <div class="card" id="rulesHint" style="display:none"><label>Fix data access (2 min)</label><div class="muted">
     Some data is blocked by your Firebase rules. Open
@@ -216,6 +225,23 @@
       }
     }catch(e){status('Error: '+e.message,'err');}
   }
+  $('awardBtn').onclick=async()=>{
+    const nm=($('awardName').value||'').trim().toLowerCase();
+    const pts=parseInt($('awardPts').value,10);
+    const say=(m,c)=>{const el=$('awardStatus');el.textContent=m;el.className='status '+(c||'');};
+    if(!nm||!pts){say('Enter a name and a points amount.','err');return;}
+    try{
+      const db=await statsInit();
+      const snap=await db.ref('lockers').once('value');
+      let uid=null,cur=null;
+      snap.forEach(c=>{const v=c.val();if(v&&String(v.name||'').trim().toLowerCase()===nm){uid=c.key;cur=v;}});
+      if(!uid){say('No locker named that. They need to sign in and set their name on the site first.','err');return;}
+      const newPts=Math.max(0,(cur.pts||0)+pts);
+      await db.ref('lockers/'+uid+'/pts').set(newPts);
+      say('Done \u2014 '+(cur.name||'them')+' now has '+newPts+' pts.','ok');
+      statsLoad();
+    }catch(e){say('Blocked: Firebase rules don\u2019t allow writing lockers from here. Either loosen lockers write in the console, or edit lockers/\u2026/pts directly in the Firebase data tab.','err');}
+  };
   $('statsReload').onclick=statsLoad;
   statsLoad();
   setInterval(statsLoad,60000);
