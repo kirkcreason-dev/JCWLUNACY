@@ -34,7 +34,10 @@
 </header>
 <div class="wrap">
 
-  <div class="card">
+  <div class="card"><label>Today</label>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px" id="statToday"></div>
+  </div>
+  <div class="card"><label>Lifetime</label>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px" id="statCards"></div>
   </div>
   <div class="card"><label>Visits — last 14 days</label><div id="statDays" class="muted">—</div></div>
@@ -109,12 +112,33 @@
       if(lockers.__err){errs.push('lockers');delete lockers.__err;}
       if(chatErr)errs.push('chat');
 
-      // headline cards
+      // headline cards — Today + Lifetime
       const day=new Date().toISOString().slice(0,10).replace(/-/g,'');
+      const fmtT=x=>{x=Math.round(x||0);return x>=3600?(Math.floor(x/3600)+'h '+Math.round(x%3600/60)+'m'):x>=60?(Math.floor(x/60)+'m '+(x%60)+'s'):(x+'s');};
       const avgS=st.total?Math.round((st.duration||0)/st.total):0;
-      const avg=avgS?(Math.floor(avgS/60)+'m '+(avgS%60)+'s'):'—';
-      const cards=[['Total visits',st.total||0],['Unique devices',st.unique||0],['Visits today',(st.days||{})[day]||0],['Avg time on site',avg],['Chat messages',chatCount]];
-      $('statCards').innerHTML=cards.map(c=>'<div style="border:1px solid var(--seam);border-radius:8px;padding:12px;background:#101015;text-align:center"><div style="font-size:26px;font-weight:800;color:var(--gold)">'+c[1]+'</div><div class="muted" style="font-size:12px">'+c[0]+'</div></div>').join('');
+      const avg=avgS?fmtT(avgS):'—';
+      const tkAll=st.tickets||{};
+      const epsAll=st.eps||{};
+      const epPlays=Object.values(epsAll).reduce((a,v)=>a+((v&&v.plays)||0),0);
+      const epSecs=Object.values(epsAll).reduce((a,v)=>a+((v&&v.secs)||0),0);
+      const tkTotal=['eventim','gathering'].reduce((a,k)=>a+((tkAll[k]||{}).total||0),0);
+      const votesTot=Object.values(polls).reduce((a,t)=>a+(t&&typeof t==='object'?Object.values(t).reduce((x,y)=>x+(+y||0),0):0),0);
+      const mkCards=(host,arr)=>{$(host).innerHTML=arr.map(c=>'<div style="border:1px solid var(--seam);border-radius:8px;padding:12px;background:#101015;text-align:center"><div style="font-size:26px;font-weight:800;color:var(--gold)">'+c[1]+'</div><div class="muted" style="font-size:12px">'+c[0]+'</div></div>').join('');};
+      mkCards('statToday',[
+        ['Visits',(st.days||{})[day]||0],
+        ['Lunacy Live clicks',((tkAll.eventim||{}).days||{})[day]||0],
+        ['Gathering clicks',((tkAll.gathering||{}).days||{})[day]||0]
+      ]);
+      mkCards('statCards',[
+        ['Total visits',st.total||0],
+        ['Unique devices',st.unique||0],
+        ['Avg time on site',avg],
+        ['Episode plays',epPlays],
+        ['Watch time',epSecs?fmtT(epSecs):'—'],
+        ['Ticket clicks',tkTotal],
+        ['Votes cast',votesTot],
+        ['Chat messages',chatCount]
+      ]);
 
       // last 14 days
       const days=[];for(let i=13;i>=0;i--){const d=new Date(Date.now()-i*86400000);const k=d.toISOString().slice(0,10).replace(/-/g,'');days.push([d.toISOString().slice(5,10),(st.days||{})[k]||0]);}
@@ -142,7 +166,6 @@
       $('statTickets').innerHTML=th;
 
       // episodes watched
-      const fmtT=x=>{x=Math.round(x||0);return x>=3600?(Math.floor(x/3600)+'h '+Math.round(x%3600/60)+'m'):x>=60?(Math.floor(x/60)+'m '+(x%60)+'s'):(x+'s');};
       const eps=Object.entries(st.eps||{}).map(([id,v])=>({title:(v&&v.title)||id,plays:(v&&v.plays)||0,secs:(v&&v.secs)||0})).sort((a,b)=>b.secs-a.secs||b.plays-a.plays);
       const emax=Math.max(1,...eps.map(x=>x.secs));
       $('statEps').innerHTML=eps.length?eps.map(x=>{
