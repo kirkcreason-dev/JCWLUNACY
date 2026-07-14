@@ -1902,6 +1902,18 @@ function observeReveals(){
         }
         const view=()=>{const r=(location.hash||'#home').slice(1).replace(/[^a-z]/g,'')||'home';bump('stats/views/'+r);};
         view();addEventListener('hashchange',view);
+        /* count outbound ticket clicks */
+        document.addEventListener('click',e=>{
+          const a=e.target.closest('a[href]');if(!a)return;
+          const h=a.getAttribute('href')||'';
+          let k=null;
+          if(/eventim/i.test(h))k='eventim';
+          else if(/juggalogathering/i.test(h))k='gathering';
+          if(!k)return;
+          const d2=new Date().toISOString().slice(0,10).replace(/-/g,'');
+          bump('stats/tickets/'+k+'/total');
+          bump('stats/tickets/'+k+'/days/'+d2);
+        });
         /* time-on-site heartbeat: +15s while the tab is visible, max 30 min */
         let hbTotal=0;
         const hb=setInterval(()=>{

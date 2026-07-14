@@ -39,6 +39,7 @@
   </div>
   <div class="card"><label>Visits — last 14 days</label><div id="statDays" class="muted">—</div></div>
   <div class="card"><label>Views by section</label><div id="statViews" class="muted">—</div></div>
+  <div class="card"><label>Ticket clicks <span class="muted">(people the site sent to the ticket pages)</span></label><div id="statTickets" class="muted">—</div></div>
   <div class="card"><label>Episodes watched</label><div id="statEps" class="muted">—</div></div>
   <div class="card"><label>Vote results</label><div id="statPolls" class="muted">—</div></div>
   <div class="card"><label>Favorite wrestlers <span class="muted">(set in the Juggalo Locker)</span></label><div id="statFavs" class="muted">—</div></div>
@@ -124,6 +125,21 @@
       const vw=Object.entries(st.views||{}).sort((a,b)=>b[1]-a[1]);
       const vmax=Math.max(1,...vw.map(x=>x[1]));
       $('statViews').innerHTML=vw.length?vw.map(x=>barRow(x[0],x[1],vmax)).join(''):'<span class="muted">No data yet — starts counting once the tracking version of the site is live.</span>';
+
+      // ticket clicks
+      const tk=st.tickets||{};
+      const ttypes=[['eventim','Lunacy Live (Eventim)'],['gathering','Gathering of the Juggalos']];
+      let th='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:12px">';
+      ttypes.forEach(([k,lbl])=>{
+        const t=tk[k]||{};
+        th+='<div style="border:1px solid var(--seam);border-radius:8px;padding:12px;background:#101015;text-align:center"><div style="font-size:24px;font-weight:800;color:var(--gold)">'+(t.total||0)+'</div><div class="muted" style="font-size:12px">'+lbl+' · '+((t.days||{})[day]||0)+' today</div></div>';
+      });
+      th+='</div>';
+      const tdays=[];for(let i=13;i>=0;i--){const d=new Date(Date.now()-i*86400000);const k2=d.toISOString().slice(0,10).replace(/-/g,'');
+        tdays.push([d.toISOString().slice(5,10),ttypes.reduce((a,[k])=>a+(((tk[k]||{}).days||{})[k2]||0),0)]);}
+      const tmax=Math.max(1,...tdays.map(x=>x[1]));
+      if(tdays.some(x=>x[1]>0))th+=tdays.map(x=>barRow(x[0],x[1],tmax)).join('');
+      $('statTickets').innerHTML=th;
 
       // episodes watched
       const fmtT=x=>{x=Math.round(x||0);return x>=3600?(Math.floor(x/3600)+'h '+Math.round(x%3600/60)+'m'):x>=60?(Math.floor(x/60)+'m '+(x%60)+'s'):(x+'s');};
