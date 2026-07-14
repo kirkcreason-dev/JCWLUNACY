@@ -39,6 +39,7 @@
   </div>
   <div class="card"><label>Visits — last 14 days</label><div id="statDays" class="muted">—</div></div>
   <div class="card"><label>Views by section</label><div id="statViews" class="muted">—</div></div>
+  <div class="card"><label>Episodes watched</label><div id="statEps" class="muted">—</div></div>
   <div class="card"><label>Vote results</label><div id="statPolls" class="muted">—</div></div>
   <div class="card"><label>Favorite wrestlers <span class="muted">(set in the Juggalo Locker)</span></label><div id="statFavs" class="muted">—</div></div>
   <div class="card"><label>Top Juggalo Lockers</label><div id="statLockers" class="muted">—</div></div>
@@ -123,6 +124,19 @@
       const vw=Object.entries(st.views||{}).sort((a,b)=>b[1]-a[1]);
       const vmax=Math.max(1,...vw.map(x=>x[1]));
       $('statViews').innerHTML=vw.length?vw.map(x=>barRow(x[0],x[1],vmax)).join(''):'<span class="muted">No data yet — starts counting once the tracking version of the site is live.</span>';
+
+      // episodes watched
+      const fmtT=x=>{x=Math.round(x||0);return x>=3600?(Math.floor(x/3600)+'h '+Math.round(x%3600/60)+'m'):x>=60?(Math.floor(x/60)+'m '+(x%60)+'s'):(x+'s');};
+      const eps=Object.entries(st.eps||{}).map(([id,v])=>({title:(v&&v.title)||id,plays:(v&&v.plays)||0,secs:(v&&v.secs)||0})).sort((a,b)=>b.secs-a.secs||b.plays-a.plays);
+      const emax=Math.max(1,...eps.map(x=>x.secs));
+      $('statEps').innerHTML=eps.length?eps.map(x=>{
+        const pct=Math.round(x.secs/emax*100);
+        const avg=x.plays?fmtT(x.secs/x.plays):'—';
+        return '<div style="display:flex;align-items:center;gap:10px;margin:5px 0">'+
+          '<div style="flex:0 0 160px;font-size:12.5px" class="muted">'+esc(x.title)+'</div>'+
+          '<div style="flex:1;background:#000;border:1px solid var(--seam);border-radius:4px;height:16px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--acid)"></div></div>'+
+          '<div style="flex:0 0 210px;text-align:right;font-size:12.5px"><b>'+x.plays+'</b> plays · <b>'+fmtT(x.secs)+'</b> watched · avg '+avg+'</div></div>';
+      }).join(''):'<span class="muted">No plays yet — starts counting once the tracking version of the site is live.</span>';
 
       // vote results
       let ph='';

@@ -1325,8 +1325,9 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
 <button id="chat-fab" aria-label="Open Lunacy Chat">CHAT</button>
 <aside id="chat-panel" aria-label="Lunacy Chat">
   <div class="ch-hd"><b>Lunacy Chat</b><span class="np" id="ch-np"></span><button class="ch-x" id="ch-x">&times;</button></div>
-  <div class="ch-tabs"><button class="on" data-tab="chat">Chat</button><button data-tab="vote">Vote</button></div>
+  <div class="ch-tabs"><button class="on" data-tab="chat">Chat</button><button data-tab="vote">Vote</button><button data-tab="board">Leaders</button></div>
   <div class="ch-pane on" id="ch-chat"></div>
+  <div class="ch-pane" id="ch-board"><div id="board-list" style="font-size:13px;color:var(--steel);">Loading the board&hellip;</div></div>
   <div class="ch-pane" id="ch-vote">
     <div class="ch-poll" data-poll="dani-revenge">
       <h5>Dani&rsquo;s Revenge &mdash; how does it end with her father Barnabas?</h5>
@@ -1736,6 +1737,14 @@ function observeReveals(){
     document.getElementById('hub-next').innerHTML=nx;
     hub.classList.add('on');
     lkAward(10,null,'Watched '+title);
+    try{
+      if(fbDB){
+        const ek=String(id).replace(/[.#$\/\[\]]/g,'');
+        fbDB.ref('stats/eps/'+ek+'/plays').transaction(v=>(v||0)+1);
+        fbDB.ref('stats/eps/'+ek+'/title').set(title||String(id));
+        window.__epWatch=ek;
+      }
+    }catch(e){}
   }
   const hubNextEl=document.getElementById('hub-next');
   if(hubNextEl)hubNextEl.addEventListener('click',e=>{
@@ -1819,7 +1828,29 @@ function observeReveals(){
     document.querySelectorAll('.ch-tabs button').forEach(x=>x.classList.toggle('on',x===b));
     document.getElementById('ch-chat').classList.toggle('on',b.dataset.tab==='chat');
     document.getElementById('ch-vote').classList.toggle('on',b.dataset.tab==='vote');
+    document.getElementById('ch-board').classList.toggle('on',b.dataset.tab==='board');
+    if(b.dataset.tab==='board')boardRender();
   }));
+  async function boardRender(){
+    const host=document.getElementById('board-list');
+    const me=lkGet();
+    let mine='<div style="border:1px solid var(--gold);padding:10px 12px;margin-bottom:12px;">'
+      +'<span style="color:var(--gold);font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.08em;">You</span> \u00b7 '
+      +'<b style="color:var(--bone);">'+(me.pts||0)+' pts</b> \u00b7 '+(me.wins||0)+' wins'
+      +(lkUser?'':' \u00b7 <span style="color:var(--hot);">sign in (Locker) to get on the board</span>')+'</div>';
+    if(!fbDB){host.innerHTML=mine+'Leaderboard goes live when the connection is up. Keep stacking points!';return;}
+    try{
+      const snap=await fbDB.ref('lockers').once('value');
+      const rows=[];snap.forEach(c=>{const v=c.val();if(v&&(v.pts||v.name))rows.push(v);});
+      rows.sort((a,b)=>(b.pts||0)-(a.pts||0));
+      host.innerHTML=mine+(rows.length?rows.slice(0,20).map((x,i)=>
+        '<div style="display:flex;gap:10px;padding:7px 2px;border-bottom:1px dashed rgba(240,179,43,.14);align-items:baseline;">'
+        +'<span style="flex:0 0 28px;color:'+(i===0?'var(--gold)':i===1?'var(--cyan)':i===2?'var(--acid)':'var(--steel)')+';font-family:\'Rubik Distressed\',system-ui,sans-serif;">#'+(i+1)+'</span>'
+        +'<span style="flex:1;color:var(--bone);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+String(x.name||'Anonymous Juggalo').replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span>'
+        +'<b style="color:var(--gold);">'+(x.pts||0)+'</b><span style="color:var(--steel);font-size:11.5px;">pts</span>'
+        +'</div>').join(''):'Nobody on the board yet \u2014 be the first: sign in from your Locker.');
+    }catch(e){host.innerHTML=mine+'Couldn\u2019t load the board right now.';}
+  }
   // now-playing context in the header
   const npObs=new MutationObserver(()=>{const n=document.getElementById('ep-now');
     if(n&&n.textContent)document.getElementById('ch-np').textContent=n.textContent.split('\u00b7')[1]||'';});
@@ -1875,9 +1906,9 @@ function observeReveals(){
         let hbTotal=0;
         const hb=setInterval(()=>{
           if(document.hidden)return;
-          hbTotal+=15;
-          fbDB.ref('stats/duration').transaction(v=>(v||0)+15);
-          if(hbTotal>=1800)clearInterval(hb);
+          if(hbTotal<1800){hbTotal+=15;fbDB.ref('stats/duration').transaction(v=>(v||0)+15);}
+          if(window.__epWatch&&document.querySelector('.ep-player.on'))
+            fbDB.ref('stats/eps/'+window.__epWatch+'/secs').transaction(v=>(v||0)+15);
         },15000);
       }catch(e){}
       fbDB.ref('chat').limitToLast(80).on('value',snap=>{
