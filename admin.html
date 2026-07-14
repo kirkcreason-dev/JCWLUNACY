@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>JCW Lunacy — Admin</title>
+<title>JCW Lunacy — Analytics</title>
 <style>
   :root{--bg:#0b0b0d;--panel:#141418;--seam:#2c2340;--gold:#ffd028;--acid:#5bd62b;--hot:#ff3fa4;--pit:#000;--txt:#e8e6ef;--mut:#9a94ad;}
   *{box-sizing:border-box}
@@ -14,423 +14,117 @@
   header .j{color:var(--acid)}header .c{color:var(--hot)}header .w{color:var(--gold)}
   .wrap{max-width:1080px;margin:0 auto;padding:20px}
   .card{background:var(--panel);border:1px solid var(--seam);border-radius:10px;padding:16px;margin-bottom:18px}
-  label{display:block;font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin:10px 0 4px}
-  input,textarea,select{width:100%;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit}
-  input:focus,textarea:focus{outline:none;border-color:var(--acid)}
-  .row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1;min-width:120px}
+  label{display:block;font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin:0 0 10px}
   button{background:var(--acid);color:#000;border:none;border-radius:6px;padding:9px 16px;font:inherit;font-weight:700;cursor:pointer;letter-spacing:.03em}
   button.ghost{background:transparent;color:var(--txt);border:1px solid var(--seam)}
-  button.gold{background:var(--gold)}button.hot{background:var(--hot);color:#fff}
   button.sm{padding:5px 10px;font-size:12px}
-  button:disabled{opacity:.4;cursor:not-allowed}
-  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:18px 0}
-  .tabs button{background:transparent;color:var(--mut);border:1px solid var(--seam)}
-  .tabs button.on{background:var(--gold);color:#000}
-  .pane{display:none}.pane.on{display:block}
-  .item{border:1px solid var(--seam);border-radius:8px;padding:12px;margin-bottom:10px;background:#101015}
-  .item .hd{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-  .item .hd .grip{color:var(--mut);font-size:12px;flex:1}
   .muted{color:var(--mut);font-size:12.5px}
   .status{font-size:12.5px;padding:6px 0}
   .ok{color:var(--acid)}.err{color:var(--hot)}
-  .colorgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
-  .colorgrid .c{display:flex;align-items:center;gap:8px}
-  .colorgrid input[type=color]{width:42px;height:34px;padding:2px;flex:none}
-  .bar{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 30%);padding:14px 0;display:flex;gap:10px;flex-wrap:wrap}
+  .item{border:1px solid var(--seam);border-radius:8px;padding:12px;margin-bottom:10px;background:#101015}
   a{color:var(--acid)}
-  code{background:#000;padding:1px 5px;border-radius:4px;color:var(--gold)}
-  details{margin-top:8px}summary{cursor:pointer;color:var(--mut)}
+  pre{background:#000;padding:10px;border-radius:6px;overflow:auto;color:var(--gold);font-size:12px}
 </style>
 </head>
 <body>
-<header><h1><span class="j">J</span><span class="c">C</span><span class="w">W</span> Lunacy — Admin</h1><span class="muted" id="who"></span></header>
+<header>
+  <h1><span class="j">J</span><span class="c">C</span><span class="w">W</span> Lunacy — Analytics</h1>
+  <button class="ghost sm" id="statsReload">Refresh</button>
+  <span class="status" id="statsStatus"></span>
+</header>
 <div class="wrap">
 
-  <h2 style="margin:4px 0 12px;font-size:16px;letter-spacing:.05em;text-transform:uppercase;color:var(--gold)">Analytics &amp; Votes</h2>
-    <!-- ANALYTICS (always visible, no token needed) -->
-    <div id="pane-stats">
-      <div class="card muted">Live numbers straight from the site's Firebase — visits, what people look at, and how the votes are going. <button class="ghost sm" id="statsReload" style="margin-left:8px">Refresh</button><span class="status" id="statsStatus" style="margin-left:8px"></span></div>
-      <div class="card">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px" id="statCards"></div>
-      </div>
-      <div class="card"><label>Visits — last 14 days</label><div id="statDays"></div></div>
-      <div class="card"><label>Views by section</label><div id="statViews"></div></div>
-      <div class="card"><label>Favorite wrestlers <span class="muted">(set in the Juggalo Locker)</span></label><div id="statFavs" class="muted">—</div></div>
-      <div class="card"><label>Vote results</label><div id="statPolls"></div></div>
-      <div class="card"><label>Top Juggalo Lockers</label><div id="statLockers" class="muted">—</div></div>
-    </div>
-  <h2 style="margin:26px 0 12px;font-size:16px;letter-spacing:.05em;text-transform:uppercase;color:var(--gold)">Site Editor</h2>
-  <div class="card" id="connCard">
-    <label>GitHub repo (owner/name)</label>
-    <div class="row">
-      <input id="repo" placeholder="kirkcreason-dev/JCWLUNACY" value="kirkcreason-dev/JCWLUNACY">
-      <input id="branch" placeholder="branch" value="main" style="max-width:120px;flex:0 0 120px">
-    </div>
-    <label>GitHub token <span class="muted">(fine-grained, Contents: Read & Write on this repo)</span></label>
-    <input id="token" type="password" placeholder="github_pat_...">
-    <div class="row" style="margin-top:12px">
-      <button id="connectBtn">Connect &amp; load</button>
-      <button class="ghost" id="forgetBtn" style="flex:0 0 auto">Forget token</button>
-    </div>
-    <div class="status" id="connStatus"></div>
-    <details><summary>How to make a token (1 min)</summary>
-      <div class="muted" style="margin-top:8px">
-        GitHub → Settings → Developer settings → <b>Fine-grained tokens</b> → Generate new token →
-        Repository access: <b>Only select repositories</b> → your JCWLUNACY repo →
-        Permissions → Repository → <b>Contents: Read and write</b> → Generate.
-        Paste it above. It is stored only in this browser (localStorage) and sent only to api.github.com.
-      </div>
-    </details>
+  <div class="card">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px" id="statCards"></div>
   </div>
+  <div class="card"><label>Visits — last 14 days</label><div id="statDays" class="muted">—</div></div>
+  <div class="card"><label>Views by section</label><div id="statViews" class="muted">—</div></div>
+  <div class="card"><label>Vote results</label><div id="statPolls" class="muted">—</div></div>
+  <div class="card"><label>Favorite wrestlers <span class="muted">(set in the Juggalo Locker)</span></label><div id="statFavs" class="muted">—</div></div>
+  <div class="card"><label>Top Juggalo Lockers</label><div id="statLockers" class="muted">—</div></div>
+  <div class="card" id="rulesHint" style="display:none"><label>Fix data access (2 min)</label><div class="muted">
+    Some data is blocked by your Firebase rules. Open
+    <a href="https://console.firebase.google.com/project/jcw-lunacy/database/jcw-lunacy-default-rtdb/rules" target="_blank" rel="noopener">Firebase Console → Realtime Database → Rules</a>
+    and make sure the blocked paths allow read — and that <b>stats</b> allows write, so the site can count visits:
+    <pre id="rulesPre"></pre>
+    Click <b>Publish</b> in the console, then hit Refresh here.
+  </div></div>
 
-  <div id="editor" style="display:none">
-    <div class="tabs">
-      <button data-tab="episodes" class="on">Episodes</button>
-      <button data-tab="clips">Clips</button>
-      <button data-tab="merch">Merch</button>
-      <button data-tab="colors">Colors</button>
-      <button data-tab="text">Site Text</button>
-    </div>
-
-    <!-- EPISODES -->
-    <div class="pane on" id="pane-episodes">
-      <div class="card">
-        <div class="row" style="align-items:flex-end">
-          <div style="flex:2"><label>Add episode — paste a YouTube link or video ID</label><input id="epUrl" placeholder="https://www.youtube.com/watch?v=..."></div>
-          <div style="flex:2"><label>Title</label><input id="epTitle" placeholder="Episode 91"></div>
-          <div style="flex:0 0 auto"><button id="epAdd">Add</button></div>
-        </div>
-        <p class="muted">Newest shown first on the site. Newest goes to the bottom of this list.</p>
-      </div>
-      <div id="epList"></div>
-    </div>
-
-    <!-- CLIPS -->
-    <div class="pane" id="pane-clips">
-      <div class="card">
-        <label>TikTok handle (without @)</label>
-        <input id="ttHandle" placeholder="therealjcw">
-        <div class="row" style="align-items:flex-end;margin-top:10px">
-          <div style="flex:3"><label>Add clip — paste a TikTok video link</label><input id="clipUrl" placeholder="https://www.tiktok.com/@therealjcw/video/..."></div>
-          <div style="flex:0 0 auto"><button id="clipAdd">Add</button></div>
-        </div>
-      </div>
-      <div id="clipList"></div>
-    </div>
-
-    <!-- MERCH -->
-    <div class="pane" id="pane-merch">
-      <div class="card muted">Edit merch items. Tick <b>Feature</b> to show an item in the "Rep the show" strip under the episode player. Image = the Shopify file name (e.g. <code>Photoroom_....png</code>).</div>
-      <div class="card">
-        <div class="row" style="align-items:flex-end">
-          <div><label>Title</label><input id="mTitle"></div>
-          <div><label>Handle (product URL slug)</label><input id="mHandle"></div>
-          <div style="flex:0 0 90px"><label>Price</label><input id="mPrice"></div>
-          <div style="flex:2"><label>Image file name</label><input id="mImg"></div>
-          <div style="flex:0 0 auto"><button id="mAdd">Add</button></div>
-        </div>
-      </div>
-      <div id="merchList"></div>
-    </div>
-
-    <!-- COLORS -->
-    <div class="pane" id="pane-colors">
-      <div class="card muted">Lunacy palette. Changes apply site-wide when published. <button class="ghost sm" id="colorReset" style="margin-left:8px">Reset to defaults</button></div>
-      <div class="card"><div class="colorgrid" id="colorGrid"></div></div>
-    </div>
-
-    <!-- SITE TEXT -->
-    <div class="pane" id="pane-text">
-      <div class="card muted">Edit <b>any text</b> on the site. Each box below is a piece of text pulled straight from your page. Search to find it, change it, then <b>Publish</b>. (Episodes, clips and merch have their own tabs; this covers all the headings, taglines and copy.)</div>
-      <div class="card"><input id="textSearch" placeholder="Search your site text…"><div class="muted" id="textCount" style="margin-top:6px"></div></div>
-      <div id="textList"></div>
-    </div>
-
-    <div class="bar">
-      <button class="gold" id="publishBtn">Publish changes to live site</button>
-      <button class="ghost" id="reloadBtn">Reload from GitHub</button>
-      <span class="status" id="saveStatus"></span>
-    </div>
-  </div>
 </div>
 
 <script>
 (function(){
-  const $=(id)=>document.getElementById(id);
-  const LS='jcw_admin_conn';
-  let conn={owner:'',repo:'',branch:'main',token:''};
-  let data={episodes:[],clips:{handle:'therealjcw',clips:[]},merch:{items:[],featured:[]},config:{colors:{}}};
-  let shas={};
-  let idxDoc=null, idxNodes=[], idxDirty=false, idxRaw="";
-  const CDN='https://cdn.shopify.com/s/files/1/0689/2588/2682/files/';
-  const COLOR_LABELS={pit:'Background',plate:'Panel',['plate-2']:'Panel 2',seam:'Borders',blood:'Blood',hot:'Hot pink',gold:'Gold (headings)',['gold-hi']:'Gold hi',bone:'Heading text',steel:'Body text',acid:'Acid green',purple:'Purple',cyan:'Cyan',tang:'Orange'};
-  const DEFAULT_COLORS={pit:'#000000',plate:'#0c0c0e',['plate-2']:'#131316',seam:'#3d2f52',blood:'#cc1483',hot:'#ff3fa4',gold:'#ffd028',['gold-hi']:'#ffe066',bone:'#ffd028',steel:'#5bd62b',acid:'#5bd62b',purple:'#a54fe0',cyan:'#ff3fa4',tang:'#ff7a1a'};
-
-  // ---- persistence of connection (token stays in this browser only) ----
-  try{const j=JSON.parse(localStorage.getItem(LS)||'{}');Object.assign(conn,j);}catch(e){}
-  if(conn.repo){$('repo').value=(conn.owner?conn.owner+'/':'')+conn.repo;}
-  if(conn.branch)$('branch').value=conn.branch;
-  if(conn.token)$('token').value=conn.token;
-
-  function saveConn(){localStorage.setItem(LS,JSON.stringify(conn));}
-  function setConn(){
-    const rp=$('repo').value.trim().replace(/^https?:\/\/github.com\//,'').replace(/\.git$/,'');
-    const parts=rp.split('/'); conn.owner=parts[0]||''; conn.repo=parts[1]||'';
-    conn.branch=$('branch').value.trim()||'main'; conn.token=$('token').value.trim();
-    saveConn();
-  }
-  function vid(u){const m=String(u).match(/(?:v=|youtu\.be\/|embed\/)([\w-]{6,})/);return m?m[1]:(/^[\w-]{6,}$/.test(u.trim())?u.trim():'');}
-
-  // ---- GitHub API ----
-  async function gh(path,method,body){
-    const url='https://api.github.com/repos/'+conn.owner+'/'+conn.repo+'/contents/'+path;
-    const opt={method:method||'GET',headers:{'Authorization':'Bearer '+conn.token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}};
-    if(body)opt.body=JSON.stringify(body);
-    const r=await fetch(url+(method==='GET'||!method?('?ref='+conn.branch+'&t='+Date.now()):''),opt);
-    return r;
-  }
-  function b64(str){return btoa(unescape(encodeURIComponent(str)));}
-  function unb64(b){return decodeURIComponent(escape(atob(b)));}
-
-  async function loadFile(path,fallback){
-    const r=await gh(path,'GET');
-    if(r.status===404){shas[path]=null;return fallback;}
-    if(!r.ok)throw new Error(path+': '+r.status+' '+(await r.text()).slice(0,120));
-    const j=await r.json(); shas[path]=j.sha;
-    try{return JSON.parse(unb64(j.content));}catch(e){return fallback;}
-  }
-  async function putFile(path,obj,msg){
-    const content=b64(JSON.stringify(obj,null,path==='episodes.json'?0:2));
-    const body={message:msg||('Update '+path+' via admin'),content:content,branch:conn.branch};
-    if(shas[path])body.sha=shas[path];
-    const r=await gh(path,'PUT',body);
-    if(!r.ok)throw new Error(path+': '+r.status+' '+(await r.text()).slice(0,160));
-    const j=await r.json(); shas[path]=j.content.sha; return true;
-  }
-  async function loadRaw(path){
-    const r=await gh(path,'GET');
-    if(!r.ok)throw new Error(path+': '+r.status);
-    const j=await r.json(); shas[path]=j.sha; return unb64(j.content);
-  }
-  async function putRaw(path,str,msg){
-    const body={message:msg||('Update '+path),content:b64(str),branch:conn.branch};
-    if(shas[path])body.sha=shas[path];
-    const r=await gh(path,'PUT',body);
-    if(!r.ok)throw new Error(path+': '+r.status+' '+(await r.text()).slice(0,160));
-    const j=await r.json(); shas[path]=j.content.sha; return true;
-  }
-  async function loadIndexHtml(){
-    try{
-      idxRaw=await loadRaw('index.html');
-      idxDoc=new DOMParser().parseFromString(idxRaw,'text/html');
-      idxNodes=[]; const skip={SCRIPT:1,STYLE:1,NOSCRIPT:1};
-      (function walk(el){for(var n=el.firstChild;n;n=n.nextSibling){if(n.nodeType===3){if(n.nodeValue&&n.nodeValue.trim())idxNodes.push(n);}else if(n.nodeType===1){if(!skip[n.tagName])walk(n);}}})(idxDoc.documentElement);
-      idxDirty=false; renderText('');
-    }catch(e){ $('textCount')&&($('textCount').textContent='Could not load index.html: '+e.message); }
-  }
-  function renderText(filter){
-    const host=$('textList'); if(!host)return; host.innerHTML=''; const f=(filter||'').toLowerCase(); let shown=0;
-    idxNodes.forEach(function(n,i){
-      const txt=n.nodeValue; if(f && txt.toLowerCase().indexOf(f)<0)return; shown++;
-      const parent=n.parentNode, tag=parent?parent.tagName.toLowerCase():''; const ctx=(parent&&parent.id)?('#'+parent.id):tag;
-      const d=document.createElement('div'); d.className='item';
-      d.innerHTML='<div class="grip muted" style="margin-bottom:4px">&lt;'+esc(ctx)+'&gt;</div>';
-      const ta=document.createElement('textarea'); ta.rows=(txt.length>70?2:1); ta.value=txt; ta.dataset.tx=i;
-      d.appendChild(ta); host.appendChild(d);
-    });
-    $('textCount').textContent=shown+' of '+idxNodes.length+' text snippets'+(f?(' matching "'+filter+'"'):'');
-  }
-  function collectText(){
-    if(!idxDoc)return;
-    document.querySelectorAll('[data-tx]').forEach(function(el){var i=+el.dataset.tx; if(idxNodes[i]&&idxNodes[i].nodeValue!==el.value){idxNodes[i].nodeValue=el.value; idxDirty=true;}});
-  }
-  function serializeDoc(){ return '<!doctype html>\n'+idxDoc.documentElement.outerHTML; }
-
-  // ---- load everything ----
-  async function connect(){
-    setConn();
-    if(!conn.owner||!conn.repo){status('connStatus','Enter owner/repo','err');return;}
-    if(!conn.token){status('connStatus','Enter a GitHub token','err');return;}
-    status('connStatus','Loading…');
-    try{
-      data.episodes=await loadFile('episodes.json',[]);
-      data.clips   =await loadFile('clips.json',{handle:'therealjcw',clips:[]});
-      if(Array.isArray(data.clips))data.clips={handle:'therealjcw',clips:data.clips};
-      data.merch   =await loadFile('merch.json',{items:[],featured:[]});
-      data.config  =await loadFile('config.json',{colors:{}});
-      if(!data.config.colors)data.config.colors={};
-      await loadIndexHtml();
-      renderAll();
-      $('editor').style.display='block';
-      $('who').textContent=conn.owner+'/'+conn.repo+' @'+conn.branch;
-      status('connStatus','Connected. '+data.episodes.length+' episodes, '+(data.merch.items||[]).length+' merch, '+(data.clips.clips||[]).length+' clips.','ok');
-    }catch(e){status('connStatus','Error: '+e.message,'err');}
-  }
-  function status(id,msg,cls){const el=$(id);el.textContent=msg;el.className='status '+(cls||'');}
-
-  // ---- EPISODES editor ----
-  function renderEpisodes(){
-    const host=$('epList');host.innerHTML='';
-    data.episodes.forEach((e,i)=>{
-      const d=document.createElement('div');d.className='item';
-      d.innerHTML='<div class="hd"><span class="grip">#'+(i+1)+' &middot; '+e[0]+'</span>'+
-        '<button class="ghost sm" data-up="'+i+'">↑</button><button class="ghost sm" data-down="'+i+'">↓</button>'+
-        '<button class="hot sm" data-del="'+i+'">Remove</button></div>'+
-        '<div class="row"><div style="flex:2"><label>Title</label><input data-t="'+i+'" value="'+esc(e[1])+'"></div>'+
-        '<div style="flex:2"><label>Video ID</label><input data-v="'+i+'" value="'+esc(e[0])+'"></div>'+
-        '<div style="flex:0 0 120px"><label>Preview</label><a href="https://youtu.be/'+e[0]+'" target="_blank"><img src="https://i.ytimg.com/vi/'+e[0]+'/default.jpg" style="width:100%;border-radius:4px"></a></div></div>';
-      host.appendChild(d);
-    });
-  }
-  // ---- CLIPS editor ----
-  function renderClips(){
-    $('ttHandle').value=data.clips.handle||'';
-    const host=$('clipList');host.innerHTML='';
-    (data.clips.clips||[]).forEach((u,i)=>{
-      const d=document.createElement('div');d.className='item';
-      d.innerHTML='<div class="hd"><span class="grip">#'+(i+1)+'</span>'+
-        '<button class="ghost sm" data-cup="'+i+'">↑</button><button class="ghost sm" data-cdown="'+i+'">↓</button>'+
-        '<button class="hot sm" data-cdel="'+i+'">Remove</button></div>'+
-        '<input data-c="'+i+'" value="'+esc(u)+'">';
-      host.appendChild(d);
-    });
-  }
-  // ---- MERCH editor ----
-  function renderMerch(){
-    const host=$('merchList');host.innerHTML='';
-    const feat=new Set((data.merch.featured||[]).map(f=>Array.isArray(f)?f[0]:f));
-    const labels={};(data.merch.featured||[]).forEach(f=>{if(Array.isArray(f))labels[f[0]]=f[1]||'';});
-    (data.merch.items||[]).forEach((p,i)=>{
-      const d=document.createElement('div');d.className='item';
-      const isF=feat.has(p[1]);
-      d.innerHTML='<div class="hd"><span class="grip">#'+(i+1)+'</span>'+
-        '<label style="display:flex;align-items:center;gap:6px;text-transform:none;margin:0;color:var(--txt)"><input type="checkbox" style="width:auto" data-feat="'+i+'" '+(isF?'checked':'')+'> Feature</label>'+
-        '<button class="hot sm" data-mdel="'+i+'">Remove</button></div>'+
-        '<div class="row"><div style="flex:2"><label>Title</label><input data-mt="'+i+'" value="'+esc(p[0])+'"></div>'+
-        '<div style="flex:2"><label>Handle</label><input data-mh="'+i+'" value="'+esc(p[1])+'"></div>'+
-        '<div style="flex:0 0 80px"><label>Price</label><input data-mp="'+i+'" value="'+esc(p[2])+'"></div></div>'+
-        '<div class="row" style="margin-top:8px"><div style="flex:3"><label>Image file</label><input data-mi="'+i+'" value="'+esc(p[3])+'"></div>'+
-        '<div style="flex:0 0 100px"><label>Preview</label><img src="'+CDN+encodeURIComponent(p[3])+'?width=120" style="width:60px;height:60px;object-fit:contain;background:#000;border-radius:4px"></div>'+
-        '<div style="flex:2"><label>Hub label (if featured)</label><input data-ml="'+i+'" value="'+esc(labels[p[1]]||'')+'" placeholder="short name"></div></div>';
-      host.appendChild(d);
-    });
-  }
-  // ---- COLORS editor ----
-  function renderColors(){
-    const host=$('colorGrid');host.innerHTML='';
-    Object.keys(DEFAULT_COLORS).forEach(k=>{
-      const val=(data.config.colors&&data.config.colors[k])||DEFAULT_COLORS[k];
-      const c=document.createElement('div');c.className='c';
-      c.innerHTML='<input type="color" data-col="'+k+'" value="'+val+'"><div><div style="font-size:12px">'+(COLOR_LABELS[k]||k)+'</div><div class="muted">--'+k+'</div></div>';
-      host.appendChild(c);
-    });
-  }
-  function renderAll(){renderEpisodes();renderClips();renderMerch();renderColors();}
+  const $=id=>document.getElementById(id);
   function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+  function status(msg,cls){const el=$('statsStatus');el.textContent=msg;el.className='status '+(cls||'');}
 
-  // ---- collect editor DOM back into data ----
-  function collect(){
-    // episodes
-    document.querySelectorAll('[data-t]').forEach(el=>{data.episodes[+el.dataset.t][1]=el.value;});
-    document.querySelectorAll('[data-v]').forEach(el=>{data.episodes[+el.dataset.v][0]=el.value.trim();});
-    // clips
-    data.clips.handle=$('ttHandle').value.trim().replace(/^@/,'');
-    document.querySelectorAll('[data-c]').forEach(el=>{data.clips.clips[+el.dataset.c]=el.value.trim();});
-    data.clips.clips=data.clips.clips.filter(Boolean);
-    // merch
-    document.querySelectorAll('[data-mt]').forEach(el=>{data.merch.items[+el.dataset.mt][0]=el.value;});
-    document.querySelectorAll('[data-mh]').forEach(el=>{data.merch.items[+el.dataset.mh][1]=el.value.trim();});
-    document.querySelectorAll('[data-mp]').forEach(el=>{data.merch.items[+el.dataset.mp][2]=el.value.trim();});
-    document.querySelectorAll('[data-mi]').forEach(el=>{data.merch.items[+el.dataset.mi][3]=el.value.trim();});
-    const feat=[];
-    document.querySelectorAll('[data-feat]').forEach(el=>{if(el.checked){const i=+el.dataset.feat;const h=data.merch.items[i][1];const lbl=(document.querySelector('[data-ml="'+i+'"]')||{}).value||'';feat.push([h,lbl.trim()||data.merch.items[i][0]]);}});
-    data.merch.featured=feat;
-    // colors
-    data.config.colors=data.config.colors||{};
-    document.querySelectorAll('[data-col]').forEach(el=>{data.config.colors[el.dataset.col]=el.value;});
-    collectText();
-  }
+  $('rulesPre').textContent=JSON.stringify({rules:{
+    chat:{'.read':true,'.write':true},
+    polls:{'.read':true,'.write':true},
+    stats:{'.read':true,'.write':true},
+    lockers:{'.read':true,'$uid':{'.write':'auth != null && auth.uid === $uid'}}
+  }},null,2);
 
-  // ---- publish ----
-  async function publish(){
-    collect();
-    status('saveStatus','Publishing…');
-    try{
-      await putFile('episodes.json',data.episodes,'Update episodes via admin');
-      await putFile('clips.json',data.clips,'Update clips via admin');
-      await putFile('merch.json',data.merch,'Update merch via admin');
-      await putFile('config.json',data.config,'Update colors via admin');
-      if(idxDirty){ await putRaw('index.html',serializeDoc(),'Update site text via admin'); idxDirty=false; }
-      status('saveStatus','Published! Live site rebuilds in ~1 minute.','ok');
-    }catch(e){status('saveStatus','Publish failed: '+e.message,'err');}
-  }
-
-  // ---- events ----
-  $('connectBtn').onclick=connect;
-  $('reloadBtn').onclick=connect;
-  $('forgetBtn').onclick=()=>{conn.token='';$('token').value='';saveConn();status('connStatus','Token cleared from this browser.','ok');};
-  $('publishBtn').onclick=publish;
-  document.addEventListener('input',function(e){ if(e.target.id==='textSearch'){ collectText(); renderText(e.target.value); } });
-  document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
-    document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
-    document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='pane-'+b.dataset.tab));
-  });
-  $('epAdd').onclick=()=>{const id=vid($('epUrl').value);if(!id){alert('Could not read a video ID from that link.');return;}data.episodes.push([id,$('epTitle').value.trim()||'New Episode']);$('epUrl').value='';$('epTitle').value='';renderEpisodes();};
-  $('clipAdd').onclick=()=>{const u=$('clipUrl').value.trim();if(!/tiktok\.com/.test(u)){alert('Paste a TikTok video link.');return;}data.clips.clips=data.clips.clips||[];data.clips.clips.push(u);$('clipUrl').value='';collect();renderClips();};
-  $('mAdd').onclick=()=>{data.merch.items.unshift([$('mTitle').value.trim()||'New item',$('mHandle').value.trim(),$('mPrice').value.trim(),$('mImg').value.trim()]);['mTitle','mHandle','mPrice','mImg'].forEach(x=>$(x).value='');collect();renderMerch();};
-  $('colorReset').onclick=()=>{data.config.colors=Object.assign({},DEFAULT_COLORS);renderColors();};
-  document.addEventListener('click',(e)=>{
-    const t=e.target;
-    if(t.dataset.del!=null){collect();data.episodes.splice(+t.dataset.del,1);renderEpisodes();}
-    if(t.dataset.up!=null){const i=+t.dataset.up;if(i>0){collect();[data.episodes[i-1],data.episodes[i]]=[data.episodes[i],data.episodes[i-1]];renderEpisodes();}}
-    if(t.dataset.down!=null){const i=+t.dataset.down;if(i<data.episodes.length-1){collect();[data.episodes[i+1],data.episodes[i]]=[data.episodes[i],data.episodes[i+1]];renderEpisodes();}}
-    if(t.dataset.cdel!=null){collect();data.clips.clips.splice(+t.dataset.cdel,1);renderClips();}
-    if(t.dataset.cup!=null){const i=+t.dataset.cup;if(i>0){collect();[data.clips.clips[i-1],data.clips.clips[i]]=[data.clips.clips[i],data.clips.clips[i-1]];renderClips();}}
-    if(t.dataset.cdown!=null){const i=+t.dataset.cdown;if(i<data.clips.clips.length-1){collect();[data.clips.clips[i+1],data.clips.clips[i]]=[data.clips.clips[i],data.clips.clips[i+1]];renderClips();}}
-    if(t.dataset.mdel!=null){collect();data.merch.items.splice(+t.dataset.mdel,1);renderMerch();}
-  });
-  // ---- ANALYTICS (reads the same Firebase the site writes to) ----
   const JCW_FB={apiKey:"AIzaSyCDCfMShCyyFZSC3qp1t75Rx_0fOfH3L_U",authDomain:"jcw-lunacy.firebaseapp.com",databaseURL:"https://jcw-lunacy-default-rtdb.firebaseio.com",projectId:"jcw-lunacy",storageBucket:"jcw-lunacy.firebasestorage.app",messagingSenderId:"743418158514",appId:"1:743418158514:web:d167d515509974fbf5d8ab"};
   const POLL_LABELS={
-    'dani-revenge':{q:"Dani\u2019s Revenge \u2014 how does it end with Barnabas?",o:['Dani gets her payback','Barnabas weasels out again','Father & daughter join forces']},
-    'tag-contenders':{q:'#1 Contenders \u2014 who gets the Tag Title shot?',o:['Willie Mack & 2 Tuff Tony','The Backseat Boyz']},
-    'bm-lunacy':{q:'Bloodymania 19 \u2014 Lunacy World',o:['Caleb Konley retains','New champion']},
-    'bm-heavy':{q:'Bloodymania 19 \u2014 World Heavyweight',o:['Josh Bishop retains','New champion']},
-    'father':{q:'Who is the father of Jasmin\u2019s baby? (closed)',o:['Vince Russo','Joel Gertner','Big Vito','Somebody nobody suspects']}
+    'dani-revenge':{q:"Dani’s Revenge — how does it end with Barnabas?",o:['Dani gets her payback','Barnabas weasels out again','Father & daughter join forces']},
+    'tag-contenders':{q:'#1 Contenders — who gets the Tag Title shot?',o:['Willie Mack & 2 Tuff Tony','The Backseat Boyz']},
+    'bm-lunacy':{q:'Bloodymania 19 — Lunacy World',o:['Caleb Konley retains','New champion']},
+    'bm-heavy':{q:'Bloodymania 19 — World Heavyweight',o:['Josh Bishop retains','New champion']},
+    'father':{q:'Who is the father of Jasmin’s baby? (closed)',o:['Vince Russo','Joel Gertner','Big Vito','Somebody nobody suspects']}
   };
+
   let statsDB=null;
-  function loadScript(src){return new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=()=>rej(new Error('load failed'));document.head.appendChild(sc);});}
+  function loadScript(src){return new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=()=>rej(new Error('could not load '+src));document.head.appendChild(sc);});}
   async function statsInit(){
     if(statsDB)return statsDB;
     await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
     await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js');
-    firebase.initializeApp(JCW_FB);statsDB=firebase.database();return statsDB;
+    firebase.initializeApp(JCW_FB);
+    statsDB=firebase.database();
+    return statsDB;
   }
   function barRow(label,v,max,extra){
     const pct=max?Math.round(v/max*100):0;
-    return '<div style="display:flex;align-items:center;gap:10px;margin:5px 0"><div style="flex:0 0 160px;font-size:12.5px" class="muted">'+esc(label)+'</div>'+
+    return '<div style="display:flex;align-items:center;gap:10px;margin:5px 0">'+
+      '<div style="flex:0 0 160px;font-size:12.5px" class="muted">'+esc(label)+'</div>'+
       '<div style="flex:1;background:#000;border:1px solid var(--seam);border-radius:4px;height:16px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--acid)"></div></div>'+
-      '<div style="flex:0 0 70px;text-align:right;font-weight:700">'+v+(extra||'')+'</div></div>';
+      '<div style="flex:0 0 90px;text-align:right;font-weight:700">'+v+(extra||'')+'</div></div>';
   }
   async function statsLoad(){
-    status('statsStatus','Loading\u2026');
+    status('Loading…');
     try{
       const db=await statsInit();
-      const snap=await db.ref('/').once('value');
-      const all=snap.val()||{};
-      const st=all.stats||{};
+      const get=async p=>{try{const v=(await db.ref(p).once('value')).val();return v||{};}catch(e){return {__err:true};}};
+      const st=await get('stats');
+      const polls=await get('polls');
+      const lockers=await get('lockers');
+      let chatCount=0,chatErr=false;
+      try{const c=await db.ref('chat').once('value');chatCount=c.numChildren();}catch(e){chatErr=true;}
+      const errs=[];
+      if(st.__err){errs.push('stats');delete st.__err;}
+      if(polls.__err){errs.push('polls');delete polls.__err;}
+      if(lockers.__err){errs.push('lockers');delete lockers.__err;}
+      if(chatErr)errs.push('chat');
+
+      // headline cards
       const day=new Date().toISOString().slice(0,10).replace(/-/g,'');
       const avgS=st.total?Math.round((st.duration||0)/st.total):0;
-      const avg=avgS?(Math.floor(avgS/60)+'m '+(avgS%60)+'s'):'\u2014';
-      const cards=[['Total visits',st.total||0],['Unique devices',st.unique||0],['Visits today',(st.days||{})[day]||0],['Avg time on site',avg],['Chat messages',all.chat?Object.keys(all.chat).length:0]];
+      const avg=avgS?(Math.floor(avgS/60)+'m '+(avgS%60)+'s'):'—';
+      const cards=[['Total visits',st.total||0],['Unique devices',st.unique||0],['Visits today',(st.days||{})[day]||0],['Avg time on site',avg],['Chat messages',chatCount]];
       $('statCards').innerHTML=cards.map(c=>'<div style="border:1px solid var(--seam);border-radius:8px;padding:12px;background:#101015;text-align:center"><div style="font-size:26px;font-weight:800;color:var(--gold)">'+c[1]+'</div><div class="muted" style="font-size:12px">'+c[0]+'</div></div>').join('');
+
+      // last 14 days
       const days=[];for(let i=13;i>=0;i--){const d=new Date(Date.now()-i*86400000);const k=d.toISOString().slice(0,10).replace(/-/g,'');days.push([d.toISOString().slice(5,10),(st.days||{})[k]||0]);}
       const dmax=Math.max(1,...days.map(x=>x[1]));
-      $('statDays').innerHTML=days.map(x=>barRow(x[0],x[1],dmax)).join('')||'<span class="muted">No data yet.</span>';
+      $('statDays').innerHTML=days.map(x=>barRow(x[0],x[1],dmax)).join('');
+
+      // views by section
       const vw=Object.entries(st.views||{}).sort((a,b)=>b[1]-a[1]);
       const vmax=Math.max(1,...vw.map(x=>x[1]));
-      $('statViews').innerHTML=vw.length?vw.map(x=>barRow(x[0],x[1],vmax)).join(''):'<span class="muted">No data yet \u2014 appears once the tracking version of the site is live.</span>';
-      const polls=all.polls||{};
+      $('statViews').innerHTML=vw.length?vw.map(x=>barRow(x[0],x[1],vmax)).join(''):'<span class="muted">No data yet — starts counting once the tracking version of the site is live.</span>';
+
+      // vote results
       let ph='';
       Object.keys(polls).forEach(key=>{
         const meta=POLL_LABELS[key]||{q:key,o:[]};
@@ -439,32 +133,39 @@
         ph+='<div class="item"><div style="font-weight:700;margin-bottom:6px">'+esc(meta.q)+' <span class="muted">('+total+' votes)</span></div>';
         const mx=Math.max(1,...Object.values(t).map(v=>+v||0));
         Object.keys(t).sort().forEach(i=>{
-          const label=meta.o[i]||('Option '+i);
           const v=+t[i]||0;
-          ph+=barRow(label,v,mx,total?(' \u00b7 '+Math.round(v/total*100)+'%'):'');
+          ph+=barRow(meta.o[i]||('Option '+i),v,mx,total?(' · '+Math.round(v/total*100)+'%'):'');
         });
         ph+='</div>';
       });
       $('statPolls').innerHTML=ph||'<span class="muted">No votes yet.</span>';
+
       // favorite wrestlers
       let favs=Object.entries(st.favs||{}).filter(x=>x[1]>0);
       if(!favs.length){
-        const agg={};Object.values(all.lockers||{}).forEach(x=>{if(x&&x.fav)agg[x.fav]=(agg[x.fav]||0)+1;});
+        const agg={};Object.values(lockers||{}).forEach(x=>{if(x&&x.fav)agg[x.fav]=(agg[x.fav]||0)+1;});
         favs=Object.entries(agg);
       }
       favs.sort((a,b)=>b[1]-a[1]);
       const fmax=Math.max(1,...favs.map(x=>x[1]));
-      $('statFavs').innerHTML=favs.length?favs.slice(0,20).map(x=>barRow(x[0],x[1],fmax)).join(''):'Nobody has picked a favorite yet.';
-      try{
-        const lk=all.lockers||{};
-        const rows=Object.values(lk).filter(x=>x&&(x.pts||x.name)).sort((a,b)=>(b.pts||0)-(a.pts||0)).slice(0,15);
-        $('statLockers').innerHTML=rows.length?rows.map((x,i)=>'<div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px dashed var(--seam)"><span class="muted" style="flex:0 0 26px">#'+(i+1)+'</span><span style="flex:1">'+esc(x.name||'Anonymous Juggalo')+'</span><b style="color:var(--gold)">'+(x.pts||0)+' pts</b><span class="muted">'+(x.wins||0)+' wins</span></div>').join(''):'No lockers synced yet.';
-      }catch(e){$('statLockers').textContent='Locker data not readable.';}
-      status('statsStatus','Live \u00b7 updated '+new Date().toLocaleTimeString(),'ok');
-    }catch(e){status('statsStatus','Error: '+e.message,'err');}
+      $('statFavs').innerHTML=favs.length?favs.slice(0,20).map(x=>barRow(x[0],x[1],fmax)).join(''):'<span class="muted">Nobody has picked a favorite yet.</span>';
+
+      // top lockers
+      const rows=Object.values(lockers||{}).filter(x=>x&&(x.pts||x.name)).sort((a,b)=>(b.pts||0)-(a.pts||0)).slice(0,15);
+      $('statLockers').innerHTML=rows.length?rows.map((x,i)=>'<div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px dashed var(--seam)"><span class="muted" style="flex:0 0 26px">#'+(i+1)+'</span><span style="flex:1">'+esc(x.name||'Anonymous Juggalo')+'</span><b style="color:var(--gold)">'+(x.pts||0)+' pts</b><span class="muted">'+(x.wins||0)+' wins</span></div>').join(''):'<span class="muted">No lockers synced yet.</span>';
+
+      if(errs.length){
+        $('rulesHint').style.display='block';
+        status('Firebase rules are blocking: '+errs.join(', ')+' — see the fix at the bottom.','err');
+      }else{
+        $('rulesHint').style.display='none';
+        status('Live · updated '+new Date().toLocaleTimeString(),'ok');
+      }
+    }catch(e){status('Error: '+e.message,'err');}
   }
-  statsLoad();
   $('statsReload').onclick=statsLoad;
+  statsLoad();
+  setInterval(statsLoad,60000);
 })();
 </script>
 </body>
