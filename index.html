@@ -1857,6 +1857,18 @@ function observeReveals(){
       await load('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js');
       await load('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js');
       firebase.initializeApp(JCW_FB);fbDB=firebase.database();fbAuth=firebase.auth();
+      /* ---- lightweight analytics: anonymous visit + section counters ---- */
+      try{
+        const day=new Date().toISOString().slice(0,10).replace(/-/g,'');
+        const bump=p=>fbDB.ref(p).transaction(v=>(v||0)+1);
+        if(!sessionStorage.getItem('jcw-visit')){
+          sessionStorage.setItem('jcw-visit','1');
+          bump('stats/total');bump('stats/days/'+day);
+          if(!localStorage.getItem('jcw-seen')){localStorage.setItem('jcw-seen','1');bump('stats/unique');}
+        }
+        const view=()=>{const r=(location.hash||'#home').slice(1).replace(/[^a-z]/g,'')||'home';bump('stats/views/'+r);};
+        view();addEventListener('hashchange',view);
+      }catch(e){}
       fbDB.ref('chat').limitToLast(80).on('value',snap=>{
         const l=[];snap.forEach(c=>{const v=c.val();if(v&&v.t)l.push(v);});
         window.__chatLive=l;

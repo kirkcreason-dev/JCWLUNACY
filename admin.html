@@ -76,6 +76,7 @@
       <button data-tab="merch">Merch</button>
       <button data-tab="colors">Colors</button>
       <button data-tab="text">Site Text</button>
+      <button data-tab="stats">Analytics</button>
     </div>
 
     <!-- EPISODES -->
@@ -130,6 +131,18 @@
       <div class="card muted">Edit <b>any text</b> on the site. Each box below is a piece of text pulled straight from your page. Search to find it, change it, then <b>Publish</b>. (Episodes, clips and merch have their own tabs; this covers all the headings, taglines and copy.)</div>
       <div class="card"><input id="textSearch" placeholder="Search your site text…"><div class="muted" id="textCount" style="margin-top:6px"></div></div>
       <div id="textList"></div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="pane" id="pane-stats">
+      <div class="card muted">Live numbers straight from the site's Firebase — visits, what people look at, and how the votes are going. <button class="ghost sm" id="statsReload" style="margin-left:8px">Refresh</button><span class="status" id="statsStatus" style="margin-left:8px"></span></div>
+      <div class="card">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px" id="statCards"></div>
+      </div>
+      <div class="card"><label>Visits — last 14 days</label><div id="statDays"></div></div>
+      <div class="card"><label>Views by section</label><div id="statViews"></div></div>
+      <div class="card"><label>Vote results</label><div id="statPolls"></div></div>
+      <div class="card"><label>Top Juggalo Lockers</label><div id="statLockers" class="muted">—</div></div>
     </div>
 
     <div class="bar">
@@ -375,6 +388,71 @@
     if(t.dataset.cdown!=null){const i=+t.dataset.cdown;if(i<data.clips.clips.length-1){collect();[data.clips.clips[i+1],data.clips.clips[i]]=[data.clips.clips[i],data.clips.clips[i+1]];renderClips();}}
     if(t.dataset.mdel!=null){collect();data.merch.items.splice(+t.dataset.mdel,1);renderMerch();}
   });
+  // ---- ANALYTICS (reads the same Firebase the site writes to) ----
+  const JCW_FB={apiKey:"AIzaSyCDCfMShCyyFZSC3qp1t75Rx_0fOfH3L_U",authDomain:"jcw-lunacy.firebaseapp.com",databaseURL:"https://jcw-lunacy-default-rtdb.firebaseio.com",projectId:"jcw-lunacy",storageBucket:"jcw-lunacy.firebasestorage.app",messagingSenderId:"743418158514",appId:"1:743418158514:web:d167d515509974fbf5d8ab"};
+  const POLL_LABELS={
+    'dani-revenge':{q:"Dani\u2019s Revenge \u2014 how does it end with Barnabas?",o:['Dani gets her payback','Barnabas weasels out again','Father & daughter join forces']},
+    'tag-contenders':{q:'#1 Contenders \u2014 who gets the Tag Title shot?',o:['Willie Mack & 2 Tuff Tony','The Backseat Boyz']},
+    'bm-lunacy':{q:'Bloodymania 19 \u2014 Lunacy World',o:['Caleb Konley retains','New champion']},
+    'bm-heavy':{q:'Bloodymania 19 \u2014 World Heavyweight',o:['Josh Bishop retains','New champion']},
+    'father':{q:'Who is the father of Jasmin\u2019s baby? (closed)',o:['Vince Russo','Joel Gertner','Big Vito','Somebody nobody suspects']}
+  };
+  let statsDB=null;
+  function loadScript(src){return new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=()=>rej(new Error('load failed'));document.head.appendChild(sc);});}
+  async function statsInit(){
+    if(statsDB)return statsDB;
+    await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+    await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js');
+    firebase.initializeApp(JCW_FB);statsDB=firebase.database();return statsDB;
+  }
+  function barRow(label,v,max,extra){
+    const pct=max?Math.round(v/max*100):0;
+    return '<div style="display:flex;align-items:center;gap:10px;margin:5px 0"><div style="flex:0 0 160px;font-size:12.5px" class="muted">'+esc(label)+'</div>'+
+      '<div style="flex:1;background:#000;border:1px solid var(--seam);border-radius:4px;height:16px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--acid)"></div></div>'+
+      '<div style="flex:0 0 70px;text-align:right;font-weight:700">'+v+(extra||'')+'</div></div>';
+  }
+  async function statsLoad(){
+    status('statsStatus','Loading\u2026');
+    try{
+      const db=await statsInit();
+      const snap=await db.ref('/').once('value');
+      const all=snap.val()||{};
+      const st=all.stats||{};
+      const day=new Date().toISOString().slice(0,10).replace(/-/g,'');
+      const cards=[['Total visits',st.total||0],['Unique devices',st.unique||0],['Visits today',(st.days||{})[day]||0],['Chat messages',all.chat?Object.keys(all.chat).length:0]];
+      $('statCards').innerHTML=cards.map(c=>'<div style="border:1px solid var(--seam);border-radius:8px;padding:12px;background:#101015;text-align:center"><div style="font-size:26px;font-weight:800;color:var(--gold)">'+c[1]+'</div><div class="muted" style="font-size:12px">'+c[0]+'</div></div>').join('');
+      const days=[];for(let i=13;i>=0;i--){const d=new Date(Date.now()-i*86400000);const k=d.toISOString().slice(0,10).replace(/-/g,'');days.push([d.toISOString().slice(5,10),(st.days||{})[k]||0]);}
+      const dmax=Math.max(1,...days.map(x=>x[1]));
+      $('statDays').innerHTML=days.map(x=>barRow(x[0],x[1],dmax)).join('')||'<span class="muted">No data yet.</span>';
+      const vw=Object.entries(st.views||{}).sort((a,b)=>b[1]-a[1]);
+      const vmax=Math.max(1,...vw.map(x=>x[1]));
+      $('statViews').innerHTML=vw.length?vw.map(x=>barRow(x[0],x[1],vmax)).join(''):'<span class="muted">No data yet \u2014 appears once the tracking version of the site is live.</span>';
+      const polls=all.polls||{};
+      let ph='';
+      Object.keys(polls).forEach(key=>{
+        const meta=POLL_LABELS[key]||{q:key,o:[]};
+        const t=polls[key]||{};
+        const total=Object.values(t).reduce((a,b)=>a+(+b||0),0);
+        ph+='<div class="item"><div style="font-weight:700;margin-bottom:6px">'+esc(meta.q)+' <span class="muted">('+total+' votes)</span></div>';
+        const mx=Math.max(1,...Object.values(t).map(v=>+v||0));
+        Object.keys(t).sort().forEach(i=>{
+          const label=meta.o[i]||('Option '+i);
+          const v=+t[i]||0;
+          ph+=barRow(label,v,mx,total?(' \u00b7 '+Math.round(v/total*100)+'%'):'');
+        });
+        ph+='</div>';
+      });
+      $('statPolls').innerHTML=ph||'<span class="muted">No votes yet.</span>';
+      try{
+        const lk=all.lockers||{};
+        const rows=Object.values(lk).filter(x=>x&&(x.pts||x.name)).sort((a,b)=>(b.pts||0)-(a.pts||0)).slice(0,15);
+        $('statLockers').innerHTML=rows.length?rows.map((x,i)=>'<div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px dashed var(--seam)"><span class="muted" style="flex:0 0 26px">#'+(i+1)+'</span><span style="flex:1">'+esc(x.name||'Anonymous Juggalo')+'</span><b style="color:var(--gold)">'+(x.pts||0)+' pts</b><span class="muted">'+(x.wins||0)+' wins</span></div>').join(''):'No lockers synced yet.';
+      }catch(e){$('statLockers').textContent='Locker data not readable.';}
+      status('statsStatus','Live \u00b7 updated '+new Date().toLocaleTimeString(),'ok');
+    }catch(e){status('statsStatus','Error: '+e.message,'err');}
+  }
+  document.querySelector('[data-tab="stats"]').addEventListener('click',statsLoad);
+  $('statsReload').onclick=statsLoad;
 })();
 </script>
 </body>
