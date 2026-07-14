@@ -46,6 +46,20 @@
 <header><h1><span class="j">J</span><span class="c">C</span><span class="w">W</span> Lunacy — Admin</h1><span class="muted" id="who"></span></header>
 <div class="wrap">
 
+  <h2 style="margin:4px 0 12px;font-size:16px;letter-spacing:.05em;text-transform:uppercase;color:var(--gold)">Analytics &amp; Votes</h2>
+    <!-- ANALYTICS (always visible, no token needed) -->
+    <div id="pane-stats">
+      <div class="card muted">Live numbers straight from the site's Firebase — visits, what people look at, and how the votes are going. <button class="ghost sm" id="statsReload" style="margin-left:8px">Refresh</button><span class="status" id="statsStatus" style="margin-left:8px"></span></div>
+      <div class="card">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px" id="statCards"></div>
+      </div>
+      <div class="card"><label>Visits — last 14 days</label><div id="statDays"></div></div>
+      <div class="card"><label>Views by section</label><div id="statViews"></div></div>
+      <div class="card"><label>Favorite wrestlers <span class="muted">(set in the Juggalo Locker)</span></label><div id="statFavs" class="muted">—</div></div>
+      <div class="card"><label>Vote results</label><div id="statPolls"></div></div>
+      <div class="card"><label>Top Juggalo Lockers</label><div id="statLockers" class="muted">—</div></div>
+    </div>
+  <h2 style="margin:26px 0 12px;font-size:16px;letter-spacing:.05em;text-transform:uppercase;color:var(--gold)">Site Editor</h2>
   <div class="card" id="connCard">
     <label>GitHub repo (owner/name)</label>
     <div class="row">
@@ -76,7 +90,6 @@
       <button data-tab="merch">Merch</button>
       <button data-tab="colors">Colors</button>
       <button data-tab="text">Site Text</button>
-      <button data-tab="stats">Analytics</button>
     </div>
 
     <!-- EPISODES -->
@@ -131,18 +144,6 @@
       <div class="card muted">Edit <b>any text</b> on the site. Each box below is a piece of text pulled straight from your page. Search to find it, change it, then <b>Publish</b>. (Episodes, clips and merch have their own tabs; this covers all the headings, taglines and copy.)</div>
       <div class="card"><input id="textSearch" placeholder="Search your site text…"><div class="muted" id="textCount" style="margin-top:6px"></div></div>
       <div id="textList"></div>
-    </div>
-
-    <!-- ANALYTICS -->
-    <div class="pane" id="pane-stats">
-      <div class="card muted">Live numbers straight from the site's Firebase — visits, what people look at, and how the votes are going. <button class="ghost sm" id="statsReload" style="margin-left:8px">Refresh</button><span class="status" id="statsStatus" style="margin-left:8px"></span></div>
-      <div class="card">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px" id="statCards"></div>
-      </div>
-      <div class="card"><label>Visits — last 14 days</label><div id="statDays"></div></div>
-      <div class="card"><label>Views by section</label><div id="statViews"></div></div>
-      <div class="card"><label>Vote results</label><div id="statPolls"></div></div>
-      <div class="card"><label>Top Juggalo Lockers</label><div id="statLockers" class="muted">—</div></div>
     </div>
 
     <div class="bar">
@@ -419,7 +420,9 @@
       const all=snap.val()||{};
       const st=all.stats||{};
       const day=new Date().toISOString().slice(0,10).replace(/-/g,'');
-      const cards=[['Total visits',st.total||0],['Unique devices',st.unique||0],['Visits today',(st.days||{})[day]||0],['Chat messages',all.chat?Object.keys(all.chat).length:0]];
+      const avgS=st.total?Math.round((st.duration||0)/st.total):0;
+      const avg=avgS?(Math.floor(avgS/60)+'m '+(avgS%60)+'s'):'\u2014';
+      const cards=[['Total visits',st.total||0],['Unique devices',st.unique||0],['Visits today',(st.days||{})[day]||0],['Avg time on site',avg],['Chat messages',all.chat?Object.keys(all.chat).length:0]];
       $('statCards').innerHTML=cards.map(c=>'<div style="border:1px solid var(--seam);border-radius:8px;padding:12px;background:#101015;text-align:center"><div style="font-size:26px;font-weight:800;color:var(--gold)">'+c[1]+'</div><div class="muted" style="font-size:12px">'+c[0]+'</div></div>').join('');
       const days=[];for(let i=13;i>=0;i--){const d=new Date(Date.now()-i*86400000);const k=d.toISOString().slice(0,10).replace(/-/g,'');days.push([d.toISOString().slice(5,10),(st.days||{})[k]||0]);}
       const dmax=Math.max(1,...days.map(x=>x[1]));
@@ -443,6 +446,15 @@
         ph+='</div>';
       });
       $('statPolls').innerHTML=ph||'<span class="muted">No votes yet.</span>';
+      // favorite wrestlers
+      let favs=Object.entries(st.favs||{}).filter(x=>x[1]>0);
+      if(!favs.length){
+        const agg={};Object.values(all.lockers||{}).forEach(x=>{if(x&&x.fav)agg[x.fav]=(agg[x.fav]||0)+1;});
+        favs=Object.entries(agg);
+      }
+      favs.sort((a,b)=>b[1]-a[1]);
+      const fmax=Math.max(1,...favs.map(x=>x[1]));
+      $('statFavs').innerHTML=favs.length?favs.slice(0,20).map(x=>barRow(x[0],x[1],fmax)).join(''):'Nobody has picked a favorite yet.';
       try{
         const lk=all.lockers||{};
         const rows=Object.values(lk).filter(x=>x&&(x.pts||x.name)).sort((a,b)=>(b.pts||0)-(a.pts||0)).slice(0,15);
@@ -451,7 +463,7 @@
       status('statsStatus','Live \u00b7 updated '+new Date().toLocaleTimeString(),'ok');
     }catch(e){status('statsStatus','Error: '+e.message,'err');}
   }
-  document.querySelector('[data-tab="stats"]').addEventListener('click',statsLoad);
+  statsLoad();
   $('statsReload').onclick=statsLoad;
 })();
 </script>

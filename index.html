@@ -1667,7 +1667,10 @@ function observeReveals(){
   }
   document.addEventListener('input',e=>{
     if(e.target.id==='lk-name'){const d=lkGet();d.name=e.target.value;lkSet(d);}
-    if(e.target.id==='lk-fav'){const d=lkGet();d.fav=e.target.value;lkSet(d);lkAward(5,'fan');}
+    if(e.target.id==='lk-fav'){const d=lkGet();const prev=d.fav;d.fav=e.target.value;lkSet(d);lkAward(5,'fan');
+      if(fbDB&&d.fav!==prev){const fk=n=>String(n).replace(/[.#$\/\[\]]/g,'');
+        if(prev)fbDB.ref('stats/favs/'+fk(prev)).transaction(v=>Math.max(0,(v||1)-1));
+        if(d.fav)fbDB.ref('stats/favs/'+fk(d.fav)).transaction(v=>(v||0)+1);}}
   });
 
   /* ---- locker auth UI ---- */
@@ -1868,6 +1871,14 @@ function observeReveals(){
         }
         const view=()=>{const r=(location.hash||'#home').slice(1).replace(/[^a-z]/g,'')||'home';bump('stats/views/'+r);};
         view();addEventListener('hashchange',view);
+        /* time-on-site heartbeat: +15s while the tab is visible, max 30 min */
+        let hbTotal=0;
+        const hb=setInterval(()=>{
+          if(document.hidden)return;
+          hbTotal+=15;
+          fbDB.ref('stats/duration').transaction(v=>(v||0)+15);
+          if(hbTotal>=1800)clearInterval(hb);
+        },15000);
       }catch(e){}
       fbDB.ref('chat').limitToLast(80).on('value',snap=>{
         const l=[];snap.forEach(c=>{const v=c.val();if(v&&v.t)l.push(v);});
