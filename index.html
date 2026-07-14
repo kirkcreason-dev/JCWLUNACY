@@ -2166,9 +2166,9 @@ route();
 /* ===== AUTO-MATCH ROSTER PHOTOS (finds photos in the repo no matter the filename) ===== */
 (async function(){
   try{
-    const CK='jcw-roster-files-v1';
+    const CK='jcw-roster-files-v2';
     let files=null;
-    try{const c=JSON.parse(localStorage.getItem(CK));if(c&&Date.now()-c.t<3600000)files=c.f;}catch(e){}
+    try{const c=JSON.parse(localStorage.getItem(CK));if(c&&Date.now()-c.t<600000)files=c.f;}catch(e){}
     if(!files){
       const r=await fetch('https://api.github.com/repos/kirkcreason-dev/JCWLUNACY/contents/roster');
       if(!r.ok)return;
@@ -2176,20 +2176,28 @@ route();
       try{localStorage.setItem(CK,JSON.stringify({t:Date.now(),f:files}));}catch(e){}
     }
     const norm=t=>t.toLowerCase().replace(/roster shell/g,'').replace(/[^a-z0-9]+/g,'');
+    const findFile=nm=>files.find(x=>{
+      const fn=norm(x.replace(/\.(jpe?g|png|webp)$/i,'').replace(/\d/g,''));
+      return fn===nm||fn.length>3&&(nm.includes(fn)||fn.includes(nm));
+    });
     document.querySelectorAll('#view-crew .wr').forEach(card=>{
-      const pic=card.querySelector('.pic');
-      if(!pic||pic.querySelector('img'))return;
+      const pic=card.querySelector('.pic');if(!pic)return;
       const nm=norm(card.querySelector('h3').textContent);
-      const f=files.find(x=>{
-        const fn=norm(x.replace(/\.(jpe?g|png|webp)$/i,'').replace(/\d/g,''));
-        return fn===nm||fn.length>3&&(nm.includes(fn)||fn.includes(nm));
-      });
-      if(f){
-        const img=document.createElement('img');
-        img.src='roster/'+encodeURIComponent(f);
+      const f=findFile(nm);if(!f)return;
+      const alt='roster/'+encodeURIComponent(f);
+      let img=pic.querySelector('img');
+      if(img){
+        if(decodeURIComponent(img.getAttribute('src'))===decodeURIComponent(alt))return;
+        // if the hardcoded src fails (or already failed), fall back to the matched repo file
+        const swap=()=>{img.onerror=()=>img.remove();img.src=alt;};
+        if(img.complete&&img.naturalWidth===0){swap();}
+        else{img.onerror=swap;}
+      }else{
+        img=document.createElement('img');
         img.alt=card.querySelector('h3').textContent;
         img.loading='lazy';
         img.onerror=()=>img.remove();
+        img.src=alt;
         pic.prepend(img);
       }
     });
