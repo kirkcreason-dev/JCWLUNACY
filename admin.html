@@ -50,10 +50,12 @@
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
       <input id="awardName" placeholder="Locker name (e.g. Digital Duke)" style="flex:2;min-width:180px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
       <input id="awardPts" type="number" placeholder="Points" style="flex:0 0 110px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
-      <button id="awardBtn">Award</button>
+      <button id="awardBtn">Award (add)</button>
+      <button class="ghost" id="setBtn">Set total</button>
+      <button class="ghost" id="zeroBtn" style="border-color:var(--hot);color:var(--hot)">Reset to 0</button>
       <span class="status" id="awardStatus"></span>
     </div>
-    <div class="muted" style="margin-top:8px">Adds points to a signed-in Juggalo's cloud locker — updates the leaderboard and syncs to their device next time they open the site. Use a negative number to take points away.</div>
+    <div class="muted" style="margin-top:8px"><b>Award</b> adds the points on top (negative subtracts). <b>Set total</b> makes their balance exactly the number entered — use it when someone spends points. <b>Reset to 0</b> wipes the balance. All of it updates the leaderboard instantly and syncs to their device next visit.</div>
   </div>
   <div class="card"><label>Top Juggalo Lockers</label><div id="statLockers" class="muted">—</div></div>
   <div class="card" id="rulesHint" style="display:none"><label>Fix data access (2 min)</label><div class="muted">
@@ -76,7 +78,8 @@
     chat:{'.read':true,'.write':true},
     polls:{'.read':true,'.write':true},
     stats:{'.read':true,'.write':true},
-    lockers:{'.read':true,'$uid':{'.write':'auth != null && auth.uid === $uid'}}
+    lockers:{'.read':true,'$uid':{'.write':'auth != null && auth.uid === $uid',
+      pts:{'.write':true,'.validate':'newData.isNumber() && newData.val() >= 0 && newData.val() < 1000000'}}}
   }},null,2);
 
   const JCW_FB={apiKey:"AIzaSyCDCfMShCyyFZSC3qp1t75Rx_0fOfH3L_U",authDomain:"jcw-lunacy.firebaseapp.com",databaseURL:"https://jcw-lunacy-default-rtdb.firebaseio.com",projectId:"jcw-lunacy",storageBucket:"jcw-lunacy.firebasestorage.app",messagingSenderId:"743418158514",appId:"1:743418158514:web:d167d515509974fbf5d8ab"};
@@ -225,23 +228,27 @@
       }
     }catch(e){status('Error: '+e.message,'err');}
   }
-  $('awardBtn').onclick=async()=>{
+  async function pointsOp(mode){
     const nm=($('awardName').value||'').trim().toLowerCase();
     const pts=parseInt($('awardPts').value,10);
     const say=(m,c)=>{const el=$('awardStatus');el.textContent=m;el.className='status '+(c||'');};
-    if(!nm||!pts){say('Enter a name and a points amount.','err');return;}
+    if(!nm){say('Enter a locker name.','err');return;}
+    if(mode!=='zero'&&isNaN(pts)){say('Enter a points amount.','err');return;}
     try{
       const db=await statsInit();
       const snap=await db.ref('lockers').once('value');
       let uid=null,cur=null;
       snap.forEach(c=>{const v=c.val();if(v&&String(v.name||'').trim().toLowerCase()===nm){uid=c.key;cur=v;}});
       if(!uid){say('No locker named that. They need to sign in and set their name on the site first.','err');return;}
-      const newPts=Math.max(0,(cur.pts||0)+pts);
+      const newPts=mode==='zero'?0:mode==='set'?Math.max(0,pts):Math.max(0,(cur.pts||0)+pts);
       await db.ref('lockers/'+uid+'/pts').set(newPts);
       say('Done \u2014 '+(cur.name||'them')+' now has '+newPts+' pts.','ok');
       statsLoad();
-    }catch(e){say('Blocked: Firebase rules don\u2019t allow writing lockers from here. Either loosen lockers write in the console, or edit lockers/\u2026/pts directly in the Firebase data tab.','err');}
-  };
+    }catch(e){say('Blocked: Firebase rules don\u2019t allow writing pts \u2014 publish the rules I gave you (lockers \u2192 $uid \u2192 pts \u2192 .write true), then try again.','err');}
+  }
+  $('awardBtn').onclick=()=>pointsOp('add');
+  $('setBtn').onclick=()=>pointsOp('set');
+  $('zeroBtn').onclick=()=>pointsOp('zero');
   $('statsReload').onclick=statsLoad;
   statsLoad();
   setInterval(statsLoad,60000);
