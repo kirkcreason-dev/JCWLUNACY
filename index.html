@@ -1281,11 +1281,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
 
     <div class="games">
       <div class="game playable rev">
-        <span class="badge">Unlock at 500 points</span>
+        <span class="badge">Unlock at 300 points</span>
         <h3>Lunacy Unlocked</h3>
         <div class="sub">2D fighting &middot; Free &middot; No download &middot; Online multiplayer</div>
-        <p>The official JCW Lunacy fighting game &mdash; take the champions of the roster into the ring &mdash; combos, weapons and pinfalls. Play solo against the AI or hit <b>Quick Match</b> for online battles, right on this page. <b>Earn 500 points</b> in your <a href="#locker" style="color:var(--acid);">Juggalo Locker</a> to unlock the Lunacy &mdash; watching episodes, calling your shots and finding secrets all pay out.</p>
-        <button class="btn gold" id="play-bmr">&#128274; Locked &middot; 500 points</button>
+        <p>The official JCW Lunacy fighting game &mdash; take the champions of the roster into the ring &mdash; combos, weapons and pinfalls. Play solo against the AI or hit <b>Quick Match</b> for online battles, right on this page. <b>Earn 300 points</b> in your <a href="#locker" style="color:var(--acid);">Juggalo Locker</a> to unlock the Lunacy &mdash; watching episodes, calling your shots and finding secrets all pay out.</p>
+        <button class="btn gold" id="play-bmr">&#128274; Locked &middot; 300 points</button>
       </div>
       <div class="game rev">
         <span class="badge">Roster</span>
@@ -1509,13 +1509,13 @@ function observeReveals(){
   const playBtn=document.getElementById('play-bmr');
   const gOverlay=document.getElementById('game-overlay');
   if(playBtn&&gOverlay){
-    function gameLockUI(){const d=lkGet(),p=d.pts||0,un=p>=500||(d.badges||[]).includes('unlocked');
-      playBtn.innerHTML=un?'Press start':'&#128274; Locked \u00b7 '+Math.min(p,500)+' / 500 points';}
+    function gameLockUI(){const d=lkGet(),p=d.pts||0,un=p>=300||(d.badges||[]).includes('unlocked');
+      playBtn.innerHTML=un?'Press start':'&#128274; Locked \u00b7 '+Math.min(p,300)+' / 300 points';}
     window.jcwGameLockUI=gameLockUI;gameLockUI();
     playBtn.addEventListener('click',()=>{
       const _d=lkGet(),_p=_d.pts||0;
-      if(_p<500&&!(_d.badges||[]).includes('unlocked')){toast('LOCKED \u00b7 '+_p+' / 500 POINTS \u00b7 EARN POINTS IN YOUR LOCKER',3400);return;}
-      if(!(_d.badges||[]).includes('unlocked'))lkAward(0,'unlocked','Lunacy Unlocked \u00b7 hit 500 points');
+      if(_p<300&&!(_d.badges||[]).includes('unlocked')){toast('LOCKED \u00b7 '+_p+' / 300 POINTS \u00b7 EARN POINTS IN YOUR LOCKER',3400);return;}
+      if(!(_d.badges||[]).includes('unlocked'))lkAward(0,'unlocked','Lunacy Unlocked \u00b7 hit 300 points');
       gameLockUI();
       if(!gOverlay.querySelector('iframe')){
         const f=document.createElement('iframe');
@@ -1618,7 +1618,7 @@ function observeReveals(){
     ['binge','Binge \u00b7 watched 5 episodes'],['gamer','In the Ring \u00b7 played the game'],
     ['prophet','Prophet \u00b7 made your picks'],['winner','Winner \u00b7 won a match'],
     ['champ','Champion \u00b7 10 match wins'],
-    ['bigfoot','Squatch Hunter \u00b7 found Bigfoot \u00b7 250 pts'],['unlocked','Lunacy Unlocked \u00b7 hit 500 points']];
+    ['bigfoot','Squatch Hunter \u00b7 found Bigfoot \u00b7 250 pts'],['unlocked','Lunacy Unlocked \u00b7 hit 300 points']];
   function lkAddWin(){
     const d=lkGet(); d.wins=(d.wins||0)+1;
     d.badges=d.badges||[]; if(!d.badges.includes('winner'))d.badges.push('winner');
@@ -1634,7 +1634,7 @@ function observeReveals(){
   window.addEventListener('message',ev=>{
     if(ev.data&&ev.data.type==='jcw-win'){lkAddWin();}
   });
-  function lkRank(p){return p>=500?'Lunacy Unlocked':p>=300?'Certified Freak':p>=150?'Dark Carnival Regular':p>=50?'Front Row':'Fresh Face';}
+  function lkRank(p){return p>=500?'Certified Freak':p>=300?'Lunacy Unlocked':p>=150?'Dark Carnival Regular':p>=50?'Front Row':'Fresh Face';}
   function lkRender(){
     const d=lkGet();
     const el=document.getElementById('lk-pts');if(!el)return;
