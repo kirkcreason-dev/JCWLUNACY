@@ -125,7 +125,8 @@
       if(chatErr)errs.push('chat');
 
       // headline cards — Today + Lifetime
-      const day=new Date().toISOString().slice(0,10).replace(/-/g,'');
+      const dKey=t=>new Date(t).toLocaleDateString('en-CA',{timeZone:'America/Detroit'});
+      const day=dKey(Date.now()).replace(/-/g,'');
       const fmtT=x=>{x=Math.round(x||0);return x>=3600?(Math.floor(x/3600)+'h '+Math.round(x%3600/60)+'m'):x>=60?(Math.floor(x/60)+'m '+(x%60)+'s'):(x+'s');};
       const avgS=st.total?Math.round((st.duration||0)/st.total):0;
       const avg=avgS?fmtT(avgS):'—';
@@ -153,7 +154,7 @@
       ]);
 
       // last 14 days
-      const days=[];for(let i=13;i>=0;i--){const d=new Date(Date.now()-i*86400000);const k=d.toISOString().slice(0,10).replace(/-/g,'');days.push([d.toISOString().slice(5,10),(st.days||{})[k]||0]);}
+      const days=[];for(let i=13;i>=0;i--){const iso=dKey(Date.now()-i*86400000);days.push([iso.slice(5),(st.days||{})[iso.replace(/-/g,'')]||0]);}
       const dmax=Math.max(1,...days.map(x=>x[1]));
       $('statDays').innerHTML=days.map(x=>barRow(x[0],x[1],dmax)).join('');
 
@@ -171,8 +172,8 @@
         th+='<div style="border:1px solid var(--seam);border-radius:8px;padding:12px;background:#101015;text-align:center"><div style="font-size:24px;font-weight:800;color:var(--gold)">'+(t.total||0)+'</div><div class="muted" style="font-size:12px">'+lbl+' · '+((t.days||{})[day]||0)+' today</div></div>';
       });
       th+='</div>';
-      const tdays=[];for(let i=13;i>=0;i--){const d=new Date(Date.now()-i*86400000);const k2=d.toISOString().slice(0,10).replace(/-/g,'');
-        tdays.push([d.toISOString().slice(5,10),ttypes.reduce((a,[k])=>a+(((tk[k]||{}).days||{})[k2]||0),0)]);}
+      const tdays=[];for(let i=13;i>=0;i--){const iso=dKey(Date.now()-i*86400000);const k2=iso.replace(/-/g,'');
+        tdays.push([iso.slice(5),ttypes.reduce((a,[k])=>a+(((tk[k]||{}).days||{})[k2]||0),0)]);}
       const tmax=Math.max(1,...tdays.map(x=>x[1]));
       if(tdays.some(x=>x[1]>0))th+=tdays.map(x=>barRow(x[0],x[1],tmax)).join('');
       $('statTickets').innerHTML=th;

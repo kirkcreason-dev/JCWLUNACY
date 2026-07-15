@@ -1892,7 +1892,8 @@ function observeReveals(){
       firebase.initializeApp(JCW_FB);fbDB=firebase.database();fbAuth=firebase.auth();
       /* ---- lightweight analytics: anonymous visit + section counters ---- */
       try{
-        const day=new Date().toISOString().slice(0,10).replace(/-/g,'');
+        const dayKey=()=>new Date().toLocaleDateString('en-CA',{timeZone:'America/Detroit'}).replace(/-/g,'');
+        const day=dayKey();
         const bump=p=>fbDB.ref(p).transaction(v=>(v||0)+1);
         if(!sessionStorage.getItem('jcw-visit')){
           sessionStorage.setItem('jcw-visit','1');
@@ -1909,7 +1910,7 @@ function observeReveals(){
           if(/eventim/i.test(h))k='eventim';
           else if(/juggalogathering/i.test(h))k='gathering';
           if(!k)return;
-          const d2=new Date().toISOString().slice(0,10).replace(/-/g,'');
+          const d2=dayKey();
           bump('stats/tickets/'+k+'/total');
           bump('stats/tickets/'+k+'/days/'+d2);
         });
@@ -2169,7 +2170,7 @@ function observeReveals(){
   let bioHold=false;
   /* ================= ENTRANCE THEMES (gated on clearance) ================= */
   const THEMES_CLEARED=true; // JCW confirmed entrance music cleared
-  const THEME_SET=["2-tuff-tony", "7-foot-tall-painful-paul", "backseat-boyz", "barnabas-the-bizarre", "big-vito", "bigfoot", "brothers-of-funstruction", "caleb-konley", "choppa-city", "cokane", "dani-mo", "ec3", "facade", "father-bronson", "gisele-shaw", "hollyhood-haley-j", "j-rod", "james-storm", "jeeves", "kongo-kong", "luigi-primo", "matt-cross", "mecha-wolf", "mickie-knuckles", "mosh-pit-mike", "mr-anderson", "mr-happy", "nic-nemeth", "ninja-mack", "officer-colt-cabana", "ricky-morton", "shane-mercer", "sonny-kiss", "sophia-rose", "steven-flowe", "the-green-phantom", "tracy-smothers", "vampiro", "vince-russo", "violent-j", "willie-mack", "zach-gowen"];
+  const THEME_SET=["2-tuff-tony","7-foot-tall-painful-paul","alice-crowley","backseat-boyz","barnabas-the-bizarre","big-vito","brothers-of-funstruction","caleb-konley","choppa-city","cokane","dani-mo","ec3","facade","father-bronson","forty-winks","gisele-shaw","hollyhood-haley-j","j-rod","james-storm","jasmin-st-claire","jeeves","kongo-kong","luigi-primo","matt-cross","mecha-wolf","mickie-knuckles","mosh-pit-mike","mr-anderson","mr-happy","nic-nemeth","ninja-mack","officer-colt-cabana","ricky-morton","sally-boy","shane-mercer","sonny-kiss","sophia-rose","steven-flowe","the-green-phantom","the-outbreak","tracy-smothers","vampiro","vince-russo","vincenzo","violent-j","willie-mack","zach-gowen"];
   function themeSlug(name){
     return name.toLowerCase().replace(/holly ?hood/,'hollyhood').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
   }
