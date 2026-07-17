@@ -1003,7 +1003,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <section class="blk">
     <div class="kick">Juggalo Locker</div>
     <h2 class="head">Your <em>locker</em></h2>
-    <p class="lede">Earn points for watching episodes, playing the game and calling your shots. Stored on this device &mdash; online accounts and leaderboards coming.</p>
+    <p class="lede">Earn points for watching episodes, playing the game and calling your shots. Sign up to sync your points across devices and climb the leaderboard in <b>Lunacy Chat</b>.</p>
     <div class="lk-grid">
       <div class="lk rev" id="lk-account"><h3>Account</h3>
         <div id="lk-signedout">
@@ -1957,7 +1957,8 @@ function observeReveals(){
         /* crash & error reporting */
         try{
           const sendErr=o=>{try{
-            o.v='b2026-07-16.2';
+            if(/^(disconnect|timeout|network ?error|Failed to fetch|Load failed)$/i.test(String(o.m||'').trim()))return;
+            o.v='b2026-07-16.3';
             o.ua=navigator.userAgent.slice(0,140);
             o.r=(location.hash||'#home').slice(1);
             o.w=innerWidth+'x'+innerHeight;
@@ -1983,7 +1984,7 @@ function observeReveals(){
             fbDB.ref('stats/eps/'+window.__epWatch+'/secs').transaction(v=>(v||0)+15);
         },15000);
       }catch(e){}
-      fbDB.ref('chat').limitToLast(80).on('value',snap=>{
+      fbDB.ref('chat').on('value',snap=>{
         const l=[];snap.forEach(c=>{const v=c.val();if(v&&v.t)l.push(v);});
         window.__chatLive=l;
         try{document.getElementById('ch-note').textContent='LIVE \u00b7 you\u2019re chatting with everybody.';}catch(e){}
