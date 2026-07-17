@@ -49,6 +49,9 @@
   <div class="card"><label>Episodes watched</label><div id="statEps" class="muted">—</div></div>
   <div class="card"><label>Vote results</label><div id="statPolls" class="muted">—</div></div>
   <div class="card"><label>Favorite wrestlers <span class="muted">(set in the Juggalo Locker)</span></label><div id="statFavs" class="muted">—</div></div>
+  <div class="card"><label>Site errors <span class="muted">(reported live from visitors' browsers)</span> <button class="ghost sm" id="errClear" style="margin-left:8px">Clear log</button></label>
+    <div id="statErrors" class="muted">—</div>
+  </div>
   <div class="card"><label>Award points</label>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
       <input id="awardName" placeholder="Locker name (e.g. Digital Duke)" style="flex:2;min-width:180px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
@@ -82,6 +85,7 @@
     polls:{'.read':true,'.write':true},
     stats:{'.read':true,'.write':true},
     presence:{'.read':true,'.write':true},
+    errors:{'.read':true,'.write':true},
     lockers:{'.read':true,'$uid':{'.write':'auth != null && auth.uid === $uid',
       pts:{'.write':true,'.validate':'newData.isNumber() && newData.val() >= 0 && newData.val() < 1000000'}}}
   }},null,2);
@@ -240,6 +244,33 @@
         $('statPlatforms').innerHTML=pc.map(c=>'<div style="border:1px solid var(--seam);border-radius:8px;padding:12px;background:#101015;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--gold)">'+c[1]+'</div><div class="muted" style="font-size:12px">'+c[0]+'</div></div>').join('');
       }catch(e){}
 
+      // site error reports
+      try{
+        const es=await db.ref('errors').limitToLast(200).once('value');
+        const list=[];es.forEach(c=>{const v=c.val();if(v&&v.m)list.push(v);});
+        if(!list.length){$('statErrors').innerHTML='<span class="muted">No errors reported. Clean bill of health.</span>';}
+        else{
+          const groups={};
+          list.forEach(e2=>{
+            const k=e2.m;
+            if(!groups[k])groups[k]={n:0,last:0,mob:0,routes:{},sample:e2};
+            const g=groups[k];g.n++;g.last=Math.max(g.last,e2.t||0);
+            if(/Mobi|Android|iPhone/i.test(e2.ua||''))g.mob++;
+            if(e2.r)g.routes[e2.r]=(g.routes[e2.r]||0)+1;
+            if((e2.t||0)>=(g.sample.t||0))g.sample=e2;
+          });
+          const rows=Object.entries(groups).sort((a,b)=>b[1].last-a[1].last);
+          $('statErrors').innerHTML=rows.map(([m,g])=>{
+            const rts=Object.entries(g.routes).sort((a,b)=>b[1]-a[1]).map(x=>x[0]).slice(0,3).join(', ');
+            return '<div class="item"><div style="font-weight:700;color:var(--hot)">'+esc(m)+'</div>'+
+              '<div class="muted" style="margin-top:4px">'+g.n+'\u00d7 \u00b7 last '+new Date(g.last).toLocaleString()+' \u00b7 '+g.mob+' on mobile'+(rts?(' \u00b7 pages: '+esc(rts)):'')+'</div>'+
+              (g.sample.s?'<div class="muted" style="margin-top:2px">at '+esc(g.sample.s)+'</div>':'')+
+              (g.sample.st?'<details style="margin-top:4px"><summary class="muted">stack trace</summary><pre>'+esc(g.sample.st)+'</pre></details>':'')+
+              '</div>';
+          }).join('');
+        }
+      }catch(e){$('statErrors').innerHTML='<span class="err">Blocked \u2014 add the errors rule below and Publish.</span>';errs.push('errors');}
+
       if(errs.length){
         $('rulesHint').style.display='block';
         status('Firebase rules are blocking: '+errs.join(', ')+' — see the fix at the bottom.','err');
@@ -267,6 +298,10 @@
       statsLoad();
     }catch(e){say('Blocked: Firebase rules don\u2019t allow writing pts \u2014 publish the rules I gave you (lockers \u2192 $uid \u2192 pts \u2192 .write true), then try again.','err');}
   }
+  $('errClear').onclick=async()=>{
+    try{const db=await statsInit();await db.ref('errors').remove();statsLoad();}
+    catch(e){$('statErrors').innerHTML='<span class="err">Could not clear \u2014 check the errors rule.</span>';}
+  };
   $('awardBtn').onclick=()=>pointsOp('add');
   $('setBtn').onclick=()=>pointsOp('set');
   $('zeroBtn').onclick=()=>pointsOp('zero');
