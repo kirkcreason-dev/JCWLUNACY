@@ -1309,11 +1309,6 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <button class="btn gold" id="play-bmr">&#128274; Locked &middot; 300 points</button>
       </div>
       <div class="game rev">
-        <span class="badge">Roster</span>
-        <h3>Roster Select</h3>
-        <p>Official ratings, straight from JCW &mdash; tap any wrestler on the <a href="#crew" style="color:var(--acid);">Roster</a> to see their Power, Speed, Technique and Toughness.</p>
-      </div>
-      <div class="game rev">
         <span class="badge">Coming soon</span>
         <h3>Match Types &amp; Unlockable Weapons</h3>
         <p>New match types and unlockable weapons are in development at <b>Creaso-Norse</b>.</p>
@@ -1657,7 +1652,8 @@ function observeReveals(){
     ['binge','Binge \u00b7 watched 5 episodes'],['gamer','In the Ring \u00b7 played the game'],
     ['prophet','Prophet \u00b7 made your picks'],['winner','Winner \u00b7 won a match'],
     ['champ','Champion \u00b7 10 match wins'],
-    ['bigfoot','Squatch Hunter \u00b7 found Bigfoot \u00b7 250 pts'],['unlocked','Lunacy Unlocked \u00b7 hit 300 points']];
+    ['bigfoot','Squatch Hunter \u00b7 found Bigfoot \u00b7 250 pts'],['unlocked','Lunacy Unlocked \u00b7 hit 300 points'],
+    ['clowngods','The Clown Gods \u00b7 100,000 points'],['dukewicked','The Duke of the Wicked \u00b7 250,000 points']];
   function lkAddWin(){
     const d=lkGet(); d.wins=(d.wins||0)+1;
     d.badges=d.badges||[]; if(!d.badges.includes('winner'))d.badges.push('winner');
@@ -1699,6 +1695,8 @@ function observeReveals(){
     if(fvb&&d.favB)fvb.value=d.favB;
     const w=(d.hist||[]).filter(x=>x.startsWith('Watched')).length;
     if(w>=5&&!(d.badges||[]).includes('binge')){d.badges.push('binge');lkSet(d);}
+    if((d.pts||0)>=100000&&!(d.badges||[]).includes('clowngods')){d.badges.push('clowngods');lkSet(d);}
+    if((d.pts||0)>=250000&&!(d.badges||[]).includes('dukewicked')){d.badges.push('dukewicked');lkSet(d);}
     if(window.jcwGameLockUI)window.jcwGameLockUI();
   }
   document.addEventListener('input',e=>{
