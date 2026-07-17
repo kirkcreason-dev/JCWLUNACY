@@ -1959,6 +1959,7 @@ function observeReveals(){
         /* crash & error reporting */
         try{
           const sendErr=o=>{try{
+            o.v='b2026-07-16.2';
             o.ua=navigator.userAgent.slice(0,140);
             o.r=(location.hash||'#home').slice(1);
             o.w=innerWidth+'x'+innerHeight;

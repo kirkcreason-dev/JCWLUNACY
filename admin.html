@@ -265,7 +265,7 @@
           $('statErrors').innerHTML=rows.map(([m,g])=>{
             const rts=Object.entries(g.routes).sort((a,b)=>b[1]-a[1]).map(x=>x[0]).slice(0,3).join(', ');
             return '<div class="item"><div style="font-weight:700;color:var(--hot)">'+esc(m)+'</div>'+
-              '<div class="muted" style="margin-top:4px">'+g.n+'\u00d7 \u00b7 last '+new Date(g.last).toLocaleString()+' \u00b7 '+g.mob+' on mobile'+(rts?(' \u00b7 pages: '+esc(rts)):'')+'</div>'+
+              '<div class="muted" style="margin-top:4px">'+g.n+'\u00d7 \u00b7 last '+new Date(g.last).toLocaleString()+' \u00b7 '+g.mob+' on mobile'+(rts?(' \u00b7 pages: '+esc(rts)):'')+' \u00b7 '+(g.sample.v?('build '+esc(g.sample.v)):'old build')+'</div>'+
               (g.sample.s?'<div class="muted" style="margin-top:2px">at '+esc(g.sample.s)+'</div>':'')+
               (g.sample.st?'<details style="margin-top:4px"><summary class="muted">stack trace</summary><pre>'+esc(g.sample.st)+'</pre></details>':'')+
               '</div>';
