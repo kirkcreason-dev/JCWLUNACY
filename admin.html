@@ -87,7 +87,9 @@
     presence:{'.read':true,'.write':true},
     errors:{'.read':true,'.write':true},
     lockers:{'.read':true,'$uid':{'.write':'auth != null && auth.uid === $uid',
-      pts:{'.write':true,'.validate':'newData.isNumber() && newData.val() >= 0 && newData.val() < 1000000'}}}
+      pts:{'.write':true,'.validate':'newData.isNumber() && newData.val() >= 0 && newData.val() < 1000000'}}},
+    rooms:{'.read':true,'.write':true},
+    quickQueue:{'.read':true,'.write':true}
   }},null,2);
 
   const JCW_FB={apiKey:"AIzaSyCDCfMShCyyFZSC3qp1t75Rx_0fOfH3L_U",authDomain:"jcw-lunacy.firebaseapp.com",databaseURL:"https://jcw-lunacy-default-rtdb.firebaseio.com",projectId:"jcw-lunacy",storageBucket:"jcw-lunacy.firebasestorage.app",messagingSenderId:"743418158514",appId:"1:743418158514:web:d167d515509974fbf5d8ab"};
