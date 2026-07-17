@@ -1764,6 +1764,8 @@ function observeReveals(){
       if(fbDB){
         const ek=String(id).replace(/[.#$\/\[\]]/g,'');
         fbDB.ref('stats/eps/'+ek+'/plays').transaction(v=>(v||0)+1);
+        const dk=new Date().toLocaleDateString('en-CA',{timeZone:'America/Detroit'}).replace(/-/g,'');
+        fbDB.ref('stats/epDays/'+dk).transaction(v=>(v||0)+1);
         fbDB.ref('stats/eps/'+ek+'/title').set(title||String(id));
         window.__epWatch=ek;
       }
@@ -1924,7 +1926,8 @@ function observeReveals(){
           bump('stats/total');bump('stats/days/'+day);
           if(!localStorage.getItem('jcw-seen')){localStorage.setItem('jcw-seen','1');bump('stats/unique');}
         }
-        const view=()=>{const r=(location.hash||'#home').slice(1).replace(/[^a-z]/g,'')||'home';bump('stats/views/'+r);};
+        const view=()=>{const r=(location.hash||'#home').slice(1).replace(/[^a-z]/g,'')||'home';bump('stats/views/'+r);
+          if(r==='clips')bump('stats/clipDays/'+dayKey());};
         view();addEventListener('hashchange',view);
         /* count outbound ticket clicks */
         document.addEventListener('click',e=>{

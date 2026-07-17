@@ -40,16 +40,8 @@
   <div class="card"><label>Lifetime</label>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px" id="statCards"></div>
   </div>
-  <div class="card"><label>Platform views</label>
+  <div class="card"><label>Episode &amp; clip views <span class="muted">(played on the site)</span></label>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px" id="statPlatforms"></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px">
-      <input id="ytKey" type="password" placeholder="YouTube API key (auto-pulls views)" style="flex:2;min-width:200px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
-      <button class="ghost sm" id="ytKeySave">Save key</button>
-      <input id="ttTotal" type="number" placeholder="TikTok total views" style="flex:1;min-width:150px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
-      <button class="ghost sm" id="ttSave">Log TikTok</button>
-      <span class="status" id="platStatus"></span>
-    </div>
-    <div class="muted" style="margin-top:8px">YouTube pulls automatically once you paste a (free) API key — Google Cloud Console → APIs → YouTube Data API v3 → Credentials. TikTok has no public numbers, so open your TikTok analytics, read the total views, type it in and hit <b>Log TikTok</b> — today's count is worked out from your last log.</div>
   </div>
   <div class="card"><label>Visits — last 14 days</label><div id="statDays" class="muted">—</div></div>
   <div class="card"><label>Views by section</label><div id="statViews" class="muted">—</div></div>
@@ -239,30 +231,12 @@
       const rows=Object.values(lockers||{}).filter(x=>x&&(x.pts||x.name)).sort((a,b)=>(b.pts||0)-(a.pts||0)).slice(0,15);
       $('statLockers').innerHTML=rows.length?rows.map((x,i)=>'<div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px dashed var(--seam)"><span class="muted" style="flex:0 0 26px">#'+(i+1)+'</span><span style="flex:1">'+esc(x.name||'Anonymous Juggalo')+'</span><b style="color:var(--gold)">'+(x.pts||0)+' pts</b><span class="muted">'+(x.wins||0)+' wins</span></div>').join(''):'<span class="muted">No lockers synced yet.</span>';
 
-      // platform views (YouTube auto, TikTok manual)
+      // episode & clip views on the site (today + lifetime)
       try{
-        const yt=st.yt||{},tt=st.tt||{};
-        let ytLife='—',ytToday='—';
-        const key=localStorage.getItem('jcw-yt-key');
-        if(key){
-          try{
-            const r=await fetch('https://www.googleapis.com/youtube/v3/channels?part=statistics&forHandle=Psychopathic_Records&key='+encodeURIComponent(key));
-            const j=await r.json();
-            const vc=+((((j.items||[])[0]||{}).statistics||{}).viewCount||0);
-            if(vc){
-              ytLife=vc.toLocaleString();
-              if(yt[day]==null){try{await db.ref('stats/yt/'+day).set(vc);}catch(e){}}
-              ytToday=(vc-(yt[day]==null?vc:yt[day])).toLocaleString();
-            }
-          }catch(e){ytLife='key error';}
-        }
-        let ttLife='—',ttToday='—';
-        if(tt.life){
-          ttLife=(+tt.life).toLocaleString();
-          const base=(tt.days||{})[day];
-          ttToday=base==null?'0':((+tt.life)-base).toLocaleString();
-        }
-        const pc=[['YouTube today',ytToday],['YouTube lifetime',ytLife],['TikTok today',ttToday],['TikTok lifetime',ttLife]];
+        const epToday=(st.epDays||{})[day]||0;
+        const clipToday=(st.clipDays||{})[day]||0;
+        const clipLife=(st.views||{}).clips||0;
+        const pc=[['Episode plays today',epToday],['Episode plays lifetime',epPlays],['Clip views today',clipToday],['Clip views lifetime',clipLife]];
         $('statPlatforms').innerHTML=pc.map(c=>'<div style="border:1px solid var(--seam);border-radius:8px;padding:12px;background:#101015;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--gold)">'+c[1]+'</div><div class="muted" style="font-size:12px">'+c[0]+'</div></div>').join('');
       }catch(e){}
 
@@ -293,21 +267,6 @@
       statsLoad();
     }catch(e){say('Blocked: Firebase rules don\u2019t allow writing pts \u2014 publish the rules I gave you (lockers \u2192 $uid \u2192 pts \u2192 .write true), then try again.','err');}
   }
-  const ytIn=$('ytKey');if(localStorage.getItem('jcw-yt-key'))ytIn.value=localStorage.getItem('jcw-yt-key');
-  $('ytKeySave').onclick=()=>{localStorage.setItem('jcw-yt-key',ytIn.value.trim());$('platStatus').textContent='Key saved in this browser.';$('platStatus').className='status ok';statsLoad();};
-  $('ttSave').onclick=async()=>{
-    const v=parseInt($('ttTotal').value,10);
-    const el=$('platStatus');
-    if(!v){el.textContent='Enter the total view count from TikTok.';el.className='status err';return;}
-    try{
-      const db=await statsInit();
-      const dk=new Date().toLocaleDateString('en-CA',{timeZone:'America/Detroit'}).replace(/-/g,'');
-      const snap=(await db.ref('stats/tt/days/'+dk).once('value')).val();
-      if(snap==null)await db.ref('stats/tt/days/'+dk).set(v);
-      await db.ref('stats/tt/life').set(v);
-      el.textContent='TikTok logged.';el.className='status ok';statsLoad();
-    }catch(e){el.textContent='Blocked by Firebase rules — stats needs write access.';el.className='status err';}
-  };
   $('awardBtn').onclick=()=>pointsOp('add');
   $('setBtn').onclick=()=>pointsOp('set');
   $('zeroBtn').onclick=()=>pointsOp('zero');
