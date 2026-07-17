@@ -226,7 +226,7 @@
       // favorite wrestlers
       let favs=Object.entries(st.favs||{}).filter(x=>x[1]>0);
       if(!favs.length){
-        const agg={};Object.values(lockers||{}).forEach(x=>{if(x&&x.fav)agg[x.fav]=(agg[x.fav]||0)+1;});
+        const agg={};Object.values(lockers||{}).forEach(x=>{if(x&&x.fav)agg[x.fav]=(agg[x.fav]||0)+1;if(x&&x.favB)agg[x.favB]=(agg[x.favB]||0)+1;});
         favs=Object.entries(agg);
       }
       favs.sort((a,b)=>b[1]-a[1]);

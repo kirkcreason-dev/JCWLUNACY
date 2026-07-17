@@ -1025,7 +1025,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
       <div class="lk rev"><h3>Game Record</h3><div class="big" id="lk-wins">0</div><p>Match wins in JCW Lunacy: The Game</p></div>
       <div class="lk rev"><h3>Profile</h3>
         <input id="lk-name" maxlength="20" placeholder="Your name">
-        <select id="lk-fav"><option value="">Favorite wrestler&hellip;</option></select>
+        <select id="lk-fav"><option value="">Favorite girl wrestler&hellip;</option></select>
+        <select id="lk-fav-b" style="margin-top:8px;"><option value="">Favorite boy wrestler&hellip;</option></select>
         <p>Saved automatically.</p></div>
       <div class="lk rev"><h3>Badges</h3>
         <div class="badges" id="lk-badges"></div></div>
@@ -1419,7 +1420,7 @@ function fitNames(){
   });
 }
 addEventListener('resize',()=>{clearTimeout(window.__fitT);window.__fitT=setTimeout(fitNames,150);});
-addEventListener('hashchange',()=>{route();lkRender();setTimeout(fitNames,80);});
+addEventListener('hashchange',()=>{route();if(window.lkRender)window.lkRender();setTimeout(fitNames,80);});
 setTimeout(fitNames,300);
 document.getElementById('brand').addEventListener('click',()=>{location.hash='#home';});
 
@@ -1664,6 +1665,7 @@ function observeReveals(){
     lkSet(d); lkAward(15,null,'Won a match in JCW Lunacy: The Game');
   }
   window.jcwReportWin=lkAddWin; // game calls this on a win
+  window.lkRender=lkRender;
   window.jcwFoundBigfoot=function(){
     const d=lkGet();if((d.badges||[]).includes('bigfoot'))return;
     lkAward(250,'bigfoot','Found Bigfoot \u00b7 +250 points');
@@ -1683,23 +1685,31 @@ function observeReveals(){
       `<span class="badge2 ${(d.badges||[]).includes(k)?'got':''}">${t}</span>`).join('');
     document.getElementById('lk-hist').innerHTML=(d.hist&&d.hist.length)?d.hist.map(x=>'&raquo; '+x).join('<br>'):'Nothing yet. Hit the episodes.';
     const nm=document.getElementById('lk-name');if(nm&&document.activeElement!==nm)nm.value=d.name||'';
-    const fv=document.getElementById('lk-fav');
+    const GIRLS=['Dani Mo','Alice Crowley','Gisele Shaw','Hollyhood Haley J','Hokane','J-Rod','Jasmin St. Claire','Mickie Knuckles','Sonny Kiss','Sophia Rose','The Ring Rat','Veda Scott','Kid Cadet','Mickie Knuckles'];
+    const fv=document.getElementById('lk-fav'),fvb=document.getElementById('lk-fav-b');
     if(fv&&!fv.dataset.filled){
       const names=[...document.querySelectorAll('#view-crew .wr h3')].map(h=>h.textContent);
-      fv.innerHTML='<option value="">Favorite wrestler\u2026</option>'+names.map(n=>`<option>${n}</option>`).join('');
+      const girls=names.filter(n=>GIRLS.includes(n));
+      const boys=names.filter(n=>!GIRLS.includes(n));
+      fv.innerHTML='<option value="">Favorite girl wrestler\u2026</option>'+girls.map(n=>`<option>${n}</option>`).join('');
+      if(fvb)fvb.innerHTML='<option value="">Favorite boy wrestler\u2026</option>'+boys.map(n=>`<option>${n}</option>`).join('');
       fv.dataset.filled='1';
     }
-    if(fv&&d.fav)fv.value=d.fav;
+    if(fv&&d.fav&&GIRLS.includes(d.fav))fv.value=d.fav;
+    if(fvb&&d.favB)fvb.value=d.favB;
     const w=(d.hist||[]).filter(x=>x.startsWith('Watched')).length;
     if(w>=5&&!(d.badges||[]).includes('binge')){d.badges.push('binge');lkSet(d);}
     if(window.jcwGameLockUI)window.jcwGameLockUI();
   }
   document.addEventListener('input',e=>{
     if(e.target.id==='lk-name'){const d=lkGet();d.name=e.target.value;lkSet(d);}
-    if(e.target.id==='lk-fav'){const d=lkGet();const prev=d.fav;d.fav=e.target.value;lkSet(d);lkAward(5,'fan');
-      if(fbDB&&d.fav!==prev){const fk=n=>String(n).replace(/[.#$\/\[\]]/g,'');
+    if(e.target.id==='lk-fav'||e.target.id==='lk-fav-b'){
+      const d=lkGet();
+      const key=e.target.id==='lk-fav'?'fav':'favB';
+      const prev=d[key];d[key]=e.target.value;lkSet(d);lkAward(5,'fan');
+      if(fbDB&&d[key]!==prev){const fk=n=>String(n).replace(/[.#$\/\[\]]/g,'');
         if(prev)fbDB.ref('stats/favs/'+fk(prev)).transaction(v=>Math.max(0,(v||1)-1));
-        if(d.fav)fbDB.ref('stats/favs/'+fk(d.fav)).transaction(v=>(v||0)+1);}}
+        if(d[key])fbDB.ref('stats/favs/'+fk(d[key])).transaction(v=>(v||0)+1);}}
   });
 
   /* ---- locker auth UI ---- */
@@ -1827,7 +1837,7 @@ function observeReveals(){
   const chPanel=document.getElementById('chat-panel'),chFab=document.getElementById('chat-fab');
   const chChat=document.getElementById('ch-chat'),chMsg=document.getElementById('ch-msg');
   /* fbDB/fbAuth/lkUser declared earlier (before first lkAward call) */
-  function lkCloudPush(){ if(fbAuth&&lkUser&&fbDB){ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:d.pts||0,wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',picks:d.picks||{}}); } }
+  function lkCloudPush(){ if(fbAuth&&lkUser&&fbDB){ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:d.pts||0,wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',picks:d.picks||{}}); } }
   function chName(){const d=lkGet();return (d.name&&d.name.trim())||('Juggalo'+(d.uid||(d.uid=Math.floor(1000+Math.random()*9000),lkSet(d),d.uid)));}
   function chRender(list){
     chChat.innerHTML=list.map(m=>`<div class="ch-msg"><b>${(m.n||'?').replace(/</g,'&lt;')}</b>${(m.t||'').replace(/</g,'&lt;')}</div>`).join('');
