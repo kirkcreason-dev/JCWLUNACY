@@ -162,6 +162,7 @@
       mkCards('statCards',[
         ['Total visits',st.total||0],
         ['Unique devices',st.unique||0],
+        ['Accounts',Object.keys(lockers||{}).length],
         ['Avg time on site',avg],
         ['Episode plays',epPlays],
         ['Watch time',epSecs?fmtT(epSecs):'—'],
