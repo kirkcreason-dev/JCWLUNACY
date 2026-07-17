@@ -1938,6 +1938,14 @@ function observeReveals(){
           bump('stats/tickets/'+k+'/total');
           bump('stats/tickets/'+k+'/days/'+d2);
         });
+        /* online-now presence beacon */
+        try{
+          const sid='p'+Math.random().toString(36).slice(2);
+          const pRef=fbDB.ref('presence/'+sid);
+          const pBeat=()=>{if(!document.hidden)pRef.set(Date.now());};
+          pBeat();setInterval(pBeat,30000);
+          if(pRef.onDisconnect)pRef.onDisconnect().remove();
+        }catch(e){}
         /* time-on-site heartbeat: +15s while the tab is visible, max 30 min */
         let hbTotal=0;
         const hb=setInterval(()=>{
