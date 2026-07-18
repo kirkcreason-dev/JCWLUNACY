@@ -1704,7 +1704,8 @@ function observeReveals(){
     if(e.target.id==='lk-fav'||e.target.id==='lk-fav-b'){
       const d=lkGet();
       const key=e.target.id==='lk-fav'?'fav':'favB';
-      const prev=d[key];d[key]=e.target.value;lkSet(d);lkAward(5,'fan');
+      const prev=d[key];d[key]=e.target.value;lkSet(d);
+      if(!prev&&d[key])lkAward(5,'fan');else lkRender();
       if(fbDB&&d[key]!==prev){const fk=n=>String(n).replace(/[.#$\/\[\]]/g,'');
         if(prev)fbDB.ref('stats/favs/'+fk(prev)).transaction(v=>Math.max(0,(v||1)-1));
         if(d[key])fbDB.ref('stats/favs/'+fk(d[key])).transaction(v=>(v||0)+1);}}
@@ -1772,7 +1773,7 @@ function observeReveals(){
     if(i<EPS.length-1)nx+=`<button class="btn line" data-ep="${EPS[i+1][0]}" data-t="${EPS[i+1][1]}">${EPS[i+1][1]} &rarr;</button>`;
     document.getElementById('hub-next').innerHTML=nx;
     hub.classList.add('on');
-    lkAward(10,null,'Watched '+title);
+    if(!((lkGet().hist)||[]).includes('Watched '+title))lkAward(10,null,'Watched '+title);
     try{
       if(fbDB){
         const ek=String(id).replace(/[.#$\/\[\]]/g,'');
@@ -1815,8 +1816,10 @@ function observeReveals(){
       const idx=[...row.querySelectorAll('button')].indexOf(b);
       row.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));
       b.classList.add('sel');
-      const dd=lkGet();dd.picks=dd.picks||{};dd.picks[key]=idx;lkSet(dd);
-      lkAward(5,'prophet','Made a Bloodymania pick');
+      const dd=lkGet();dd.picks=dd.picks||{};
+      const had=dd.picks[key]!==undefined;
+      dd.picks[key]=idx;lkSet(dd);
+      if(!had)lkAward(5,'prophet','Made a Bloodymania pick');
     });
   });
 
@@ -1911,11 +1914,17 @@ function observeReveals(){
   document.querySelectorAll('.ch-poll .po').forEach(btn=>btn.addEventListener('click',()=>{
     const pl=btn.closest('.ch-poll'),key=pl.dataset.poll,i=btn.dataset.i;
     const P=pollGet();P.mine=P.mine||{};P.t=P.t||{};P.t[key]=P.t[key]||{};
-    if(P.mine[key]!==undefined){P.t[key][P.mine[key]]=Math.max(0,(P.t[key][P.mine[key]]||1)-1);}
+    const prev=P.mine[key];
+    if(prev===i){return;} /* already voted this way */
+    if(prev!==undefined){
+      P.t[key][prev]=Math.max(0,(P.t[key][prev]||1)-1);
+      if(fbDB)fbDB.ref('polls/'+key+'/'+prev).transaction(v=>Math.max(0,(v||1)-1));
+    }
     P.mine[key]=i;P.t[key][i]=(P.t[key][i]||0)+1;
     localStorage.setItem('jcw_polls',JSON.stringify(P));
     if(fbDB)fbDB.ref('polls/'+key+'/'+i).transaction(v=>(v||0)+1);
-    pollRender();lkAward(2,'prophet','Voted in Lunacy Chat');
+    pollRender();
+    if(prev===undefined)lkAward(2,'prophet','Voted in Lunacy Chat');
   }));
   pollRender();
 
@@ -1960,7 +1969,7 @@ function observeReveals(){
             const _m=String(o.m||'').trim();
             if(/^(disconnect|timeout|network ?error|Failed to fetch|Load failed|Script error\.?)$/i.test(_m))return;
             if(/__gCrWeb|__firefox__|DarkReader|window\.ethereum|runtime\.sendMessage|in-progress transaction|extension context/i.test(_m))return;
-            o.v='b2026-07-17.1';
+            o.v='b2026-07-17.2';
             o.ua=navigator.userAgent.slice(0,140);
             o.r=(location.hash||'#home').slice(1);
             o.w=innerWidth+'x'+innerHeight;
