@@ -1957,8 +1957,10 @@ function observeReveals(){
         /* crash & error reporting */
         try{
           const sendErr=o=>{try{
-            if(/^(disconnect|timeout|network ?error|Failed to fetch|Load failed)$/i.test(String(o.m||'').trim()))return;
-            o.v='b2026-07-16.3';
+            const _m=String(o.m||'').trim();
+            if(/^(disconnect|timeout|network ?error|Failed to fetch|Load failed|Script error\.?)$/i.test(_m))return;
+            if(/__gCrWeb|__firefox__|DarkReader|window\.ethereum|runtime\.sendMessage|in-progress transaction|extension context/i.test(_m))return;
+            o.v='b2026-07-17.1';
             o.ua=navigator.userAgent.slice(0,140);
             o.r=(location.hash||'#home').slice(1);
             o.w=innerWidth+'x'+innerHeight;
