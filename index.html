@@ -1027,6 +1027,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <input id="lk-name" maxlength="20" placeholder="Your name">
         <select id="lk-fav"><option value="">Favorite girl wrestler&hellip;</option></select>
         <select id="lk-fav-b" style="margin-top:8px;"><option value="">Favorite boy wrestler&hellip;</option></select>
+        <select id="lk-theme" style="margin-top:8px;"><option value="">Your entrance theme&hellip;</option></select>
+        <button class="btn line" id="lk-theme-play" style="margin-top:10px;width:100%;justify-content:center;">&#9654; Play my theme</button>
         <p>Saved automatically.</p></div>
       <div class="lk rev"><h3>Badges</h3>
         <div class="badges" id="lk-badges"></div></div>
@@ -1693,6 +1695,20 @@ function observeReveals(){
     }
     if(fv&&d.fav&&GIRLS.includes(d.fav))fv.value=d.fav;
     if(fvb&&d.favB)fvb.value=d.favB;
+    const tv=document.getElementById('lk-theme');
+    if(tv&&!tv.dataset.filled&&window.THEME_MAP){
+      const slugit=n=>n.toLowerCase().replace(/holly ?hood/,'hollyhood').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+      const opts=[];
+      document.querySelectorAll('#view-crew .wr h3').forEach(h=>{
+        const sl=slugit(h.textContent);
+        if(window.THEME_MAP[sl])opts.push([sl,h.textContent]);
+      });
+      if(opts.length){
+        tv.innerHTML='<option value="">Your entrance theme\u2026</option>'+opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
+        tv.dataset.filled='1';
+      }
+    }
+    if(tv&&d.theme)tv.value=d.theme;
     const w=(d.hist||[]).filter(x=>x.startsWith('Watched')).length;
     if(w>=5&&!(d.badges||[]).includes('binge')){d.badges.push('binge');lkSet(d);}
     if((d.pts||0)>=100000&&!(d.badges||[]).includes('clowngods')){d.badges.push('clowngods');lkSet(d);}
@@ -1709,6 +1725,20 @@ function observeReveals(){
       if(fbDB&&d[key]!==prev){const fk=n=>String(n).replace(/[.#$\/\[\]]/g,'');
         if(prev)fbDB.ref('stats/favs/'+fk(prev)).transaction(v=>Math.max(0,(v||1)-1));
         if(d[key])fbDB.ref('stats/favs/'+fk(d[key])).transaction(v=>(v||0)+1);}}
+    if(e.target.id==='lk-theme'){const d=lkGet();d.theme=e.target.value;lkSet(d);}
+  });
+
+  /* ---- my entrance theme (MySpace style) ---- */
+  let myTheme=null;
+  const tpBtn=document.getElementById('lk-theme-play');
+  if(tpBtn)tpBtn.addEventListener('click',()=>{
+    if(myTheme){myTheme.pause();myTheme=null;tpBtn.innerHTML='&#9654; Play my theme';return;}
+    const d=lkGet();if(!d.theme){tpBtn.innerHTML='Pick a theme first &uarr;';setTimeout(()=>tpBtn.innerHTML='&#9654; Play my theme',1800);return;}
+    const src=(window.THEME_MAP&&window.THEME_MAP[d.theme])||('audio/'+d.theme+'.mp3');
+    myTheme=new Audio(src);
+    myTheme.play().catch(()=>{});
+    tpBtn.innerHTML='&#9632; Stop my theme';
+    myTheme.onended=()=>{tpBtn.innerHTML='&#9654; Play my theme';myTheme=null;};
   });
 
   /* ---- locker auth UI ---- */
@@ -1838,7 +1868,7 @@ function observeReveals(){
   const chPanel=document.getElementById('chat-panel'),chFab=document.getElementById('chat-fab');
   const chChat=document.getElementById('ch-chat'),chMsg=document.getElementById('ch-msg');
   /* fbDB/fbAuth/lkUser declared earlier (before first lkAward call) */
-  function lkCloudPush(){ if(fbAuth&&lkUser&&fbDB){ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:d.pts||0,wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',picks:d.picks||{}}); } }
+  function lkCloudPush(){ if(fbAuth&&lkUser&&fbDB){ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:d.pts||0,wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',picks:d.picks||{}}); } }
   function chName(){const d=lkGet();return (d.name&&d.name.trim())||('Juggalo'+(d.uid||(d.uid=Math.floor(1000+Math.random()*9000),lkSet(d),d.uid)));}
   function chRender(list){
     chChat.innerHTML=list.map(m=>`<div class="ch-msg"><b>${(m.n||'?').replace(/</g,'&lt;')}</b>${(m.t||'').replace(/</g,'&lt;')}</div>`).join('');
@@ -1969,7 +1999,7 @@ function observeReveals(){
             const _m=String(o.m||'').trim();
             if(/^(disconnect|timeout|network ?error|Failed to fetch|Load failed|Script error\.?)$/i.test(_m))return;
             if(/__gCrWeb|__firefox__|DarkReader|window\.ethereum|runtime\.sendMessage|in-progress transaction|extension context/i.test(_m))return;
-            o.v='b2026-07-17.2';
+            o.v='b2026-07-17.3';
             o.ua=navigator.userAgent.slice(0,140);
             o.r=(location.hash||'#home').slice(1);
             o.w=innerWidth+'x'+innerHeight;
