@@ -63,6 +63,25 @@
     </div>
     <div class="muted" style="margin-top:8px"><b>Award</b> adds the points on top (negative subtracts). <b>Set total</b> makes their balance exactly the number entered — use it when someone spends points. <b>Reset to 0</b> wipes the balance. All of it updates the leaderboard instantly and syncs to their device next visit.</div>
   </div>
+
+  <div class="card"><label>Admin sign-in <span class="muted">(needed to award points or broadcast)</span></label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <input id="adminEmail" placeholder="Digital Duke email" style="flex:2;min-width:180px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+      <input id="adminPass" type="password" placeholder="Password" style="flex:1;min-width:120px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+      <button id="adminLogin">Sign in</button>
+      <button class="ghost" id="adminLogout" style="display:none">Sign out</button>
+      <span class="status" id="adminWho">Not signed in</span>
+    </div>
+  </div>
+
+  <div class="card"><label>&#128227; Broadcast to everyone</label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <input id="bcastMsg" maxlength="180" placeholder="Announce to all Juggalos…" style="flex:2;min-width:220px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+      <button id="bcastBtn">Send to all</button>
+      <span class="status" id="bcastStatus"></span>
+    </div>
+    <div class="muted" style="margin-top:8px">Pops a notification for every visitor on the site (once each). Sign in above first.</div>
+  </div>
   <div class="card"><label>Top Juggalo Lockers</label><div id="statLockers" class="muted">—</div></div>
   <div class="card" id="rulesHint" style="display:none"><label>Fix data access (2 min)</label><div class="muted">
     Some data is blocked by your Firebase rules. Open
@@ -105,14 +124,18 @@
     'belt-importance':{q:'Which belt matters more — legacy or the modern era?',o:['JCW World Title — history & legacy (Josh Bishop)','JCW Lunacy Title — today’s brand (Caleb Konley)']}
   };
 
-  let statsDB=null;
+  let statsDB=null,statsAuth=null;
   function loadScript(src){return new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=()=>rej(new Error('could not load '+src));document.head.appendChild(sc);});}
   async function statsInit(){
     if(statsDB)return statsDB;
     await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
     await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js');
+    await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js');
     firebase.initializeApp(JCW_FB);
     statsDB=firebase.database();
+    statsAuth=firebase.auth();
+    statsAuth.onAuthStateChanged(u=>{const el=$('adminWho');if(el)el.textContent=u?('Signed in as '+(u.email||'admin')):'Not signed in';
+      const lo=$('adminLogout');if(lo)lo.style.display=u?'':'none';});
     return statsDB;
   }
   function barRow(label,v,max,extra){
@@ -305,6 +328,22 @@
   $('errClear').onclick=async()=>{
     try{const db=await statsInit();await db.ref('errors').remove();statsLoad();}
     catch(e){$('statErrors').innerHTML='<span class="err">Could not clear \u2014 check the errors rule.</span>';}
+  };
+  $('adminLogin').onclick=async()=>{
+    const el=$('adminWho');el.textContent='Signing in…';
+    try{await statsInit();await statsAuth.signInWithEmailAndPassword(($('adminEmail').value||'').trim(),$('adminPass').value||'');el.textContent='Signed in';$('adminPass').value='';}
+    catch(e){el.textContent=(e.message||'sign-in failed').replace('Firebase: ','');}
+  };
+  $('adminLogout').onclick=()=>{try{statsAuth&&statsAuth.signOut();}catch(e){}};
+  $('bcastBtn').onclick=async()=>{
+    const el=$('bcastStatus');const t=($('bcastMsg').value||'').trim();
+    if(!t){el.textContent='Type a message.';el.className='status err';return;}
+    try{
+      const db=await statsInit();
+      if(!statsAuth||!statsAuth.currentUser){el.textContent='Sign in first.';el.className='status err';return;}
+      await db.ref('broadcast/latest').set({t:t,ts:Date.now(),from:'JCW'});
+      $('bcastMsg').value='';el.textContent='Sent to everyone ✅';el.className='status ok';
+    }catch(e){el.textContent='Blocked — sign in as a mod/admin.';el.className='status err';}
   };
   $('awardBtn').onclick=()=>pointsOp('add');
   $('setBtn').onclick=()=>pointsOp('set');
