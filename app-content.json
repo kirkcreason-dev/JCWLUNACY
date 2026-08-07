@@ -1,367 +1,2722 @@
 {
-  "contentVersion": 3,
-  "config": {
-    "firebase": { "apiKey": "", "appId": "", "projectId": "" },
-    "siteUrl": "https://jcwlunacy.net",
-    "youtubeChannelUrl": "https://www.youtube.com/@Psychopathic_Records",
-    "showSchedule": "New Lunacy every Thursday · 7PM Eastern",
-    "ticketsUrl": "https://www.psychopathicrecords.com/jcwtours",
-    "gotjTicketsUrl": "https://juggalogathering.com/gotjtickets/",
-    "merchCollectionUrl": "https://psychopathicvault.com/collections/wrestling",
-    "membershipUrl": "https://jcwlunacy.net/#lunatics",
-    "webGameUrl": "https://jcwlunacy.net/#games",
-    "socials": [
-      { "label": "YouTube", "url": "https://www.youtube.com/@Psychopathic_Records" },
-      { "label": "X", "url": "https://x.com/jcwlunacy" },
-      { "label": "Instagram", "url": "https://www.instagram.com/juggalochampionshipwrestling/" },
-      { "label": "TikTok", "url": "https://www.tiktok.com/@therealjcw" },
-      { "label": "Facebook", "url": "https://www.facebook.com/therealjcw/" }
-    ]
+ "contentVersion": 5,
+ "config": {
+  "firebase": {
+   "apiKey": "AIzaSyCDCfMShCyyFZSC3qp1t75Rx_0fOfH3L_U",
+   "appId": "1:743418158514:web:d167d515509974fbf5d8ab",
+   "projectId": "jcw-lunacy",
+   "databaseUrl": "https://jcw-lunacy-default-rtdb.firebaseio.com"
   },
-  "ticker": [
-    "BLOODYMANIA 19 · TWO NIGHTS · AUG 20–21 · THE JCW PAVILION",
-    "NEW LUNACY EVERY THURSDAY · 7PM EASTERN · YOUTUBE",
-    "HATCHET ATTACKS",
-    "ODDBALL WRESTLING",
-    "FLASHLIGHT WRESTLING",
-    "HALLOWICKED AFTER PARTY",
-    "BIG BALLAS' X-MAS PARTY"
+  "siteUrl": "https://jcwlunacy.net",
+  "youtubeChannelUrl": "https://www.youtube.com/@Psychopathic_Records",
+  "showSchedule": "New Lunacy every Thursday · 7PM Eastern",
+  "ticketsUrl": "https://www.psychopathicrecords.com/jcwtours",
+  "gotjTicketsUrl": "https://juggalogathering.com/gotjtickets/",
+  "merchCollectionUrl": "https://psychopathicvault.com/collections/wrestling",
+  "membershipUrl": "https://jcwlunacy.net/#lunatics",
+  "webGameUrl": "https://jcwlunacy.net/#games",
+  "socials": [
+   {
+    "label": "YouTube",
+    "url": "https://www.youtube.com/@Psychopathic_Records"
+   },
+   {
+    "label": "X",
+    "url": "https://x.com/jcwlunacy"
+   },
+   {
+    "label": "Instagram",
+    "url": "https://www.instagram.com/juggalochampionshipwrestling/"
+   },
+   {
+    "label": "TikTok",
+    "url": "https://www.tiktok.com/@therealjcw"
+   },
+   {
+    "label": "Facebook",
+    "url": "https://www.facebook.com/therealjcw/"
+   }
   ],
-  "thisWeek": {
-    "title": "ALL-NEW LUNACY",
-    "subtitle": "Thursday · 7PM Eastern · Psychopathic Records YouTube",
-    "watchUrl": "https://www.youtube.com/@Psychopathic_Records"
+  "audioBaseUrl": "https://jcwlunacy.net/audio/",
+  "audioListUrl": "https://api.github.com/repos/kirkcreason-dev/JCWLUNACY/contents/audio"
+ },
+ "ticker": [
+  "BLOODYMANIA 19 · TWO NIGHTS · AUG 20–21 · THE JCW PAVILION",
+  "NEW LUNACY EVERY THURSDAY · 7PM EASTERN · YOUTUBE",
+  "HATCHET ATTACKS",
+  "ODDBALL WRESTLING",
+  "FLASHLIGHT WRESTLING",
+  "HALLOWICKED AFTER PARTY",
+  "BIG BALLAS' X-MAS PARTY"
+ ],
+ "thisWeek": {
+  "title": "ALL-NEW LUNACY",
+  "subtitle": "Thursday · 7PM Eastern · Psychopathic Records YouTube",
+  "watchUrl": "https://www.youtube.com/@Psychopathic_Records"
+ },
+ "stats": [
+  {
+   "value": "12.19.99",
+   "label": "First bell · St. Andrew's Hall"
   },
-  "stats": [
-    { "value": "12.19.99", "label": "First bell · St. Andrew's Hall" },
-    { "value": "#2", "label": "Vol. 1 on Billboard · 38 weeks" },
-    { "value": "5", "label": "Championships defended today" },
-    { "value": "2013", "label": "Hall of Fame opens its doors" }
-  ],
-  "news": [
-    {
-      "id": "getting-real-big",
-      "title": "Getting Real BIG!",
-      "byline": "JCW Editorial · Sean Oliver",
-      "date": "2026-07-30",
-      "tag": "EDITORIAL",
-      "summary": "Sean Oliver looks at how JCW's roster has been growing in a very literal sense — with big-frame stars like Josh Bishop, Donovan Dijak, EC3, Krule and 7-foot Painful Paul reshaping the Lunacy landscape.",
-      "externalUrl": "https://jcwlunacy.net/#news"
-    },
-    {
-      "id": "bloodymania-19",
-      "title": "Bloodymania 19 hits the JCW Pavilion for two nights",
-      "byline": "JCW Lunacy",
-      "date": "2026-07-20",
-      "tag": "EVENTS",
-      "summary": "The biggest show of the Juggalo calendar runs two straight nights at the Gathering of the Juggalos, August 20–21 at the JCW Pavilion. Card announcements are rolling out on Lunacy every Thursday.",
-      "externalUrl": "https://jcwlunacy.net/#events"
-    },
-    {
-      "id": "lunacy-thursdays",
-      "title": "Lunacy drops every Thursday at 7PM Eastern",
-      "byline": "JCW Lunacy",
-      "date": "2026-07-01",
-      "tag": "SHOW",
-      "summary": "New episodes of JCW Lunacy stream weekly on the Psychopathic Records YouTube channel — championship matches, backstage madness and the wildest roster in wrestling.",
-      "externalUrl": "https://www.youtube.com/@Psychopathic_Records"
-    }
-  ],
-  "episodes": [
-    {
-      "id": "ep-91",
-      "number": 91,
-      "title": "Lunacy Episode 91 — Title Double-Header",
-      "date": "2026-07-30",
-      "description": "Caleb Konley and Josh Bishop headline a championship double-header.",
-      "videoUrl": "https://youtu.be/r671-6OrvRQ",
-      "featured": true
-    },
-    {
-      "id": "ep-90",
-      "number": 90,
-      "title": "Lunacy Episode 90",
-      "date": "2026-07-23",
-      "description": "Full episode on the Psychopathic Records channel.",
-      "videoUrl": "https://www.youtube.com/@Psychopathic_Records",
-      "featured": false
-    },
-    {
-      "id": "ep-89",
-      "number": 89,
-      "title": "Lunacy Episode 89",
-      "date": "2026-07-16",
-      "description": "Full episode on the Psychopathic Records channel.",
-      "videoUrl": "https://www.youtube.com/@Psychopathic_Records",
-      "featured": false
-    },
-    {
-      "id": "ep-88",
-      "number": 88,
-      "title": "Lunacy Episode 88",
-      "date": "2026-07-09",
-      "description": "Full episode on the Psychopathic Records channel.",
-      "videoUrl": "https://www.youtube.com/@Psychopathic_Records",
-      "featured": false
-    }
-  ],
-  "clipsLinks": [
-    { "label": "#JCWLunacy on TikTok", "url": "https://www.tiktok.com/tag/jcwlunacy" },
-    { "label": "@therealjcw clips", "url": "https://www.tiktok.com/@therealjcw" },
-    { "label": "Instagram reels", "url": "https://www.instagram.com/juggalochampionshipwrestling/" },
-    { "label": "YouTube channel", "url": "https://www.youtube.com/@Psychopathic_Records" }
-  ],
-  "events": [
-    {
-      "id": "lunacy-weekly",
-      "name": "JCW Lunacy — new episode",
-      "dates": "Every Thursday",
-      "venue": "Psychopathic Records YouTube",
-      "location": "Streaming worldwide",
-      "detail": "7PM Eastern, free on YouTube.",
-      "ticketsUrl": "https://www.youtube.com/@Psychopathic_Records",
-      "countdownIso": null,
-      "badge": "WEEKLY"
-    },
-    {
-      "id": "gotj-2026",
-      "name": "Gathering of the Juggalos",
-      "dates": "Aug 19–22, 2026",
-      "venue": "Mother Nature's Riverfront Retreat",
-      "location": "Macks Creek, MO",
-      "detail": "Four days of the Juggalo family reunion — with JCW running the Pavilion all weekend.",
-      "ticketsUrl": "https://juggalogathering.com/gotjtickets/",
-      "countdownIso": null,
-      "badge": "FESTIVAL"
-    },
-    {
-      "id": "bloodymania-19-n1",
-      "name": "Bloodymania 19 — Night One",
-      "dates": "Aug 20, 2026 · Midnight–2AM",
-      "venue": "The JCW Pavilion",
-      "location": "Gathering of the Juggalos",
-      "detail": "Night one of JCW's flagship supershow.",
-      "ticketsUrl": "https://www.psychopathicrecords.com/jcwtours",
-      "countdownIso": "2026-08-20T00:00:00-05:00",
-      "badge": "SUPERSHOW"
-    },
-    {
-      "id": "bloodymania-19-n2",
-      "name": "Bloodymania 19 — Night Two",
-      "dates": "Aug 21, 2026 · 1–3AM",
-      "venue": "The JCW Pavilion",
-      "location": "Gathering of the Juggalos",
-      "detail": "Night two — every championship on the line.",
-      "ticketsUrl": "https://www.psychopathicrecords.com/jcwtours",
-      "countdownIso": "2026-08-21T01:00:00-05:00",
-      "badge": "SUPERSHOW"
-    }
-  ],
-  "annualEvents": [
-    "Hatchet Attacks",
-    "Oddball Wrestling",
-    "Flashlight Wrestling",
-    "Hallowicked After Party",
-    "Big Ballas' X-Mas Party"
-  ],
-  "roster": [
-    { "id": "caleb-konley", "name": "Caleb Konley", "role": "Lunacy World Champion", "division": "champion" },
-    { "id": "josh-bishop", "name": "Josh Bishop", "role": "World Heavyweight Champion", "division": "champion" },
-    { "id": "dani-mo", "name": "Dani Mo", "role": "Women's World Champion", "division": "champion" },
-    { "id": "father-bronson", "name": "Father Bronson", "role": "American Champion", "division": "champion" },
-    { "id": "choppa-city", "name": "Choppa City", "role": "World Tag Team Champions", "division": "champion" },
-
-    { "id": "2-tuff-tony", "name": "2 Tuff Tony", "role": "Active roster", "division": "active" },
-    { "id": "alice-crowley", "name": "Alice Crowley", "role": "Active roster", "division": "active" },
-    { "id": "backseat-boyz", "name": "Backseat Boyz", "role": "Tag team", "division": "active" },
-    { "id": "barnabas", "name": "Barnabas the Bizarre", "role": "Active roster", "division": "active" },
-    { "id": "big-vito", "name": "Big Vito", "role": "Active roster", "division": "active" },
-    { "id": "breyer-wellington", "name": "Breyer Wellington", "role": "Active roster", "division": "active" },
-    { "id": "funstruction", "name": "Brothers of Funstruction", "role": "Tag team", "division": "active" },
-    { "id": "cokane", "name": "Cokane", "role": "Active roster", "division": "active" },
-    { "id": "donovan-dijak", "name": "Donovan Dijak", "role": "Active roster", "division": "active" },
-    { "id": "ec3", "name": "EC3", "role": "Active roster", "division": "active" },
-    { "id": "facade", "name": "Facade", "role": "Active roster", "division": "active" },
-    { "id": "forty-winks", "name": "Forty Winks", "role": "Active roster", "division": "active" },
-    { "id": "freya-the-slaya", "name": "Freya the Slaya", "role": "Active roster", "division": "active" },
-    { "id": "gisele-shaw", "name": "Gisele Shaw", "role": "Active roster", "division": "active" },
-    { "id": "green-phantom", "name": "The Green Phantom", "role": "Active roster", "division": "active" },
-    { "id": "haley-j", "name": "Hollyhood Haley J", "role": "Active roster", "division": "active" },
-    { "id": "hokane", "name": "Hokane", "role": "Active roster", "division": "active" },
-    { "id": "j-rod", "name": "J-Rod", "role": "Active roster", "division": "active" },
-    { "id": "james-storm", "name": "James Storm", "role": "Active roster", "division": "active" },
-    { "id": "jasmin-st-claire", "name": "Jasmin St. Claire", "role": "Active roster", "division": "active" },
-    { "id": "jeeves", "name": "Jeeves", "role": "Active roster", "division": "active" },
-    { "id": "joel-gertner", "name": "Joel Gertner", "role": "Active roster", "division": "active" },
-    { "id": "kerry-morton", "name": "Kerry Morton", "role": "Active roster", "division": "active" },
-    { "id": "kongo-kong", "name": "Kongo Kong", "role": "Active roster", "division": "active" },
-    { "id": "krule", "name": "Krule", "role": "Active roster", "division": "active" },
-    { "id": "luigi-primo", "name": "Luigi Primo", "role": "Active roster", "division": "active" },
-    { "id": "mad-man-pondo", "name": "Mad Man Pondo", "role": "Active roster", "division": "active" },
-    { "id": "matt-cross", "name": "Matt Cross", "role": "Active roster", "division": "active" },
-    { "id": "mecha-wolf", "name": "Mecha Wolf", "role": "Active roster", "division": "active" },
-    { "id": "mickie-knuckles", "name": "Mickie Knuckles", "role": "Active roster", "division": "active" },
-    { "id": "mosh-pit-mike", "name": "Mosh Pit Mike", "role": "Active roster", "division": "active" },
-    { "id": "mr-anderson", "name": "Mr. Anderson", "role": "Active roster", "division": "active" },
-    { "id": "mr-happy", "name": "Mr. Happy", "role": "Active roster", "division": "active" },
-    { "id": "nic-nemeth", "name": "Nic Nemeth", "role": "Active roster", "division": "active" },
-    { "id": "ninja-mack", "name": "Ninja Mack", "role": "Active roster", "division": "active" },
-    { "id": "the-outbreak", "name": "The Outbreak", "role": "Active roster", "division": "active" },
-    { "id": "painful-paul", "name": "7 Foot Tall Painful Paul", "role": "Active roster", "division": "active" },
-    { "id": "ricky-morton", "name": "Ricky Morton", "role": "Active roster", "division": "active" },
-    { "id": "ring-rat", "name": "The Ring Rat", "role": "Active roster", "division": "active" },
-    { "id": "sally-boy", "name": "Sally Boy", "role": "Active roster", "division": "active" },
-    { "id": "sewacide", "name": "Sewacide", "role": "Active roster", "division": "active" },
-    { "id": "shane-mercer", "name": "Shane Mercer", "role": "Active roster", "division": "active" },
-    { "id": "sonny-kiss", "name": "Sonny Kiss", "role": "Active roster", "division": "active" },
-    { "id": "sophia-rose", "name": "Sophia Rose", "role": "Active roster", "division": "active" },
-    { "id": "steven-flowe", "name": "Steven Flowe", "role": "Active roster", "division": "active" },
-    { "id": "vincenzo", "name": "Vincenzo", "role": "Active roster", "division": "active" },
-    { "id": "zach-gowen", "name": "Zach Gowen", "role": "Active roster", "division": "active" },
-    { "id": "willie-mack", "name": "Willie Mack", "role": "Active roster", "division": "active" },
-
-    { "id": "violent-j", "name": "Violent J", "role": "Owner", "division": "official" },
-    { "id": "vince-russo", "name": "Vince Russo", "role": "Owner", "division": "official" },
-    { "id": "joe-dombrowski", "name": "Joe Dombrowski", "role": "Commentary", "division": "official" },
-    { "id": "mark-roberts", "name": "Mark Roberts", "role": "Commentary", "division": "official" },
-    { "id": "veda-scott", "name": "Veda Scott", "role": "Commentary", "division": "official" },
-    { "id": "zac-amico", "name": "Zac Amico", "role": "Commentary", "division": "official" },
-    { "id": "dj-clay", "name": "DJ Clay", "role": "House DJ", "division": "official" },
-    { "id": "mac-davis", "name": "Mac Davis", "role": "Roving Reporter", "division": "official" },
-    { "id": "kid-cadet", "name": "Kid Cadet", "role": "Ring Announcer", "division": "official" },
-    { "id": "jeff-the-ref", "name": "Jeff the Ref", "role": "Referee", "division": "official" },
-    { "id": "george-ross", "name": "George Ross", "role": "Referee", "division": "official" },
-
-    { "id": "iron-sheik", "name": "The Iron Sheik", "role": "Legend", "division": "legend" },
-    { "id": "king-kong-bundy", "name": "King Kong Bundy", "role": "Legend", "division": "legend" },
-    { "id": "abdullah", "name": "Abdullah the Butcher", "role": "Legend", "division": "legend" },
-    { "id": "evil-dead", "name": "Evil Dead", "role": "Alumni", "division": "legend" },
-    { "id": "corporal-robinson", "name": "Corporal Robinson", "role": "Alumni", "division": "legend" },
-    { "id": "rude-boy", "name": "The Rude Boy", "role": "Alumni", "division": "legend" },
-    { "id": "vampiro", "name": "Vampiro", "role": "Legend", "division": "legend" },
-    { "id": "necro-butcher", "name": "Necro Butcher", "role": "Alumni", "division": "legend" },
-    { "id": "human-tornado", "name": "Human Tornado", "role": "Alumni", "division": "legend" },
-    { "id": "trent-acid", "name": "Trent Acid", "role": "Alumni", "division": "legend" },
-    { "id": "great-muta", "name": "The Great Muta", "role": "Legend", "division": "legend" },
-    { "id": "chris-hero", "name": "Chris Hero", "role": "Alumni", "division": "legend" },
-    { "id": "scott-hall", "name": "Scott Hall", "role": "Legend", "division": "legend" },
-    { "id": "raven", "name": "Raven", "role": "Legend", "division": "legend" },
-    { "id": "scott-damore", "name": "Scott D'Amore", "role": "Alumni", "division": "legend" },
-    { "id": "colt-cabana", "name": "Officer Colt Cabana", "role": "Alumni", "division": "legend" },
-    { "id": "cash-flo", "name": "Cash Flo", "role": "Alumni", "division": "legend" },
-    { "id": "rob-conway", "name": "Rob Conway", "role": "Alumni", "division": "legend" },
-    { "id": "jwo", "name": "JWO", "role": "Faction", "division": "legend" },
-    { "id": "kevin-nash", "name": "Kevin Nash", "role": "Legend", "division": "legend" },
-    { "id": "sean-waltman", "name": "Sean Waltman", "role": "Legend", "division": "legend" },
-    { "id": "weedman", "name": "The Weedman", "role": "Alumni", "division": "legend" },
-    { "id": "vanilla-ice", "name": "Vanilla Ice", "role": "Alumni", "division": "legend" },
-    { "id": "terry-funk", "name": "Terry Funk", "role": "Legend", "division": "legend" },
-    { "id": "dusty-rhodes", "name": "Dusty Rhodes", "role": "Legend", "division": "legend" },
-    { "id": "pat-tanaka", "name": "Pat Tanaka", "role": "Alumni", "division": "legend" },
-    { "id": "ring-ryders", "name": "The Ring Ryders", "role": "Alumni", "division": "legend" },
-    { "id": "thomaselli-brothers", "name": "The Thomaselli Brothers", "role": "Alumni", "division": "legend" },
-    { "id": "chuck-hogan", "name": "Hollywood Chuck Hogan", "role": "Alumni", "division": "legend" },
-    { "id": "tracy-smothers", "name": "Tracy Smothers", "role": "Legend", "division": "legend" },
-    { "id": "steve-corino", "name": "Steve Corino", "role": "Alumni", "division": "legend" },
-    { "id": "roddy-piper", "name": "\"Rowdy\" Roddy Piper", "role": "Legend", "division": "legend" },
-    { "id": "greg-valentine", "name": "Greg \"The Hammer\" Valentine", "role": "Legend", "division": "legend" },
-    { "id": "kamala", "name": "Kamala", "role": "Legend", "division": "legend" },
-    { "id": "tito-santana", "name": "Tito Santana", "role": "Legend", "division": "legend" },
-    { "id": "kid-kash", "name": "Kid Kash", "role": "Alumni", "division": "legend" },
-    { "id": "monty-brown", "name": "Monty Brown", "role": "Alumni", "division": "legend" },
-    { "id": "kevin-thorn", "name": "Kevin Thorn", "role": "Alumni", "division": "legend" },
-    { "id": "bobby-lashley", "name": "Bobby Lashley", "role": "Legend", "division": "legend" },
-    { "id": "balls-mahoney", "name": "Balls Mahoney", "role": "Alumni", "division": "legend" },
-    { "id": "ian-rotten", "name": "Ian Rotten", "role": "Alumni", "division": "legend" },
-    { "id": "bull-pain", "name": "Bull Pain", "role": "Alumni", "division": "legend" },
-    { "id": "sabu", "name": "Sabu", "role": "Legend", "division": "legend" }
-  ],
-  "merch": [
-    { "id": "lunacy-logo-shirt", "name": "JCW Lunacy Logo Shirt", "category": "Shirts", "url": "https://psychopathicvault.com/products/jcw-lunacy-logo-shirt" },
-    { "id": "lunacy-hoodie", "name": "Black JCW Lunacy Embroidered Hoodie", "category": "Hoodies", "url": "https://psychopathicvault.com/products/black-jcw-lunacy-embroidered-hoodie" },
-    { "id": "lunacy-snapback", "name": "Black JCW Lunacy Snapback Hat", "category": "Hats", "url": "https://psychopathicvault.com/products/black-jcw-lunacy-snapback-hat" },
-    { "id": "lunacy-beanie", "name": "JCW Lunacy 12\" Beanie", "category": "Hats", "url": "https://psychopathicvault.com/products/jcw-lunacy-12-beanie" },
-    { "id": "lunacy-flexfit", "name": "Black JCW Lunacy Flexfit Baseball Hat", "category": "Hats", "url": "https://psychopathicvault.com/products/black-jcw-lunacy-flexfit-baseball-hat" },
-    { "id": "jersey-red-black", "name": "Red on Black JCW Football Jersey", "category": "Jerseys", "url": "https://psychopathicvault.com/products/red-on-black-jcw-football-jersey" },
-    { "id": "jersey-jwo", "name": "JWO Football Jersey", "category": "Jerseys", "url": "https://psychopathicvault.com/products/jwo-football-jersey" },
-    { "id": "jersey-camo", "name": "Black on Camo JCW Football Jersey", "category": "Jerseys", "url": "https://psychopathicvault.com/products/black-on-camo-jcw-football-jersey" },
-    { "id": "jersey-black-black", "name": "Black on Black JCW Football Jersey", "category": "Jerseys", "url": "https://psychopathicvault.com/products/black-on-black-jcw-football-jersey" },
-    { "id": "jersey-white-blue", "name": "White on Blue JCW Football Jersey", "category": "Jerseys", "url": "https://psychopathicvault.com/products/white-on-blue-jcw-football-jersey" },
-    { "id": "jersey-red-white", "name": "Red on White JCW Football Jersey", "category": "Jerseys", "url": "https://psychopathicvault.com/products/red-on-white-jcw-football-jersey" },
-    { "id": "jcw-hoodie", "name": "Black JCW Embroidered Hoodie", "category": "Hoodies", "url": "https://psychopathicvault.com/products/black-jcw-embroidered-hoodie" },
-    { "id": "barbwire-shirt", "name": "JCW Yellow Barbwire Shirt", "category": "Shirts", "url": "https://psychopathicvault.com/products/jcw-yellow-barbwire-shirt" },
-    { "id": "bw-logo-shirt", "name": "JCW Black & White Logo Shirt", "category": "Shirts", "url": "https://psychopathicvault.com/products/jcw-black-white-logo-shirt" },
-    { "id": "blood-splatter-shirt", "name": "JCW Blood Splatter Shirt", "category": "Shirts", "url": "https://psychopathicvault.com/products/jcw-blood-splatter-shirt-1" },
-    { "id": "commissioner-shirt", "name": "JCW Violent J Commissioner Shirt", "category": "Shirts", "url": "https://psychopathicvault.com/products/jcw-violent-j-commissioner-shirt" },
-    { "id": "jcw-beanie", "name": "JCW 12\" Beanie", "category": "Hats", "url": "https://psychopathicvault.com/products/jcw-12-beanie" },
-    { "id": "jcw-flexfit", "name": "Black JCW Flexfit Baseball Hat", "category": "Hats", "url": "https://psychopathicvault.com/products/black-jcw-flexfit-baseball-hat" },
-    { "id": "konley-shirt", "name": "JCW Caleb Konley Shirt", "category": "Shirts", "url": "https://psychopathicvault.com/products/jcw-caleb-konley-shirt" },
-    { "id": "outbreak-shirt", "name": "JCW The Outbreak Shirt", "category": "Shirts", "url": "https://psychopathicvault.com/products/jcw-the-outbreak-shirt" },
-    { "id": "funstruction-shirt", "name": "JCW Brothers of Funstruction Fun Colors Shirt", "category": "Shirts", "url": "https://psychopathicvault.com/products/jcw-brothers-of-funstruction-fun-colors-shirt" }
-  ],
-  "cards": [
-    { "id": "card-konley", "name": "Caleb Konley", "rarity": "superRare", "subtitle": "Lunacy World Champion" },
-    { "id": "card-bishop", "name": "Josh Bishop", "rarity": "superRare", "subtitle": "World Heavyweight Champion" },
-    { "id": "card-dani-mo", "name": "Dani Mo", "rarity": "superRare", "subtitle": "Women's World Champion" },
-    { "id": "card-bronson", "name": "Father Bronson", "rarity": "superRare", "subtitle": "American Champion" },
-    { "id": "card-choppa", "name": "Choppa City", "rarity": "superRare", "subtitle": "World Tag Team Champions" },
-    { "id": "card-dijak", "name": "Donovan Dijak", "rarity": "foil", "subtitle": "Six-six of bad intentions" },
-    { "id": "card-ec3", "name": "EC3", "rarity": "foil", "subtitle": "Control your narrative" },
-    { "id": "card-krule", "name": "Krule", "rarity": "foil", "subtitle": "6'8\" · 317 lbs" },
-    { "id": "card-paul", "name": "7 Foot Tall Painful Paul", "rarity": "foil", "subtitle": "Seven feet of pain" },
-    { "id": "card-nemeth", "name": "Nic Nemeth", "rarity": "foil", "subtitle": "Show-off certified" },
-    { "id": "card-willie", "name": "Willie Mack", "rarity": "foil", "subtitle": "Stone cold smooth" },
-    { "id": "card-tony", "name": "2 Tuff Tony", "rarity": "foil", "subtitle": "Detroit's own" },
-    { "id": "card-haley", "name": "Hollyhood Haley J", "rarity": "foil", "subtitle": "Hollyhood royalty" },
-    { "id": "card-kongo", "name": "Kongo Kong", "rarity": "standard", "subtitle": "The monster among us" },
-    { "id": "card-pondo", "name": "Mad Man Pondo", "rarity": "standard", "subtitle": "Hardcore lifer" },
-    { "id": "card-storm", "name": "James Storm", "rarity": "standard", "subtitle": "Sorry about your damn luck" },
-    { "id": "card-ricky", "name": "Ricky Morton", "rarity": "standard", "subtitle": "Rock n roll forever" },
-    { "id": "card-kerry", "name": "Kerry Morton", "rarity": "standard", "subtitle": "Second generation fire" },
-    { "id": "card-cross", "name": "Matt Cross", "rarity": "standard", "subtitle": "Gravity optional" },
-    { "id": "card-ninja", "name": "Ninja Mack", "rarity": "standard", "subtitle": "Human highlight reel" },
-    { "id": "card-mercer", "name": "Shane Mercer", "rarity": "standard", "subtitle": "Iron demon" },
-    { "id": "card-mickie", "name": "Mickie Knuckles", "rarity": "standard", "subtitle": "Knuckle up" },
-    { "id": "card-gisele", "name": "Gisele Shaw", "rarity": "standard", "subtitle": "The quintessential diva" },
-    { "id": "card-freya", "name": "Freya the Slaya", "rarity": "standard", "subtitle": "Valhalla awaits" },
-    { "id": "card-vito", "name": "Big Vito", "rarity": "standard", "subtitle": "Old school tough" },
-    { "id": "card-facade", "name": "Facade", "rarity": "standard", "subtitle": "Neon ninja" },
-    { "id": "card-gowen", "name": "Zach Gowen", "rarity": "standard", "subtitle": "One leg, zero limits" },
-    { "id": "card-kiss", "name": "Sonny Kiss", "rarity": "standard", "subtitle": "Concrete rose" },
-    { "id": "card-phantom", "name": "The Green Phantom", "rarity": "standard", "subtitle": "Mystery in green" },
-    { "id": "card-crowley", "name": "Alice Crowley", "rarity": "standard", "subtitle": "Something wicked" },
-    { "id": "card-luigi", "name": "Luigi Primo", "rarity": "standard", "subtitle": "Pizza by hand" },
-    { "id": "card-sewacide", "name": "Sewacide", "rarity": "standard", "subtitle": "Straight from the drain" }
-  ],
-  "locker": {
-    "packCost": 150,
-    "checkInReward": 25,
-    "gameUnlockCost": 300
+  {
+   "value": "#2",
+   "label": "Vol. 1 on Billboard · 38 weeks"
   },
-  "lunatics": {
-    "headline": "LUNATICS ONLY",
-    "benefits": [
-      "Bonus content drops over time",
-      "Unlocks the Lunatics Only 2D fighting game",
-      "Trading cards and collection perks",
-      "First looks at new Lunacy madness"
-    ],
-    "note": "Membership content is added over time and may change. Billing terms, if added, are shown at checkout.",
-    "url": "https://jcwlunacy.net/#lunatics"
+  {
+   "value": "5",
+   "label": "Championships defended today"
   },
-  "about": {
-    "paragraphs": [
-      "Juggalo Championship Wrestling was founded by the Insane Clown Posse, with the first bell ringing December 19, 1999 at St. Andrew's Hall in Detroit.",
-      "Today JCW runs weekly — Lunacy streams every Thursday at 7PM Eastern on the Psychopathic Records YouTube channel, free for the whole world, with the biggest supershows landing at the Gathering of the Juggalos.",
-      "No ads sold on your data. No tracking. Made for the family, 13 and up."
-    ],
-    "timeline": [
-      { "year": "1999", "text": "First bell — December 19 at St. Andrew's Hall, Detroit" },
-      { "year": "2008", "text": "Hatchet Attacks debuts May 17" },
-      { "year": "2011", "text": "Hatchet Attacks goes PPV March 26" },
-      { "year": "2013", "text": "JCW Hall of Fame opens its doors" },
-      { "year": "2026", "text": "Lunacy streams weekly — Bloodymania 19 runs two nights at the Pavilion" }
-    ],
-    "legal": "JCW, JCW Lunacy, the Hatchetman and all related names, logos, photos, video and music are trademarks and property of Psychopathic Records."
+  {
+   "value": "2013",
+   "label": "Hall of Fame opens its doors"
   }
+ ],
+ "news": [
+  {
+   "id": "getting-real-big",
+   "title": "Getting Real BIG!",
+   "byline": "JCW Editorial · Sean Oliver",
+   "date": "2026-07-30",
+   "tag": "EDITORIAL",
+   "summary": "Sean Oliver looks at how JCW's roster has been growing in a very literal sense — with big-frame stars like Josh Bishop, Donovan Dijak, EC3, Krule and 7-foot Painful Paul reshaping the Lunacy landscape.",
+   "externalUrl": "https://jcwlunacy.net/#news"
+  },
+  {
+   "id": "bloodymania-19",
+   "title": "Bloodymania 19 hits the JCW Pavilion for two nights",
+   "byline": "JCW Lunacy",
+   "date": "2026-07-20",
+   "tag": "EVENTS",
+   "summary": "The biggest show of the Juggalo calendar runs two straight nights at the Gathering of the Juggalos, August 20–21 at the JCW Pavilion. Card announcements are rolling out on Lunacy every Thursday.",
+   "externalUrl": "https://jcwlunacy.net/#events"
+  },
+  {
+   "id": "lunacy-thursdays",
+   "title": "Lunacy drops every Thursday at 7PM Eastern",
+   "byline": "JCW Lunacy",
+   "date": "2026-07-01",
+   "tag": "SHOW",
+   "summary": "New episodes of JCW Lunacy stream weekly on the Psychopathic Records YouTube channel — championship matches, backstage madness and the wildest roster in wrestling.",
+   "externalUrl": "https://www.youtube.com/@Psychopathic_Records"
+  }
+ ],
+ "episodes": [
+  {
+   "id": "yt-r671-6OrvRQ",
+   "number": 94,
+   "title": "Episode 94",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/r671-6OrvRQ",
+   "featured": true
+  },
+  {
+   "id": "yt-14dZgNF2ts8",
+   "number": 93,
+   "title": "Episode 93",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/14dZgNF2ts8",
+   "featured": false
+  },
+  {
+   "id": "yt-S8ZBlfamxYs",
+   "number": 92,
+   "title": "Episode 92",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/S8ZBlfamxYs",
+   "featured": false
+  },
+  {
+   "id": "yt-FJ-a7mnnruk",
+   "number": 91,
+   "title": "Episode 91",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/FJ-a7mnnruk",
+   "featured": false
+  },
+  {
+   "id": "yt-72QVBcW2iXk",
+   "number": 90,
+   "title": "Episode 90",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/72QVBcW2iXk",
+   "featured": false
+  },
+  {
+   "id": "yt-O2JaBg6vAfg",
+   "number": 89,
+   "title": "Episode 89",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/O2JaBg6vAfg",
+   "featured": false
+  },
+  {
+   "id": "yt-8Em2w7Ddg6g",
+   "number": 88,
+   "title": "Episode 88",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/8Em2w7Ddg6g",
+   "featured": false
+  },
+  {
+   "id": "yt-0FMRsqVMMVA",
+   "number": 87,
+   "title": "Episode 87",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/0FMRsqVMMVA",
+   "featured": false
+  },
+  {
+   "id": "yt-684RfMLfw0g",
+   "number": 86,
+   "title": "Episode 86",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/684RfMLfw0g",
+   "featured": false
+  },
+  {
+   "id": "yt-ZCrl439PNAs",
+   "number": 85,
+   "title": "Episode 85",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/ZCrl439PNAs",
+   "featured": false
+  },
+  {
+   "id": "yt-l51MorhPj2w",
+   "number": 84,
+   "title": "Episode 84",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/l51MorhPj2w",
+   "featured": false
+  },
+  {
+   "id": "yt-o_5-_qKTsVA",
+   "number": 83,
+   "title": "Episode 83 — The Assault",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/o_5-_qKTsVA",
+   "featured": false
+  },
+  {
+   "id": "yt-d8PYYX2MDnc",
+   "number": 82,
+   "title": "Episode 82",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/d8PYYX2MDnc",
+   "featured": false
+  },
+  {
+   "id": "yt-8qKxZ2-JWW4",
+   "number": 81,
+   "title": "Episode 81",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/8qKxZ2-JWW4",
+   "featured": false
+  },
+  {
+   "id": "yt-Tyzby8Rj6OM",
+   "number": 80,
+   "title": "Episode 80",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/Tyzby8Rj6OM",
+   "featured": false
+  },
+  {
+   "id": "yt-FAhm9PJlTn0",
+   "number": 0,
+   "title": "Strangle-Mania: Viva Las Violence",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/FAhm9PJlTn0",
+   "featured": false
+  },
+  {
+   "id": "yt-YiSlwqSUZXU",
+   "number": 79,
+   "title": "Episode 79",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/YiSlwqSUZXU",
+   "featured": false
+  },
+  {
+   "id": "yt-bB_k_nfeUPE",
+   "number": 78,
+   "title": "Episode 78",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/bB_k_nfeUPE",
+   "featured": false
+  },
+  {
+   "id": "yt-4PH6EFlDbl4",
+   "number": 77,
+   "title": "Episode 77",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/4PH6EFlDbl4",
+   "featured": false
+  },
+  {
+   "id": "yt-FHhrfdjBpr0",
+   "number": 76,
+   "title": "Episode 76",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/FHhrfdjBpr0",
+   "featured": false
+  },
+  {
+   "id": "yt-db6e9r31uEY",
+   "number": 0,
+   "title": "The Panic Zone",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/db6e9r31uEY",
+   "featured": false
+  },
+  {
+   "id": "yt-bNts3D4NblE",
+   "number": 75,
+   "title": "Episode 75",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/bNts3D4NblE",
+   "featured": false
+  },
+  {
+   "id": "yt-YxhF2D4c0LA",
+   "number": 74,
+   "title": "Episode 74",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/YxhF2D4c0LA",
+   "featured": false
+  },
+  {
+   "id": "yt-8cxBNrYCF-s",
+   "number": 73,
+   "title": "Episode 73",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/8cxBNrYCF-s",
+   "featured": false
+  },
+  {
+   "id": "yt-6n_8B1Yh7xo",
+   "number": 72,
+   "title": "Episode 72",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/6n_8B1Yh7xo",
+   "featured": false
+  },
+  {
+   "id": "yt-HXC9H59lpbs",
+   "number": 71,
+   "title": "Episode 71",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/HXC9H59lpbs",
+   "featured": false
+  },
+  {
+   "id": "yt-76FNoNnh7gk",
+   "number": 70,
+   "title": "Episode 70",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/76FNoNnh7gk",
+   "featured": false
+  },
+  {
+   "id": "yt-roXOQk3uckg",
+   "number": 69,
+   "title": "Episode 69",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/roXOQk3uckg",
+   "featured": false
+  },
+  {
+   "id": "yt-5njFG9ChEk4",
+   "number": 68,
+   "title": "Episode 68",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/5njFG9ChEk4",
+   "featured": false
+  },
+  {
+   "id": "yt-rd5H2gETzEk",
+   "number": 67,
+   "title": "Episode 67",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/rd5H2gETzEk",
+   "featured": false
+  },
+  {
+   "id": "yt-HfSpJQgTuQI",
+   "number": 66,
+   "title": "Episode 66",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/HfSpJQgTuQI",
+   "featured": false
+  },
+  {
+   "id": "yt-9tWyyMIzFcc",
+   "number": 65,
+   "title": "Episode 65",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/9tWyyMIzFcc",
+   "featured": false
+  },
+  {
+   "id": "yt-DZ6wNE1Qxy0",
+   "number": 0,
+   "title": "2025 Year's End Award Show",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/DZ6wNE1Qxy0",
+   "featured": false
+  },
+  {
+   "id": "yt-2OnhMyzsW2w",
+   "number": 64,
+   "title": "Episode 64",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/2OnhMyzsW2w",
+   "featured": false
+  },
+  {
+   "id": "yt-oTohclO6Jnc",
+   "number": 63,
+   "title": "Episode 63",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/oTohclO6Jnc",
+   "featured": false
+  },
+  {
+   "id": "yt-mBQW_J_yZ8k",
+   "number": 62,
+   "title": "Episode 62",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/mBQW_J_yZ8k",
+   "featured": false
+  },
+  {
+   "id": "yt-TxVt-PfXCzw",
+   "number": 61,
+   "title": "Episode 61",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/TxVt-PfXCzw",
+   "featured": false
+  },
+  {
+   "id": "yt-o_YGWZr7Fq4",
+   "number": 60,
+   "title": "Episode 60",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/o_YGWZr7Fq4",
+   "featured": false
+  },
+  {
+   "id": "yt-qBiqfty4_ys",
+   "number": 59,
+   "title": "Episode 59",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/qBiqfty4_ys",
+   "featured": false
+  },
+  {
+   "id": "yt--sn9kPSkv6A",
+   "number": 58,
+   "title": "Episode 58",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/-sn9kPSkv6A",
+   "featured": false
+  },
+  {
+   "id": "yt-GQHnKnCFqoY",
+   "number": 57,
+   "title": "Episode 57 — Friends Forced to Fight",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/GQHnKnCFqoY",
+   "featured": false
+  },
+  {
+   "id": "yt-UB0WlZnUhxM",
+   "number": 56,
+   "title": "Episode 56",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/UB0WlZnUhxM",
+   "featured": false
+  },
+  {
+   "id": "yt-eSJ2TXRkaQw",
+   "number": 55,
+   "title": "Episode 55 — 2 Tuff Country",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/eSJ2TXRkaQw",
+   "featured": false
+  },
+  {
+   "id": "yt-EYSDRIK-npE",
+   "number": 54,
+   "title": "Episode 54",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/EYSDRIK-npE",
+   "featured": false
+  },
+  {
+   "id": "yt-8Bd-98tqn0g",
+   "number": 53,
+   "title": "Episode 53",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/8Bd-98tqn0g",
+   "featured": false
+  },
+  {
+   "id": "yt-gHNj4fGVCSc",
+   "number": 52,
+   "title": "Episode 52 — Houston Heat",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/gHNj4fGVCSc",
+   "featured": false
+  },
+  {
+   "id": "yt-X5qDbM9t2N8",
+   "number": 51,
+   "title": "Episode 51",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/X5qDbM9t2N8",
+   "featured": false
+  },
+  {
+   "id": "yt-KcP4ULp4CWM",
+   "number": 50,
+   "title": "Episode 50 — South Padre Island",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/KcP4ULp4CWM",
+   "featured": false
+  },
+  {
+   "id": "yt-sqXCDdCFEhU",
+   "number": 49,
+   "title": "Episode 49 — San Antonio",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/sqXCDdCFEhU",
+   "featured": false
+  },
+  {
+   "id": "yt-48elq7Or4O8",
+   "number": 0,
+   "title": "JCW vs. GCW: 2 Day War — Night 2",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/48elq7Or4O8",
+   "featured": false
+  },
+  {
+   "id": "yt-0UCyl_pDHR4",
+   "number": 0,
+   "title": "JCW vs. GCW: 2 Day War — Night 1",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/0UCyl_pDHR4",
+   "featured": false
+  },
+  {
+   "id": "yt-8BtBjewkJfQ",
+   "number": 0,
+   "title": "Powder Keg",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/8BtBjewkJfQ",
+   "featured": false
+  },
+  {
+   "id": "yt-eMkTN2bEnow",
+   "number": 47,
+   "title": "Episode 47",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/eMkTN2bEnow",
+   "featured": false
+  },
+  {
+   "id": "yt-LP6-6OqDicU",
+   "number": 46,
+   "title": "Episode 46",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/LP6-6OqDicU",
+   "featured": false
+  },
+  {
+   "id": "yt-KiZ78rXvl_c",
+   "number": 45,
+   "title": "Episode 45",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/KiZ78rXvl_c",
+   "featured": false
+  },
+  {
+   "id": "yt-TlKyiJW8m4c",
+   "number": 44,
+   "title": "Episode 44",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/TlKyiJW8m4c",
+   "featured": false
+  },
+  {
+   "id": "yt-qkVRtZg38Ik",
+   "number": 43,
+   "title": "Episode 43",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/qkVRtZg38Ik",
+   "featured": false
+  },
+  {
+   "id": "yt-A5f6L6_oBGc",
+   "number": 42,
+   "title": "Episode 42",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/A5f6L6_oBGc",
+   "featured": false
+  },
+  {
+   "id": "yt-X5cYQuoOQVA",
+   "number": 41,
+   "title": "Episode 41",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/X5cYQuoOQVA",
+   "featured": false
+  },
+  {
+   "id": "yt-tRE_G7BtGeE",
+   "number": 40,
+   "title": "Episode 40",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/tRE_G7BtGeE",
+   "featured": false
+  },
+  {
+   "id": "yt-mJQKz0Q_xHE",
+   "number": 39,
+   "title": "Episode 39",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/mJQKz0Q_xHE",
+   "featured": false
+  },
+  {
+   "id": "yt-zNbkLzt2D2Q",
+   "number": 38,
+   "title": "Episode 38",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/zNbkLzt2D2Q",
+   "featured": false
+  },
+  {
+   "id": "yt-hlfPEffocsE",
+   "number": 37,
+   "title": "Episode 37",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/hlfPEffocsE",
+   "featured": false
+  },
+  {
+   "id": "yt-eOmhz4U8coY",
+   "number": 36,
+   "title": "Episode 36",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/eOmhz4U8coY",
+   "featured": false
+  },
+  {
+   "id": "yt-rEGpLdGOhzI",
+   "number": 35,
+   "title": "Episode 35",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/rEGpLdGOhzI",
+   "featured": false
+  },
+  {
+   "id": "yt-6Xq9Zcnr1QA",
+   "number": 34,
+   "title": "Episode 34",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/6Xq9Zcnr1QA",
+   "featured": false
+  },
+  {
+   "id": "yt-_obgIuRSDsE",
+   "number": 33,
+   "title": "Episode 33",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/_obgIuRSDsE",
+   "featured": false
+  },
+  {
+   "id": "yt-UL03FY4U8UY",
+   "number": 32,
+   "title": "Episode 32",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/UL03FY4U8UY",
+   "featured": false
+  },
+  {
+   "id": "yt-gRWRracqq_o",
+   "number": 31,
+   "title": "Episode 31",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/gRWRracqq_o",
+   "featured": false
+  },
+  {
+   "id": "yt-e3AwvVov_fc",
+   "number": 30,
+   "title": "Episode 30",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/e3AwvVov_fc",
+   "featured": false
+  },
+  {
+   "id": "yt-0SxfODYHjZc",
+   "number": 29,
+   "title": "Episode 29",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/0SxfODYHjZc",
+   "featured": false
+  },
+  {
+   "id": "yt-e3JkV39gI8g",
+   "number": 28,
+   "title": "Episode 28",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/e3JkV39gI8g",
+   "featured": false
+  },
+  {
+   "id": "yt-ywD8BbJCvIk",
+   "number": 27,
+   "title": "Episode 27",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/ywD8BbJCvIk",
+   "featured": false
+  },
+  {
+   "id": "yt-0qFEflV2O9k",
+   "number": 26,
+   "title": "Episode 26",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/0qFEflV2O9k",
+   "featured": false
+  },
+  {
+   "id": "yt-3cig-98Kh7I",
+   "number": 25,
+   "title": "Episode 25",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/3cig-98Kh7I",
+   "featured": false
+  },
+  {
+   "id": "yt-2wBSD_rnwSE",
+   "number": 24,
+   "title": "Episode 24",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/2wBSD_rnwSE",
+   "featured": false
+  },
+  {
+   "id": "yt-mMh3L5VTl40",
+   "number": 23,
+   "title": "Episode 23",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/mMh3L5VTl40",
+   "featured": false
+  },
+  {
+   "id": "yt-iUhmaXAvyL0",
+   "number": 22,
+   "title": "Episode 22",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/iUhmaXAvyL0",
+   "featured": false
+  },
+  {
+   "id": "yt-LNMQCAOu2Yw",
+   "number": 21,
+   "title": "Episode 21",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/LNMQCAOu2Yw",
+   "featured": false
+  },
+  {
+   "id": "yt-oQKiiIOmLKM",
+   "number": 20,
+   "title": "Episode 20",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/oQKiiIOmLKM",
+   "featured": false
+  },
+  {
+   "id": "yt-cBxbQSaeQQY",
+   "number": 19,
+   "title": "Episode 19",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/cBxbQSaeQQY",
+   "featured": false
+  },
+  {
+   "id": "yt-03RpH6jSoAQ",
+   "number": 0,
+   "title": "Deck the Jaws",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/03RpH6jSoAQ",
+   "featured": false
+  },
+  {
+   "id": "yt-N4LFBR7rsBA",
+   "number": 0,
+   "title": "St. Louis 12/5",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/N4LFBR7rsBA",
+   "featured": false
+  },
+  {
+   "id": "yt-5JlCpnUQBf0",
+   "number": 0,
+   "title": "Little Rock 12/4",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/5JlCpnUQBf0",
+   "featured": false
+  },
+  {
+   "id": "yt-0d6aHVEy6Dk",
+   "number": 0,
+   "title": "Spanks Givin' 2024",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/0d6aHVEy6Dk",
+   "featured": false
+  },
+  {
+   "id": "yt-z_RdoVtB-gY",
+   "number": 0,
+   "title": "Detroit 10/31",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/z_RdoVtB-gY",
+   "featured": false
+  },
+  {
+   "id": "yt-rIMUrp5jIFk",
+   "number": 0,
+   "title": "Joliet 10/29",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/rIMUrp5jIFk",
+   "featured": false
+  },
+  {
+   "id": "yt-A1wLIwmJWfg",
+   "number": 0,
+   "title": "Milwaukee 10/28",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/A1wLIwmJWfg",
+   "featured": false
+  },
+  {
+   "id": "yt-aPJN20rxS64",
+   "number": 0,
+   "title": "St. Louis 10/27",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/aPJN20rxS64",
+   "featured": false
+  },
+  {
+   "id": "yt-GTsdVZhU-yc",
+   "number": 0,
+   "title": "Columbia, MO 10/26",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/GTsdVZhU-yc",
+   "featured": false
+  },
+  {
+   "id": "yt-v5vUkwZQskk",
+   "number": 0,
+   "title": "Little Rock 10/25",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/v5vUkwZQskk",
+   "featured": false
+  },
+  {
+   "id": "yt-rsAZvyaugQA",
+   "number": 0,
+   "title": "Birmingham 10/24",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/rsAZvyaugQA",
+   "featured": false
+  },
+  {
+   "id": "yt-bs0SabnHf0o",
+   "number": 0,
+   "title": "Nashville 10/23",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/bs0SabnHf0o",
+   "featured": false
+  },
+  {
+   "id": "yt-j9dZK-sKbf8",
+   "number": 8,
+   "title": "Episode 8",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/j9dZK-sKbf8",
+   "featured": false
+  },
+  {
+   "id": "yt-zN907ySdszs",
+   "number": 7,
+   "title": "Episode 7",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/zN907ySdszs",
+   "featured": false
+  },
+  {
+   "id": "yt-OOQPcSVwj8s",
+   "number": 6,
+   "title": "Episode 6",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/OOQPcSVwj8s",
+   "featured": false
+  },
+  {
+   "id": "yt-zZWzPuQxmgs",
+   "number": 5,
+   "title": "Episode 5",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/zZWzPuQxmgs",
+   "featured": false
+  },
+  {
+   "id": "yt-mr0yPRmqHtk",
+   "number": 4,
+   "title": "Episode 4",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/mr0yPRmqHtk",
+   "featured": false
+  },
+  {
+   "id": "yt-uoh_iT8XU_4",
+   "number": 3,
+   "title": "Episode 3",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/uoh_iT8XU_4",
+   "featured": false
+  },
+  {
+   "id": "yt-lxGoZY8CVHk",
+   "number": 2,
+   "title": "Episode 2",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/lxGoZY8CVHk",
+   "featured": false
+  },
+  {
+   "id": "yt-YZWJwm2JmTk",
+   "number": 1,
+   "title": "Episode 1",
+   "date": "",
+   "description": "",
+   "videoUrl": "https://youtu.be/YZWJwm2JmTk",
+   "featured": false
+  }
+ ],
+ "clipsLinks": [
+  {
+   "label": "#JCWLunacy on TikTok",
+   "url": "https://www.tiktok.com/tag/jcwlunacy"
+  },
+  {
+   "label": "@therealjcw clips",
+   "url": "https://www.tiktok.com/@therealjcw"
+  },
+  {
+   "label": "Instagram reels",
+   "url": "https://www.instagram.com/juggalochampionshipwrestling/"
+  },
+  {
+   "label": "YouTube channel",
+   "url": "https://www.youtube.com/@Psychopathic_Records"
+  }
+ ],
+ "events": [
+  {
+   "id": "lunacy-weekly",
+   "name": "JCW Lunacy — new episode",
+   "dates": "Every Thursday",
+   "venue": "Psychopathic Records YouTube",
+   "location": "Streaming worldwide",
+   "detail": "7PM Eastern, free on YouTube.",
+   "ticketsUrl": "https://www.youtube.com/@Psychopathic_Records",
+   "countdownIso": null,
+   "badge": "WEEKLY"
+  },
+  {
+   "id": "gotj-2026",
+   "name": "Gathering of the Juggalos",
+   "dates": "Aug 19–22, 2026",
+   "venue": "Mother Nature's Riverfront Retreat",
+   "location": "Macks Creek, MO",
+   "detail": "Four days of the Juggalo family reunion — with JCW running the Pavilion all weekend.",
+   "ticketsUrl": "https://juggalogathering.com/gotjtickets/",
+   "countdownIso": null,
+   "badge": "FESTIVAL"
+  },
+  {
+   "id": "bloodymania-19-n1",
+   "name": "Bloodymania 19 — Night One",
+   "dates": "Aug 20, 2026 · Midnight–2AM",
+   "venue": "The JCW Pavilion",
+   "location": "Gathering of the Juggalos",
+   "detail": "Night one of JCW's flagship supershow.",
+   "ticketsUrl": "https://www.psychopathicrecords.com/jcwtours",
+   "countdownIso": "2026-08-20T00:00:00-05:00",
+   "badge": "SUPERSHOW"
+  },
+  {
+   "id": "bloodymania-19-n2",
+   "name": "Bloodymania 19 — Night Two",
+   "dates": "Aug 21, 2026 · 1–3AM",
+   "venue": "The JCW Pavilion",
+   "location": "Gathering of the Juggalos",
+   "detail": "Night two — every championship on the line.",
+   "ticketsUrl": "https://www.psychopathicrecords.com/jcwtours",
+   "countdownIso": "2026-08-21T01:00:00-05:00",
+   "badge": "SUPERSHOW"
+  }
+ ],
+ "annualEvents": [
+  "Hatchet Attacks",
+  "Oddball Wrestling",
+  "Flashlight Wrestling",
+  "Hallowicked After Party",
+  "Big Ballas' X-Mas Party"
+ ],
+ "roster": [
+  {
+   "id": "caleb-konley",
+   "name": "Caleb Konley",
+   "role": "Lunacy World Champion",
+   "division": "champion",
+   "imageUrl": "https://jcwlunacy.net/roster/caleb-konley.jpg",
+   "facts": [
+    "Nickname: The Obsession",
+    "Height: 6'0\"",
+    "Weight: 207",
+    "Hometown: Charlotte by God, NC",
+    "Finisher: Picture Perfect Moonsault"
+   ],
+   "tagline": "THE CHOSEN ONE HOLDS THE LUNACY GOLD",
+   "themeTitle": ""
+  },
+  {
+   "id": "josh-bishop",
+   "name": "Josh Bishop",
+   "role": "World Heavyweight Champion",
+   "division": "champion",
+   "imageUrl": "https://jcwlunacy.net/roster/josh-bishop.jpg",
+   "facts": [
+    "World Heavyweight Champion",
+    "1 of 1 · The Intense Icon · Big Money"
+   ],
+   "tagline": "THE HEAVYWEIGHT OF THE WHOLE WORLD",
+   "themeTitle": ""
+  },
+  {
+   "id": "dani-mo",
+   "name": "Dani Mo",
+   "role": "Women’s World Champion",
+   "division": "champion",
+   "imageUrl": "https://jcwlunacy.net/roster/dani-mo.jpg",
+   "facts": [
+    "Nickname: Dino-Myte Dani Mo",
+    "Height: 5’6”",
+    "Weight: 130",
+    "Hometown: Pittsburgh, PA",
+    "Finisher: The Moon Mist Twist"
+   ],
+   "tagline": "DANI MO DOESN’T BACK DOWN",
+   "themeTitle": ""
+  },
+  {
+   "id": "father-bronson",
+   "name": "Father Bronson",
+   "role": "American Champion",
+   "division": "champion",
+   "imageUrl": "https://jcwlunacy.net/roster/father-bronson.jpg",
+   "facts": [
+    "American Champion"
+   ],
+   "tagline": "THE AMERICAN CHAMPION WILL SEE YOU NOW",
+   "themeTitle": ""
+  },
+  {
+   "id": "choppa-city",
+   "name": "Choppa City",
+   "role": "World Tag Team Champions",
+   "division": "champion",
+   "imageUrl": "https://jcwlunacy.net/roster/choppa-city.jpg",
+   "facts": [
+    "World Tag Team Champions",
+    "Bruce Wayans & Atiba"
+   ],
+   "tagline": "TAG TEAM GOLD LIVES IN CHOPPA CITY",
+   "themeTitle": ""
+  },
+  {
+   "id": "2-tuff-tony",
+   "name": "2 Tuff Tony",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/2-tuff-tony.jpg",
+   "facts": [
+    "Nickname: The Louisville Town Drunk",
+    "Height: 6'0\"",
+    "Weight: 240 lbs",
+    "Hometown: Louisville, KY",
+    "Finisher: Meteorite"
+   ],
+   "tagline": "2 TUFF TONY RIDES AGAIN",
+   "themeTitle": ""
+  },
+  {
+   "id": "alice-crowley",
+   "name": "Alice Crowley",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/alice-crowley.jpg",
+   "facts": [
+    "Nickname: Big Al",
+    "Height: 5’6”",
+    "Weight: 130",
+    "Hometown: Indianapolis, IN",
+    "Finisher: "
+   ],
+   "tagline": "ALICE CROWLEY &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "backseat-boyz",
+   "name": "Backseat Boyz",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/backseat-boyz.jpg",
+   "facts": [
+    "Nickname: Tommy 2 Dope & Violent JP",
+    "Height: 5’8” & 5’7”",
+    "Weight: 175 & 180",
+    "Hometown: Rockland County, NY",
+    "Finisher: T Gimmick Double Crucifix Power Bomb"
+   ],
+   "tagline": "BACKSEAT BOYZ &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "barnabas-the-bizarre",
+   "name": "Barnabas the Bizarre",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/barnabas-the-bizarre.jpg",
+   "facts": [
+    "Nickname: Purveyor of Peculiar & The Twins of Salem",
+    "Height: All 6’1”",
+    "Weight: 220 & 175 & 175"
+   ],
+   "tagline": "THE BIZARRE ONE HAS A FAMILY MATTER",
+   "themeTitle": ""
+  },
+  {
+   "id": "big-vito",
+   "name": "Big Vito",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/big-vito.jpg",
+   "facts": [
+    "The Luciano Family",
+    "Lunacy Era"
+   ],
+   "tagline": "TAKE OUT COKANE &mdash; OR ELSE",
+   "themeTitle": ""
+  },
+  {
+   "id": "breyer-wellington",
+   "name": "Breyer Wellington",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/breyer-wellington.jpg",
+   "facts": [
+    "Nickname: Richie Boy, The Manservant",
+    "Height: 5’11’’ & 5’9”",
+    "Weight: 225 & 180",
+    "Hometown: Detroit, MI",
+    "Finisher: Kings Landing Backstabber & The Damn Daniel"
+   ],
+   "tagline": "BREYER WELLINGTON &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "brothers-of-funstruction",
+   "name": "Brothers of Funstruction",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/brothers-of-funstruction.jpg",
+   "facts": [
+    "Nickname: Yabo the Clown & Ruffo the Clown",
+    "Height: Both 6’5”",
+    "Weight: 44 Boxes of Popcorn and 135 Bags of Circus Peanuts",
+    "Hometown: The Funstruction Tent at the Dark Carnival",
+    "Finisher: The Whoop Whoop Stomp"
+   ],
+   "tagline": "BROTHERS OF FUNSTRUCTION &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "cokane",
+   "name": "Cokane",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/cokane.jpg",
+   "facts": [
+    "Nickname: The Devil’s Favorite Dealer",
+    "Height: 6'2\"",
+    "Weight: 235 lbs",
+    "Hometown: Hell's Playground",
+    "Finisher: The Coke Slam"
+   ],
+   "tagline": "THE DEVIL’S FAVORITE DEALER",
+   "themeTitle": ""
+  },
+  {
+   "id": "donovan-dijak",
+   "name": "Donovan Dijak",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/donovan-dijak.jpg",
+   "facts": [
+    "Feast Your Eyes"
+   ],
+   "tagline": "DONOVAN DIJAK &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "ec3",
+   "name": "EC3",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/ec3.jpg",
+   "facts": [
+    "The Top 1%"
+   ],
+   "tagline": "EC3 &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "facade",
+   "name": "Facade",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/facade.jpg",
+   "facts": [
+    "Nickname: The Neon Ninja",
+    "Height: 6'0\"",
+    "Weight: 187",
+    "Hometown: Pittsburgh, PA",
+    "Finisher: Neon Terminator"
+   ],
+   "tagline": "FACADE &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "forty-winks",
+   "name": "Forty Winks",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/forty-winks.jpg",
+   "facts": [
+    "Lunacy Era"
+   ],
+   "tagline": "FORTY WINKS &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "freya-the-slaya",
+   "name": "Freya the Slaya",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/freya-the-slaya.jpg",
+   "facts": [
+    "Lunacy Era"
+   ],
+   "tagline": "FREYA THE SLAYA &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "gisele-shaw",
+   "name": "Gisele Shaw",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/gisele-shaw.jpg",
+   "facts": [
+    "The Quintessential Diva"
+   ],
+   "tagline": "GISELE SHAW &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "the-green-phantom",
+   "name": "The Green Phantom",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/the-green-phantom.jpg",
+   "facts": [
+    "Get With The Green"
+   ],
+   "tagline": "THE GREEN PHANTOM &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "hollyhood-haley-j",
+   "name": "Hollyhood Haley J",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/hollyhood-haley-j.jpg",
+   "facts": [
+    "The Boujhettoest Baddie"
+   ],
+   "tagline": "POWER SLAP &middot; DARK CARNIVAL",
+   "themeTitle": ""
+  },
+  {
+   "id": "hokane",
+   "name": "Hokane",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/hokane.jpg",
+   "facts": [
+    "Lunacy Era"
+   ],
+   "tagline": "BIG AL IS STILL LOOKING FOR HIM",
+   "themeTitle": ""
+  },
+  {
+   "id": "j-rod",
+   "name": "J-Rod",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/j-rod.jpg",
+   "facts": [
+    "The Ultimate Athlete"
+   ],
+   "tagline": "J-ROD &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "james-storm",
+   "name": "James Storm",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/james-storm.jpg",
+   "facts": [
+    "The Cowboy"
+   ],
+   "tagline": "JAMES STORM &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "jasmine-st-claire",
+   "name": "Jasmin St. Claire",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/jasmine-st-claire.jpg",
+   "facts": [
+    "Combined Weight: More than 1400 pounds",
+    "Hometown: The St Claire Monster Factory"
+   ],
+   "tagline": "WHO’S THE FATHER?",
+   "themeTitle": ""
+  },
+  {
+   "id": "jeeves",
+   "name": "Jeeves",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/jeeves.jpg",
+   "facts": [
+    "Nickname: Richie Boy, The Manservant",
+    "Height: 5’11’’ & 5’9”",
+    "Weight: 225 & 180",
+    "Hometown: Detroit, MI",
+    "Finisher: Kings Landing Backstabber & The Damn Daniel"
+   ],
+   "tagline": "JEEVES &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "joel-gertner",
+   "name": "Joel Gertner",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/joel-gertner.jpg",
+   "facts": [
+    "The Quintessential Stud Muffin"
+   ],
+   "tagline": "JOEL GERTNER &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "kerry-morton",
+   "name": "Kerry Morton",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/kerry-morton.jpg",
+   "facts": [
+    "Nickname: Mr. JCW",
+    "Height: 5'11\"",
+    "Weight: 191",
+    "Hometown: Bristol, TN",
+    "Finisher: Kiss It Goodnight"
+   ],
+   "tagline": "KERRY MORTON &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "kongo-kong",
+   "name": "Kongo Kong",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/kongo-kong.jpg",
+   "facts": [
+    "Combined Weight: More than 1400 pounds",
+    "Hometown: The St Claire Monster Factory"
+   ],
+   "tagline": "THE MONSTER’S MONSTER",
+   "themeTitle": ""
+  },
+  {
+   "id": "krule",
+   "name": "Krule",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/krule.jpg",
+   "facts": [
+    "The Atrocity"
+   ],
+   "tagline": "KRULE &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "luigi-primo",
+   "name": "Luigi Primo",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/luigi-primo.jpg",
+   "facts": [
+    "Nickname: The Best Pizza Chef",
+    "Height: 5'10\"",
+    "Weight: 176",
+    "Hometown: The Old Country"
+   ],
+   "tagline": "TOSSED MORE TIMES THAN LUIGI’S PIZZA DOUGH",
+   "themeTitle": ""
+  },
+  {
+   "id": "mad-man-pondo",
+   "name": "Mad Man Pondo",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/mad-man-pondo.jpg",
+   "facts": [
+    "Height: 5'10\"",
+    "Weight: 220",
+    "Hometown: The Realm of Pain",
+    "Signature: Sudden Stop"
+   ],
+   "tagline": "MAD MAN PONDO HAS ENTERED THE BUILDING",
+   "themeTitle": ""
+  },
+  {
+   "id": "matt-cross",
+   "name": "Matt Cross",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/matt-cross.jpg",
+   "facts": [
+    "Nickname: MDogg20",
+    "Height: 5’7”",
+    "Weight: 191",
+    "Hometown: Cleveland, Ohio",
+    "Finisher: Shooting Star Press, Cross Cutter"
+   ],
+   "tagline": "MATT CROSS &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "mecha-wolf",
+   "name": "Mecha Wolf",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/mecha-wolf.jpg",
+   "facts": [
+    "Lunacy Era"
+   ],
+   "tagline": "MECHA WOLF &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "mickie-knuckles",
+   "name": "Mickie Knuckles",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/mickie-knuckles.jpg",
+   "facts": [
+    "Nickname: The Man from Nantucket",
+    "Height: 5’ 6”",
+    "Weight: Whole lot of Ass",
+    "Hometown: Louisville, KY",
+    "Finisher: Rusty Taco, Cunt Monkey Special"
+   ],
+   "tagline": "MICKIE KNUCKLES &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "moshpit-mike",
+   "name": "Mosh Pit Mike",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/moshpit-mike.jpg",
+   "facts": [
+    "Nickname: The Man of 1000 Gimmicks",
+    "Height: 6’4”",
+    "Weight: 264",
+    "Hometown: Albuquerque, NM",
+    "Finisher: Snapmare Powerbomb"
+   ],
+   "tagline": "MOSH PIT MIKE &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "mr-anderson",
+   "name": "Mr. Anderson",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/mr-anderson.jpg",
+   "facts": [
+    "First JCW Lunacy World Champion"
+   ],
+   "tagline": "MR. ANDERSON &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "mr-happy",
+   "name": "Mr. Happy",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/mr-happy.jpg",
+   "facts": [
+    "Combined Weight: More than 1400 pounds",
+    "Hometown: The St Claire Monster Factory"
+   ],
+   "tagline": "MR. HAPPY &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "nic-nemeth",
+   "name": "Nic Nemeth",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/nic-nemeth.jpg",
+   "facts": [
+    "The Wanted Man"
+   ],
+   "tagline": "NIC NEMETH &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "ninja-mack",
+   "name": "Ninja Mack",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/ninja-mack.jpg",
+   "facts": [
+    "Former American Champion"
+   ],
+   "tagline": "NINJA MACK KEEPS FLYING",
+   "themeTitle": ""
+  },
+  {
+   "id": "outbreak",
+   "name": "The Outbreak",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/outbreak.jpg",
+   "facts": [
+    "Nickname: Purveyor of Peculiar & The Twins of Salem",
+    "Height: All 6’1”",
+    "Weight: 220 & 175 & 175"
+   ],
+   "tagline": "THE OUTBREAK &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "7-foot-tall-painful-paul",
+   "name": "7 Foot Tall Painful Paul",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/7-foot-tall-painful-paul.jpg",
+   "facts": [
+    "7 Feet of Pain"
+   ],
+   "tagline": "7 FOOT TALL PAINFUL PAUL &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "ricky-morton",
+   "name": "Ricky Morton",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/ricky-morton.jpg",
+   "facts": [
+    "Nickname: Punky",
+    "Height: 5'11\"",
+    "Weight: 227",
+    "Hometown: Nashville, TN",
+    "Finisher: Tennessee Destroyer"
+   ],
+   "tagline": "RICKY MORTON &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "the-ring-rat",
+   "name": "The Ring Rat",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/the-ring-rat.jpg",
+   "facts": [
+    "Lunacy Era"
+   ],
+   "tagline": "THE RING RAT &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "sally-boy",
+   "name": "Sally Boy",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/sally-boy.jpg",
+   "facts": [
+    "The Luciano Family"
+   ],
+   "tagline": "SALLY BOY &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "sewacide",
+   "name": "Sewacide",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/sewacide.jpg",
+   "facts": [
+    "Lunacy Era"
+   ],
+   "tagline": "SEWACIDE &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "shane-mercer",
+   "name": "Shane Mercer",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/shane-mercer.jpg",
+   "facts": [
+    "Nickname: The Mercenary",
+    "Height: 5'11\"",
+    "Weight: 209",
+    "Hometown: My Own Personal Hell",
+    "Finisher: Moonsault and Battery"
+   ],
+   "tagline": "SHANE MERCER &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "sonny-kiss",
+   "name": "Sonny Kiss",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/sonny-kiss.jpg",
+   "facts": [
+    "Nickname: The Concrete Rose",
+    "Height: 5’8”",
+    "Weight: 189",
+    "Hometown: Jersey City, New Jersey",
+    "Finisher: Twerksault"
+   ],
+   "tagline": "SONNY KISS &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "sohpia-rose",
+   "name": "Sophia Rose",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/sohpia-rose.jpg",
+   "facts": [
+    "Lunacy Era"
+   ],
+   "tagline": "SOPHIA ROSE &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "steven-flowe",
+   "name": "Steven Flowe",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/steven-flowe.jpg",
+   "facts": [
+    "Nickname: The Grunge Lord",
+    "Height: 5’11\"",
+    "Weight: 168",
+    "Hometown: Chicago, IL",
+    "Finisher: Steven Flowesion"
+   ],
+   "tagline": "UNDER ORDERS FROM BIG VITO",
+   "themeTitle": ""
+  },
+  {
+   "id": "vincenzo",
+   "name": "Vincenzo",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/vincenzo.jpg",
+   "facts": [
+    "The Luciano Family"
+   ],
+   "tagline": "VINCENZO &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "zach-gowen",
+   "name": "Zach Gowen",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/zach-gowen.jpg",
+   "facts": [
+    "Former Tag Team Champion"
+   ],
+   "tagline": "ZACH GOWEN &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "willie-mack",
+   "name": "Willie Mack",
+   "role": "JCW Roster",
+   "division": "active",
+   "imageUrl": "https://jcwlunacy.net/roster/willie-mack.jpg",
+   "facts": [
+    "Nickname: The Chocolate Juggalo",
+    "Height: 6'0\"",
+    "Weight: 250 lbs",
+    "Hometown: South Central LA",
+    "Finisher: Chocolate Thunder Bomb"
+   ],
+   "tagline": "WILLIE MACK DIDN’T BLINK",
+   "themeTitle": ""
+  },
+  {
+   "id": "violent-j",
+   "name": "Violent J",
+   "role": "Owner",
+   "division": "official",
+   "imageUrl": "https://jcwlunacy.net/roster/violent-j.jpg",
+   "facts": [
+    "Nickname: The Duke of the Wicked",
+    "Height: 6’3”",
+    "Weight: 257",
+    "Hometown: Detroit",
+    "Finisher: Moonsult"
+   ],
+   "tagline": "VIOLENT J &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "vince-russo",
+   "name": "Vince Russo",
+   "role": "Owner",
+   "division": "official",
+   "imageUrl": "https://jcwlunacy.net/roster/vince-russo.jpg",
+   "facts": [
+    "Co-Owner"
+   ],
+   "tagline": "VINCE RUSSO &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "joe-dombrowski",
+   "name": "Joe Dombrowski",
+   "role": "Commentary",
+   "division": "official",
+   "imageUrl": "https://jcwlunacy.net/roster/joe-dombrowski.jpg",
+   "facts": [
+    "Nickname: The Voice of Lunacy",
+    "Height: 5’11”",
+    "Weight: 220",
+    "Hometown: Pittsburgh, PA",
+    "Finisher: The Sign Off"
+   ],
+   "tagline": "JOE DOMBROWSKI &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "mark-roberts",
+   "name": "Mark Roberts",
+   "role": "Commentary",
+   "division": "official",
+   "imageUrl": "https://jcwlunacy.net/roster/mark-roberts.jpg",
+   "facts": [
+    "Nickname: The Smartest Mark in the Room",
+    "Height: 6’0”",
+    "Weight: 202",
+    "Hometown: Brooklyn, New York",
+    "Finisher: The Dirt Sheet Press"
+   ],
+   "tagline": "MARK ROBERTS &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "dj-clay",
+   "name": "DJ Clay",
+   "role": "House DJ",
+   "division": "official",
+   "imageUrl": "https://jcwlunacy.net/roster/dj-clay.jpg",
+   "facts": [
+    "House DJ"
+   ],
+   "tagline": "DJ CLAY &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "veda-scott",
+   "name": "Veda Scott",
+   "role": "Commentary",
+   "division": "official",
+   "imageUrl": "https://jcwlunacy.net/roster/veda-scott.jpg",
+   "facts": [
+    "Commentary"
+   ],
+   "tagline": "VEDA SCOTT &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "zac-amico",
+   "name": "Zac Amico",
+   "role": "Commentary",
+   "division": "official",
+   "imageUrl": "https://jcwlunacy.net/roster/zac-amico.jpg",
+   "facts": [
+    "Commentary"
+   ],
+   "tagline": "ZAC AMICO &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "mac-davis",
+   "name": "Mac Davis",
+   "role": "Roving Reporter",
+   "division": "official",
+   "imageUrl": "https://jcwlunacy.net/roster/mac-davis.jpg",
+   "facts": [
+    "Roving Reporter"
+   ],
+   "tagline": "MAC DAVIS &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "kid-cadet",
+   "name": "Kid Cadet",
+   "role": "Ring Announcer",
+   "division": "official",
+   "imageUrl": "https://jcwlunacy.net/roster/kid-cadet.jpg",
+   "facts": [
+    "Ring Announcer"
+   ],
+   "tagline": "KID CADET &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "jeff-the-ref",
+   "name": "Jeff the Ref",
+   "role": "Referee",
+   "division": "official",
+   "imageUrl": "https://jcwlunacy.net/roster/jeff-the-ref.jpg",
+   "facts": [
+    "Nickname: Jeff the Ref",
+    "Height: 5’9”",
+    "Weight: 150",
+    "Hometown: Detroit, MI",
+    "Finisher: The Pinfall"
+   ],
+   "tagline": "JEFF THE REF &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "george-ross",
+   "name": "George Ross",
+   "role": "Referee",
+   "division": "official",
+   "imageUrl": "https://jcwlunacy.net/roster/george-ross.jpg",
+   "facts": [
+    "Referee"
+   ],
+   "tagline": "GEORGE ROSS &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "the-iron-sheik",
+   "name": "The Iron Sheik",
+   "role": "Night One &middot; 1999",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/the-iron-sheik.jpg",
+   "facts": [
+    "Night One · 1999"
+   ],
+   "tagline": "THE IRON SHEIK WAS ON THE FIRST CARD",
+   "themeTitle": ""
+  },
+  {
+   "id": "king-kong-bundy",
+   "name": "King Kong Bundy",
+   "role": "Night One &middot; 1999",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/king-kong-bundy.jpg",
+   "facts": [
+    "Night One · 1999"
+   ],
+   "tagline": "KING KONG BUNDY &middot; FIVE COUNT ONLY",
+   "themeTitle": ""
+  },
+  {
+   "id": "abdullah-the-butcher",
+   "name": "Abdullah the Butcher",
+   "role": "Night One &middot; 1999",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/abdullah-the-butcher.jpg",
+   "facts": [
+    "Night One · 1999"
+   ],
+   "tagline": "ABDULLAH THE BUTCHER BROUGHT THE FORK",
+   "themeTitle": ""
+  },
+  {
+   "id": "icp-founders",
+   "name": "Handsome Harley Guestella & Diamond Donovan Douglas",
+   "role": "Founders &middot; First Tag Champs",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/icp-founders.jpg",
+   "facts": [
+    "Founders"
+   ],
+   "tagline": "TWO CLOWNS BEAT TWO CLOWNS",
+   "themeTitle": ""
+  },
+  {
+   "id": "evil-dead",
+   "name": "Evil Dead",
+   "role": "First Champion",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/evil-dead.jpg",
+   "facts": [
+    "First Champion · HOF 2013"
+   ],
+   "tagline": "EVIL DEAD &middot; FIRST CHAMP, 12.19.1999",
+   "themeTitle": ""
+  },
+  {
+   "id": "corporal-robinson",
+   "name": "Corporal Robinson",
+   "role": "Original &middot; Creative",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/corporal-robinson.jpg",
+   "facts": [
+    "Original · Creative"
+   ],
+   "tagline": "CORPORAL ROBINSON REPORTS FOR DUTY",
+   "themeTitle": ""
+  },
+  {
+   "id": "the-rude-boy",
+   "name": "The Rude Boy",
+   "role": "JCW Legend",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/the-rude-boy.jpg",
+   "facts": [
+    "JCW Legend"
+   ],
+   "tagline": "RUDE BOY IS WATCHING",
+   "themeTitle": ""
+  },
+  {
+   "id": "vampiro",
+   "name": "Vampiro",
+   "role": "Champion &middot; Consultant",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/vampiro.jpg",
+   "facts": [
+    "Champion · Consultant"
+   ],
+   "tagline": "VAMPIRO TOOK THE GOLD TO NITRO &middot; 8.21.2000",
+   "themeTitle": ""
+  },
+  {
+   "id": "necro-butcher",
+   "name": "Necro Butcher",
+   "role": "Vol. 3 &middot; 2003",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/necro-butcher.jpg",
+   "facts": [
+    "Vol. 3 · 2003"
+   ],
+   "tagline": "NECRO BUTCHER FEELS NOTHING",
+   "themeTitle": ""
+  },
+  {
+   "id": "human-tornado",
+   "name": "Human Tornado",
+   "role": "SlamTV! Era",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/human-tornado.jpg",
+   "facts": [
+    "SlamTV! Era"
+   ],
+   "tagline": "HUMAN TORNADO TOUCHED DOWN",
+   "themeTitle": ""
+  },
+  {
+   "id": "trent-acid",
+   "name": "Trent Acid",
+   "role": "PWU Alliance",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/trent-acid.jpg",
+   "facts": [
+    "PWU Alliance"
+   ],
+   "tagline": "TRENT ACID &middot; PHILLY FOREVER",
+   "themeTitle": ""
+  },
+  {
+   "id": "the-great-muta",
+   "name": "The Great Muta",
+   "role": "Icon",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/the-great-muta.jpg",
+   "facts": [
+    "Icon"
+   ],
+   "tagline": "THE GREAT MUTA MISTED BLOODYMANIA",
+   "themeTitle": ""
+  },
+  {
+   "id": "chris-hero",
+   "name": "Chris Hero",
+   "role": "Young Blood",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/chris-hero.jpg",
+   "facts": [
+    "Early JCW"
+   ],
+   "tagline": "CHRIS HERO &middot; CLASS OF 2000",
+   "themeTitle": ""
+  },
+  {
+   "id": "scott-hall",
+   "name": "Scott Hall",
+   "role": "Executive Consultant",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/scott-hall.jpg",
+   "facts": [
+    "Executive Consultant"
+   ],
+   "tagline": "HEY YO. &middot; EXEC CONSULTANT, 2011",
+   "themeTitle": ""
+  },
+  {
+   "id": "raven",
+   "name": "Raven",
+   "role": "2008 Arrival",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/raven.jpg",
+   "facts": [
+    "2008 Arrival"
+   ],
+   "tagline": "RAVEN &middot; QUOTE THE SLAM TV TOUR",
+   "themeTitle": ""
+  },
+  {
+   "id": "scott-damore",
+   "name": "Scott D’Amore",
+   "role": "Manager &middot; 2008",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/scott-damore.jpg",
+   "facts": [
+    "Manager · 2008"
+   ],
+   "tagline": "SCOTT D’AMORE MANAGES THE CHAOS",
+   "themeTitle": ""
+  },
+  {
+   "id": "officer-colt-cabana",
+   "name": "Officer Colt Cabana",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/officer-colt-cabana.jpg",
+   "facts": [
+    "Nickname: The Long Dick of the Law",
+    "Height: 6'1\"",
+    "Weight: 233",
+    "Hometown: Joliet Correctional Center",
+    "Finisher: Hands-on Excessive Force"
+   ],
+   "tagline": "OFFICER COLT CABANA &middot; JCW LUNACY",
+   "themeTitle": ""
+  },
+  {
+   "id": "cash-flo",
+   "name": "Cash Flo",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/cash-flo.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "CASH FLO &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "rob-conway",
+   "name": "Rob Conway",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/rob-conway.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "ROB CONWAY &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "jwo",
+   "name": "JWO",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/jwo.jpg",
+   "facts": [
+    "Juggalo World Order"
+   ],
+   "tagline": "JWO &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "kevin-nash",
+   "name": "Kevin Nash",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/kevin-nash.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "KEVIN NASH &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "sean-waltman",
+   "name": "Sean Waltman",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/sean-waltman.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "SEAN WALTMAN &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "the-weedman",
+   "name": "The Weedman",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/the-weedman.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "THE WEEDMAN &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "vanilla-ice",
+   "name": "Vanilla Ice",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/vanilla-ice.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "VANILLA ICE &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "terry-funk",
+   "name": "Terry Funk",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/terry-funk.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "TERRY FUNK &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "dusty-rhodes",
+   "name": "Dusty Rhodes",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/dusty-rhodes.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "DUSTY RHODES &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "pat-tanaka",
+   "name": "Pat Tanaka",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/pat-tanaka.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "PAT TANAKA &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "the-ring-ryders",
+   "name": "The Ring Ryders",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/the-ring-ryders.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "THE RING RYDERS &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "the-thomaselli-brothers",
+   "name": "The Thomaselli Brothers",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/the-thomaselli-brothers.jpg",
+   "facts": [
+    "The Haters"
+   ],
+   "tagline": "THE THOMASELLI BROTHERS &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "hollywood-chuck-hogan",
+   "name": "Hollywood Chuck Hogan",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/hollywood-chuck-hogan.jpg",
+   "facts": [
+    "Hall of Famer"
+   ],
+   "tagline": "HOLLYWOOD CHUCK HOGAN &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "tracy-smothers",
+   "name": "Tracy Smothers",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/tracy-smothers.jpg",
+   "facts": [
+    "Hall of Famer"
+   ],
+   "tagline": "TRACY SMOTHERS &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "steve-corino",
+   "name": "Steve Corino",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/steve-corino.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "STEVE CORINO &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "roddy-piper",
+   "name": "“Rowdy” Roddy Piper",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/roddy-piper.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "ROWDY RODDY PIPER &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "greg-valentine",
+   "name": "Greg “The Hammer” Valentine",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/greg-valentine.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "GREG THE HAMMER VALENTINE &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "kamala",
+   "name": "Kamala",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/kamala.jpg",
+   "facts": [
+    "The Ugandan Headhunter"
+   ],
+   "tagline": "KAMALA &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "tito-santana",
+   "name": "Tito Santana",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/tito-santana.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "TITO SANTANA &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "kid-kash",
+   "name": "Kid Kash",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/kid-kash.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "KID KASH &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "monty-brown",
+   "name": "Monty Brown",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/monty-brown.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "MONTY BROWN &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "kevin-thorn",
+   "name": "Kevin Thorn",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/kevin-thorn.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "KEVIN THORN &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "bobby-lashley",
+   "name": "Bobby Lashley",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/bobby-lashley.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "BOBBY LASHLEY &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "balls-mahoney",
+   "name": "Balls Mahoney",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/balls-mahoney.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "BALLS MAHONEY &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "ian-rotten",
+   "name": "Ian Rotten",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/ian-rotten.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "IAN ROTTEN &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "bull-pain",
+   "name": "Bull Pain",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/bull-pain.jpg",
+   "facts": [
+    "Legends & Alumni"
+   ],
+   "tagline": "BULL PAIN &middot; JCW",
+   "themeTitle": ""
+  },
+  {
+   "id": "sabu",
+   "name": "Sabu",
+   "role": "Legends & Alumni",
+   "division": "legend",
+   "imageUrl": "https://jcwlunacy.net/roster/sabu.jpg",
+   "facts": [
+    "2x World Champion"
+   ],
+   "tagline": "SABU &middot; JCW",
+   "themeTitle": ""
+  }
+ ],
+ "merch": [
+  {
+   "id": "lunacy-logo-shirt",
+   "name": "JCW Lunacy Logo Shirt",
+   "category": "Shirts",
+   "url": "https://psychopathicvault.com/products/jcw-lunacy-logo-shirt"
+  },
+  {
+   "id": "lunacy-hoodie",
+   "name": "Black JCW Lunacy Embroidered Hoodie",
+   "category": "Hoodies",
+   "url": "https://psychopathicvault.com/products/black-jcw-lunacy-embroidered-hoodie"
+  },
+  {
+   "id": "lunacy-snapback",
+   "name": "Black JCW Lunacy Snapback Hat",
+   "category": "Hats",
+   "url": "https://psychopathicvault.com/products/black-jcw-lunacy-snapback-hat"
+  },
+  {
+   "id": "lunacy-beanie",
+   "name": "JCW Lunacy 12\" Beanie",
+   "category": "Hats",
+   "url": "https://psychopathicvault.com/products/jcw-lunacy-12-beanie"
+  },
+  {
+   "id": "lunacy-flexfit",
+   "name": "Black JCW Lunacy Flexfit Baseball Hat",
+   "category": "Hats",
+   "url": "https://psychopathicvault.com/products/black-jcw-lunacy-flexfit-baseball-hat"
+  },
+  {
+   "id": "jersey-red-black",
+   "name": "Red on Black JCW Football Jersey",
+   "category": "Jerseys",
+   "url": "https://psychopathicvault.com/products/red-on-black-jcw-football-jersey"
+  },
+  {
+   "id": "jersey-jwo",
+   "name": "JWO Football Jersey",
+   "category": "Jerseys",
+   "url": "https://psychopathicvault.com/products/jwo-football-jersey"
+  },
+  {
+   "id": "jersey-camo",
+   "name": "Black on Camo JCW Football Jersey",
+   "category": "Jerseys",
+   "url": "https://psychopathicvault.com/products/black-on-camo-jcw-football-jersey"
+  },
+  {
+   "id": "jersey-black-black",
+   "name": "Black on Black JCW Football Jersey",
+   "category": "Jerseys",
+   "url": "https://psychopathicvault.com/products/black-on-black-jcw-football-jersey"
+  },
+  {
+   "id": "jersey-white-blue",
+   "name": "White on Blue JCW Football Jersey",
+   "category": "Jerseys",
+   "url": "https://psychopathicvault.com/products/white-on-blue-jcw-football-jersey"
+  },
+  {
+   "id": "jersey-red-white",
+   "name": "Red on White JCW Football Jersey",
+   "category": "Jerseys",
+   "url": "https://psychopathicvault.com/products/red-on-white-jcw-football-jersey"
+  },
+  {
+   "id": "jcw-hoodie",
+   "name": "Black JCW Embroidered Hoodie",
+   "category": "Hoodies",
+   "url": "https://psychopathicvault.com/products/black-jcw-embroidered-hoodie"
+  },
+  {
+   "id": "barbwire-shirt",
+   "name": "JCW Yellow Barbwire Shirt",
+   "category": "Shirts",
+   "url": "https://psychopathicvault.com/products/jcw-yellow-barbwire-shirt"
+  },
+  {
+   "id": "bw-logo-shirt",
+   "name": "JCW Black & White Logo Shirt",
+   "category": "Shirts",
+   "url": "https://psychopathicvault.com/products/jcw-black-white-logo-shirt"
+  },
+  {
+   "id": "blood-splatter-shirt",
+   "name": "JCW Blood Splatter Shirt",
+   "category": "Shirts",
+   "url": "https://psychopathicvault.com/products/jcw-blood-splatter-shirt-1"
+  },
+  {
+   "id": "commissioner-shirt",
+   "name": "JCW Violent J Commissioner Shirt",
+   "category": "Shirts",
+   "url": "https://psychopathicvault.com/products/jcw-violent-j-commissioner-shirt"
+  },
+  {
+   "id": "jcw-beanie",
+   "name": "JCW 12\" Beanie",
+   "category": "Hats",
+   "url": "https://psychopathicvault.com/products/jcw-12-beanie"
+  },
+  {
+   "id": "jcw-flexfit",
+   "name": "Black JCW Flexfit Baseball Hat",
+   "category": "Hats",
+   "url": "https://psychopathicvault.com/products/black-jcw-flexfit-baseball-hat"
+  },
+  {
+   "id": "konley-shirt",
+   "name": "JCW Caleb Konley Shirt",
+   "category": "Shirts",
+   "url": "https://psychopathicvault.com/products/jcw-caleb-konley-shirt"
+  },
+  {
+   "id": "outbreak-shirt",
+   "name": "JCW The Outbreak Shirt",
+   "category": "Shirts",
+   "url": "https://psychopathicvault.com/products/jcw-the-outbreak-shirt"
+  },
+  {
+   "id": "funstruction-shirt",
+   "name": "JCW Brothers of Funstruction Fun Colors Shirt",
+   "category": "Shirts",
+   "url": "https://psychopathicvault.com/products/jcw-brothers-of-funstruction-fun-colors-shirt"
+  }
+ ],
+ "cards": [],
+ "locker": {
+  "packCost": 150,
+  "packSize": 5,
+  "checkInReward": 5,
+  "gameUnlockCost": 300
+ },
+ "lunatics": {
+  "headline": "LUNATICS ONLY",
+  "benefits": [
+   "Bonus content drops over time",
+   "Unlocks the Lunatics Only 2D fighting game",
+   "Trading cards and collection perks",
+   "First looks at new Lunacy madness"
+  ],
+  "note": "Membership content is added over time and may change. Billing terms, if added, are shown at checkout.",
+  "url": "https://jcwlunacy.net/#lunatics"
+ },
+ "about": {
+  "paragraphs": [
+   "Juggalo Championship Wrestling was founded by the Insane Clown Posse, with the first bell ringing December 19, 1999 at St. Andrew's Hall in Detroit.",
+   "Today JCW runs weekly — Lunacy streams every Thursday at 7PM Eastern on the Psychopathic Records YouTube channel, free for the whole world, with the biggest supershows landing at the Gathering of the Juggalos.",
+   "No ads sold on your data. No tracking. Made for the family, 13 and up."
+  ],
+  "timeline": [
+   {
+    "year": "1999",
+    "text": "First bell — December 19 at St. Andrew's Hall, Detroit"
+   },
+   {
+    "year": "2008",
+    "text": "Hatchet Attacks debuts May 17"
+   },
+   {
+    "year": "2011",
+    "text": "Hatchet Attacks goes PPV March 26"
+   },
+   {
+    "year": "2013",
+    "text": "JCW Hall of Fame opens its doors"
+   },
+   {
+    "year": "2026",
+    "text": "Lunacy streams weekly — Bloodymania 19 runs two nights at the Pavilion"
+   }
+  ],
+  "legal": "JCW, JCW Lunacy, the Hatchetman and all related names, logos, photos, video and music are trademarks and property of Psychopathic Records."
+ },
+ "polls": [
+  {
+   "key": "belt-importance",
+   "q": "Which belt matters more — legacy or the modern era?",
+   "options": [
+    "JCW World Title — history & legacy (Josh Bishop)",
+    "JCW Lunacy Title — today's brand (Caleb Konley)"
+   ]
+  },
+  {
+   "key": "ep92-tag",
+   "q": "Ep 92 — World Tag Team Titles: Choppa City (c) vs Purple Phantom & Malcolm Monroe III",
+   "options": [
+    "Choppa City retain",
+    "Purple Phantom & Malcolm Monroe III"
+   ]
+  },
+  {
+   "key": "ep92-bacardi",
+   "q": "Ep 92 — Bacardi on a Pole Match: 2 Tuff Tony & Willie Mack vs Backseat Boyz",
+   "options": [
+    "2 Tuff Tony & Willie Mack",
+    "Backseat Boyz"
+   ]
+  },
+  {
+   "key": "ep92-bishop",
+   "q": "Ep 92 — Josh Bishop vs Krule",
+   "options": [
+    "Josh Bishop",
+    "Krule"
+   ]
+  },
+  {
+   "key": "ep92-morton",
+   "q": "Ep 92 — Kerry Morton vs Mr. Happy",
+   "options": [
+    "Kerry Morton",
+    "Mr. Happy"
+   ]
+  }
+ ],
+ "themeAliases": {
+  "big-vito": "mamalukes",
+  "alice-crowley": "big al",
+  "jasmin-st-claire": "monster corporation",
+  "sally-boy": "@big-vito",
+  "vincenzo": "@big-vito",
+  "the-outbreak": "@barnabas-the-bizarre"
+ }
 }
