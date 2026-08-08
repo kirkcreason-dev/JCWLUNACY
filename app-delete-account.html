@@ -1,0 +1,83 @@
+<!doctype html>
+<!--
+  Google Play requires a publicly reachable account-deletion page for any app
+  with accounts — reachable WITHOUT installing the app or signing in.
+  Upload to the site root as app-delete-account.html, then paste
+  https://jcwlunacy.net/app-delete-account into
+  Play Console → App content → Data deletion.
+
+  Note: the app's App Links filter is scoped to the site root, so this page
+  opens in a browser instead of bouncing into the app. Keep it that way.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Delete your JCW Lunacy account</title>
+<style>
+  :root { --green:#45F248; --purple:#B44CFF; --yellow:#FFC61A; --ink:#F3F3F0; --bg:#050107; }
+  * { box-sizing: border-box; }
+  body {
+    margin:0; padding:32px 20px 64px; background:var(--bg); color:var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height:1.65;
+  }
+  main { max-width:680px; margin:0 auto; }
+  h1 { font-size:1.9rem; letter-spacing:.02em; margin:0 0 4px; }
+  .kicker { color:var(--green); font-weight:800; letter-spacing:.14em; font-size:.78rem; margin-bottom:22px; }
+  h2 { font-size:1.1rem; margin:30px 0 8px; color:var(--yellow); }
+  .card { background:#12101a; border:1px solid #23202e; border-radius:14px; padding:18px 20px; margin:18px 0; }
+  ol, ul { padding-left:22px; }
+  li { margin:6px 0; }
+  a { color:var(--green); }
+  .mail { display:inline-block; margin-top:10px; padding:12px 18px; border-radius:10px;
+          background:linear-gradient(135deg,var(--green),var(--purple)); color:#050107;
+          font-weight:800; text-decoration:none; }
+  footer { margin-top:40px; color:#9A9A9A; font-size:.85rem; }
+</style>
+</head>
+<body>
+<main>
+  <div class="kicker">JCW LUNACY</div>
+  <h1>Delete your account</h1>
+  <p>Your JCW Lunacy account is shared between the app and jcwlunacy.net. Deleting it removes it from both.</p>
+
+  <div class="card">
+    <h2>In the app (fastest)</h2>
+    <ol>
+      <li>Open <strong>JCW Lunacy</strong> and go to the <strong>Locker</strong> tab.</li>
+      <li>Under <strong>Account</strong>, tap <strong>DELETE ACCOUNT</strong>.</li>
+      <li>Confirm. Your account and its data are removed immediately.</li>
+    </ol>
+    <p>If it asks you to sign in again first, that's a security check — sign out, sign back in, and delete again.</p>
+  </div>
+
+  <div class="card">
+    <h2>By email</h2>
+    <p>Don't have the app installed any more? Send us the email address on the account and we'll delete it for you.</p>
+    <a class="mail" href="mailto:kirkcreason@creasocamps.com?subject=Delete%20my%20JCW%20Lunacy%20account">Email a deletion request</a>
+  </div>
+
+  <h2>What gets deleted</h2>
+  <ul>
+    <li>Your sign-in account and email address.</li>
+    <li>Your Locker: points, wins, badges, cards, event picks and activity history.</li>
+    <li>Your notifications, gifts, trade offers and ally/rival relationships.</li>
+  </ul>
+
+  <h2>What may remain</h2>
+  <ul>
+    <li>Chat messages and wall posts you already sent, because they're part of other people's conversations. Ask us and we'll remove those too.</li>
+    <li>Anonymous totals that aren't tied to you, like how many times an episode has been played.</li>
+  </ul>
+
+  <p>Deletion is permanent and can't be undone. Points, badges and cards can't be restored afterwards.</p>
+
+  <footer>
+    Questions: <a href="mailto:kirkcreason@creasocamps.com">kirkcreason@creasocamps.com</a> ·
+    <a href="/app-privacy">Privacy policy</a> ·
+    <a href="/">jcwlunacy.net</a>
+  </footer>
+</main>
+</body>
+</html>
