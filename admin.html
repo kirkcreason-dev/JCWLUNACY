@@ -47,6 +47,7 @@
   <div class="card"><label>Views by section</label><div id="statViews" class="muted">—</div></div>
   <div class="card"><label>Ticket clicks <span class="muted">(people the site sent to the ticket pages)</span></label><div id="statTickets" class="muted">—</div></div>
   <div class="card"><label>Episodes watched</label><div id="statEps" class="muted">—</div></div>
+  <div class="card"><label>Arcade &mdash; games played <span class="muted">(Psychopathic Arcade)</span></label><div id="statArcade" class="muted">&mdash;</div></div>
   <div class="card"><label>Vote results</label><div id="statPolls" class="muted">—</div></div>
   <div class="card"><label>Favorite wrestlers <span class="muted">(set in the Juggalo Locker)</span></label><div id="statFavs" class="muted">—</div></div>
   <div class="card"><label>Site errors <span class="muted">(reported live from visitors' browsers)</span> <button class="ghost sm" id="errClear" style="margin-left:8px">Clear log</button></label>
@@ -235,6 +236,16 @@
           '<div style="flex:1;background:#000;border:1px solid var(--seam);border-radius:4px;height:16px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--acid)"></div></div>'+
           '<div style="flex:0 0 210px;text-align:right;font-size:12.5px"><b>'+x.plays+'</b> plays · <b>'+fmtT(x.secs)+'</b> watched · avg '+avg+'</div></div>';
       }).join(''):'<span class="muted">No plays yet — starts counting once the tracking version of the site is live.</span>';
+
+      // arcade games played
+      const ARC_NAMES={ttt:'Tic Tac Slam',chess:'Juggalo Chess',checkers:'Juggalo Checkers',faygo:'Faygo 4',pinball:'Dark Carnival Pinball',bj:'Blackjack 21',memory:'Joker Card Memory',camper:'Gathering Camper',solitaire:'Dark Carnival Solitaire',j31:'Juggalo 31',hockey:'Juggalo Air Hockey'};
+      const arc=st.arcade||{};
+      const arows=Object.keys(ARC_NAMES).map(k=>[ARC_NAMES[k],arc[k]||0]).sort((a,b)=>b[1]-a[1]);
+      const atot=st.arcadeTotal||arows.reduce((a,x)=>a+x[1],0);
+      const amax=Math.max(1,...arows.map(x=>x[1]));
+      let ah='<div style="border:1px solid var(--seam);border-radius:8px;padding:12px;background:#101015;text-align:center;margin-bottom:12px"><div style="font-size:24px;font-weight:800;color:var(--gold)">'+atot+'</div><div class="muted" style="font-size:12px">total games played \u00b7 11 games live</div></div>';
+      ah+=arows.some(x=>x[1]>0)?arows.map(x=>barRow(x[0],x[1],amax)).join(''):'<span class="muted">No plays yet \u2014 starts counting once the arcade with the counter is live.</span>';
+      $('statArcade').innerHTML=ah;
 
       // vote results
       let ph='';
