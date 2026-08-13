@@ -11408,5 +11408,48 @@ showScreen('menu');
   };
 })();
 </script>
+<div id="lunatics-gate" style="position:fixed;inset:0;z-index:2147483647;background:#0a0a0d;color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;font-family:system-ui,-apple-system,sans-serif;">
+  <div style="font-size:46px;">&#129313;</div>
+  <div id="lg-title" style="font-size:22px;font-weight:800;color:#ffd028;margin:12px 0 6px;letter-spacing:.06em;text-transform:uppercase;">Checking your pass&hellip;</div>
+  <div id="lg-msg" style="max-width:440px;color:#aab;line-height:1.6;font-size:15px;"></div>
+  <a id="lg-link" href="https://jcwlunacy.net/#lunatics" style="display:none;margin-top:18px;background:#ffd028;color:#000;font-weight:800;text-decoration:none;padding:12px 22px;border-radius:10px;">Get Lunatics Access</a>
+</div>
+<script>
+/* Psychopathic Arcade is Lunatics Only on the website. Gates on premiumMembers.
+   Skips entirely in the bundled app (file://), where the app handles premium. */
+(function(){
+  if(location.protocol==='file:')return;
+  var CFG={apiKey:"AIzaSyCDCfMShCyyFZSC3qp1t75Rx_0fOfH3L_U",authDomain:"jcw-lunacy.firebaseapp.com",databaseURL:"https://jcw-lunacy-default-rtdb.firebaseio.com",projectId:"jcw-lunacy",storageBucket:"jcw-lunacy.firebasestorage.app",messagingSenderId:"743418158514",appId:"1:743418158514:web:d167d515509974fbf5d8ab"};
+  var COMP={"oYrNiXZywhexmLqRQO7j1iyA1Bh1":1,"zRLXcejE4dWQRL0l07Bo19SO5j52":1,"GZ4FzgT740gxOtiFUtBaxshngbi2":1};
+  var gate=document.getElementById('lunatics-gate'),t=document.getElementById('lg-title'),m=document.getElementById('lg-msg'),a=document.getElementById('lg-link');
+  if(!gate)return;
+  gate.style.display='flex';
+  var done=false;
+  function allow(){done=true;clearTimeout(fo);gate.style.display='none';}
+  function block(title,msg){done=true;clearTimeout(fo);t.textContent=title;m.textContent=msg;a.style.display='inline-block';gate.style.display='flex';}
+  /* never lock out a paying member on a network hiccup: fail open after 9s */
+  var fo=setTimeout(function(){if(!done)allow();},9000);
+  function ld(src,cb){var x=document.createElement('script');x.src=src;x.onload=cb;x.onerror=function(){if(!done)allow();};document.head.appendChild(x);}
+  ld('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js',function(){
+    ld('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js',function(){
+      ld('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js',function(){
+        try{
+          if(!firebase.apps.length)firebase.initializeApp(CFG);
+          firebase.auth().onAuthStateChanged(function(u){
+            if(done)return;
+            if(!u){block('Lunatics Only','Log into your Juggalo Locker on jcwlunacy.net, then open the arcade.');return;}
+            if(COMP[u.uid]){allow();return;}
+            firebase.database().ref('premiumMembers/'+u.uid).once('value').then(function(snap){
+              if(done)return;
+              if(snap.val()===true)allow();
+              else block('Lunatics Only','The Psychopathic Arcade is part of The Lunatics Only — join on jcwlunacy.net to play.');
+            }).catch(function(){if(!done)allow();});
+          });
+        }catch(e){if(!done)allow();}
+      });
+    });
+  });
+})();
+</script>
 </body>
 </html>

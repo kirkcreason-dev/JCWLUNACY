@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#000000" />
 <meta name="referrer" content="origin">
-<meta name="build" content="b2026-08-12.143">
+<meta name="build" content="b2026-08-13.145">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="JCW Lunacy">
 <meta property="og:title" content="JCW Lunacy — Juggalo Championship Wrestling">
@@ -1150,7 +1150,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <span class="go">Roll call &rarr;</span></a>
       
       <a class="panel rev" href="#games"><span class="num">03</span><h3>Games</h3>
-        <p>The <b>Psychopathic Arcade</b> &mdash; 11 games, free for all &mdash; plus the official JCW Lunacy fighting game.</p>
+        <p>The <b>Psychopathic Arcade</b> &mdash; 11 games &mdash; plus the official JCW Lunacy fighting game. <b>Lunatics Only.</b></p>
         <span class="go">Press start &rarr;</span></a>
       <a class="panel rev" href="#episodes"><span class="num">04</span><h3>Episodes</h3>
         <p>All episodes, playable right here.</p>
@@ -1447,7 +1447,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
       <p style="color:var(--steel,#9aa0aa);line-height:1.6;margin:6px 0 16px;">
         The livestream pay-per-view for <b>Bloodymania 19</b> streams live from the JCW Pavilion,
         <b>August 20&ndash;21</b>. Tickets go on sale here soon &mdash; one payment, one event,
-        no membership required. Cloudflare records it, so your ticket includes the replay.
+        no membership required.
       </p>
       <button class="btn gold" disabled style="display:inline-flex;justify-content:center;opacity:.6;cursor:default;">Tickets coming soon</button>
       <p style="color:var(--steel,#9aa0aa);font-size:.82rem;margin:14px 0 0;">New Lunacy every Thursday, 7PM ET on the Psychopathic Records YouTube while you wait.</p>
@@ -1739,7 +1739,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <section class="blk">
     <div class="kick">Games</div>
     <h2 class="head">Press <em>start</em></h2>
-    <p class="lede">In the browser, right here. No downloads, no consoles. The Arcade is free for everybody &mdash; the fighting game is Lunatics Only.</p>
+    <p class="lede">In the browser, right here. No downloads, no consoles. <b>Lunatics Only.</b></p>
 
     <div class="games">
       <div class="game playable rev">
@@ -1750,11 +1750,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <button class="btn gold" id="play-bmr">&#128274; Locked &middot; 300 points</button>
       </div>
       <div class="game playable rev">
-        <span class="badge">New &middot; 11 Games</span>
+        <span class="badge">Lunatics Only</span>
         <h3>Psychopathic Arcade</h3>
-        <div class="sub">11 arcade games &middot; Online VS &middot; No download &middot; Free for every Juggalo</div>
+        <div class="sub">11 arcade games &middot; Online VS &middot; No download &middot; Lunatics Only</div>
         <p>The midway, in your browser &mdash; <b>Tic Tac Slam</b>, <b>Juggalo Chess</b>, <b>Juggalo Checkers</b>, <b>Dark Carnival Pinball</b>, <b>Faygo 4</b>, <b>Blackjack 21</b>, <b>Joker Card Memory</b>, <b>Gathering Camper</b>, <b>Dark Carnival Solitaire</b>, <b>Juggalo 31</b> and <b>Juggalo Air Hockey</b>. Head-to-head <b>online play</b> with speakable room codes, and arcade-style top-10 records in every game.</p>
-        <a class="btn gold" href="arcade.html" target="_blank" rel="noopener">&#127918; Enter the Arcade</a>
+        <a class="btn gold" id="arcade-enter" href="arcade.html" target="_blank" rel="noopener" onclick="if(!window.__lkPremOn){event.preventDefault();location.hash='#lunatics';return false;}">&#127918; Enter the Arcade</a>
       </div>
       <div class="game rev">
         <span class="badge">Coming soon</span>
@@ -2385,6 +2385,7 @@ function observeReveals(){
     box.innerHTML='<p><b style="color:#ffd028;">&#9733; LUNATIC CONFIRMED</b></p>'
       +'<div style="margin:12px 0;padding:10px;border:1px solid rgba(255,208,40,.35);border-radius:10px;"><b>&#127918; Lunacy Unlocked &mdash; The Game</b><p style="margin:6px 0 0;">Live for Lunatics. Solo vs the AI or online Quick Match &mdash; wins count on your Locker.</p><button class="btn" id="lo-play" style="margin-top:8px;width:100%;justify-content:center;">Press start</button></div>'
       +'<div style="margin:12px 0;padding:10px;border:1px solid rgba(255,208,40,.35);border-radius:10px;"><b>&#127183; JCW Trading Cards</b><p style="margin:6px 0 0;">Collect the whole roster &mdash; buy packs, chase foils and super rares.</p><button class="btn" id="lo-cards" style="margin-top:8px;width:100%;justify-content:center;">Open the collection</button></div>'
+      +'<div style="margin:12px 0;padding:10px;border:1px solid rgba(255,208,40,.35);border-radius:10px;"><b>&#127918; Psychopathic Arcade</b><p style="margin:6px 0 0;">11 games &mdash; Tic Tac Slam, Chess, Pinball, Air Hockey and more, with online VS.</p><a class="btn" href="arcade.html" target="_blank" rel="noopener" style="margin-top:8px;width:100%;justify-content:center;">Enter the arcade</a></div>'
       +'<div style="margin:12px 0;padding:10px;border:1px solid rgba(255,208,40,.35);border-radius:10px;"><b>&#127915; Backstage Pass</b><p style="margin:6px 0 0;">Behind the curtain &mdash; locker room, promos, the stuff that never airs. <b>Coming soon.</b></p></div>'
       +'<div style="margin:12px 0;padding:10px;border:1px solid rgba(255,208,40,.35);border-radius:10px;"><b>&#129315; Bloopers</b><p style="margin:6px 0 0;">Botches, breaks and bleeps &mdash; the outtakes reel. <b>Coming soon.</b></p></div>'
       +'<div style="margin:12px 0;padding:10px;border:1px solid rgba(255,208,40,.35);border-radius:10px;"><b>&#128249; PPV</b><p style="margin:6px 0 0;">Members-only live streams &mdash; Bloodymania and beyond. <b>Coming soon.</b></p></div>'

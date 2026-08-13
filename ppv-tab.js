@@ -11,7 +11,7 @@
  * ==========================================================================*/
 (function () {
   /* ===================== CONFIG — edit these two ===================== */
-  var PPV_API = "https://ppv-backend.YOUR-SUBDOMAIN.workers.dev"; // or https://api.jcwlunacy.net
+  var PPV_API = "https://ppv-backend.kirkcreason.workers.dev";
   var DEFAULT_EVENT = "bloodymania-19"; // must match the EVENTS key in worker.js
   /* ================================================================== */
 
