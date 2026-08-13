@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#000000" />
 <meta name="referrer" content="origin">
-<meta name="build" content="b2026-08-13.145">
+<meta name="build" content="b2026-08-13.147">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="JCW Lunacy">
 <meta property="og:title" content="JCW Lunacy — Juggalo Championship Wrestling">
@@ -1443,14 +1443,13 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <!-- BEFORE PURCHASE / COMING SOON -->
     <div id="ppv-gate" class="lk" style="margin-top:18px;padding:26px 22px;border:1px solid rgba(255,208,40,.35);border-radius:14px;background:#15151c;text-align:center;">
       <div style="font-family:'Rubik Distressed',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.12em;color:var(--gold,#ffd028);font-size:.8rem;">Two Nights &middot; The Gathering of the Juggalos</div>
-      <p style="font-size:2rem;font-weight:900;color:#fff;margin:8px 0 2px;line-height:1;">COMING <span style="color:var(--hot,#ff3fa4);">8/20</span></p>
+      <p style="font-size:2rem;font-weight:900;color:#fff;margin:8px 0 2px;line-height:1;">BLOODYMANIA <span style="color:var(--hot,#ff3fa4);">19</span></p>
       <p style="color:var(--steel,#9aa0aa);line-height:1.6;margin:6px 0 16px;">
-        The livestream pay-per-view for <b>Bloodymania 19</b> streams live from the JCW Pavilion,
-        <b>August 20&ndash;21</b>. Tickets go on sale here soon &mdash; one payment, one event,
-        no membership required.
+        Livestream pay-per-view straight from the JCW Pavilion, <b>August 20&ndash;21</b>.
+        One payment, one event &mdash; no membership required. It's a one-time fee.
       </p>
-      <button class="btn gold" disabled style="display:inline-flex;justify-content:center;opacity:.6;cursor:default;">Tickets coming soon</button>
-      <p style="color:var(--steel,#9aa0aa);font-size:.82rem;margin:14px 0 0;">New Lunacy every Thursday, 7PM ET on the Psychopathic Records YouTube while you wait.</p>
+      <button class="btn gold" id="ppv-buy" style="display:inline-flex;justify-content:center;">Buy Ticket</button>
+      <p style="color:var(--steel,#9aa0aa);font-size:.82rem;margin:14px 0 0;">Secure checkout through Stripe. Your ticket unlocks the live stream on this page.</p>
     </div>
 
     <!-- AFTER PURCHASE -->
@@ -2368,7 +2367,7 @@ function observeReveals(){
     try{lkPremRender();}catch(_e){}
   }
   /* ==== JCW PREMIUM ==== paste your Stripe Payment Link between the quotes below */
-  const JCW_STRIPE_LINK='';
+  const JCW_STRIPE_LINK='https://buy.stripe.com/9B67sNajKfzd2H89Pz4c800';
   let lkPremIsOn=false;
   function lkPremRender(){
     document.querySelectorAll('.lk-prem-body').forEach(box=>lkPremFill(box));

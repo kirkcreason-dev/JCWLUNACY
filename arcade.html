@@ -11416,9 +11416,9 @@ showScreen('menu');
 </div>
 <script>
 /* Psychopathic Arcade is Lunatics Only on the website. Gates on premiumMembers.
-   Skips entirely in the bundled app (file://), where the app handles premium. */
+   Runs ONLY on jcwlunacy.net; the apps bundle their own arcade and gate natively. */
 (function(){
-  if(location.protocol==='file:')return;
+  if(!/(^|\.)jcwlunacy\.net$/i.test(location.hostname))return; /* gate ONLY on the live site; apps (appassets/file/custom scheme) gate natively */
   var CFG={apiKey:"AIzaSyCDCfMShCyyFZSC3qp1t75Rx_0fOfH3L_U",authDomain:"jcw-lunacy.firebaseapp.com",databaseURL:"https://jcw-lunacy-default-rtdb.firebaseio.com",projectId:"jcw-lunacy",storageBucket:"jcw-lunacy.firebasestorage.app",messagingSenderId:"743418158514",appId:"1:743418158514:web:d167d515509974fbf5d8ab"};
   var COMP={"oYrNiXZywhexmLqRQO7j1iyA1Bh1":1,"zRLXcejE4dWQRL0l07Bo19SO5j52":1,"GZ4FzgT740gxOtiFUtBaxshngbi2":1};
   var gate=document.getElementById('lunatics-gate'),t=document.getElementById('lg-title'),m=document.getElementById('lg-msg'),a=document.getElementById('lg-link');
