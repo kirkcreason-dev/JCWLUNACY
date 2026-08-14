@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#000000" />
 <meta name="referrer" content="origin">
-<meta name="build" content="b2026-08-13.150">
+<meta name="build" content="b2026-08-13.151">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="JCW Lunacy">
 <meta property="og:title" content="JCW Lunacy — Juggalo Championship Wrestling">
@@ -1426,8 +1426,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <section style="max-width:760px;margin:0 auto;padding:90px 20px;">
     <h2>The <em>Lunatics</em> Only</h2>
     <p style="margin-top:10px;">The inner circle of the carnival. Members only.</p>
-    <div class="lk" style="margin-top:22px;"><h3>The Lunatics Only</h3><div class="lk-prem-body"><p>Loading&hellip;</p></div></div>
-    <p style="margin-top:14px;">Not signed in? Log in from your <a href="#locker">Juggalo Locker</a>, then come back to this page.</p>
+    <div class="lk" style="margin-top:22px;padding:22px;"><div class="lk-prem-body"><p>Loading&hellip;</p></div></div>
   </section>
 </main>
 
@@ -1742,11 +1741,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
 
     <div class="games">
       <div class="game playable rev">
-        <span class="badge">Lunatics Only</span>
+        <span class="badge">Coming Soon</span>
         <h3>Lunacy Unlocked</h3>
         <div class="sub">2D fighting &middot; Lunatics Only &middot; No download &middot; Online multiplayer</div>
         <p>The official JCW Lunacy fighting game &mdash; take the champions of the roster into the ring &mdash; combos, weapons and pinfalls. Play solo against the AI or hit <b>Quick Match</b> for online battles, right on this page. Part of <b>The Lunatics Only</b> &mdash; join the inner circle for the game, backstage content and trading cards.</p>
-        <button class="btn gold" id="play-bmr">&#128274; Locked &middot; 300 points</button>
+        <button class="btn gold" id="play-bmr" disabled style="opacity:.6;cursor:default;">Coming soon</button>
       </div>
       <div class="game playable rev">
         <span class="badge">Lunatics Only</span>
@@ -2068,8 +2067,7 @@ function observeReveals(){
   const playBtn=document.getElementById('play-bmr');
   const gOverlay=document.getElementById('game-overlay');
   if(playBtn&&gOverlay){
-    function gameLockUI(){const d=lkGet(),p=d.pts||0,un=window.__lkPremOn;
-      playBtn.innerHTML=un?'Press start':'&#128274; Locked \u00b7 '+Math.min(p,300)+' / 300 points';}
+    function gameLockUI(){ playBtn.innerHTML='Coming soon'; playBtn.disabled=true; playBtn.style.opacity='.6'; playBtn.style.cursor='default'; }
     window.jcwGameLockUI=gameLockUI;gameLockUI();
     const JCW_GAME_URL='https://kirkcreason-dev.github.io/JCWLUNACYUNLOCKED/';
     window.jcwOpenGame=function(){
@@ -2373,22 +2371,29 @@ function observeReveals(){
     document.querySelectorAll('.lk-prem-body').forEach(box=>lkPremFill(box));
   }
   function lkPremFill(box){
-    if(!lkUser){ box.innerHTML='<p>Unseen footage, game beta access and members-only live streams. <b>Log in from your Juggalo Locker first.</b></p>'; return; }
+    if(!lkUser){ box.innerHTML='<div style="text-align:center;padding:10px 6px;"><div style="font-size:34px;">&#127914;</div><p style="margin:10px 0 0;color:var(--steel,#9aa0aa);line-height:1.55;">The inner circle of the carnival &mdash; the arcade, the game, trading cards, backstage content and more.<br><b style="color:#fff;">Log into your Juggalo Locker to join.</b></p><a class="btn gold" href="#locker" style="margin-top:16px;display:inline-flex;justify-content:center;">Go to my Locker</a></div>'; return; }
     if(!lkPremIsOn){
       const btn=JCW_STRIPE_LINK
-        ?'<a class="btn" style="margin-top:10px;width:100%;justify-content:center;" href="'+JCW_STRIPE_LINK+(JCW_STRIPE_LINK.indexOf('?')>-1?'&':'?')+'client_reference_id='+encodeURIComponent(lkUser.uid)+'" target="_blank" rel="noopener">Join The Lunatics Only</a>'
-        :'<button class="btn line" style="margin-top:10px;width:100%;justify-content:center;" disabled>Coming soon</button>';
-      box.innerHTML='<p><b style="color:#ff3fa4;">&#10060; YOU ARE NOT A LUNATIC&hellip; yet.</b></p><p>Backstage Pass &middot; Bloopers &middot; PPV streams &middot; game beta access &mdash; straight from the carnival.</p>'+btn;
+        ?'<a class="btn gold" style="margin-top:16px;width:100%;justify-content:center;font-size:1rem;" href="'+JCW_STRIPE_LINK+(JCW_STRIPE_LINK.indexOf('?')>-1?'&':'?')+'client_reference_id='+encodeURIComponent(lkUser.uid)+'" target="_blank" rel="noopener">Join The Lunatics Only</a>'
+        :'<button class="btn line" style="margin-top:16px;width:100%;justify-content:center;" disabled>Coming soon</button>';
+      box.innerHTML='<div style="text-align:center;margin-bottom:16px;"><span style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:#ff3fa4;border:1px solid rgba(255,63,164,.5);border-radius:999px;padding:5px 16px;font-size:.82rem;">Members Only</span><p style="margin:12px 0 4px;color:#fff;font-weight:800;font-size:1.1rem;">You&rsquo;re not a Lunatic&hellip; yet.</p><p style="margin:0;color:var(--steel,#9aa0aa);line-height:1.55;">Join the inner circle &mdash; the arcade now, plus the game, trading cards, backstage content and PPV as they drop.</p></div>'
+        +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;opacity:.85;">'
+        +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));"><b>&#128377; Psychopathic Arcade</b><p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">11 games with online VS. <b style="color:#7CFF4F;">Live now.</b></p></div>'
+        +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));"><b>&#127918; Lunacy &mdash; The Game</b><p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">The official JCW fighting game. <b>Coming soon.</b></p></div>'
+        +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));"><b>&#127183; JCW Trading Cards</b><p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">Collect the whole roster. <b>Coming soon.</b></p></div>'
+        +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));"><b>&#127915; Backstage &amp; Bloopers</b><p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">The stuff that never airs. <b>Coming soon.</b></p></div>'
+        +'</div>'+btn;
       return;
     }
-    box.innerHTML='<p><b style="color:#ffd028;">&#9733; LUNATIC CONFIRMED</b></p>'
-      +'<div style="margin:12px 0;padding:10px;border:1px solid rgba(255,208,40,.35);border-radius:10px;"><b>&#127918; Lunacy Unlocked &mdash; The Game</b><p style="margin:6px 0 0;">Live for Lunatics. Solo vs the AI or online Quick Match &mdash; wins count on your Locker.</p><button class="btn" id="lo-play" style="margin-top:8px;width:100%;justify-content:center;">Press start</button></div>'
-      +'<div style="margin:12px 0;padding:10px;border:1px solid rgba(255,208,40,.35);border-radius:10px;"><b>&#127183; JCW Trading Cards</b><p style="margin:6px 0 0;">Collect the whole roster &mdash; buy packs, chase foils and super rares. <b>Coming soon.</b></p></div>'
-      +'<div style="margin:12px 0;padding:10px;border:1px solid rgba(255,208,40,.35);border-radius:10px;"><b>&#127918; Psychopathic Arcade</b><p style="margin:6px 0 0;">11 games &mdash; Tic Tac Slam, Chess, Pinball, Air Hockey and more, with online VS.</p><a class="btn" href="arcade.html" target="_blank" rel="noopener" style="margin-top:8px;width:100%;justify-content:center;">Enter the arcade</a></div>'
-      +'<div style="margin:12px 0;padding:10px;border:1px solid rgba(255,208,40,.35);border-radius:10px;"><b>&#127915; Backstage Pass</b><p style="margin:6px 0 0;">Behind the curtain &mdash; locker room, promos, the stuff that never airs. <b>Coming soon.</b></p></div>'
-      +'<div style="margin:12px 0;padding:10px;border:1px solid rgba(255,208,40,.35);border-radius:10px;"><b>&#129315; Bloopers</b><p style="margin:6px 0 0;">Botches, breaks and bleeps &mdash; the outtakes reel. <b>Coming soon.</b></p></div>'
-      +'<div style="margin:12px 0;padding:10px;border:1px solid rgba(255,208,40,.35);border-radius:10px;"><b>&#128249; PPV</b><p style="margin:6px 0 0;">Members-only live streams &mdash; Bloodymania and beyond. <b>Coming soon.</b></p></div>'
-      +'<div class="lk-prem-list"></div>';
+    box.innerHTML='<div style="text-align:center;margin-bottom:16px;"><span style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:#ffd028;border:1px solid rgba(255,208,40,.5);border-radius:999px;padding:5px 16px;font-size:.82rem;">&#9733; Lunatic Confirmed</span><p style="margin:10px 0 0;color:var(--steel,#9aa0aa);line-height:1.5;">You&rsquo;re in the inner circle. Here&rsquo;s what&rsquo;s yours.</p></div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;">'
+      +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));"><b>&#127918; Lunacy &mdash; The Game</b><p style="margin:6px 0 0;">The official JCW fighting game, playable right on this page. <b>Coming soon.</b></p></div>'
+      +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));"><b>&#127183; JCW Trading Cards</b><p style="margin:6px 0 0;">Collect the whole roster &mdash; buy packs, chase foils and super rares. <b>Coming soon.</b></p></div>'
+      +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));"><b>&#127918; Psychopathic Arcade</b><p style="margin:6px 0 0;">11 games &mdash; Tic Tac Slam, Chess, Pinball, Air Hockey and more, with online VS.</p><a class="btn" href="arcade.html" target="_blank" rel="noopener" style="margin-top:8px;width:100%;justify-content:center;">Enter the arcade</a></div>'
+      +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));"><b>&#127915; Backstage Pass</b><p style="margin:6px 0 0;">Behind the curtain &mdash; locker room, promos, the stuff that never airs. <b>Coming soon.</b></p></div>'
+      +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));"><b>&#129315; Bloopers</b><p style="margin:6px 0 0;">Botches, breaks and bleeps &mdash; the outtakes reel. <b>Coming soon.</b></p></div>'
+      +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));"><b>&#128249; PPV</b><p style="margin:6px 0 0;">Members-only live streams &mdash; Bloodymania and beyond. <b>Coming soon.</b></p></div>'
+      +'</div><div class="lk-prem-list" style="display:grid;gap:12px;margin-top:12px;"></div>';
     if(!fbDB)return;
     fbDB.ref('premiumContent').once('value').then(snap=>{
       const list=box.querySelector('.lk-prem-list'); if(!list)return;
@@ -2397,7 +2402,7 @@ function observeReveals(){
       let h='';
       if(v)Object.keys(v).forEach(k=>{
         const it=v[k]||{};
-        h+='<div style="margin:12px 0;padding:10px;border:1px solid rgba(255,208,40,.35);border-radius:10px;">';
+        h+='<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">';
         if(it.t)h+='<b>'+esc(it.t)+'</b>';
         if(it.d)h+='<p style="margin:6px 0 0;">'+esc(it.d)+'</p>';
         if(it.yt)h+='<div style="position:relative;padding-bottom:56.25%;height:0;margin-top:8px;"><iframe src="https://www.youtube.com/embed/'+esc(it.yt)+'" style="position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:8px;" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>';
