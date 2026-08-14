@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#000000" />
 <meta name="referrer" content="origin">
-<meta name="build" content="b2026-08-13.151">
+<meta name="build" content="b2026-08-14.153">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="JCW Lunacy">
 <meta property="og:title" content="JCW Lunacy — Juggalo Championship Wrestling">
@@ -1249,6 +1249,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <div class="kick">Juggalo Locker</div>
     <h2 class="head">Your <em>locker</em></h2>
     <p class="lede">Earn points for watching episodes, playing the game and calling your shots. Sign up to sync your points across devices and climb the leaderboard in <b>Lunacy Chat</b>.</p>
+    <p class="join-lo-cta" style="margin:4px 0 14px;"><a class="btn line" href="#lunatics">&#127914; Join The Lunatics Only &mdash; arcade, game, cards &amp; more</a></p>
     <div class="usearch" data-usearch>
       <input type="search" class="us-q" placeholder="Search Juggalos by name&hellip;" aria-label="Search user pages" autocomplete="off" spellcheck="false">
       <div class="us-res" hidden></div>
@@ -1307,6 +1308,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <div class="kick">Collect Them All</div>
     <h2 class="head">JCW <em>trading cards</em></h2>
     <p class="lede">Buy packs and collect the whole roster. Some cards are shiny foil, some are <b>super rare</b>. Every wrestler has more than one card &mdash; pulled straight from their real stats and finishers.</p>
+    <p class="join-lo-cta" style="margin:4px 0 14px;"><a class="btn line" href="#lunatics">&#127914; Cards are a Lunatics Only perk &mdash; join the inner circle</a></p>
     <div class="cards-top">
       <button class="btn gold" id="cards-buy">&#127183; Open a pack &middot; 150 pts</button>
       <div class="cards-stats">
@@ -1449,6 +1451,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
       </p>
       <button class="btn gold" id="ppv-buy" style="display:inline-flex;justify-content:center;">Buy Ticket</button>
       <p style="color:var(--steel,#9aa0aa);font-size:.82rem;margin:14px 0 0;">Secure checkout through Stripe. Your ticket unlocks the live stream on this page.</p>
+      <p class="join-lo-cta" style="margin:12px 0 0;"><a href="#lunatics" style="color:var(--gold,#ffd028);font-size:.85rem;">&#127914; Want the arcade, game and cards too? Join The Lunatics Only &rarr;</a></p>
     </div>
 
     <!-- AFTER PURCHASE -->
@@ -1738,6 +1741,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <div class="kick">Games</div>
     <h2 class="head">Press <em>start</em></h2>
     <p class="lede">In the browser, right here. No downloads, no consoles. <b>Lunatics Only.</b></p>
+    <p class="join-lo-cta" style="margin:4px 0 14px;"><a class="btn gold" href="#lunatics">&#127914; Join The Lunatics Only</a></p>
 
     <div class="games">
       <div class="game playable rev">
@@ -2369,6 +2373,8 @@ function observeReveals(){
   let lkPremIsOn=false;
   function lkPremRender(){
     document.querySelectorAll('.lk-prem-body').forEach(box=>lkPremFill(box));
+    /* members don't need the Join CTAs scattered around the site */
+    try{document.querySelectorAll('.join-lo-cta').forEach(el=>{el.style.display=window.__lkPremOn?'none':'';});}catch(_e){}
   }
   function lkPremFill(box){
     if(!lkUser){ box.innerHTML='<div style="text-align:center;padding:10px 6px;"><div style="font-size:34px;">&#127914;</div><p style="margin:10px 0 0;color:var(--steel,#9aa0aa);line-height:1.55;">The inner circle of the carnival &mdash; the arcade, the game, trading cards, backstage content and more.<br><b style="color:#fff;">Log into your Juggalo Locker to join.</b></p><a class="btn gold" href="#locker" style="margin-top:16px;display:inline-flex;justify-content:center;">Go to my Locker</a></div>'; return; }
@@ -2548,6 +2554,9 @@ function observeReveals(){
     try{
       const dow=new Date().toLocaleDateString('en-US',{timeZone:'America/Detroit',weekday:'long'});
       if(dow!=='Thursday')return;
+      /* only before/through the show (7PM ET) — after 9PM ET "drops tonight" reads wrong */
+      const hrDet=+new Date().toLocaleString('en-US',{timeZone:'America/Detroit',hour:'2-digit',hour12:false});
+      if(hrDet>=21)return;
       const today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Detroit'});
       if(localStorage.getItem('jcw_lday_seen')===today)return;
       localStorage.setItem('jcw_lday_seen',today);
@@ -3101,7 +3110,7 @@ function observeReveals(){
           +'<button class="btn line" data-rel="ally" style="margin-right:8px;'+(myRel==='ally'?'border-color:var(--acid);color:var(--acid);':'')+'">'+(myRel==='ally'?'&#10004; ALLY':'Mark as Ally')+'</button>'
           +'<button class="btn line" data-rel="rival" style="'+(myRel==='rival'?'border-color:var(--hot);color:var(--hot);':'')+'">'+(myRel==='rival'?'&#9876; RIVAL':'Mark as Rival')+'</button>'
           +(isMod()&&JCW_MODS[uid]?'<button class="btn" id="prof-dm" style="margin-left:8px;background:var(--acid);color:#000;">&#128172; Message</button>':'')
-          +((curUser()&&curUser().uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1')?'<button class="btn line" id="prof-gift" style="margin-left:8px;">&#127183; Send a card</button>':'')
+          +((lkUser&&lkUser.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1')?'<button class="btn line" id="prof-gift" style="margin-left:8px;">&#127183; Send a card</button>':'')
           +'</p>';
       }
       if(uid==='zRLXcejE4dWQRL0l07Bo19SO5j52'){
