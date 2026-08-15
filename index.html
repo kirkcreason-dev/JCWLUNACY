@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#000000" />
 <meta name="referrer" content="origin">
-<meta name="build" content="b2026-08-14.155">
+<meta name="build" content="b2026-08-14.156">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="JCW Lunacy">
 <meta property="og:title" content="JCW Lunacy — Juggalo Championship Wrestling">
@@ -2135,6 +2135,18 @@ function observeReveals(){
         renderEps(q&&q.value?q.value:'');
       }).catch(function(){});
     } }catch(e){}
+    /* episodes added live from the admin panel (RTDB siteEpisodes) — no redeploy needed */
+    window.jcwAddEpisodes=function(list){
+      try{
+        var have={};EPS.forEach(function(e){have[String(e[0])]=1;});
+        var added=false;
+        (list||[]).forEach(function(e){
+          if(!e||!e[0]||have[String(e[0])])return;
+          have[String(e[0])]=1;EPS.push([String(e[0]),e[1]||'Episode']);added=true;
+        });
+        if(added)renderEps(q&&q.value?q.value:'');
+      }catch(_e){}
+    };
     q.addEventListener('input',()=>renderEps(q.value));
     grid.addEventListener('click',e=>{
       const c=e.target.closest('.ep');if(!c)return;
@@ -3342,6 +3354,13 @@ function observeReveals(){
       fbDB.ref('premiumMembers').on('value',snap=>{
         window.__lkPremSet=snap.val()||{};
         try{if(window.__chatLive)chRender(window.__chatLive);}catch(_e){}
+      },()=>{});
+      /* episodes added from the admin panel appear instantly for everyone */
+      fbDB.ref('siteEpisodes').on('value',snap=>{
+        const v=snap.val()||{};
+        const list=Object.keys(v).map(k=>({id:k,t:(v[k]&&v[k].t)||'Episode',ts:(v[k]&&v[k].ts)||0}))
+          .sort((a,b)=>a.ts-b.ts).map(x=>[x.id,x.t]);
+        try{if(window.jcwAddEpisodes)window.jcwAddEpisodes(list);}catch(_e){}
       },()=>{});
       fbDB.ref('polls').on('value',snap=>{
         const P=pollGet();P.t=snap.val()||{};localStorage.setItem('jcw_polls',JSON.stringify(P));pollRender();

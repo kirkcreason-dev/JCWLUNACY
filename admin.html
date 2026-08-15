@@ -65,7 +65,23 @@
     <div class="muted" style="margin-top:8px"><b>Award</b> adds the points on top (negative subtracts). <b>Set total</b> makes their balance exactly the number entered — use it when someone spends points. <b>Reset to 0</b> wipes the balance. All of it updates the leaderboard instantly and syncs to their device next visit.</div>
   </div>
 
-  <div class="card"><label>Admin sign-in <span class="muted">(needed to award points or broadcast)</span></label>
+  <div class="card"><label>&#127909; Episodes <span class="muted">(add the new episode here &mdash; it appears on the site instantly, no redeploy)</span></label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+      <input id="epUrl" placeholder="YouTube link or video ID" style="flex:2;min-width:220px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+      <button class="ghost" id="epFetch">Fetch title</button>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <input id="epTitle" placeholder="Title (e.g. Episode 96)" style="flex:2;min-width:180px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+      <button id="epAdd">Add episode</button>
+      <span class="status" id="epStatus"></span>
+    </div>
+    <div class="muted" style="margin-top:8px">Sign in below first. Paste the YouTube link, hit <b>Fetch title</b> (or type it), then <b>Add</b>. It lands at the top of the Episodes page for everyone within seconds. Remove works the same way.</div>
+    <div id="epList" class="muted" style="margin-top:12px">&mdash;</div>
+  </div>
+
+  <div class="card"><label>&#127942; Game wins <span class="muted">(JCW Lunacy: The Game &mdash; synced from every player's Locker)</span></label><div id="statWins" class="muted">&mdash;</div></div>
+
+  <div class="card"><label>Admin sign-in <span class="muted">(needed to award points, broadcast or manage episodes)</span></label>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
       <input id="adminEmail" placeholder="Digital Duke email" style="flex:2;min-width:180px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
       <input id="adminPass" type="password" placeholder="Password" style="flex:1;min-width:120px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
@@ -273,6 +289,16 @@
       const fmax=Math.max(1,...favs.map(x=>x[1]));
       $('statFavs').innerHTML=favs.length?favs.slice(0,20).map(x=>barRow(x[0],x[1],fmax)).join(''):'<span class="muted">Nobody has picked a favorite yet.</span>';
 
+      // game wins — every locker with at least one win, sorted by wins
+      try{
+        const wrows=Object.entries(lockers||{}).map(([k,x])=>x?{uid:k,name:x.name||'Anonymous Juggalo',wins:+x.wins||0,pts:+x.pts||0}:null)
+          .filter(x=>x&&x.wins>0).sort((a,b)=>b.wins-a.wins);
+        const wtot=wrows.reduce((a,x)=>a+x.wins,0);
+        let wh='<div style="border:1px solid var(--seam);border-radius:8px;padding:12px;background:#101015;text-align:center;margin-bottom:12px"><div style="font-size:24px;font-weight:800;color:var(--gold)">'+wtot+'</div><div class="muted" style="font-size:12px">total wins recorded · '+wrows.length+' players</div></div>';
+        wh+=wrows.length?wrows.slice(0,40).map((x,i)=>'<div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px dashed var(--seam)"><span class="muted" style="flex:0 0 26px">#'+(i+1)+'</span><span style="flex:1">'+esc(x.name)+'</span><b style="color:var(--gold)">'+x.wins+' wins</b><span class="muted">'+x.pts+' pts</span></div>').join(''):'<span class="muted">No wins recorded yet — wins count when the game goes live.</span>';
+        $('statWins').innerHTML=wh;
+      }catch(e){}
+
       // top lockers
       const rows=Object.values(lockers||{}).filter(x=>x&&(x.pts||x.name)).sort((a,b)=>(b.pts||0)-(a.pts||0)).slice(0,15);
       $('statLockers').innerHTML=rows.length?rows.map((x,i)=>'<div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px dashed var(--seam)"><span class="muted" style="flex:0 0 26px">#'+(i+1)+'</span><span style="flex:1">'+esc(x.name||'Anonymous Juggalo')+'</span><b style="color:var(--gold)">'+(x.pts||0)+' pts</b><span class="muted">'+(x.wins||0)+' wins</span></div>').join(''):'<span class="muted">No lockers synced yet.</span>';
@@ -364,6 +390,64 @@
   $('setBtn').onclick=()=>pointsOp('set');
   $('zeroBtn').onclick=()=>pointsOp('zero');
   $('statsReload').onclick=statsLoad;
+
+  /* ===== Episodes manager (writes RTDB siteEpisodes; the site merges live) ===== */
+  function ytId(s){
+    s=String(s||'').trim();
+    var m=s.match(/[?&]v=([A-Za-z0-9_-]{6,})/)||s.match(/youtu\.be\/([A-Za-z0-9_-]{6,})/)||s.match(/embed\/([A-Za-z0-9_-]{6,})/)||s.match(/^([A-Za-z0-9_-]{6,})$/);
+    return m?m[1]:null;
+  }
+  function epSay(m,c){const el=$('epStatus');el.textContent=m;el.className='status '+(c||'');}
+  async function epsRender(){
+    try{
+      const db=await statsInit();
+      const v=(await db.ref('siteEpisodes').once('value')).val()||{};
+      const list=Object.entries(v).map(([id,x])=>({id,t:(x&&x.t)||'Episode',ts:(x&&x.ts)||0})).sort((a,b)=>b.ts-a.ts);
+      $('epList').innerHTML=list.length
+        ? list.map(e2=>'<div class="item" style="display:flex;justify-content:space-between;gap:10px;align-items:center"><span><b>'+esc(e2.t)+'</b> <span class="muted">'+esc(e2.id)+' · added '+new Date(e2.ts).toLocaleDateString()+'</span></span><button class="ghost sm" data-epdel="'+esc(e2.id)+'" style="border-color:var(--hot);color:var(--hot)">Remove</button></div>').join('')
+        : '<span class="muted">No admin-added episodes yet. Episodes baked into the site build are managed by redeploys; everything you add here is extra and live-updates.</span>';
+    }catch(e){$('epList').innerHTML='<span class="err">Couldn’t load — make sure the siteEpisodes rule is published (read: true, write: admin).</span>';}
+  }
+  $('epFetch').onclick=async()=>{
+    const id=ytId($('epUrl').value);
+    if(!id){epSay('Paste a YouTube link or video ID first.','err');return;}
+    epSay('Fetching title…');
+    async function tryFetch(u){const r=await fetch(u);if(!r.ok)throw 0;return (await r.json()).title||'';}
+    let t='';
+    try{t=await tryFetch('https://www.youtube.com/oembed?format=json&url='+encodeURIComponent('https://www.youtube.com/watch?v='+id));}
+    catch(e){try{t=await tryFetch('https://noembed.com/embed?url='+encodeURIComponent('https://www.youtube.com/watch?v='+id));}catch(e2){}}
+    if(!t){epSay('Couldn’t fetch it — type the title yourself.','err');return;}
+    const m=t.match(/Episode\s*\d+/i);
+    $('epTitle').value=m?m[0].replace(/\s+/g,' ').replace(/episode/i,'Episode'):t;
+    epSay('Title found — check it, then Add.','ok');
+  };
+  $('epAdd').onclick=async()=>{
+    const id=ytId($('epUrl').value);
+    const t=($('epTitle').value||'').trim();
+    if(!id){epSay('Paste a YouTube link or video ID.','err');return;}
+    if(!t){epSay('Give it a title (e.g. Episode 96).','err');return;}
+    try{
+      const db=await statsInit();
+      if(!statsAuth||!statsAuth.currentUser){epSay('Sign in below first.','err');return;}
+      await db.ref('siteEpisodes/'+id).set({t:t,ts:Date.now()});
+      $('epUrl').value='';$('epTitle').value='';
+      epSay('Added — it’s live on the site now. ✅','ok');
+      epsRender();
+    }catch(e){epSay('Blocked — publish the siteEpisodes rule, then retry.','err');}
+  };
+  document.addEventListener('click',async e=>{
+    const b=e.target.closest('[data-epdel]');if(!b)return;
+    if(!confirm('Remove "'+b.dataset.epdel+'" from the site?'))return;
+    try{
+      const db=await statsInit();
+      if(!statsAuth||!statsAuth.currentUser){epSay('Sign in below first.','err');return;}
+      await db.ref('siteEpisodes/'+b.dataset.epdel).remove();
+      epSay('Removed. (Viewers see it gone next visit.)','ok');
+      epsRender();
+    }catch(err){epSay('Blocked — check the siteEpisodes rule.','err');}
+  });
+  epsRender();
+
   statsLoad();
   setInterval(statsLoad,60000);
 })();
