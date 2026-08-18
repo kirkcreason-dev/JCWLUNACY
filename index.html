@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#000000" />
 <meta name="referrer" content="origin">
-<meta name="build" content="b2026-08-17.158">
+<meta name="build" content="b2026-08-17.159">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="JCW Lunacy">
 <meta property="og:title" content="JCW Lunacy — Juggalo Championship Wrestling">
@@ -4194,12 +4194,12 @@ route();
       if(!curUser()){toast('Log into your Locker first');location.hash='#locker';return;}
       if(!window.__lkPremOn){toast('Sending cards is Lunatics Only');return;}
       buildCatalog();const c=coll();
-      const dupes=CATALOG.filter(cd=>c[cd.id]&&c[cd.id].n>=2);
+      const dupes=CATALOG.filter(cd=>isDuke()||(c[cd.id]&&c[cd.id].n>=2)); /* Duke is the house — can send any card */
       const to=document.getElementById('gift-to'); if(to)to.textContent='Send a card to '+toName;
       const box=document.getElementById('gift-cards'); if(!box)return;
       const m=document.getElementById('gift-modal'); if(m){m.dataset.uid=toUid;m.dataset.name=toName;}
       if(!dupes.length){box.innerHTML='<p class="muted">You need a duplicate (2 or more of a card) to send one &mdash; you always keep your last copy. Open more packs!</p>';}
-      else{box.innerHTML='';dupes.forEach(cd=>{const el=cardEl(cd,{owned:true,cnt:c[cd.id].n,foil:c[cd.id].foil,locked:false});el.style.cursor='pointer';el.title='Send this card';el.addEventListener('click',()=>doSendCard(toUid,toName,cd.id));box.appendChild(el);});}
+      else{box.innerHTML='';dupes.forEach(cd=>{const oo=c[cd.id]||{n:(isDuke()?Infinity:0),foil:false};const el=cardEl(cd,{owned:true,cnt:oo.n,foil:oo.foil,locked:false});el.style.cursor='pointer';el.title='Send this card';el.addEventListener('click',()=>doSendCard(toUid,toName,cd.id));box.appendChild(el);});}
       if(m)m.classList.add('on');
     };
     function doSendCard(toUid,toName,cardId){
@@ -4314,7 +4314,7 @@ route();
       buildCatalog();
       const want=catById(wantId);if(!want)return;
       const c=coll();
-      const mine=CATALOG.filter(cd=>{const o=c[cd.id];return o&&(isDuke()||o.n>=2);});
+      const mine=CATALOG.filter(cd=>{if(isDuke())return true;const o=c[cd.id];return o&&o.n>=2;}); /* Duke is the house — can offer any card */
       const box=document.getElementById('trade-offer-cards');
       const hd=document.getElementById('trade-want');
       const m=document.getElementById('trade-modal');
@@ -4328,7 +4328,7 @@ route();
       }else{
         box.innerHTML='';
         mine.forEach(cd=>{
-          const o=c[cd.id];
+          const o=c[cd.id]||{n:(isDuke()?Infinity:0),foil:false};
           const el=cardEl(cd,{owned:true,cnt:o.n,foil:o.foil,locked:false});
           el.style.cursor='pointer';el.title='Offer this card';
           el.addEventListener('click',()=>sendTrade(toUid,toName,wantId,cd.id));

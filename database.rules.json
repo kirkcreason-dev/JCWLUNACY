@@ -7,7 +7,8 @@
     "chat": {
       ".read": true,
       "$msg": {
-        ".write": "(!data.exists() && newData.exists()) || (auth != null && (root.child('mods').child(auth.uid).val() === true || auth.uid === 'oYrNiXZywhexmLqRQO7j1iyA1Bh1' || auth.uid === 'L1feNpUUBPfe9ONSwxpgwqcVFPv1' || auth.uid === 'PlWKdSiM9hfJ5HJ2WNBN9IqwPBN2' || auth.uid === 'QC0UIOmTazZNOrIiwPznSa7YEo53' || auth.uid === 'widUOpWNhYhTtAVf3iDseNHHWVE3' || auth.uid === 'zRLXcejE4dWQRL0l07Bo19SO5j52' || auth.uid === 'TwkyqKXbJ6NV8VNewfofluB1sji2' || auth.uid === 'CUqiZLujVGTTbvXsgEynoOaUzA52' || auth.uid === 'krXCIRnqkUcfPgXMsM9E5PcoTxi1' || auth.uid === '4IQHHQJXUUUi1gx6fRSg94J9ug82'))"
+        ".write": "(!data.exists() && newData.exists()) || (auth != null && (root.child('mods').child(auth.uid).val() === true || auth.uid === 'oYrNiXZywhexmLqRQO7j1iyA1Bh1' || auth.uid === 'L1feNpUUBPfe9ONSwxpgwqcVFPv1' || auth.uid === 'PlWKdSiM9hfJ5HJ2WNBN9IqwPBN2' || auth.uid === 'QC0UIOmTazZNOrIiwPznSa7YEo53' || auth.uid === 'widUOpWNhYhTtAVf3iDseNHHWVE3' || auth.uid === 'zRLXcejE4dWQRL0l07Bo19SO5j52' || auth.uid === 'TwkyqKXbJ6NV8VNewfofluB1sji2' || auth.uid === 'CUqiZLujVGTTbvXsgEynoOaUzA52' || auth.uid === 'krXCIRnqkUcfPgXMsM9E5PcoTxi1' || auth.uid === '4IQHHQJXUUUi1gx6fRSg94J9ug82'))",
+        ".validate": "newData.hasChildren(['n','t','ts']) && newData.child('t').isString() && newData.child('t').val().length <= 1000 && newData.child('n').isString() && newData.child('n').val().length <= 80 && newData.child('ts').isNumber()"
       }
     },
     "modchat": {
@@ -21,7 +22,7 @@
       "$poll": {
         "$opt": {
           ".write": true,
-          ".validate": "newData.isNumber() && newData.val() >= 0"
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= (data.exists() ? data.val() : 0) + 1"
         }
       }
     },
@@ -52,7 +53,8 @@
     "presence": {
       ".read": true,
       "$child": {
-        ".write": true
+        ".write": true,
+        ".validate": "newData.isNumber()"
       }
     },
     "presenceUsers": {
@@ -67,7 +69,7 @@
         ".write": "auth != null && auth.uid === $uid",
         "pts": {
           ".write": "auth != null && (auth.uid === $uid || auth.uid === 'oYrNiXZywhexmLqRQO7j1iyA1Bh1') && newData.exists()",
-          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 1000000 && (auth.uid === 'oYrNiXZywhexmLqRQO7j1iyA1Bh1' || ((data.exists() ? data.val() : 0) - newData.val() <= 500 && (newData.val() - (data.exists() ? data.val() : 0) <= 1000 || (data.exists() ? data.val() : 0) < 1000)))"
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 1000000 && (auth.uid === 'oYrNiXZywhexmLqRQO7j1iyA1Bh1' || ((data.exists() ? data.val() : 0) - newData.val() <= 500 && newData.val() - (data.exists() ? data.val() : 0) <= 1000))"
         },
         "cards": {
           ".write": "auth != null && auth.uid === $uid && (newData.exists() || !data.exists())"
@@ -141,6 +143,10 @@
     "premiumContent": {
       ".read": "auth != null && root.child('premiumMembers').child(auth.uid).val() === true",
       ".write": false
+    },
+    "siteEpisodes": {
+      ".read": true,
+      ".write": "auth != null && (root.child('mods').child(auth.uid).val() === true || auth.uid === 'oYrNiXZywhexmLqRQO7j1iyA1Bh1' || auth.uid === 'zRLXcejE4dWQRL0l07Bo19SO5j52')"
     }
   }
 }
