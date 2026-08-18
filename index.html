@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#000000" />
 <meta name="referrer" content="origin">
-<meta name="build" content="b2026-08-17.170">
+<meta name="build" content="b2026-08-17.171">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="JCW Lunacy">
 <meta property="og:title" content="JCW Lunacy — Juggalo Championship Wrestling">
@@ -1271,6 +1271,16 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
           <p>Signed in as</p><div class="big" id="au-who" style="font-size:20px;word-break:break-all;"></div>
           <button class="btn line" id="au-logout" style="margin-top:12px;">Log out</button>
           <p>Your points sync across every device.</p>
+          <button id="au-del-open" style="background:none;border:none;color:var(--hot,#ff3fa4);font-size:12px;text-decoration:underline;cursor:pointer;padding:0;margin-top:10px;">Delete my account</button>
+          <div id="au-del-box" style="display:none;margin-top:12px;padding:12px;border:1px solid rgba(255,63,164,.5);border-radius:10px;background:rgba(255,63,164,.07);">
+            <p style="color:#ffd1e8;font-size:13px;line-height:1.6;margin:0 0 10px;"><b>This is forever.</b> Your points, badges, cards, allies and wall get wiped and your login is destroyed. If you&rsquo;re a Lunatic, cancel your subscription too or Stripe keeps billing you.</p>
+            <input type="password" id="au-del-pass" placeholder="Enter your password to confirm" autocomplete="current-password" style="width:100%;background:#000;border:1px solid rgba(255,63,164,.5);color:#fff;border-radius:8px;padding:9px 10px;font:inherit;">
+            <div style="display:flex;gap:8px;margin-top:10px;">
+              <button class="btn line" id="au-del-cancel" style="flex:1;">Keep my account</button>
+              <button class="btn" id="au-del-go" style="flex:1;background:var(--hot,#ff3fa4);color:#000;">Delete forever</button>
+            </div>
+            <p id="au-del-msg" style="min-height:16px;font-size:12px;color:#ffd1e8;margin:8px 0 0;"></p>
+          </div>
         </div>
       </div>
       <div class="lk rev"><h3>Points</h3><div class="big" id="lk-pts">0</div><p id="lk-rank">Fresh Face</p></div>
@@ -2503,6 +2513,9 @@ function observeReveals(){
         .catch(err=>{msg.textContent=err.message.replace('Firebase: ','');});
     }
     if(e.target.id==='au-logout'){ if(fbAuth)fbAuth.signOut(); }
+    if(e.target.id==='au-del-open'){const b=document.getElementById('au-del-box');if(b)b.style.display=b.style.display==='none'?'block':'none';}
+    if(e.target.id==='au-del-cancel'){const b=document.getElementById('au-del-box');if(b)b.style.display='none';const p=document.getElementById('au-del-pass');if(p)p.value='';}
+    if(e.target.id==='au-del-go'){jcwDeleteAccount();}
   });
 
   (function(){ /* daily check-in — once per day, not per page load (stops auto-refresh farming) */
@@ -2715,6 +2728,41 @@ function observeReveals(){
         dst.n=Math.max(dst.n||0,src.n||0);dst.foil=!!(dst.foil||src.foil);out[dk]=dst;}
       if(ch){d.cards=out;localStorage.setItem('jcw_locker',JSON.stringify(d));}}
   }catch(_e){}})();
+  /* ===== account deletion: reauth -> wipe own data -> destroy login ===== */
+  window.jcwDeleteAccount=async function(){
+    const say=(m)=>{const el=document.getElementById('au-del-msg');if(el)el.textContent=m;};
+    try{
+      if(!fbAuth||!fbAuth.currentUser){say('Not signed in.');return;}
+      const user=fbAuth.currentUser, uid=user.uid, email=user.email;
+      const pass=(document.getElementById('au-del-pass')||{}).value||'';
+      if(!pass){say('Enter your password first.');return;}
+      say('Checking password…');
+      const cred=firebase.auth.EmailAuthProvider.credential(email,pass);
+      await user.reauthenticateWithCredential(cred);
+      say('Deleting your data…');
+      const paths=['lockers/'+uid,'relations/'+uid,'presenceUsers/'+uid,'trades/'+uid,'gifts/'+uid,'presence/'+uid];
+      for(const p of paths){try{await fbDB.ref(p).remove();}catch(_e){}}
+      /* wall + notifications allow per-child owner deletes */
+      for(const node of ['walls','notifications']){
+        try{
+          const s=await fbDB.ref(node+'/'+uid).once('value');
+          const jobs=[];s.forEach(c=>{jobs.push(fbDB.ref(node+'/'+uid+'/'+c.key).remove().catch(()=>{}));});
+          await Promise.all(jobs);
+        }catch(_e){}
+      }
+      say('Removing your login…');
+      try{localStorage.removeItem('jcw_locker');}catch(_e){}
+      await user.delete();
+      say('Done.');
+      try{if(window.toast)toast('Your account is gone. Much clown love — the carnival will miss you.',5000);}catch(_e){}
+      setTimeout(()=>{location.hash='#home';location.reload();},1200);
+    }catch(err){
+      const code=(err&&err.code)||'';
+      if(code==='auth/wrong-password'||code==='auth/invalid-credential')say('Wrong password.');
+      else if(code==='auth/too-many-requests')say('Too many tries — wait a minute.');
+      else say('Could not delete: '+((err&&err.message)||'unknown error'));
+    }
+  };
   function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:Math.min(d.pts||0,999999),wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:d.picks||{},hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{})}); }catch(_e){try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
   /* ===== WIPE RECOVERY =====
      Snapshot the best locker this device has ever seen for the signed-in account
