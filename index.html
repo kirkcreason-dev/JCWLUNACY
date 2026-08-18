@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#000000" />
 <meta name="referrer" content="origin">
-<meta name="build" content="b2026-08-17.161">
+<meta name="build" content="b2026-08-17.162">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="JCW Lunacy">
 <meta property="og:title" content="JCW Lunacy — Juggalo Championship Wrestling">
@@ -4218,7 +4218,7 @@ route();
       const box=document.getElementById('gift-cards'); if(!box)return;
       const m=document.getElementById('gift-modal'); if(m){m.dataset.uid=toUid;m.dataset.name=toName;}
       if(!dupes.length){box.innerHTML='<p class="muted">You need a duplicate (2 or more of a card) to send one &mdash; you always keep your last copy. Open more packs!</p>';}
-      else{box.innerHTML='';dupes.forEach(cd=>{const oo=c[cd.id]||{n:(isDuke()?Infinity:0),foil:false};const el=cardEl(cd,{owned:true,cnt:oo.n,foil:oo.foil,locked:false});el.style.cursor='pointer';el.title='Send this card';el.addEventListener('click',()=>doSendCard(toUid,toName,cd.id));box.appendChild(el);});}
+      else{box.innerHTML=isDuke()?'<label style="grid-column:1/-1;display:flex;align-items:center;gap:8px;color:var(--gold);font-size:14px;cursor:pointer;"><input type="checkbox" id="gift-foil-tgl" style="width:18px;height:18px;accent-color:#ffd028;"> Send as &#10024; foil</label>':'';dupes.forEach(cd=>{const oo=c[cd.id]||{n:(isDuke()?Infinity:0),foil:false};const el=cardEl(cd,{owned:true,cnt:oo.n,foil:oo.foil,locked:false});el.style.cursor='pointer';el.title='Send this card';el.addEventListener('click',()=>doSendCard(toUid,toName,cd.id));box.appendChild(el);});}
       if(m)m.classList.add('on');
     };
     function doSendCard(toUid,toName,cardId){
@@ -4242,7 +4242,10 @@ route();
       }
       let sendDone=false;
       try{
-        const sf=(function(){try{const cc=(lkGet().cards||{})[cardId];return !!(cc&&cc.foil);}catch(e){return false;}})();
+        const sf=(function(){try{
+          if(isDuke()){const t=document.getElementById('gift-foil-tgl');return !!(t&&t.checked);} /* the house picks */
+          const cc=(lkGet().cards||{})[cardId];return !!(cc&&cc.foil);
+        }catch(e){return false;}})();
         const p=db().ref('gifts/'+toUid).push({id:cardId,from:curUser().uid,fromName:(lkGet().name||'A Juggalo'),ts:Date.now(),foil:sf});
         const done=(p&&typeof p.then==='function')?p:(p&&p.__proto__&&p.then?p:Promise.resolve());
         Promise.resolve(done).then(function(){
@@ -4346,7 +4349,7 @@ route();
       if(!mine.length){
         box.innerHTML='<p class="muted">You need a <b>duplicate</b> card to offer (2 or more of one card) so you keep your own copy. Open more packs first!</p>';
       }else{
-        box.innerHTML='';
+        box.innerHTML=isDuke()?'<label style="grid-column:1/-1;display:flex;align-items:center;gap:8px;color:var(--gold);font-size:14px;cursor:pointer;"><input type="checkbox" id="trade-foil-tgl" style="width:18px;height:18px;accent-color:#ffd028;"> Offer as &#10024; foil</label>':'';
         mine.forEach(cd=>{
           const o=c[cd.id]||{n:(isDuke()?Infinity:0),foil:false};
           const el=cardEl(cd,{owned:true,cnt:o.n,foil:o.foil,locked:false});
@@ -4363,7 +4366,10 @@ route();
       const D=db(),u=curUser();
       if(!D||!u){toast('Sign in first');return;}
       let offerFoil=false;
-      try{const cc=(lkGet().cards||{})[offerId];offerFoil=!!(cc&&cc.foil);}catch(e){}
+      try{
+        if(isDuke()){const tg=document.getElementById('trade-foil-tgl');offerFoil=!!(tg&&tg.checked);} /* the house picks */
+        else{const cc=(lkGet().cards||{})[offerId];offerFoil=!!(cc&&cc.foil);}
+      }catch(e){}
       if(!isDuke()){
         const d=lkGet();d.cards=d.cards||{};const cur=d.cards[offerId];
         if(!cur||cur.n<2){toast('You need to keep at least one copy');return;}
