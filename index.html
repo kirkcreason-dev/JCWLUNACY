@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#000000" />
 <meta name="referrer" content="origin">
-<meta name="build" content="b2026-08-17.165">
+<meta name="build" content="b2026-08-17.166">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="JCW Lunacy">
 <meta property="og:title" content="JCW Lunacy — Juggalo Championship Wrestling">
@@ -776,6 +776,11 @@ img.hm-mast{margin-bottom:20px;}
   font-family:inherit;font-size:14px;padding:10px 12px;outline:none;}
 .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
 .badge2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;padding:5px 10px;border:1px solid var(--seam);color:var(--steel);}
+.navtiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:16px;}
+.navtiles a{display:block;border-radius:14px;overflow:hidden;transition:transform .16s ease,box-shadow .16s ease;}
+.navtiles img{display:block;width:100%;height:auto;border-radius:14px;}
+.navtiles a:hover{transform:translateY(-4px) scale(1.03);box-shadow:0 10px 30px rgba(0,0,0,.6),0 0 18px rgba(255,208,40,.25);}
+@media(max-width:520px){.navtiles{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;}}
 .lun-chip{display:inline-block;background:linear-gradient(135deg,var(--gold,#ffd028),#ff9d1c);color:#000;font-size:9px;font-weight:800;text-transform:uppercase;padding:1px 6px;border-radius:3px;letter-spacing:.08em;margin:0 5px 0 2px;vertical-align:middle;}
 .badge2.got{border-color:var(--gold);color:var(--gold);}
 .badge2.verified-chip{background:linear-gradient(135deg,var(--gold),var(--tang));color:#000;border-color:var(--gold);font-weight:800;}
@@ -1143,22 +1148,20 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <section class="blk">
     <div class="kick">Inside</div>
     <h2 class="head">Pick your <em>poison</em></h2>
-    <div class="panels">
-      <a class="panel rev" href="#events"><span class="num">01</span><h3>Events</h3>
-        <p>Bloodymania and the whole calendar, from the Gathering to Big Ballas&rsquo; X-Mas Party.</p>
-        <span class="go">See the card &rarr;</span></a>
-      
-      <a class="panel rev" href="#crew"><span class="num">02</span><h3>Roster</h3>
-        <p>Night-one legends, the originals, the SlamTV! generation, the front office.</p>
-        <span class="go">Roll call &rarr;</span></a>
-      
-      <a class="panel rev" href="#games"><span class="num">03</span><h3>Games</h3>
-        <p>The <b>Psychopathic Arcade</b> &mdash; 11 games &mdash; plus the official JCW Lunacy fighting game. <b>Lunatics Only.</b></p>
-        <span class="go">Press start &rarr;</span></a>
-      <a class="panel rev" href="#episodes"><span class="num">04</span><h3>Episodes</h3>
-        <p>All episodes, playable right here.</p>
-        <span class="go">Binge it &rarr;</span></a>
-      
+    <div class="navtiles rev">
+      <a href="#episodes"><img src="nav/nav-episodes.png" alt="Episodes" loading="lazy"></a>
+      <a href="#clips"><img src="nav/nav-clips.png" alt="Clips" loading="lazy"></a>
+      <a href="#events"><img src="nav/nav-events.png" alt="Events" loading="lazy"></a>
+      <a href="https://www.psychopathicrecords.com/jcwtours" target="_blank" rel="noopener"><img src="nav/nav-tickets.png" alt="Tickets" loading="lazy"></a>
+      <a href="#crew"><img src="nav/nav-roster.png" alt="Roster" loading="lazy"></a>
+      <a href="#games"><img src="nav/nav-games.png" alt="Games" loading="lazy"></a>
+      <a href="#merch"><img src="nav/nav-merch.png" alt="Merch" loading="lazy"></a>
+      <a href="#cards"><img src="nav/nav-cards.png" alt="Cards" loading="lazy"></a>
+      <a href="#comics"><img src="nav/nav-comics.png" alt="Comics" loading="lazy"></a>
+      <a href="#vote"><img src="nav/nav-vote.png" alt="Vote" loading="lazy"></a>
+      <a href="#locker"><img src="nav/nav-locker.png" alt="Locker" loading="lazy"></a>
+      <a href="#lunatics"><img src="nav/nav-lunatics.png" alt="Lunatics Only" loading="lazy"></a>
+      <a href="#about"><img src="nav/nav-about.png" alt="About" loading="lazy"></a>
     </div>
   </section>
 </main>
