@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#000000" />
 <meta name="referrer" content="origin">
-<meta name="build" content="b2026-08-17.168">
+<meta name="build" content="b2026-08-17.170">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="JCW Lunacy">
 <meta property="og:title" content="JCW Lunacy — Juggalo Championship Wrestling">
@@ -31,7 +31,7 @@ window.addEventListener('unhandledrejection',function(e){try{var r=e.reason||{};
   --blood:#cc1483;--hot:#ff3fa4;--gold:#ffd028;--gold-hi:#ffe066;
   --bone:#ffd028;--steel:#5bd62b;--acid:#5bd62b;
   --purple:#a54fe0;--cyan:#ff3fa4;--tang:#ff7a1a;
-  --pad:clamp(16px,4vw,44px);--nav-h:108px;
+  --pad:clamp(16px,4vw,44px);--nav-h:132px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html{scroll-behavior:smooth;}
@@ -52,16 +52,16 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 
 /* ============ NAV ============ */
 nav.top{position:fixed;top:0;left:0;right:0;z-index:100;min-height:var(--nav-h);
-  display:flex;align-items:center;gap:8px;padding:8px var(--pad);
+  display:flex;align-items:center;gap:18px;padding:10px var(--pad);
   background:rgba(0,0,0,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--seam);
   flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
-@media (max-width:899px){:root{--nav-h:90px;}body{padding-top:var(--nav-h);}}
+@media (max-width:899px){:root{--nav-h:106px;}body{padding-top:var(--nav-h);}}
 nav.top::-webkit-scrollbar{display:none;}
 nav.top .brand{font-family:'Rubik Distressed',system-ui,sans-serif;font-size:20px;color:var(--gold);
-  letter-spacing:.03em;margin-right:14px;flex:none;text-shadow:2px 2px 0 #000;user-select:none;cursor:pointer;}
+  letter-spacing:.03em;margin-right:18px;flex:none;text-shadow:2px 2px 0 #000;user-select:none;cursor:pointer;}
 nav.top a{flex:none;padding:0;position:relative;transition:transform .15s,filter .15s;border-radius:8px;}
-nav.top a img{height:88px;width:auto;display:block;border-radius:8px;}
-@media (max-width:899px){nav.top a img{height:70px;}}
+nav.top a img{height:108px;width:auto;display:block;border-radius:8px;}
+@media (max-width:899px){nav.top a img{height:84px;}nav.top{gap:12px;}}
 nav.top a:hover{transform:translateY(-2px);filter:brightness(1.2);}
 nav.top a.on{filter:brightness(1.25);}
 nav.top a.on img{box-shadow:0 0 14px rgba(255,208,40,.6),0 0 3px rgba(255,208,40,.9);}
@@ -952,7 +952,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
 
 <nav class="top" id="nav">
   <span class="brand" id="brand">JCW</span>
-  <a href="#home" data-r="home"><img src="nav/nav-home.png" alt="Home"></a>
+  <a href="#home" data-r="home"><img src="nav/nav-home.png?v=2" alt="Home"></a>
   <a href="#about" data-r="about"><img src="nav/nav-about.png" alt="About"></a>
   <a href="#episodes" data-r="episodes"><img src="nav/nav-episodes.png" alt="Episodes"></a>
   <a href="#clips" data-r="clips"><img src="nav/nav-clips.png" alt="Clips"></a>
@@ -1143,7 +1143,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <div class="kick">Inside</div>
     <h2 class="head">Pick your <em>poison</em></h2>
     <div class="navtiles rev">
-      <a href="#home"><img src="nav/nav-home.png" alt="Home" loading="lazy"></a>
+      <a href="#home"><img src="nav/nav-home.png?v=2" alt="Home" loading="lazy"></a>
       <a href="#episodes"><img src="nav/nav-episodes.png" alt="Episodes" loading="lazy"></a>
       <a href="#clips"><img src="nav/nav-clips.png" alt="Clips" loading="lazy"></a>
       <a href="#events"><img src="nav/nav-events.png" alt="Events" loading="lazy"></a>
