@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#000000" />
 <meta name="referrer" content="origin">
-<meta name="build" content="b2026-08-17.162">
+<meta name="build" content="b2026-08-17.163">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="JCW Lunacy">
 <meta property="og:title" content="JCW Lunacy — Juggalo Championship Wrestling">
@@ -1445,7 +1445,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <div style="margin-top:18px;padding:44px 26px;border:1px solid rgba(255,208,40,.35);border-radius:14px;background:#15151c;text-align:center;">
       <div style="font-size:52px;">&#128227;&#128218;</div>
       <p style="font-family:'Rubik Distressed',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:2rem;color:var(--gold,#ffd028);margin:12px 0 4px;">Coming Soon</p>
-      <p style="color:var(--steel,#9aa0aa);line-height:1.7;max-width:480px;margin:8px auto 0;">The first issue is being inked at <b>Creaso-Norse</b>. Lunatics get it here the day it drops &mdash; keep your membership close and your Faygo closer.</p>
+      <p style="color:var(--steel,#9aa0aa);line-height:1.7;max-width:480px;margin:8px auto 0;">Straight from the mind of <b>Violent J</b> himself. Lunatics get it here the day it drops &mdash; keep your membership close and your Faygo closer.</p>
     </div>
   </section>
 </main>
@@ -2705,7 +2705,10 @@ function observeReveals(){
   var lkCloudReady=false;   /* var, not let — lkCloudPush() can be reached before this
                               line runs, and a let would throw instead of returning */
   window.__lkCloudReady=function(){return lkCloudReady;};
-  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:Math.min(d.pts||0,999999),wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:d.picks||{},hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,lastCheckin:d.lastCheckin||'',cards:d.cards||{}}); } }
+  /* card ids contain '#', which Firebase forbids in keys — encode as '~' in the cloud */
+  window.jcwEncCards=function(o){const r={};for(const k in (o||{}))r[String(k).replace(/#/g,'~')]=o[k];return r;};
+  window.jcwDecCards=function(o){const r={};for(const k in (o||{}))r[String(k).replace(/~/g,'#')]=o[k];return r;};
+  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:Math.min(d.pts||0,999999),wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:d.picks||{},hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{})}); }catch(_e){try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
   /* ===== WIPE RECOVERY =====
      Snapshot the best locker this device has ever seen for the signed-in account
      (jcw_locker_best_<uid>). If a later login pulls a cloud copy whose points have
@@ -3461,7 +3464,7 @@ function observeReveals(){
               merged.watched=Math.max(d.watched||0,cloud.watched||0);
               merged.played=!!(d.played||cloud.played);
               merged.lastCheckin=(d.lastCheckin||'')>(cloud.lastCheckin||'')?(d.lastCheckin||''):(cloud.lastCheckin||'');
-              merged.cards=Object.assign({},cloud.cards||{},d.cards||{});
+              merged.cards=Object.assign({},window.jcwDecCards(cloud.cards||{}),d.cards||{});
               merged.pts=Math.max(d.pts||0,cloud.pts||0);
               merged.wins=Math.max(d.wins||0,cloud.wins||0);
               lkCloudReady=true;          /* safe to write from here on */
@@ -4293,6 +4296,7 @@ route();
       buildCatalog();
       const host=document.getElementById('prof-cards');if(!host)return;
       let src=theirCards||{};
+      try{if(window.jcwDecCards)src=window.jcwDecCards(src);}catch(_e){} /* cloud copies use '~' keys */
       try{
         const u=curUser();
         if(u&&u.uid===uid){                       /* my own page */
@@ -4691,12 +4695,12 @@ route();
       if(!gifts.length){BUSY=false;return;}
       /* merge against the CLOUD copy, not localStorage, so nothing gets clobbered */
       return db.ref('lockers/'+u.uid+'/cards').once('value').then(function(cs){
-        var cards=cs.val()||{};
+        var cards=(window.jcwDecCards?window.jcwDecCards(cs.val()||{}):(cs.val()||{}));
         gifts.forEach(function(g){
           var c=cards[g.id]||{n:0,foil:false};
           c.n=(c.n||0)+1; if(g.foil)c.foil=true; cards[g.id]=c;
         });
-        return db.ref('lockers/'+u.uid+'/cards').set(cards).then(function(){
+        return db.ref('lockers/'+u.uid+'/cards').set(window.jcwEncCards?window.jcwEncCards(cards):cards).then(function(){
           var d=lkGet(); d.cards=cards; lkSet(d);
           /* only clear the inbox once the cards are safely banked */
           return Promise.all(gifts.map(function(g){
