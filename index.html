@@ -4035,6 +4035,7 @@ route();
         tries++;
         const u=curUser();
         if(u&&window.__lkCloudReady&&window.__lkCloudReady()){
+          try{pruneLocker();}catch(e){}   /* drop cards no longer in the set */
           const d=lkGet();
           if(d.cards&&Object.keys(d.cards).length)pushCards(d);
           else if(isDuke()){try{coll();}catch(e){}}
@@ -4047,6 +4048,34 @@ route();
     function curUser(){try{return (window.firebase&&firebase.auth&&firebase.auth().currentUser)||null;}catch(e){return null;}}
     function db(){try{return (window.firebase&&firebase.database)?firebase.database():null;}catch(e){return null;}}
     function bios(){try{return window.BIOS||{};}catch(e){return {};}}
+
+    /* ---- Playable fighters in Lunacy Unlocked ----------------------------
+       ONLY these wrestlers get trading cards. Names must match the roster
+       <h3> text exactly. Add a fighter to the game -> add the name here.
+       Leave the array empty to fall back to the full roster.            */
+    const GAME_CHARS=[
+      'Caleb Konley',
+      'Josh Bishop',
+      'Dani Mo',
+      'Father Bronson',
+      'Choppa City'
+    ];
+    /* ---- Locker prune ---------------------------------------------------
+       Deletes cards that are no longer in the catalog from a player's
+       locker. THIS IS IRREVERSIBLE — it rewrites lockers/<uid>/cards.
+         'report' = dry run. Counts what it would delete, deletes nothing,
+                    and logs to console + window.__pruneReport. (default)
+         'on'     = actually delete, on next page load, per player.
+         'off'    = disabled entirely.
+       Do not switch to 'on' until GAME_CHARS is confirmed against the real
+       fighter select AND lockers/ has been exported from Firebase.      */
+    const PRUNE_MODE='report';
+
+    const GAME_SET=(function(){const s={};GAME_CHARS.forEach(n=>{s[String(n).trim().toLowerCase()]=1;});return s;})();
+    function inGame(name){
+      if(!GAME_CHARS.length)return true;              /* empty list = no filter */
+      return !!GAME_SET[String(name||'').trim().toLowerCase()];
+    }
 
     const PACK_COST=150, PACK_SIZE=5;
     const RAR=['common','rare','superrare','legendary'];
@@ -4068,6 +4097,7 @@ route();
         if(!img||!h)return;
         const src=img.getAttribute('src')||'';const m=src.match(/roster\/([^\/]+)\.jpg/);if(!m)return;
         const slug=m[1], name=(h.textContent||'').trim();
+        if(!inGame(name))return;                      /* game characters only */
         const role=((card.querySelector('.role')||{}).textContent||'').trim();
         const isChamp=!!card.querySelector('.hof');
         const era=card.closest('.era'); const section=era?((era.querySelector('.tag')||{}).textContent||''):'';
@@ -4103,7 +4133,53 @@ route();
       }
       return d.cards;
     }
-    function ownedCount(){const c=coll();let n=0;for(const k in c)if(c[k]&&c[k].n>0)n++;return n;}
+    /* Strip cards that are no longer in the catalog out of this player's
+       locker. Guarded hard: a half-built catalog or an empty fighter list
+       must never be read as "the player owns nothing valid". */
+    function pruneLocker(){
+      try{
+        if(PRUNE_MODE==='off')return;
+        if(isDuke())return;                             /* Duke's set is synthetic */
+        if(!GAME_CHARS.length)return;                   /* no filter = nothing stale */
+        buildCatalog();
+        if(!CATALOG||CATALOG.length<1)return;           /* roster DOM not ready */
+        if(!(window.__lkCloudReady&&window.__lkCloudReady()))return;  /* pre-pull = don't touch */
+
+        const d=lkGet(), cards=(d&&d.cards)||{};
+        const ids=Object.keys(cards);
+        if(!ids.length)return;
+
+        const valid={};CATALOG.forEach(c=>{valid[c.id]=1;});
+        const stale=ids.filter(id=>!valid[id]);
+        if(!stale.length)return;
+
+        /* Refuse to run if it would empty the locker outright — that shape
+           means the catalog is wrong, not that every card is stale. */
+        if(stale.length===ids.length&&ids.length>3){
+          window.__pruneReport={skipped:'would delete every card — check GAME_CHARS',total:ids.length};
+          try{console.warn('[cards] prune skipped:',window.__pruneReport);}catch(e){}
+          return;
+        }
+
+        window.__pruneReport={mode:PRUNE_MODE,total:ids.length,stale:stale.length,
+                              keeping:ids.length-stale.length,ids:stale.slice(0,50)};
+        try{console.warn('[cards] prune '+PRUNE_MODE+':',window.__pruneReport);}catch(e){}
+        if(PRUNE_MODE!=='on')return;                    /* dry run stops here */
+
+        stale.forEach(id=>{delete cards[id];});
+        d.cards=cards;
+        lkSet(d);                                        /* writes local + cloud */
+      }catch(e){try{console.warn('[cards] prune error',e);}catch(_e){}}
+    }
+    window.jcwPruneLocker=pruneLocker;
+
+    /* Count only cards that are actually in the set, so progress can't read
+       "60 of 14 · 429%" while a locker still holds retired cards. */
+    function ownedCount(){
+      const c=coll();buildCatalog();
+      const valid={};(CATALOG||[]).forEach(x=>{valid[x.id]=1;});
+      let n=0;for(const k in c)if(c[k]&&c[k].n>0&&valid[k])n++;return n;
+    }
     function esc(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
 
     function cardEl(card,{owned,cnt,foil,locked}={}){
@@ -4213,7 +4289,16 @@ route();
     })();
     function pickRarity(){let r=Math.random()*(58+27+12+3);
       if(r<58)return 'common';r-=58;if(r<27)return 'rare';r-=27;if(r<12)return 'superrare';return 'legendary';}
-    function pickCard(rar){let t=rar,tries=0;while(tries<4){if(byRar[t]&&byRar[t].length)return byRar[t][Math.floor(Math.random()*byRar[t].length)];t=({legendary:'superrare',superrare:'rare',rare:'common',common:'common'})[t];tries++;}return byRar.common[0];}
+    /* A small catalog can leave whole rarity tiers empty (e.g. an all-champion
+       set has no commons), so step down first, then back up, then take
+       anything rather than returning nothing and short-changing the pack. */
+    function pickCard(rar){
+      const pick=t=>(byRar[t]&&byRar[t].length)?byRar[t][Math.floor(Math.random()*byRar[t].length)]:null;
+      const i=RAR.indexOf(rar), start=i<0?0:i;
+      for(let j=start;j>=0;j--){const c=pick(RAR[j]);if(c)return c;}
+      for(let j=start+1;j<RAR.length;j++){const c=pick(RAR[j]);if(c)return c;}
+      return (CATALOG&&CATALOG.length)?CATALOG[Math.floor(Math.random()*CATALOG.length)]:null;
+    }
 
     function openPack(){
       buildCatalog();
