@@ -2227,14 +2227,45 @@ function observeReveals(){
   function lkGet(){try{return JSON.parse(localStorage.getItem(LK_KEY))||{}}catch(e){return{}}}
   function lkSet(d){if(d&&d.pts>999999)d.pts=999999; /* stay under the Firebase pts cap so writes (theme/fav/pic) never get rejected */
     try{localStorage.setItem(LK_KEY,JSON.stringify(d))}catch(e){} if(typeof lkBackupKeep==='function')try{lkBackupKeep(d)}catch(_e){} if(typeof lkCloudPush==='function')lkCloudPush();}
+  /* Boldizar the Great Hunter — the meta badge for collecting 30 others.
+     Boldizar never counts toward its own threshold, so it can't award
+     itself, and the includes() guard means it's granted exactly once. */
+  const BOLDIZAR={key:'boldizar', at:30, pts:500};
+  function boldizarCheck(d){          /* mutates d, returns true if just granted */
+    try{
+      if(!d||!Array.isArray(d.badges))return false;
+      if(d.badges.indexOf(BOLDIZAR.key)>-1)return false;
+      const earned=d.badges.filter(b=>b&&b!==BOLDIZAR.key).length;
+      if(earned<BOLDIZAR.at)return false;
+      d.badges.push(BOLDIZAR.key);
+      d.pts=(d.pts||0)+BOLDIZAR.pts;
+      d.hist=d.hist||[];
+      d.hist.unshift('Boldizar the Great Hunter · '+earned+' badges · +'+BOLDIZAR.pts);
+      d.hist=d.hist.slice(0,40);
+      return true;
+    }catch(e){return false;}
+  }
   function lkAward(pts,badge,histLine){
     const d=lkGet();
     d.pts=(d.pts||0)+pts;
     d.badges=d.badges||[];
     if(badge&&!d.badges.includes(badge))d.badges.push(badge);
     if(histLine){d.hist=d.hist||[];if(d.hist[0]!==histLine){d.hist.unshift(histLine);d.hist=d.hist.slice(0,40);}}
+    const gotBoldizar=boldizarCheck(d);
     lkSet(d);lkRender();
+    if(gotBoldizar){try{toast('🏹 BOLDIZAR THE GREAT HUNTER · 30 badges · +'+BOLDIZAR.pts,5200);}catch(e){}}
   }
+  /* Backfill: anyone already past 30 when this shipped gets it on next load.
+     Writes only when it actually grants, so it's a no-op for everyone else. */
+  window.jcwCheckBoldizar=function(){
+    try{
+      const d=lkGet();
+      if(boldizarCheck(d)){
+        lkSet(d);lkRender();
+        try{toast('🏹 BOLDIZAR THE GREAT HUNTER · 30 badges · +'+BOLDIZAR.pts,5200);}catch(e){}
+      }
+    }catch(e){}
+  };
   const LK_BADGES=[['mod','Moderator \u00b7 keeps the family right'],['first','First Blood \u00b7 showed up'],['fan','Down With the Clown \u00b7 set a favorite'],
     ['rideordie','Ride or Die \u00b7 picked your girl AND your boy'],
     ['freshpaint','Fresh Paint \u00b7 set a profile pic'],['ownentrance','Own Entrance \u00b7 picked your theme'],
@@ -2268,7 +2299,8 @@ function observeReveals(){
     ['unlocked','Lunacy Unlocked \u00b7 hit 300 points'],
     ['faygoshower','Faygo Shower \u00b7 1,000 points'],['carnivalelite','Dark Carnival Elite \u00b7 10,000 points'],
     ['wickedclown','Wicked Clown \u00b7 50,000 points'],
-    ['clowngods','The Clown Gods \u00b7 100,000 points'],['dukewicked','The Duke of the Wicked \u00b7 250,000 points']];
+    ['clowngods','The Clown Gods \u00b7 100,000 points'],['dukewicked','The Duke of the Wicked \u00b7 250,000 points'],
+    ['boldizar','Boldizar the Great Hunter \u00b7 earned 30 badges']];
   function lkAddWin(){
     const d=lkGet(); d.wins=(d.wins||0)+1;
     d.badges=d.badges||[]; if(!d.badges.includes('winner'))d.badges.push('winner');
@@ -3549,6 +3581,8 @@ function observeReveals(){
               lkCloudReady=true;          /* safe to write from here on */
               lkSet(merged);lkRender();
               try{lkBackupKeep(merged);lkWipeCheck(cloud);}catch(_e){}
+              /* only now is the badge list complete — safe to test the 30 threshold */
+              try{window.jcwCheckBoldizar&&window.jcwCheckBoldizar();}catch(_e){}
             } else {
               /* genuinely new account — nothing to lose, allow the first write */
               lkCloudReady=true;
