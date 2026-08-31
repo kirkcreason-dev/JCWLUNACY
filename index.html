@@ -2255,8 +2255,16 @@ function observeReveals(){
     lkSet(d);lkRender();
     if(gotBoldizar){try{toast('🏹 BOLDIZAR THE GREAT HUNTER · 30 badges · +'+BOLDIZAR.pts,5200);}catch(e){}}
   }
-  /* Backfill: anyone already past 30 when this shipped gets it on next load.
-     Writes only when it actually grants, so it's a no-op for everyone else. */
+  /* Backfill: anyone already past 30 when this shipped gets it retroactively.
+     Writes only when it actually grants, so it's a no-op for everyone else,
+     and it's idempotent — calling it repeatedly can't double-award.
+     Run from two places on purpose:
+       1. right here at load, which covers signed-out lockers and anyone
+          Firebase can't reach;
+       2. after the cloud merge, which is the first moment a signed-in
+          member's full badge list is actually present.
+     Running early is safe: a short badge list fails the threshold, so the
+     worst case is a missed grant that call 2 then catches — never a false one. */
   window.jcwCheckBoldizar=function(){
     try{
       const d=lkGet();
@@ -2266,6 +2274,7 @@ function observeReveals(){
       }
     }catch(e){}
   };
+  try{setTimeout(window.jcwCheckBoldizar,900);}catch(e){}
   const LK_BADGES=[['mod','Moderator \u00b7 keeps the family right'],['first','First Blood \u00b7 showed up'],['fan','Down With the Clown \u00b7 set a favorite'],
     ['rideordie','Ride or Die \u00b7 picked your girl AND your boy'],
     ['freshpaint','Fresh Paint \u00b7 set a profile pic'],['ownentrance','Own Entrance \u00b7 picked your theme'],
