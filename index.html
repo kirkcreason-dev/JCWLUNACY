@@ -1836,7 +1836,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <div class="ch-tabs"><button class="on" data-tab="chat">Chat</button><button data-tab="vote">Vote</button><button data-tab="board">Leaders</button><button data-tab="mods" id="ch-mods-tab" style="display:none;color:var(--acid);">Mods</button></div>
   <div class="ch-pane on" id="ch-chat"></div>
   <button id="ch-jump" style="display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:118px;z-index:6;background:var(--acid);color:#000;border:none;border-radius:20px;padding:7px 16px;font:700 12px system-ui;letter-spacing:.04em;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.5);">&#8595; New messages</button>
-  <div class="ch-pane" id="ch-mods"><div style="font-size:12px;color:var(--acid);margin-bottom:10px;border-bottom:1px dashed rgba(157,255,58,.25);padding-bottom:8px;">&#128274; Mods only &mdash; the backstage room. Nobody else sees this.</div><div id="dm-inbox"></div><div id="ch-mods-list"></div></div>
+  <div class="ch-pane" id="ch-mods"><div style="font-size:12px;color:var(--acid);margin-bottom:10px;border-bottom:1px dashed rgba(157,255,58,.25);padding-bottom:8px;">&#128274; Mods only &mdash; the backstage room. Nobody else sees this.</div><div id="dm-inbox"></div><div id="ch-reports" style="margin-bottom:12px;"></div><div id="ch-mods-list"></div></div>
   <div class="ch-pane" id="ch-board"><div class="usearch" data-usearch>
   <input type="search" class="us-q" placeholder="Search Juggalos by name&hellip;" aria-label="Search user pages" autocomplete="off" spellcheck="false">
   <div class="us-res" hidden></div>
@@ -2357,6 +2357,13 @@ function observeReveals(){
       if(lkUser&&lkUser.uid==='L1feNpUUBPfe9ONSwxpgwqcVFPv1')add('securitysucker'); /* hurray69 exclusive */
       if(lkUser&&JCW_JEFF&&lkUser.uid===JCW_JEFF)add('violentjeff'); /* Jeff Lane exclusive */
       if(lkUser&&isVerified(lkUser.uid))add('verified');
+      /* Digital Duke holds the full set except the badges tied to someone
+         else's identity. 'mod' and 'verified' aren't listed here — he earns
+         those through the checks above, so they stay honest. */
+      if(lkUser&&lkUser.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1'){
+        const NOT_HIS={securitysucker:1, violentjeff:1, verified:1};
+        LK_BADGES.forEach(function(b){ if(!NOT_HIS[b[0]])add(b[0]); });
+      }
       if(d.fav||d.favB)add('fan');
       if(d.picks&&Object.keys(d.picks).length)add('prophet');
       if(d.played||(d.wins||0)>0)add('gamer');
@@ -2947,7 +2954,7 @@ function observeReveals(){
     const ADMIN=isMod();
     const nearBottom=(chChat.scrollHeight-chChat.scrollTop-chChat.clientHeight)<90;
     const prevCount=chChat.__count||0;
-    chChat.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${ADMIN&&m.__k?`<span data-chdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete message">&times;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:`data-pname="${String(m.n||'').replace(/"/g,'').replace(/</g,'')}"`} style="cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${m.u&&isVerified(m.u)?'<span title="Verified JCW talent" style="color:var(--gold);margin-right:5px;">&#10004;</span>':''}${m.u&&window.__lkPremSet&&window.__lkPremSet[m.u]===true?'<span class="lun-chip" title="Lunatics Only member">&#127914; Lunatic</span>':''}${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;padding:10px;">No messages yet \u2014 say something to the family.</p>';
+    chChat.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${(!ADMIN&&m.__k&&lkUser&&m.u!==lkUser.uid)?`<span data-chrep="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-repn="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--steel);opacity:.5;margin-right:6px;font-size:12px;" title="Report this message">&#9873;</span>`:''}${ADMIN&&m.__k?`<span data-chdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete message">&times;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'').replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:`data-pname="${String(m.n||'').replace(/"/g,'').replace(/</g,'')}"`} style="cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${m.u&&isVerified(m.u)?'<span title="Verified JCW talent" style="color:var(--gold);margin-right:5px;">&#10004;</span>':''}${m.u&&window.__lkPremSet&&window.__lkPremSet[m.u]===true?'<span class="lun-chip" title="Lunatics Only member">&#127914; Lunatic</span>':''}${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;padding:10px;">No messages yet \u2014 say something to the family.</p>';
     chChat.__count=list.length;
     if(nearBottom){chChat.scrollTop=chChat.scrollHeight;jcwHideJump();}
     else if(list.length>prevCount){jcwShowJump();}
@@ -2956,6 +2963,31 @@ function observeReveals(){
   function jcwShowJump(){const b=document.getElementById('ch-jump');if(b)b.style.display='block';}
   function jcwHideJump(){const b=document.getElementById('ch-jump');if(b)b.style.display='none';}
   chChat.addEventListener('click',e=>{
+    const rep=e.target.closest('[data-chrep]');
+    if(rep){
+      try{
+        if(!lkUser){toast('Log into your Locker to report.',3200);return;}
+        if(!fbDB){toast('Reporting needs a live connection.',3200);return;}
+        const key=rep.dataset.chrep;
+        /* one report per message per device — stops rage-click duplicates */
+        let done={};try{done=JSON.parse(localStorage.getItem('jcw_reported'))||{};}catch(_e){}
+        if(done[key]){toast('Already reported. Mods are on it.',3000);return;}
+        if(!confirm('Report this message to the JCW mods?'))return;
+        const msg=(window.__chatLive||[]).find(x=>x&&x.__k===key)||{};
+        fbDB.ref('reports').push({
+          k:key,                                   /* chat message key */
+          t:String(msg.t||'').slice(0,300),        /* snapshot: survives deletion */
+          who:String(msg.n||rep.dataset.repn||'?').slice(0,40),
+          whoUid:msg.u||'',
+          by:chName(), byUid:lkUser.uid,
+          ts:Date.now(), open:true
+        });
+        done[key]=1;try{localStorage.setItem('jcw_reported',JSON.stringify(done));}catch(_e){}
+        rep.style.color='var(--hot)';rep.style.opacity='1';rep.title='Reported';
+        toast('\u2691 Reported \u2014 thanks, the mods will take a look.',3600);
+      }catch(_e){}
+      return;
+    }
     const del=e.target.closest('[data-chdel]');
     if(del){
       if(fbDB&&isMod()&&confirm('Delete this message?'))
@@ -3014,13 +3046,46 @@ function observeReveals(){
     const el=document.getElementById('ch-mods-list');if(!el)return;
     list=list||[];
     window.__modLive=list;
-    el.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${isMod()&&m.__k?`<span data-mdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete">&times;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:''} style="color:var(--acid);cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;">Quiet backstage. Say something to the crew.</p>';
+    el.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${isMod()&&m.__k?`<span data-mdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete">&times;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'').replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:''} style="color:var(--acid);cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;">Quiet backstage. Say something to the crew.</p>';
     el.scrollTop=el.scrollHeight;
     }catch(e){}
   }
+  /* ---- reported messages queue (mods only) ---------------------------- */
+  function repRender(list){
+    try{
+      const el=document.getElementById('ch-reports');if(!el)return;
+      const open=(list||[]).filter(r=>r&&r.open!==false)
+                           .sort((a,b)=>(b.ts||0)-(a.ts||0));
+      if(!open.length){el.innerHTML='';return;}
+      const esc=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+      el.innerHTML='<div style="font-size:12px;color:var(--hot);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">'
+        +'&#9873; Reported &middot; '+open.length+'</div>'
+        +open.map(r=>'<div style="border:1px solid rgba(255,63,164,.35);border-radius:8px;padding:8px 10px;margin-bottom:6px;background:rgba(255,63,164,.06);">'
+          +'<div style="font-size:11px;color:var(--steel);">'+esc(r.who)+' &middot; reported by '+esc(r.by)+'</div>'
+          +'<div style="font-size:13px;color:var(--bone);margin:4px 0 6px;word-break:break-word;">'+esc(r.t)+'</div>'
+          +'<button data-repdel="'+esc(r.k)+'" data-repid="'+esc(r.__k)+'" style="font-size:11px;padding:3px 8px;margin-right:6px;cursor:pointer;">Delete message</button>'
+          +'<button data-repok="'+esc(r.__k)+'" style="font-size:11px;padding:3px 8px;cursor:pointer;">Dismiss</button>'
+        +'</div>').join('');
+    }catch(e){}
+  }
+  document.addEventListener('click',e=>{
+    try{
+      const d=e.target.closest('[data-repdel]');
+      if(d&&fbDB&&isMod()){
+        if(!confirm('Delete the reported message and close this report?'))return;
+        if(d.dataset.repdel)fbDB.ref('chat/'+d.dataset.repdel).remove();
+        fbDB.ref('reports/'+d.dataset.repid+'/open').set(false);
+        return;
+      }
+      const k=e.target.closest('[data-repok]');
+      if(k&&fbDB&&isMod())fbDB.ref('reports/'+k.dataset.repok+'/open').set(false);
+    }catch(_e){}
+  });
+
   function modWire(){
     if(modWired||!fbDB||!isMod())return;modWired=true;
     fbDB.ref('modchat').limitToLast(80).on('value',s=>{const L=[];s.forEach(c=>{const v=c.val();if(v&&v.t){v.__k=c.key;L.push(v);}});modRender(L);});
+    fbDB.ref('reports').limitToLast(60).on('value',s=>{const L=[];s.forEach(c=>{const v=c.val();if(v){v.__k=c.key;L.push(v);}});repRender(L);},()=>{});
   }
   document.addEventListener('click',e=>{
     const d=e.target.closest('[data-mdel]');
@@ -3205,8 +3270,32 @@ function observeReveals(){
   /* ===== ONLINE PRESENCE (per account) ===== */
   window.__presence=window.__presence||{};
   function isOnline(uid){const t=window.__presence[uid];return !!t && (Date.now()-t < 75000);}
+  /* presenceUsers is wiped on disconnect, so it can't answer "when were they
+     last here". lastSeen is a separate node that is only ever written, never
+     removed — the onDisconnect below stamps it server-side as they drop. */
+  window.__lastSeen=window.__lastSeen||{};
+  window.jcwLastSeen=function(uid){
+    try{
+      if(!uid)return '';
+      if(isOnline(uid))return 'Online now';
+      const t=window.__lastSeen[uid];
+      if(!t)return '';
+      let d=Date.now()-t;
+      if(d<0)d=0;
+      const m=Math.floor(d/60000);
+      if(m<1)return 'Last seen just now';
+      if(m<60)return 'Last seen '+m+'m ago';
+      const h=Math.floor(m/60);
+      if(h<24)return 'Last seen '+h+'h ago';
+      const dd=Math.floor(h/24);
+      if(dd<30)return 'Last seen '+dd+'d ago';
+      const mo=Math.floor(dd/30);
+      return mo<12 ? 'Last seen '+mo+'mo ago' : 'Last seen over a year ago';
+    }catch(e){return '';}
+  };
   window.jcwWatchPresence=function(){
     if(!fbDB||window.__presWired)return;window.__presWired=true;
+    fbDB.ref('lastSeen').on('value',s=>{window.__lastSeen=s.val()||{};},()=>{});
     fbDB.ref('presenceUsers').on('value',s=>{
       window.__presence=s.val()||{};
       try{if(window.__chatLive&&document.getElementById('ch-chat').classList.contains('on'))chRender(window.__chatLive);}catch(_e){}
@@ -3323,6 +3412,11 @@ function observeReveals(){
       if(uid===DUKE)h+='<p style="margin-top:8px;"><b style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:22px;color:#000;background:var(--gold,#ffd028);padding:6px 16px;border-radius:6px;">&#9819; Administrator</b></p>';
       else if(typeof JCW_MODS!=='undefined'&&JCW_MODS[uid])h+='<p style="margin-top:8px;"><b style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:20px;color:#0a0a0a;background:var(--acid,#9dff3a);padding:5px 15px;border-radius:6px;">&#9733; Moderator</b></p>';
       if(window.__lkPremSet&&window.__lkPremSet[uid]===true)h+='<p style="margin-top:8px;"><span class="lun-chip" style="font-size:13px;padding:4px 12px;">&#127914; Lunatic</span><span style="color:var(--steel);font-size:12px;">Lunatics Only member</span></p>';
+      (function(){
+        const ls=(window.jcwLastSeen?window.jcwLastSeen(uid):'');
+        if(ls)h+='<p style="margin-top:6px;font-size:12.5px;color:'+(ls==='Online now'?'var(--acid)':'var(--steel)')+';">'
+          +(ls==='Online now'?'<span class="pdot on"></span>':'<span class="pdot off"></span>')+' '+ls+'</p>';
+      })();
       h+='<p style="margin-top:6px;"><b style="color:var(--gold);">'+(v.pts||0)+' pts</b> &middot; '+(v.wins||0)+' game wins'
         +(v.fav?(' &middot; rides with <b>'+pEsc(v.fav)+'</b>'):'')
         +(v.favB?(' &amp; <b>'+pEsc(v.favB)+'</b>'):'')+'</p>';
@@ -3589,9 +3683,13 @@ function observeReveals(){
         if(user){
           try{
             const puRef=fbDB.ref('presenceUsers/'+user.uid);
-            const beat=()=>{if(!document.hidden)puRef.set(Date.now());};
+            const lsRef=fbDB.ref('lastSeen/'+user.uid);
+            const beat=()=>{if(!document.hidden){puRef.set(Date.now());lsRef.set(Date.now());}};
             beat();window.__puBeat&&clearInterval(window.__puBeat);window.__puBeat=setInterval(beat,30000);
             if(puRef.onDisconnect)puRef.onDisconnect().remove();
+            /* server clock, so a wrong device clock can't post a bogus time */
+            try{if(lsRef.onDisconnect&&window.firebase&&firebase.database&&firebase.database.ServerValue)
+                  lsRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);}catch(_e){}
             document.addEventListener('visibilitychange',()=>{if(!document.hidden)beat();});
           }catch(_e){}
           if(isMod()&&user.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'){
