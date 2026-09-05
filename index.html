@@ -3017,11 +3017,11 @@ function observeReveals(){
         const ctx=[];
         for(let j=Math.max(0,i-2);j<Math.min(list.length,i+3);j++){
           if(j===i||!list[j])continue;
-          ctx.push({n:String(list[j].n||'?').slice(0,40),t:String(list[j].t||'').slice(0,140)});
+          ctx.push({n:String(list[j].n||'?').slice(0,40),t:String(list[j].t||'').slice(0,300)});
         }
         fbDB.ref('reports').push({
           k:key,
-          t:String(msg.t||'').slice(0,300),
+          t:String(msg.t||'').slice(0,1000),   /* full message: chat allows 1000 */
           who:String(msg.n||'?').slice(0,40),
           whoUid:msg.u||'',
           by:chName(), byUid:lkUser.uid,
@@ -3128,26 +3128,37 @@ function observeReveals(){
         const rs=byMsg[k].sort((a,b)=>(b.ts||0)-(a.ts||0));
         return {k:k,rs:rs,newest:rs[0].ts||0};
       }).sort((a,b)=>b.newest-a.newest);
+      const ago=t=>{if(!t)return'';const m=Math.floor((Date.now()-t)/60000);
+        if(m<1)return'just now';if(m<60)return m+'m ago';const h=Math.floor(m/60);
+        if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';};
       el.innerHTML='<div style="font-size:12px;color:var(--hot);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">'
         +'&#9873; Reported &middot; '+groups.length+(groups.length!==open.length?(' ('+open.length+' reports)'):'')+'</div>'
         +groups.map(g=>{
           const top=g.rs[0];
           const ids=g.rs.map(r=>r.__k).join(',');
-          const cats=[...new Set(g.rs.map(r=>REPORT_LABEL[r.cat]||'Other'))].join(', ');
-          const notes=g.rs.filter(r=>r.note).map(r=>'<div style="font-size:11.5px;color:var(--bone);margin-top:3px;">&ldquo;'+esc(r.note)+'&rdquo; <span style="color:var(--steel);">&mdash; '+esc(r.by)+'</span></div>').join('');
+          /* every reporter gets their own line: who, why, what they said, when.
+             A merged list hid the fact that three people can flag one message
+             for three different reasons. */
+          const who=g.rs.map(r=>'<div style="border-top:1px solid rgba(255,255,255,.07);padding-top:5px;margin-top:5px;">'
+              +'<div style="font-size:11.5px;"><b style="color:var(--gold);">'+esc(r.by||'?')+'</b>'
+              +' <span style="color:var(--hot);">'+esc(REPORT_LABEL[r.cat]||'Other')+'</span>'
+              +' <span style="color:var(--steel);">&middot; '+ago(r.ts)+'</span></div>'
+              +(r.note?('<div style="font-size:11.5px;color:var(--bone);margin-top:2px;">&ldquo;'+esc(r.note)+'&rdquo;</div>'):'')
+            +'</div>').join('');
           const ctx=(top.ctx&&top.ctx.length)
-            ? '<details style="margin-top:6px;"><summary style="font-size:11px;color:var(--steel);cursor:pointer;">Context</summary>'
-              +top.ctx.map(c=>'<div style="font-size:11.5px;color:var(--steel);margin-top:2px;"><b>'+esc(c.n)+'</b> '+esc(c.t)+'</div>').join('')
+            ? '<details style="margin-top:7px;"><summary style="font-size:11px;color:var(--steel);cursor:pointer;">Surrounding messages</summary>'
+              +top.ctx.map(c=>'<div style="font-size:11.5px;color:var(--steel);margin-top:3px;word-break:break-word;"><b>'+esc(c.n)+'</b> '+esc(c.t)+'</div>').join('')
               +'</details>' : '';
           return '<div style="border:1px solid rgba(255,63,164,.35);border-radius:8px;padding:9px 11px;margin-bottom:7px;background:rgba(255,63,164,.06);">'
             +'<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;">'
-              +'<span style="font-size:11px;color:var(--hot);text-transform:uppercase;letter-spacing:.08em;">'+esc(cats)+'</span>'
+              +'<span style="font-size:11px;color:var(--steel);">Message by <b style="color:var(--bone);">'+esc(top.who)+'</b></span>'
               +(g.rs.length>1?'<span style="font-size:11px;color:var(--gold);">&times;'+g.rs.length+' reports</span>':'')
             +'</div>'
-            +'<div style="font-size:11px;color:var(--steel);margin-top:3px;">'+esc(top.who)+' &middot; reported by '+esc(g.rs.map(r=>r.by).slice(0,3).join(', '))+(g.rs.length>3?' +'+(g.rs.length-3):'')+'</div>'
-            +'<div style="font-size:13px;color:var(--bone);margin:5px 0 2px;word-break:break-word;">'+esc(top.t)+'</div>'
-            +notes+ctx
-            +'<div style="margin-top:8px;">'
+            /* the whole message, not a preview — a mod cannot judge a truncated line */
+            +'<div style="font-size:13px;color:var(--bone);margin:6px 0 2px;word-break:break-word;white-space:pre-wrap;max-height:220px;overflow:auto;'
+              +'background:rgba(0,0,0,.35);border-radius:6px;padding:7px 9px;">'+esc(top.t||'(message was empty)')+'</div>'
+            +who+ctx
+            +'<div style="margin-top:9px;">'
               +'<button data-repdel="'+esc(top.k||'')+'" data-repid="'+esc(ids)+'" style="font-size:11px;padding:3px 8px;margin-right:6px;cursor:pointer;">Delete message</button>'
               +'<button data-repok="'+esc(ids)+'" style="font-size:11px;padding:3px 8px;cursor:pointer;">Dismiss</button>'
             +'</div></div>';
