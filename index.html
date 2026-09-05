@@ -3136,11 +3136,18 @@ function observeReveals(){
         +groups.map(g=>{
           const top=g.rs[0];
           const ids=g.rs.map(r=>r.__k).join(',');
+          /* reports filed before the schema carried the author (and the message
+             body) have blank fields. Resolve them from the live chat by key so
+             an old report is still actionable instead of an anonymous blank. */
+          const live=(window.__chatLive||[]).filter(function(m){return m&&m.__k===g.k;})[0]||null;
+          const gone=!live&&!!(window.__chatLive&&window.__chatLive.length);
+          const author=top.who||(live&&live.n)||'';
+          const body=top.t||(live&&live.t)||'';
           /* every reporter gets their own line: who, why, what they said, when.
              A merged list hid the fact that three people can flag one message
              for three different reasons. */
           const who=g.rs.map(r=>'<div style="border-top:1px solid rgba(255,255,255,.07);padding-top:5px;margin-top:5px;">'
-              +'<div style="font-size:11.5px;"><b style="color:var(--gold);">'+esc(r.by||'?')+'</b>'
+              +'<div style="font-size:11.5px;"><b style="color:var(--gold);">'+esc(r.by||'unknown reporter')+'</b>'
               +' <span style="color:var(--hot);">'+esc(REPORT_LABEL[r.cat]||'Other')+'</span>'
               +' <span style="color:var(--steel);">&middot; '+ago(r.ts)+'</span></div>'
               +(r.note?('<div style="font-size:11.5px;color:var(--bone);margin-top:2px;">&ldquo;'+esc(r.note)+'&rdquo;</div>'):'')
@@ -3151,33 +3158,53 @@ function observeReveals(){
               +'</details>' : '';
           return '<div style="border:1px solid rgba(255,63,164,.35);border-radius:8px;padding:9px 11px;margin-bottom:7px;background:rgba(255,63,164,.06);">'
             +'<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;">'
-              +'<span style="font-size:11px;color:var(--steel);">Message by <b style="color:var(--bone);">'+esc(top.who)+'</b></span>'
+              +'<span style="font-size:11px;color:var(--steel);">Message by <b style="color:var(--bone);">'+esc(author||'unknown \u2014 older report')+'</b>'
+              +(gone?' <span style="color:var(--steel);opacity:.8;">(message already gone)</span>':'')+'</span>'
               +(g.rs.length>1?'<span style="font-size:11px;color:var(--gold);">&times;'+g.rs.length+' reports</span>':'')
             +'</div>'
             /* the whole message, not a preview — a mod cannot judge a truncated line */
             +'<div style="font-size:13px;color:var(--bone);margin:6px 0 2px;word-break:break-word;white-space:pre-wrap;max-height:220px;overflow:auto;'
-              +'background:rgba(0,0,0,.35);border-radius:6px;padding:7px 9px;">'+esc(top.t||'(message was empty)')+'</div>'
+              +'background:rgba(0,0,0,.35);border-radius:6px;padding:7px 9px;">'+esc(body||'(message text was not captured \u2014 reported before this update)')+'</div>'
             +who+ctx
             +'<div style="margin-top:9px;">'
-              +'<button data-repdel="'+esc(top.k||'')+'" data-repid="'+esc(ids)+'" style="font-size:11px;padding:3px 8px;margin-right:6px;cursor:pointer;">Delete message</button>'
+              +(top.k?('<button data-repdel="'+esc(top.k)+'" data-repid="'+esc(ids)+'" style="font-size:11px;padding:3px 8px;margin-right:6px;cursor:pointer;">'+(gone?'Clear':'Delete message')+'</button>'):'')
               +'<button data-repok="'+esc(ids)+'" style="font-size:11px;padding:3px 8px;cursor:pointer;">Dismiss</button>'
             +'</div></div>';
         }).join('');
     }catch(e){}
+  }
+  /* Closing a report used to fail silently: the rules pinned byUid to auth.uid
+     on EVERY write, so a mod closing somebody else's report was rejected and
+     the card just sat there. The rules are fixed, but a rejected close now
+     falls back to removing the report node outright (validate is not evaluated
+     for a delete), and any real failure is shown instead of swallowed. */
+  function repClose(idcsv){
+    const ids=String(idcsv||'').split(',').filter(Boolean);
+    if(!ids.length||!fbDB)return;
+    let failed=0, done=0;
+    ids.forEach(function(id){
+      fbDB.ref('reports/'+id+'/open').set(false)
+        .catch(function(){ return fbDB.ref('reports/'+id).remove(); })
+        .catch(function(er){ failed++; try{console.warn('[JCW reports] close failed',id,er);}catch(_x){} })
+        .then(function(){
+          if(++done===ids.length&&failed){
+            try{toast('Could not close '+failed+' of '+ids.length+' reports \u2014 check the database rules.',5200);}catch(_x){}
+          }
+        });
+    });
   }
   document.addEventListener('click',e=>{
     try{
       const d=e.target.closest('[data-repdel]');
       if(d&&fbDB&&isMod()){
         if(!confirm('Delete the reported message and close these reports?'))return;
-        if(d.dataset.repdel)fbDB.ref('chat/'+d.dataset.repdel).remove();
-        String(d.dataset.repid||'').split(',').filter(Boolean)
-          .forEach(id=>fbDB.ref('reports/'+id+'/open').set(false));
+        if(d.dataset.repdel)fbDB.ref('chat/'+d.dataset.repdel).remove()
+          .catch(er=>{try{toast('Could not delete the message: '+(er&&er.message||er),4200);}catch(_x){}});
+        repClose(d.dataset.repid);
         return;
       }
       const k=e.target.closest('[data-repok]');
-      if(k&&fbDB&&isMod())String(k.dataset.repok||'').split(',').filter(Boolean)
-        .forEach(id=>fbDB.ref('reports/'+id+'/open').set(false));
+      if(k&&fbDB&&isMod())repClose(k.dataset.repok);
     }catch(_e){}
   });
 
