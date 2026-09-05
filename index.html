@@ -2954,7 +2954,7 @@ function observeReveals(){
     const ADMIN=isMod();
     const nearBottom=(chChat.scrollHeight-chChat.scrollTop-chChat.clientHeight)<90;
     const prevCount=chChat.__count||0;
-    chChat.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${(!ADMIN&&m.__k&&lkUser&&m.u!==lkUser.uid)?`<span data-chrep="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-repn="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--steel);opacity:.5;margin-right:6px;font-size:12px;" title="Report this message">&#9873;</span>`:''}${ADMIN&&m.__k?`<span data-chdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete message">&times;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'').replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:`data-pname="${String(m.n||'').replace(/"/g,'').replace(/</g,'')}"`} style="cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${m.u&&isVerified(m.u)?'<span title="Verified JCW talent" style="color:var(--gold);margin-right:5px;">&#10004;</span>':''}${m.u&&window.__lkPremSet&&window.__lkPremSet[m.u]===true?'<span class="lun-chip" title="Lunatics Only member">&#127914; Lunatic</span>':''}${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;padding:10px;">No messages yet \u2014 say something to the family.</p>';
+    chChat.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${(m.__k&&lkUser&&m.u!==lkUser.uid)?`<span data-chrep="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-repn="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--steel);opacity:.5;margin-right:6px;font-size:12px;" title="Report this message">&#9873;</span>`:''}${ADMIN&&m.__k?`<span data-chdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete message">&times;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'').replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:`data-pname="${String(m.n||'').replace(/"/g,'').replace(/</g,'')}"`} style="cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${m.u&&isVerified(m.u)?'<span title="Verified JCW talent" style="color:var(--gold);margin-right:5px;">&#10004;</span>':''}${m.u&&window.__lkPremSet&&window.__lkPremSet[m.u]===true?'<span class="lun-chip" title="Lunatics Only member">&#127914; Lunatic</span>':''}${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;padding:10px;">No messages yet \u2014 say something to the family.</p>';
     chChat.__count=list.length;
     if(nearBottom){chChat.scrollTop=chChat.scrollHeight;jcwHideJump();}
     else if(list.length>prevCount){jcwShowJump();}
@@ -2962,6 +2962,81 @@ function observeReveals(){
   }
   function jcwShowJump(){const b=document.getElementById('ch-jump');if(b)b.style.display='block';}
   function jcwHideJump(){const b=document.getElementById('ch-jump');if(b)b.style.display='none';}
+  /* ---- report modal -------------------------------------------------------
+     A bare confirm() gave mods nothing to act on — no reason, no context, and
+     no way to tell a joke from a threat. This collects a category, an optional
+     note, and a snapshot of the surrounding conversation, because the reported
+     line often only reads as abuse next to what came before it. */
+  const REPORT_REASONS=[
+    ['harassment','Harassment or bullying'],
+    ['hate','Hate speech or slurs'],
+    ['threat','Threats or violence'],
+    ['sexual','Sexual or explicit content'],
+    ['spam','Spam, scam or advertising'],
+    ['selfharm','Self-harm concern'],
+    ['other','Something else']
+  ];
+  function jcwCloseReport(){const m=document.getElementById('rep-modal');if(m)m.remove();}
+  window.jcwOpenReport=function(key,flagEl){
+    jcwCloseReport();
+    const list=window.__chatLive||[];
+    const i=list.findIndex(x=>x&&x.__k===key);
+    const msg=(i>-1?list[i]:{})||{};
+    const esc=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const wrap=document.createElement('div');
+    wrap.id='rep-modal';
+    wrap.setAttribute('role','dialog');wrap.setAttribute('aria-modal','true');
+    wrap.style.cssText='position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:18px;';
+    wrap.innerHTML='<div style="background:#0e0d11;border:1px solid var(--seam,#3d2f52);border-radius:14px;max-width:420px;width:100%;padding:20px 20px 18px;max-height:88vh;overflow:auto;">'
+      +'<div style="font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:var(--hot,#ff3fa4);font-size:15px;margin-bottom:4px;">&#9873; Report to the mods</div>'
+      +'<p style="color:var(--steel,#9aa0aa);font-size:12.5px;margin:0 0 12px;line-height:1.5;">This goes to the JCW mod team. Nothing is hidden until a mod reviews it.</p>'
+      +'<div style="border-left:3px solid var(--hot,#ff3fa4);padding:6px 0 6px 10px;margin-bottom:14px;background:rgba(255,63,164,.06);">'
+        +'<div style="font-size:11px;color:var(--steel,#9aa0aa);">'+esc(msg.n||'?')+'</div>'
+        +'<div style="font-size:13px;color:var(--bone,#ffd028);word-break:break-word;">'+esc(String(msg.t||'').slice(0,220))+'</div>'
+      +'</div>'
+      +'<div style="font-size:12px;color:var(--steel,#9aa0aa);margin-bottom:6px;">What\'s wrong with it?</div>'
+      +'<div id="rep-reasons" style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px;">'
+        +REPORT_REASONS.map(function(r,ix){return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--bone,#ffd028);cursor:pointer;">'
+          +'<input type="radio" name="repcat" value="'+r[0]+'"'+(ix===0?' checked':'')+' style="accent-color:var(--hot,#ff3fa4);">'+r[1]+'</label>';}).join('')
+      +'</div>'
+      +'<label style="font-size:12px;color:var(--steel,#9aa0aa);display:block;margin-bottom:4px;">Anything else the mods should know? <span style="opacity:.7;">(optional)</span></label>'
+      +'<textarea id="rep-note" maxlength="200" rows="3" placeholder="Context, history, what happened before&hellip;" style="width:100%;background:#08070a;color:var(--bone,#ffd028);border:1px solid var(--seam,#3d2f52);border-radius:8px;padding:8px;font:inherit;font-size:13px;resize:vertical;"></textarea>'
+      +'<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">'
+        +'<button id="rep-cancel" class="btn line" style="font-size:13px;">Cancel</button>'
+        +'<button id="rep-send" class="btn gold" style="font-size:13px;">Send report</button>'
+      +'</div></div>';
+    document.body.appendChild(wrap);
+    wrap.addEventListener('click',ev=>{if(ev.target===wrap)jcwCloseReport();});
+    document.addEventListener('keydown',function esckey(ev){if(ev.key==='Escape'){jcwCloseReport();document.removeEventListener('keydown',esckey);}});
+    wrap.querySelector('#rep-cancel').addEventListener('click',jcwCloseReport);
+    wrap.querySelector('#rep-send').addEventListener('click',function(){
+      try{
+        const cat=(wrap.querySelector('input[name=repcat]:checked')||{}).value||'other';
+        const note=String((wrap.querySelector('#rep-note')||{}).value||'').slice(0,200);
+        /* two lines either side, so a mod can see what the message was replying to */
+        const ctx=[];
+        for(let j=Math.max(0,i-2);j<Math.min(list.length,i+3);j++){
+          if(j===i||!list[j])continue;
+          ctx.push({n:String(list[j].n||'?').slice(0,40),t:String(list[j].t||'').slice(0,140)});
+        }
+        fbDB.ref('reports').push({
+          k:key,
+          t:String(msg.t||'').slice(0,300),
+          who:String(msg.n||'?').slice(0,40),
+          whoUid:msg.u||'',
+          by:chName(), byUid:lkUser.uid,
+          cat:cat, note:note, ctx:ctx,
+          ts:Date.now(), open:true
+        });
+        let done={};try{done=JSON.parse(localStorage.getItem('jcw_reported'))||{};}catch(_e){}
+        done[key]=1;try{localStorage.setItem('jcw_reported',JSON.stringify(done));}catch(_e){}
+        if(flagEl){flagEl.style.color='var(--hot,#ff3fa4)';flagEl.style.opacity='1';flagEl.title='Reported';}
+        jcwCloseReport();
+        toast('\u2691 Reported \u2014 thanks, the mods will take a look.',3600);
+      }catch(_e){jcwCloseReport();}
+    });
+  };
+
   chChat.addEventListener('click',e=>{
     const rep=e.target.closest('[data-chrep]');
     if(rep){
@@ -2969,22 +3044,9 @@ function observeReveals(){
         if(!lkUser){toast('Log into your Locker to report.',3200);return;}
         if(!fbDB){toast('Reporting needs a live connection.',3200);return;}
         const key=rep.dataset.chrep;
-        /* one report per message per device — stops rage-click duplicates */
         let done={};try{done=JSON.parse(localStorage.getItem('jcw_reported'))||{};}catch(_e){}
-        if(done[key]){toast('Already reported. Mods are on it.',3000);return;}
-        if(!confirm('Report this message to the JCW mods?'))return;
-        const msg=(window.__chatLive||[]).find(x=>x&&x.__k===key)||{};
-        fbDB.ref('reports').push({
-          k:key,                                   /* chat message key */
-          t:String(msg.t||'').slice(0,300),        /* snapshot: survives deletion */
-          who:String(msg.n||rep.dataset.repn||'?').slice(0,40),
-          whoUid:msg.u||'',
-          by:chName(), byUid:lkUser.uid,
-          ts:Date.now(), open:true
-        });
-        done[key]=1;try{localStorage.setItem('jcw_reported',JSON.stringify(done));}catch(_e){}
-        rep.style.color='var(--hot)';rep.style.opacity='1';rep.title='Reported';
-        toast('\u2691 Reported \u2014 thanks, the mods will take a look.',3600);
+        if(done[key]){toast('You already reported that one. Mods are on it.',3000);return;}
+        jcwOpenReport(key,rep);
       }catch(_e){}
       return;
     }
@@ -3051,34 +3113,60 @@ function observeReveals(){
     }catch(e){}
   }
   /* ---- reported messages queue (mods only) ---------------------------- */
+  const REPORT_LABEL={harassment:'Harassment',hate:'Hate speech',threat:'Threats',sexual:'Sexual content',spam:'Spam / scam',selfharm:'Self-harm concern',other:'Other'};
   function repRender(list){
     try{
       const el=document.getElementById('ch-reports');if(!el)return;
-      const open=(list||[]).filter(r=>r&&r.open!==false)
-                           .sort((a,b)=>(b.ts||0)-(a.ts||0));
+      const open=(list||[]).filter(r=>r&&r.open!==false);
       if(!open.length){el.innerHTML='';return;}
-      const esc=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+      const esc=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      /* group by reported message: five people flagging one line is one job,
+         not five, and the repeat count is itself a signal */
+      const byMsg={};
+      open.forEach(r=>{const k=r.k||r.__k;(byMsg[k]=byMsg[k]||[]).push(r);});
+      const groups=Object.keys(byMsg).map(k=>{
+        const rs=byMsg[k].sort((a,b)=>(b.ts||0)-(a.ts||0));
+        return {k:k,rs:rs,newest:rs[0].ts||0};
+      }).sort((a,b)=>b.newest-a.newest);
       el.innerHTML='<div style="font-size:12px;color:var(--hot);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">'
-        +'&#9873; Reported &middot; '+open.length+'</div>'
-        +open.map(r=>'<div style="border:1px solid rgba(255,63,164,.35);border-radius:8px;padding:8px 10px;margin-bottom:6px;background:rgba(255,63,164,.06);">'
-          +'<div style="font-size:11px;color:var(--steel);">'+esc(r.who)+' &middot; reported by '+esc(r.by)+'</div>'
-          +'<div style="font-size:13px;color:var(--bone);margin:4px 0 6px;word-break:break-word;">'+esc(r.t)+'</div>'
-          +'<button data-repdel="'+esc(r.k)+'" data-repid="'+esc(r.__k)+'" style="font-size:11px;padding:3px 8px;margin-right:6px;cursor:pointer;">Delete message</button>'
-          +'<button data-repok="'+esc(r.__k)+'" style="font-size:11px;padding:3px 8px;cursor:pointer;">Dismiss</button>'
-        +'</div>').join('');
+        +'&#9873; Reported &middot; '+groups.length+(groups.length!==open.length?(' ('+open.length+' reports)'):'')+'</div>'
+        +groups.map(g=>{
+          const top=g.rs[0];
+          const ids=g.rs.map(r=>r.__k).join(',');
+          const cats=[...new Set(g.rs.map(r=>REPORT_LABEL[r.cat]||'Other'))].join(', ');
+          const notes=g.rs.filter(r=>r.note).map(r=>'<div style="font-size:11.5px;color:var(--bone);margin-top:3px;">&ldquo;'+esc(r.note)+'&rdquo; <span style="color:var(--steel);">&mdash; '+esc(r.by)+'</span></div>').join('');
+          const ctx=(top.ctx&&top.ctx.length)
+            ? '<details style="margin-top:6px;"><summary style="font-size:11px;color:var(--steel);cursor:pointer;">Context</summary>'
+              +top.ctx.map(c=>'<div style="font-size:11.5px;color:var(--steel);margin-top:2px;"><b>'+esc(c.n)+'</b> '+esc(c.t)+'</div>').join('')
+              +'</details>' : '';
+          return '<div style="border:1px solid rgba(255,63,164,.35);border-radius:8px;padding:9px 11px;margin-bottom:7px;background:rgba(255,63,164,.06);">'
+            +'<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;">'
+              +'<span style="font-size:11px;color:var(--hot);text-transform:uppercase;letter-spacing:.08em;">'+esc(cats)+'</span>'
+              +(g.rs.length>1?'<span style="font-size:11px;color:var(--gold);">&times;'+g.rs.length+' reports</span>':'')
+            +'</div>'
+            +'<div style="font-size:11px;color:var(--steel);margin-top:3px;">'+esc(top.who)+' &middot; reported by '+esc(g.rs.map(r=>r.by).slice(0,3).join(', '))+(g.rs.length>3?' +'+(g.rs.length-3):'')+'</div>'
+            +'<div style="font-size:13px;color:var(--bone);margin:5px 0 2px;word-break:break-word;">'+esc(top.t)+'</div>'
+            +notes+ctx
+            +'<div style="margin-top:8px;">'
+              +'<button data-repdel="'+esc(top.k||'')+'" data-repid="'+esc(ids)+'" style="font-size:11px;padding:3px 8px;margin-right:6px;cursor:pointer;">Delete message</button>'
+              +'<button data-repok="'+esc(ids)+'" style="font-size:11px;padding:3px 8px;cursor:pointer;">Dismiss</button>'
+            +'</div></div>';
+        }).join('');
     }catch(e){}
   }
   document.addEventListener('click',e=>{
     try{
       const d=e.target.closest('[data-repdel]');
       if(d&&fbDB&&isMod()){
-        if(!confirm('Delete the reported message and close this report?'))return;
+        if(!confirm('Delete the reported message and close these reports?'))return;
         if(d.dataset.repdel)fbDB.ref('chat/'+d.dataset.repdel).remove();
-        fbDB.ref('reports/'+d.dataset.repid+'/open').set(false);
+        String(d.dataset.repid||'').split(',').filter(Boolean)
+          .forEach(id=>fbDB.ref('reports/'+id+'/open').set(false));
         return;
       }
       const k=e.target.closest('[data-repok]');
-      if(k&&fbDB&&isMod())fbDB.ref('reports/'+k.dataset.repok+'/open').set(false);
+      if(k&&fbDB&&isMod())String(k.dataset.repok||'').split(',').filter(Boolean)
+        .forEach(id=>fbDB.ref('reports/'+id+'/open').set(false));
     }catch(_e){}
   });
 
