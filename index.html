@@ -2363,9 +2363,15 @@ function observeReveals(){
          else's identity. 'mod' and 'verified' aren't listed here — he earns
          those through the checks above, so they stay honest. */
       if(lkUser&&lkUser.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1'){
-        const NOT_HIS={securitysucker:1, violentjeff:1, verified:1};
+        /* 'nocturnal' is earned by facing the delete button, so it is not
+           part of the blanket grant — otherwise the one person most likely
+           to test it could never see the prompt. */
+        const NOT_HIS={securitysucker:1, violentjeff:1, verified:1, nocturnal:1};
         LK_BADGES.forEach(function(b){ if(!NOT_HIS[b[0]])add(b[0]); });
       }
+      /* only ever added, never removed — so strip 'nocturnal' from anyone
+         holding it without the receipt d.noct that says they earned it */
+      if(!d.noct&&d.badges.includes('nocturnal')){d.badges=d.badges.filter(function(x){return x!=='nocturnal';});ch=true;}
       if(d.fav||d.favB)add('fan');
       if(d.picks&&Object.keys(d.picks).length)add('prophet');
       if(d.played||(d.wins||0)>0)add('gamer');
@@ -2867,6 +2873,7 @@ function observeReveals(){
           dd.badges=dd.badges||[];
           if(dd.badges.indexOf('nocturnal')<0){
             dd.badges.push('nocturnal');
+            dd.noct=1;                 /* the receipt; without it lkRender strips the badge */
             dd.pts=(dd.pts||0)+250;
             lkSet(dd);
             try{lkCloudPush();}catch(_e){}
@@ -2922,7 +2929,7 @@ function observeReveals(){
       else say('Could not delete: '+((err&&err.message)||'unknown error'));
     }
   };
-  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:Math.min(d.pts||0,999999),wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:d.picks||{},hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{})}); }catch(_e){try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
+  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:Math.min(d.pts||0,999999),wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:d.picks||{},hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{})}); }catch(_e){try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
   /* ===== WIPE RECOVERY =====
      Snapshot the best locker this device has ever seen for the signed-in account
      (jcw_locker_best_<uid>). If a later login pulls a cloud copy whose points have
