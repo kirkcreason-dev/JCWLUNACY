@@ -225,6 +225,55 @@
       const lo=$('adminLogout');if(lo)lo.style.display=u?'':'none';});
     return statsDB;
   }
+  /* ---- read the site's own content so admin never drifts from it -------- */
+  let _epCat=null, _pollCat=null;
+  async function epCatalog(){
+    if(_epCat)return _epCat;
+    const out=[];
+    try{
+      const j=await fetch('episodes.json?cb='+Date.now(),{cache:'no-store'}).then(r=>r.json());
+      (j.episodes||j||[]).forEach(function(e,i){
+        const id=Array.isArray(e)?e[0]:(e.id||e.yt), t=Array.isArray(e)?e[1]:(e.t||e.title);
+        if(id)out.push({id:id,title:t||id,order:i+1});
+      });
+    }catch(_e){}
+    try{
+      const db=await statsInit();
+      const v=(await db.ref('siteEpisodes').once('value')).val()||{};
+      Object.keys(v).forEach(function(id,i){
+        if(!out.some(function(e){return e.id===id;}))
+          out.push({id:id,title:(v[id]&&v[id].t)||id,order:1000+i});
+      });
+    }catch(_e){}
+    _epCat=out;return out;
+  }
+  async function pollCatalog(){
+    if(_pollCat)return _pollCat;
+    const map={};
+    try{
+      const html=await fetch('index.html?cb='+Date.now(),{cache:'no-store'}).then(r=>r.text());
+      const strip=x=>String(x||'').replace(/<[^>]*>/g,'').replace(/&mdash;/g,'—')
+        .replace(/&amp;/g,'&').replace(/&rsquo;/g,'’').replace(/&ldquo;/g,'“')
+        .replace(/&rdquo;/g,'”').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+      const blocks=html.match(/<div class="ch-poll" data-poll="[^"]+"[\s\S]*?<\/div>/g)||[];
+      blocks.forEach(function(b){
+        const key=(b.match(/data-poll="([^"]+)"/)||[])[1];if(!key||map[key])return;
+        const q=strip((b.match(/<h5[^>]*>([\s\S]*?)<\/h5>/)||[])[1]);
+        const o=[];
+        const re=/data-i="(\d+)"[^>]*>[\s\S]*?<span>([\s\S]*?)<\/span>/g;let m;
+        while((m=re.exec(b)))o[+m[1]]=strip(m[2]);
+        if(q||o.length)map[key]={q:q||key,o:o};
+      });
+    }catch(_e){}
+    _pollCat=map;return map;
+  }
+  let _midnight=null;
+  function scheduleMidnight(){
+    if(_midnight)return;
+    const now=new Date();
+    const next=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,20);
+    _midnight=setTimeout(function(){_midnight=null;statsLoad();},Math.max(5000,next-now));
+  }
   function barRow(label,v,max,extra){
     const pct=max?Math.round(v/max*100):0;
     return '<div style="display:flex;align-items:center;gap:10px;margin:5px 0">'+
@@ -285,12 +334,36 @@
       // last 14 days
       const days=[];for(let i=13;i>=0;i--){const iso=dKey(Date.now()-i*86400000);days.push([iso.slice(5),(st.days||{})[iso.replace(/-/g,'')]||0]);}
       const dmax=Math.max(1,...days.map(x=>x[1]));
-      $('statDays').innerHTML=days.map(x=>barRow(x[0],x[1],dmax)).join('');
+      /* the window is recomputed from the clock every refresh, so it always
+         ends on today; the label says so, and scheduleMidnight() forces the
+         redraw the moment the date turns instead of up to a minute later */
+      $('statDays').innerHTML='<div class="muted" style="font-size:11.5px;margin-bottom:6px">'
+        +esc(days[0][0])+' \u2192 '+esc(days[days.length-1][0])+' (today) \u00b7 Detroit time</div>'
+        +days.map(function(x,i){return barRow(x[0]+(i===days.length-1?' \u2022':''),x[1],dmax);}).join('');
+      scheduleMidnight();
 
       // views by section
-      const vw=Object.entries(st.views||{}).sort((a,b)=>b[1]-a[1]);
+      /* The site bumps stats/views/<hash> after stripping everything that is
+         not a-z, so "#ep92" landed as "ep" and "#ppv-tab" as "ppvtab". Those
+         mangled keys were the clutter in here. Only real sections are shown,
+         under their proper names; anything else is counted once at the bottom
+         rather than listed as its own bogus row. */
+      const VIEW_NAMES={home:'Home',episodes:'Episodes',clips:'Clips',events:'Events',
+        roster:'Roster',games:'Games',merch:'Merch',cards:'Trading cards',comics:'Comics',
+        vote:'Vote',locker:'Juggalo Locker',lunatics:'Lunatics Only',about:'About',
+        tickets:'Tickets',ppv:'PPV',ppvtab:'PPV',news:'News',arcade:'Arcade'};
+      const rawViews=Object.entries(st.views||{});
+      const named={},strays=[];
+      rawViews.forEach(function(e){
+        const lbl=VIEW_NAMES[e[0]];
+        if(lbl)named[lbl]=(named[lbl]||0)+(+e[1]||0);
+        else strays.push(e);
+      });
+      const vw=Object.entries(named).sort((a,b)=>b[1]-a[1]);
+      const strayTot=strays.reduce((a,e)=>a+(+e[1]||0),0);
       const vmax=Math.max(1,...vw.map(x=>x[1]));
-      $('statViews').innerHTML=vw.length?vw.map(x=>barRow(x[0],x[1],vmax)).join(''):'<span class="muted">No data yet — starts counting once the tracking version of the site is live.</span>';
+      $('statViews').innerHTML=(vw.length?vw.map(x=>barRow(x[0],x[1],vmax)).join(''):'<span class="muted">No data yet — starts counting once the tracking version of the site is live.</span>')
+        +(strayTot?'<div class="muted" style="margin-top:8px;font-size:11.5px">'+strayTot+' more from links that are not sections.</div>':'');
 
       // ticket clicks
       const tk=st.tickets||{};
@@ -308,7 +381,19 @@
       $('statTickets').innerHTML=th;
 
       // episodes watched
-      const eps=Object.entries(st.eps||{}).map(([id,v])=>({title:(v&&v.title)||id,plays:(v&&v.plays)||0,secs:(v&&v.secs)||0})).sort((a,b)=>b.secs-a.secs||b.plays-a.plays);
+      /* stats/eps only ever held episodes somebody had actually played, so a
+         newly added episode was invisible here until its first view. Every
+         known episode is merged in at zero, newest first, so the week's new
+         one shows up the moment it is added. */
+      const epStats=st.eps||{};
+      const known={};
+      try{(await epCatalog()).forEach(function(e){known[e.id]={title:e.title,order:e.order};});}catch(_e){}
+      const ids={};Object.keys(epStats).forEach(k=>ids[k]=1);Object.keys(known).forEach(k=>ids[k]=1);
+      const eps=Object.keys(ids).map(function(id){
+        const v=epStats[id]||{};
+        return {id:id,title:(known[id]&&known[id].title)||v.title||id,
+                plays:v.plays||0,secs:v.secs||0,order:(known[id]&&known[id].order)||0};
+      }).sort((a,b)=>b.secs-a.secs||b.plays-a.plays||b.order-a.order);
       const emax=Math.max(1,...eps.map(x=>x.secs));
       $('statEps').innerHTML=eps.length?eps.map(x=>{
         const pct=Math.round(x.secs/emax*100);
@@ -317,7 +402,7 @@
           '<div style="flex:0 0 160px;font-size:12.5px" class="muted">'+esc(x.title)+'</div>'+
           '<div style="flex:1;background:#000;border:1px solid var(--seam);border-radius:4px;height:16px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--acid)"></div></div>'+
           '<div style="flex:0 0 210px;text-align:right;font-size:12.5px"><b>'+x.plays+'</b> plays · <b>'+fmtT(x.secs)+'</b> watched · avg '+avg+'</div></div>';
-      }).join(''):'<span class="muted">No plays yet — starts counting once the tracking version of the site is live.</span>';
+      }).join(''):'<span class="muted">No episodes found.</span>';
 
       // arcade games played
       const ARC_NAMES={ttt:'Tic Tac Slam',chess:'Juggalo Chess',checkers:'Juggalo Checkers',faygo:'Faygo 4',pinball:'Dark Carnival Pinball',bj:'Blackjack 21',memory:'Joker Card Memory',camper:'Gathering Camper',solitaire:'Dark Carnival Solitaire',j31:'Juggalo 31',hockey:'Juggalo Air Hockey'};
@@ -330,9 +415,14 @@
       $('statArcade').innerHTML=ah;
 
       // vote results
+      /* POLL_LABELS below is a snapshot that went stale every time a poll was
+         added to index.html — new keys rendered as "ep94-main / Option 0".
+         The wording is now read straight out of the live site, so a poll added
+         there shows up here with its real question and answers, no edit. */
+      let live={};try{live=await pollCatalog();}catch(_e){}
       let ph='';
       Object.keys(polls).forEach(key=>{
-        const meta=POLL_LABELS[key]||{q:key,o:[]};
+        const meta=live[key]||POLL_LABELS[key]||{q:key,o:[]};
         const t=polls[key]||{};
         const total=Object.values(t).reduce((a,b)=>a+(+b||0),0);
         ph+='<div class="item"><div style="font-weight:700;margin-bottom:6px">'+esc(meta.q)+' <span class="muted">('+total+' votes)</span></div>';

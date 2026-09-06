@@ -2328,7 +2328,8 @@ function observeReveals(){
     ['faygoshower','Faygo Shower \u00b7 1,000 points'],['carnivalelite','Dark Carnival Elite \u00b7 10,000 points'],
     ['wickedclown','Wicked Clown \u00b7 50,000 points'],
     ['clowngods','The Clown Gods \u00b7 100,000 points'],['dukewicked','The Duke of the Wicked \u00b7 250,000 points'],
-    ['boldizar','Boldizar the Great Hunter \u00b7 earned 30 badges']];
+    ['boldizar','Boldizar the Great Hunter \u00b7 earned 30 badges'],
+    ['nocturnal','Nocturnal Deadhead \u00b7 stared down the delete button and blinked']];
   function lkAddWin(){
     const d=lkGet(); d.wins=(d.wins||0)+1;
     d.badges=d.badges||[]; if(!d.badges.includes('winner'))d.badges.push('winner');
@@ -2596,7 +2597,14 @@ function observeReveals(){
         .catch(err=>{msg.textContent=err.message.replace('Firebase: ','');});
     }
     if(e.target.id==='au-logout'){ if(fbAuth)fbAuth.signOut(); }
-    if(e.target.id==='au-del-open'){const b=document.getElementById('au-del-box');if(b)b.style.display=b.style.display==='none'?'block':'none';}
+    if(e.target.id==='au-del-open'){
+      const b=document.getElementById('au-del-box');
+      const opening=!b||b.style.display==='none';
+      /* ask the Nocturnal Deadhead question once, before the password box even
+         appears. If it takes over, it reveals the box itself on "No". */
+      if(opening&&window.jcwNocturnalGate&&window.jcwNocturnalGate()){if(b)b.style.display='none';return;}
+      if(b)b.style.display=opening?'block':'none';
+    }
     if(e.target.id==='au-del-cancel'){const b=document.getElementById('au-del-box');if(b)b.style.display='none';const p=document.getElementById('au-del-pass');if(p)p.value='';}
     if(e.target.id==='au-del-go'){jcwDeleteAccount();}
   });
@@ -2819,6 +2827,66 @@ function observeReveals(){
         dst.n=Math.max(dst.n||0,src.n||0);dst.foil=!!(dst.foil||src.foil);out[dk]=dst;}
       if(ch){d.cards=out;localStorage.setItem('jcw_locker',JSON.stringify(d));}}
   }catch(_e){}})();
+  /* ===== the Nocturnal Deadhead question ================================
+     Named for the man who lost everything and built it back. Anyone who
+     opens the delete box gets asked once whether they are only here for the
+     badge. Yes: badge granted, nothing deleted. No: the real delete flow
+     runs untouched, because an account deletion someone actually wants must
+     never be harder than one click. Asked once per account, so it cannot
+     become a wall between somebody and leaving. */
+  const NOCT_ASKED='jcw_noct_asked';
+  function noctAskedGet(){try{return JSON.parse(localStorage.getItem(NOCT_ASKED))||{};}catch(e){return {};}}
+  function noctAskedSet(uid){try{const a=noctAskedGet();a[uid]=1;localStorage.setItem(NOCT_ASKED,JSON.stringify(a));}catch(e){}}
+  window.jcwNocturnalGate=function(){
+    try{
+      const uid=(fbAuth&&fbAuth.currentUser&&fbAuth.currentUser.uid)||'';
+      if(!uid)return false;
+      const d=lkGet();
+      if((d.badges||[]).indexOf('nocturnal')>=0)return false;   /* already has it */
+      if(noctAskedGet()[uid])return false;                       /* only ever once */
+      noctAskedSet(uid);
+      const wrap=document.createElement('div');
+      wrap.id='noct-modal';
+      wrap.setAttribute('role','dialog');wrap.setAttribute('aria-modal','true');
+      wrap.style.cssText='position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:18px;';
+      wrap.innerHTML='<div style="background:#0e0d11;border:1px solid var(--seam,#3d2f52);border-radius:14px;max-width:420px;width:100%;padding:22px;">'
+        +'<div style="font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:var(--gold,#ffd028);font-size:16px;margin-bottom:8px;">&#128128; Hold up</div>'
+        +'<p style="color:var(--bone,#ffd028);font-size:14px;line-height:1.6;margin:0 0 6px;">There is a badge for this. <b>Nocturnal Deadhead</b> &mdash; for anyone brave enough to wipe it all and start from nothing.</p>'
+        +'<p style="color:var(--steel,#9aa0aa);font-size:13.5px;line-height:1.6;margin:0 0 16px;">Are you deleting your account to get it?</p>'
+        +'<div style="display:flex;flex-direction:column;gap:9px;">'
+          +'<button id="noct-yes" class="btn gold" style="width:100%;">Yes &mdash; give me the badge</button>'
+          +'<button id="noct-no" class="btn line" style="width:100%;">No &mdash; I really want my account deleted</button>'
+        +'</div>'
+        +'<p style="color:var(--steel,#9aa0aa);font-size:11.5px;line-height:1.5;margin:14px 0 0;">Taking the badge keeps your account exactly as it is. Nothing is deleted.</p>'
+      +'</div>';
+      document.body.appendChild(wrap);
+      const close=()=>{try{wrap.remove();}catch(e){}};
+      wrap.querySelector('#noct-yes').addEventListener('click',function(){
+        try{
+          const dd=lkGet();
+          dd.badges=dd.badges||[];
+          if(dd.badges.indexOf('nocturnal')<0){
+            dd.badges.push('nocturnal');
+            dd.pts=(dd.pts||0)+250;
+            lkSet(dd);
+            try{lkCloudPush();}catch(_e){}
+            try{if(window.lkRender)window.lkRender();}catch(_e){}
+            try{window.jcwCheckBoldizar&&window.jcwCheckBoldizar();}catch(_e){}
+          }
+          if(window.toast)toast('☠️ Nocturnal Deadhead earned — +250 pts. Your account is untouched.',5200);
+        }catch(_e){}
+        close();
+        /* fold the delete box back up — they are not going anywhere */
+        try{const b=document.getElementById('au-del-box');if(b)b.style.display='none';}catch(_e){}
+      });
+      wrap.querySelector('#noct-no').addEventListener('click',function(){
+        close();
+        try{const b=document.getElementById('au-del-box');if(b)b.style.display='';}catch(_e){}
+      });
+      return true;
+    }catch(_e){return false;}
+  };
+
   /* ===== account deletion: reauth -> wipe own data -> destroy login ===== */
   window.jcwDeleteAccount=async function(){
     const say=(m)=>{const el=document.getElementById('au-del-msg');if(el)el.textContent=m;};
@@ -2925,7 +2993,13 @@ function observeReveals(){
      the admin page or the Firebase console without shipping a new index.html.
      The security rules already honour this node. */
   let JCW_MODS_LIVE={};
-  function isMod(){return !!(lkUser&&(JCW_MODS[lkUser.uid]||JCW_MODS_LIVE[lkUser.uid]===true));}
+  /* Anywhere we asked "is this OTHER person a mod" we were reading only the
+     hardcoded map, so anyone promoted through the mods node got the mod tab
+     but no mod DM, no MOD tag, and no Message button on their profile —
+     invisible to the very feature they had just been given. */
+  function isModUid(uid){return !!(uid&&(JCW_MODS[uid]||JCW_MODS_LIVE[uid]===true));}
+  window.jcwIsModUid=isModUid;
+  function isMod(){return !!(lkUser&&isModUid(lkUser.uid));}
   window.jcwIsMod=isMod;
   /* ===== VERIFIED JCW TALENT =====
      Add a wrestler by pasting their Firebase Auth User UID with their roster name.
@@ -3279,12 +3353,17 @@ function observeReveals(){
   };
   /* seed the high-water mark once so a first-time visitor doesn't see every
      message in history counted as unread */
-  setTimeout(function(){try{if(!chSeenGet())chSeenSet(chLatestKey(window.__chatLive||[]));jcwChatBadge();}catch(e){}},2500);
+  setTimeout(function(){try{jcwChatBadge();}catch(e){}},2500);
 
   chFab.addEventListener('click',()=>{chPanel.classList.add('on');if(!fbDB)chRender(chLocal());setTimeout(chScrollBottom,60);setTimeout(chScrollBottom,400);try{jcwChatBadge();}catch(e){}});
-  document.getElementById('ch-x').addEventListener('click',()=>{chPanel.classList.remove('on');
-    /* mark everything read on close, so reopening doesn't show a stale count */
-    try{jcwChatBadge();chFab.classList.remove('unread');}catch(e){}});
+  document.getElementById('ch-x').addEventListener('click',()=>{
+    /* Mark read FIRST. This used to close the panel and then call the badge,
+       which took its closed branch, skipped chSeenSet and left the marker
+       stale — so the count was hidden but not cleared, and the next single
+       message came back as "17 unread". */
+    try{chSeenSet(chLatestKey(window.__chatLive||[]));}catch(e){}
+    chPanel.classList.remove('on');
+    try{jcwChatBadge();}catch(e){}});
   /* pop chat out into its own window */
   (function(){
     const pop=document.getElementById('ch-pop');if(!pop)return;
@@ -3451,7 +3530,7 @@ function observeReveals(){
     dmScrollBottom();
   }
   window.dmOpen=function(otherUid,otherName){
-    if(!fbDB||!lkUser||!isMod()||!JCW_MODS[otherUid]||otherUid===lkUser.uid)return;
+    if(!fbDB||!lkUser||!isMod()||!isModUid(otherUid)||otherUid===lkUser.uid)return;
     dmOther=otherUid;dmOtherName=otherName||'Mod';
     document.getElementById('dm-with').textContent='DM \u00b7 '+dmOtherName;
     document.getElementById('dm-list').innerHTML='<p style="color:var(--steel);font-size:13px;">Loading\u2026</p>';
@@ -3538,7 +3617,7 @@ function observeReveals(){
       let h=(v.pic?'<img src="roster/'+pEsc(v.pic)+'.jpg" alt="" style="width:84px;height:84px;border-radius:50%;object-fit:cover;border:2px solid rgba(240,179,43,.5);margin-bottom:10px;" onerror="this.remove()">':'')+'<h2><span class="pdot '+(isOnline(uid)?'on':'off')+'"></span>'+pEsc(v.name||'Anonymous Juggalo')+' <span style="font-size:13px;color:'+(isOnline(uid)?'#3ad900':'var(--steel)')+';font-family:system-ui,sans-serif;letter-spacing:normal;text-transform:none;">'+(isOnline(uid)?'online':'offline')+'</span></h2>';
       if(isVerified(uid))h+='<p style="margin-top:8px;"><b style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:20px;color:#000;background:linear-gradient(135deg,var(--gold),var(--tang));padding:5px 15px;border-radius:6px;">&#10004; JCW Roster</b> <span style="color:var(--steel);font-size:12px;">verified talent</span></p>';
       if(uid===DUKE)h+='<p style="margin-top:8px;"><b style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:22px;color:#000;background:var(--gold,#ffd028);padding:6px 16px;border-radius:6px;">&#9819; Administrator</b></p>';
-      else if(typeof JCW_MODS!=='undefined'&&JCW_MODS[uid])h+='<p style="margin-top:8px;"><b style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:20px;color:#0a0a0a;background:var(--acid,#9dff3a);padding:5px 15px;border-radius:6px;">&#9733; Moderator</b></p>';
+      else if(typeof isModUid==='function'&&isModUid(uid))h+='<p style="margin-top:8px;"><b style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:20px;color:#0a0a0a;background:var(--acid,#9dff3a);padding:5px 15px;border-radius:6px;">&#9733; Moderator</b></p>';
       if(window.__lkPremSet&&window.__lkPremSet[uid]===true)h+='<p style="margin-top:8px;"><span class="lun-chip" style="font-size:13px;padding:4px 12px;">&#127914; Lunatic</span><span style="color:var(--steel);font-size:12px;">Lunatics Only member</span></p>';
       (function(){
         const ls=(window.jcwLastSeen?window.jcwLastSeen(uid):'');
@@ -3553,7 +3632,7 @@ function observeReveals(){
         h+='<p style="margin-top:12px;">'
           +'<button class="btn line" data-rel="ally" style="margin-right:8px;'+(myRel==='ally'?'border-color:var(--acid);color:var(--acid);':'')+'">'+(myRel==='ally'?'&#10004; ALLY':'Mark as Ally')+'</button>'
           +'<button class="btn line" data-rel="rival" style="'+(myRel==='rival'?'border-color:var(--hot);color:var(--hot);':'')+'">'+(myRel==='rival'?'&#9876; RIVAL':'Mark as Rival')+'</button>'
-          +(isMod()&&JCW_MODS[uid]?'<button class="btn" id="prof-dm" style="margin-left:8px;background:var(--acid);color:#000;">&#128172; Message</button>':'')
+          +(isMod()&&isModUid(uid)?'<button class="btn" id="prof-dm" style="margin-left:8px;background:var(--acid);color:#000;">&#128172; Message</button>':'')
           +(window.__lkPremOn?'<button class="btn line" id="prof-gift" style="margin-left:8px;">&#127183; Send a card</button>':'')
           +'</p>';
       }
@@ -3772,6 +3851,9 @@ function observeReveals(){
       fbDB.ref('chat').limitToLast(120).on('value',snap=>{
         const l=[];snap.forEach(c=>{const v=c.val();if(v&&v.t){v.__k=c.key;l.push(v);}});
         window.__chatLive=l;
+        /* first payload for a new device: treat what is already there as read,
+           so a newcomer does not open to a badge counting the whole backlog */
+        try{if(!chSeenGet()&&l.length)chSeenSet(chLatestKey(l));}catch(_e){}
         try{document.getElementById('ch-note').textContent='LIVE \u00b7 you\u2019re chatting with everybody.';}catch(e){}
         chRender(l);
         try{window.jcwChatBadge&&window.jcwChatBadge();}catch(_e){}
@@ -5145,7 +5227,7 @@ route();
   function tags(uid){
     var out='';
     try{if(window.jcwIsVerified&&window.jcwIsVerified(uid))out+=' <span class="us-v" title="Verified JCW talent">&#10004;</span>';}catch(e){}
-    try{if(window.JCW_MODS&&window.JCW_MODS[uid])out+=' <span class="us-m">MOD</span>';}catch(e){}
+    try{if(window.jcwIsModUid&&window.jcwIsModUid(uid))out+=' <span class="us-m">MOD</span>';}catch(e){}
     try{if(window.__lkPremSet&&window.__lkPremSet[uid]===true)out+=' <span class="lun-chip" title="Lunatics Only member">&#127914; Lunatic</span>';}catch(e){}
     return out;
   }
