@@ -99,6 +99,72 @@
     </div>
     <div class="muted" style="margin-top:8px">Pops a notification for every visitor on the site (once each). Sign in above first.</div>
   </div>
+  <div class="card"><label>&#128197; This Thursday&rsquo;s card <span class="muted">(the &ldquo;This Week&rdquo; box on the homepage)</span></label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+      <input id="wkTitle" placeholder="Heading (e.g. JCW Lunacy · 9/10)" style="flex:2;min-width:200px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+      <input id="wkSub" placeholder="Subheading (e.g. All-new Lunacy · Thursday · 7PM Eastern)" style="flex:2;min-width:200px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+    </div>
+    <textarea id="wkIntro" rows="2" placeholder="Opening line — e.g. A brand new JCW Lunacy this Thursday, and the fallout from Bloodymania 19 is far from over." style="width:100%;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit;font-size:13px;resize:vertical"></textarea>
+    <textarea id="wkLines" rows="7" placeholder="One match or angle per line. The first sentence of each is bolded automatically.&#10;&#10;The 5-Minute Challenge begins. Vince Russo has put Kerry Morton on the clock.&#10;Barnabas the Bizarre speaks. At a crossroads after losing The Outbreak." style="width:100%;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit;font-size:13px;resize:vertical" style="margin-top:8px;width:100%;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit;font-size:13px;resize:vertical"></textarea>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:8px">
+      <button id="wkSave">Publish to homepage</button>
+      <button class="ghost" id="wkLoad">Reload current</button>
+      <button class="ghost" id="wkClear" style="border-color:var(--hot);color:var(--hot)">Revert to built-in card</button>
+      <span class="status" id="wkStatus"></span>
+    </div>
+    <div class="muted" style="margin-top:8px">Goes live the moment you publish &mdash; no upload needed. Reverting puts back the card that ships inside index.html.</div>
+  </div>
+
+  <div class="card"><label>&#128240; News articles <span class="muted">(added above the ones built into the site)</span></label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+      <input id="artTitle" placeholder="Headline" style="flex:2;min-width:200px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+      <input id="artImg" placeholder="Image path (optional) e.g. article_imgs/article-ringside.jpg" style="flex:2;min-width:200px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+    </div>
+    <textarea id="artBody" rows="6" placeholder="The article. Leave a blank line between paragraphs." style="width:100%;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit;font-size:13px;resize:vertical"></textarea>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:8px">
+      <button id="artAdd">Post article</button>
+      <span class="status" id="artStatus"></span>
+    </div>
+    <div id="artList" class="muted" style="margin-top:12px">&mdash;</div>
+  </div>
+
+  <div class="card"><label>&#127914; Lunatics Only members</label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <input id="lunName" placeholder="Locker name" style="flex:2;min-width:200px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+      <button id="lunAdd">Give access</button>
+      <span class="status" id="lunStatus"></span>
+    </div>
+    <div id="lunList" class="muted" style="margin-top:12px">&mdash;</div>
+  </div>
+
+  <div class="card"><label>&#128274; Lunatics Only vault <span class="muted">(what members see inside)</span></label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+      <input id="vtTitle" placeholder="Title" style="flex:2;min-width:200px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+      <input id="vtYt" placeholder="YouTube link or ID (optional)" style="flex:2;min-width:200px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+    </div>
+    <textarea id="vtDesc" rows="3" placeholder="Description (optional)" style="width:100%;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit;font-size:13px;resize:vertical"></textarea>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+      <input id="vtUrl" placeholder="Link (optional)" style="flex:2;min-width:200px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+      <input id="vtBtn" placeholder="Button text (e.g. Read it)" style="flex:2;min-width:200px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+      <input id="vtCode" placeholder="Discount code (optional)" style="flex:2;min-width:200px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:8px">
+      <button id="vtAdd">Add to vault</button>
+      <span class="status" id="vtStatus"></span>
+    </div>
+    <div id="vtList" class="muted" style="margin-top:12px">&mdash;</div>
+  </div>
+
+  <div class="card"><label>&#128737; Moderators <span class="muted">(grant or remove mod powers)</span></label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <input id="modName" placeholder="Locker name (e.g. Nocturnal Deadhead)" style="flex:2;min-width:200px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+      <button id="modGrant">Make mod</button>
+      <span class="status" id="modStatus"></span>
+    </div>
+    <div class="muted" style="margin-top:8px">Type the name exactly as it appears in their Locker. Names with emoji count &mdash; copy it from their profile if you are not sure. Sign in above as Digital Duke first; the database only lets that account change this list.</div>
+    <div id="modList" class="muted" style="margin-top:12px">&mdash;</div>
+  </div>
+
   <div class="card"><label>Top Juggalo Lockers</label><div id="statLockers" class="muted">—</div></div>
   <div class="card" id="rulesHint" style="display:none"><label>Fix data access (2 min)</label><div class="muted">
     Some data is blocked by your Firebase rules. Open
@@ -386,10 +452,255 @@
       $('bcastMsg').value='';el.textContent='Sent to everyone ✅';el.className='status ok';
     }catch(e){el.textContent='Blocked — sign in as a mod/admin.';el.className='status err';}
   };
+  /* ===== Weekly homepage card ============================================
+     Writes siteWeekly; index.html overlays it on the built-in card. Deleting
+     the node restores the hardcoded card, so this is never a one-way door. */
+  function wkSay(m,c){const el=$('wkStatus');if(el){el.textContent=m;el.className='status '+(c||'');}}
+  async function wkLoad(){
+    try{
+      const db=await statsInit();
+      const w=(await db.ref('siteWeekly').once('value')).val();
+      if(!w){wkSay('Nothing published — the site is showing its built-in card.');return;}
+      $('wkTitle').value=w.title||''; $('wkSub').value=w.sub||''; $('wkIntro').value=w.intro||'';
+      let l=w.lines; if(Array.isArray(l))l=l.join('\n'); else if(l&&typeof l==='object')l=Object.keys(l).map(k=>l[k]).join('\n');
+      $('wkLines').value=l||'';
+      wkSay('Loaded what is live now.','ok');
+    }catch(e){wkSay('Could not read it.','err');}
+  }
+  $('wkSave').onclick=async()=>{
+    const title=($('wkTitle').value||'').trim(), sub=($('wkSub').value||'').trim();
+    const intro=($('wkIntro').value||'').trim();
+    const lines=($('wkLines').value||'').split('\n').map(x=>x.trim()).filter(Boolean);
+    if(!title&&!intro&&!lines.length){wkSay('Fill in at least a heading or some lines.','err');return;}
+    try{
+      const db=await statsInit();
+      if(!statsAuth||!statsAuth.currentUser){wkSay('Sign in above first.','err');return;}
+      await db.ref('siteWeekly').set({title:title,sub:sub,intro:intro,lines:lines,ts:Date.now()});
+      wkSay('Live on the homepage now.','ok');
+    }catch(e){wkSay('Blocked — publish the updated rules, then sign in as an admin.','err');}
+  };
+  $('wkLoad').onclick=wkLoad;
+  $('wkClear').onclick=async()=>{
+    if(!confirm('Put back the card that is built into index.html?'))return;
+    try{
+      const db=await statsInit();
+      await db.ref('siteWeekly').remove();
+      ['wkTitle','wkSub','wkIntro','wkLines'].forEach(function(id){$(id).value='';});
+      wkSay('Reverted to the built-in card.','ok');
+    }catch(e){wkSay('Blocked — sign in as an admin.','err');}
+  };
+
+  /* ===== News articles ==================================================== */
+  function artSay(m,c){const el=$('artStatus');if(el){el.textContent=m;el.className='status '+(c||'');}}
+  async function artLoad(){
+    const el=$('artList');if(!el)return;
+    try{
+      const db=await statsInit();
+      const v=(await db.ref('siteArticles').once('value')).val()||{};
+      const ks=Object.keys(v).sort(function(a,b){return ((v[b]||{}).ts||0)-((v[a]||{}).ts||0);});
+      el.innerHTML = ks.length ? ks.map(function(k){
+        const a=v[k]||{};
+        return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--seam)">'
+          +'<div style="flex:1;min-width:0"><div style="color:var(--txt);font-weight:700">'+esc(a.t||'(untitled)')+'</div>'
+          +'<div class="muted" style="font-size:11.5px">'+(a.ts?new Date(a.ts).toLocaleDateString():'')+'</div></div>'
+          +'<button class="ghost sm" data-artdel="'+esc(k)+'" style="border-color:var(--hot);color:var(--hot)">Delete</button></div>';
+      }).join('') : '<div style="padding:6px 0">Nothing posted here yet. The articles built into the site are unaffected.</div>';
+    }catch(e){el.innerHTML='<span class="err">Could not read the article list.</span>';}
+  }
+  $('artAdd').onclick=async()=>{
+    const t=($('artTitle').value||'').trim(), d=($('artBody').value||'').trim(), img=($('artImg').value||'').trim();
+    if(!t&&!d){artSay('Give it a headline or some text.','err');return;}
+    try{
+      const db=await statsInit();
+      if(!statsAuth||!statsAuth.currentUser){artSay('Sign in above first.','err');return;}
+      await db.ref('siteArticles').push({t:t,d:d,img:img,ts:Date.now()});
+      $('artTitle').value='';$('artBody').value='';$('artImg').value='';
+      artSay('Posted — it is at the top of the News section now.','ok');
+      artLoad();
+    }catch(e){artSay('Blocked — publish the updated rules, then sign in as an admin.','err');}
+  };
+
+  /* ===== Lunatics Only members =========================================== */
+  function lunSay(m,c){const el=$('lunStatus');if(el){el.textContent=m;el.className='status '+(c||'');}}
+  async function lunLoad(){
+    const el=$('lunList');if(!el)return;
+    try{
+      const db=await statsInit();
+      const res=await Promise.all([
+        db.ref('premiumMembers').once('value').then(function(s){return s.val()||{};}),
+        db.ref('lockers').once('value')
+      ]);
+      const mem=res[0], lockers=res[1];
+      const names={};lockers.forEach(function(c){const v=c.val();if(v&&v.name)names[c.key]=String(v.name);});
+      const ids=Object.keys(mem).filter(function(k){return mem[k]===true;});
+      el.innerHTML='<div style="margin-bottom:4px;color:var(--txt);font-weight:700">Members &middot; '+ids.length+'</div>'
+        +(ids.length?ids.map(function(u){return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--seam)">'
+          +'<div style="flex:1;min-width:0"><div style="color:var(--txt);font-weight:700">'+esc(names[u]||u)+(names[u]?'':' <span class="err" style="font-weight:400">&mdash; no account with this ID</span>')+'</div>'
+          +'<div class="muted" style="font-size:11px;word-break:break-all">'+esc(u)+'</div></div>'
+          +'<button class="ghost sm" data-lundel="'+esc(u)+'" style="border-color:var(--hot);color:var(--hot)">Remove</button></div>';}).join('')
+        :'<div style="padding:6px 0">Nobody yet.</div>');
+    }catch(e){el.innerHTML='<span class="err">Could not read the member list.</span>';}
+  }
+  $('lunAdd').onclick=async()=>{
+    const nm=($('lunName').value||'').trim().toLowerCase();
+    if(!nm){lunSay('Enter a locker name.','err');return;}
+    try{
+      const db=await statsInit();
+      if(!statsAuth||!statsAuth.currentUser){lunSay('Sign in above first.','err');return;}
+      const snap=await db.ref('lockers').once('value');
+      let uid=null,found=null;
+      snap.forEach(function(c){const v=c.val();if(v&&String(v.name||'').trim().toLowerCase()===nm){uid=c.key;found=v;}});
+      if(!uid){lunSay('No locker with that name.','err');return;}
+      await db.ref('premiumMembers/'+uid).set(true);
+      $('lunName').value='';
+      lunSay((found.name||'They')+' has Lunatics Only access.','ok');
+      lunLoad();
+    }catch(e){lunSay('Blocked — publish the updated rules, then sign in as an admin.','err');}
+  };
+
+  /* ===== Lunatics Only vault ============================================= */
+  function vtSay(m,c){const el=$('vtStatus');if(el){el.textContent=m;el.className='status '+(c||'');}}
+  async function vtLoad(){
+    const el=$('vtList');if(!el)return;
+    try{
+      const db=await statsInit();
+      const v=(await db.ref('premiumContent').once('value')).val()||{};
+      const ks=Object.keys(v);
+      el.innerHTML= ks.length ? ks.map(function(k){
+        const it=v[k]||{};
+        return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--seam)">'
+          +'<div style="flex:1;min-width:0"><div style="color:var(--txt);font-weight:700">'+esc(it.t||'(untitled)')+'</div>'
+          +'<div class="muted" style="font-size:11.5px">'+esc(it.d||'')+'</div></div>'
+          +'<button class="ghost sm" data-vtdel="'+esc(k)+'" style="border-color:var(--hot);color:var(--hot)">Delete</button></div>';
+      }).join('') : '<div style="padding:6px 0">Vault is empty — members see only the four &ldquo;coming soon&rdquo; tiles.</div>';
+    }catch(e){el.innerHTML='<span class="err">Could not read the vault — it is readable only by members and admins.</span>';}
+  }
+  $('vtAdd').onclick=async()=>{
+    const t=($('vtTitle').value||'').trim();
+    if(!t){vtSay('Give it a title.','err');return;}
+    const yt=ytId($('vtYt').value||'')||'';
+    try{
+      const db=await statsInit();
+      if(!statsAuth||!statsAuth.currentUser){vtSay('Sign in above first.','err');return;}
+      await db.ref('premiumContent').push({t:t,d:($('vtDesc').value||'').trim(),yt:yt,
+        u:($('vtUrl').value||'').trim(),b:($('vtBtn').value||'').trim(),c:($('vtCode').value||'').trim(),ts:Date.now()});
+      ['vtTitle','vtYt','vtDesc','vtUrl','vtBtn','vtCode'].forEach(function(id){$(id).value='';});
+      vtSay('Added to the vault.','ok');
+      vtLoad();
+    }catch(e){vtSay('Blocked — publish the updated rules, then sign in as an admin.','err');}
+  };
+
+  document.addEventListener('click',async e=>{
+    const t=e.target.closest('[data-artdel],[data-lundel],[data-vtdel]');
+    if(!t)return;
+    const map=[['data-artdel','siteArticles/','article',artLoad],['data-lundel','premiumMembers/','member',lunLoad],['data-vtdel','premiumContent/','vault item',vtLoad]];
+    for(let i=0;i<map.length;i++){
+      const k=t.getAttribute(map[i][0]);
+      if(!k)continue;
+      if(!confirm('Delete this '+map[i][2]+'?'))return;
+      try{
+        const db=await statsInit();
+        await db.ref(map[i][1]+k).remove();
+        map[i][3]();
+      }catch(_e){alert('Blocked — sign in as an admin and make sure the updated rules are published.');}
+      return;
+    }
+  });
+
+  /* ===== Moderators =====================================================
+     Grants and revocations live in the RTDB `mods` node, which index.html
+     subscribes to live — a change here takes effect without a deploy.
+
+     The eleven uids baked into JCW_MODS in index.html are a separate,
+     older mechanism. isMod() checks the hardcoded list FIRST, so a
+     built-in mod cannot be switched off from here; they are listed
+     read-only rather than given a button that would quietly do nothing. */
+  const MOD_BUILTIN={
+    'oYrNiXZywhexmLqRQO7j1iyA1Bh1':'Digital Duke',
+    'L1feNpUUBPfe9ONSwxpgwqcVFPv1':'hurray69',
+    'PlWKdSiM9hfJ5HJ2WNBN9IqwPBN2':'HashPappy',
+    'QC0UIOmTazZNOrIiwPznSa7YEo53':'The Miracle Man',
+    'widUOpWNhYhTtAVf3iDseNHHWVE3':'Griff Tanski',
+    'zRLXcejE4dWQRL0l07Bo19SO5j52':'Creaso Norse Tech',
+    'TwkyqKXbJ6NV8VNewfofluB1sji2':'Nocturnal Deadhead (old account)',
+    'CUqiZLujVGTTbvXsgEynoOaUzA52':'Ciromi',
+    'krXCIRnqkUcfPgXMsM9E5PcoTxi1':'Boldizar',
+    '4IQHHQJXUUUi1gx6fRSg94J9ug82':'Son Of Man',
+    'GZ4FzgT740gxOtiFUtBaxshngbi2':'Jeff Lane'
+  };
+  function modSay(m,c){const el=$('modStatus');if(el){el.textContent=m;el.className='status '+(c||'');}}
+  let MOD_NAMES={};
+  async function modLoad(){
+    const el=$('modList');if(!el)return;
+    try{
+      const db=await statsInit();
+      const [live,lockers]=await Promise.all([
+        db.ref('mods').once('value').then(s=>s.val()||{}).catch(()=>({})),
+        db.ref('lockers').once('value')
+      ]);
+      MOD_NAMES={};
+      lockers.forEach(c=>{const v=c.val();if(v&&v.name)MOD_NAMES[c.key]=String(v.name);});
+      const row=(uid,label,builtin)=>{
+        const nm=MOD_NAMES[uid];
+        const dead=!nm;
+        return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--seam)">'
+          +'<div style="flex:1;min-width:0">'
+            +'<div style="color:var(--txt);font-weight:700">'+esc(nm||label||uid)+(dead?' <span class="err" style="font-weight:400">&mdash; no account with this ID</span>':'')+'</div>'
+            +'<div class="muted" style="font-size:11px;word-break:break-all">'+esc(uid)+'</div>'
+          +'</div>'
+          +(builtin
+             ? '<span class="muted" style="font-size:11.5px;white-space:nowrap">built into the site</span>'
+             : '<button class="ghost sm" data-modrevoke="'+esc(uid)+'" style="border-color:var(--hot);color:var(--hot)">Remove</button>')
+        +'</div>';
+      };
+      const liveIds=Object.keys(live).filter(k=>live[k]===true);
+      let html='';
+      html+='<div style="margin-bottom:4px;color:var(--txt);font-weight:700">Granted here &middot; '+liveIds.length+'</div>';
+      html+= liveIds.length ? liveIds.map(u=>row(u,null,false)).join('')
+           : '<div class="muted" style="padding:6px 0">Nobody yet. Add someone above.</div>';
+      const builtIds=Object.keys(MOD_BUILTIN);
+      html+='<div style="margin:14px 0 4px;color:var(--txt);font-weight:700">Built into index.html &middot; '+builtIds.length+'</div>';
+      html+='<div class="muted" style="font-size:11.5px;margin-bottom:2px">These are hardcoded in the site file. They cannot be removed from this page &mdash; that needs a code change.</div>';
+      html+=builtIds.map(u=>row(u,MOD_BUILTIN[u],true)).join('');
+      el.innerHTML=html;
+    }catch(e){el.innerHTML='<span class="err">Could not read the mod list.</span>';}
+  }
+  $('modGrant').onclick=async()=>{
+    const nm=($('modName').value||'').trim().toLowerCase();
+    if(!nm){modSay('Enter a locker name.','err');return;}
+    try{
+      const db=await statsInit();
+      if(!statsAuth||!statsAuth.currentUser){modSay('Sign in above first.','err');return;}
+      const snap=await db.ref('lockers').once('value');
+      let uid=null,found=null;
+      snap.forEach(c=>{const v=c.val();if(v&&String(v.name||'').trim().toLowerCase()===nm){uid=c.key;found=v;}});
+      if(!uid){modSay('No locker with that name. They need to sign in on the site and set their name first.','err');return;}
+      if(MOD_BUILTIN[uid]){modSay((found.name||'They')+' is already a mod, built into the site.','ok');return;}
+      await db.ref('mods/'+uid).set(true);
+      $('modName').value='';
+      modSay((found.name||'They')+' is a mod now — it takes effect for them straight away.','ok');
+      modLoad();
+    }catch(e){
+      modSay('Blocked — only Digital Duke’s account can change the mod list. Sign in as that account above.','err');
+    }
+  };
+  document.addEventListener('click',async e=>{
+    const b=e.target.closest('[data-modrevoke]');if(!b)return;
+    const uid=b.getAttribute('data-modrevoke');
+    const who=MOD_NAMES[uid]||uid;
+    if(!confirm('Remove mod powers from '+who+'?'))return;
+    try{
+      const db=await statsInit();
+      if(!statsAuth||!statsAuth.currentUser){modSay('Sign in above first.','err');return;}
+      await db.ref('mods/'+uid).remove();
+      modSay('Removed '+who+'.','ok');
+      modLoad();
+    }catch(_e){modSay('Blocked — sign in as Digital Duke to change the mod list.','err');}
+  });
   $('awardBtn').onclick=()=>pointsOp('add');
   $('setBtn').onclick=()=>pointsOp('set');
   $('zeroBtn').onclick=()=>pointsOp('zero');
-  $('statsReload').onclick=statsLoad;
+  $('statsReload').onclick=()=>{statsLoad();modLoad();};
 
   /* ===== Episodes manager (writes RTDB siteEpisodes; the site merges live) ===== */
   function ytId(s){
@@ -449,6 +760,11 @@
   epsRender();
 
   statsLoad();
+  modLoad();
+  wkLoad();
+  artLoad();
+  lunLoad();
+  vtLoad();
   setInterval(statsLoad,60000);
 })();
 </script>

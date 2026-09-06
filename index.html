@@ -1043,8 +1043,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <div class="kick">This Week</div>
     <h2 class="head">This Thursday&rsquo;s <em>card</em></h2>
     <div class="card-res rev">
-      <div class="hdr"><h3>JCW Lunacy &middot; 9/3</h3><span class="d">All-new Lunacy &middot; Thursday &middot; 7PM Eastern</span></div>
-      <div style="padding:16px 22px 22px;color:var(--bone);line-height:1.7;font-size:15px;">
+      <div class="hdr"><h3 id="wk-title">JCW Lunacy &middot; 9/3</h3><span class="d" id="wk-sub">All-new Lunacy &middot; Thursday &middot; 7PM Eastern</span></div>
+      <div id="wk-body" style="padding:16px 22px 22px;color:var(--bone);line-height:1.7;font-size:15px;">
         <p style="margin:0 0 16px;"><b>A brand new JCW Lunacy this Thursday</b> &mdash; and the fallout from <b>Bloodymania 19</b> is far from over.</p>
         <div style="display:flex;flex-direction:column;gap:10px;">
           <div style="border-left:3px solid var(--hot);padding:2px 0 2px 12px;"><b>The 5-Minute Challenge begins.</b> <b>Vince Russo</b> has put &ldquo;Mr. JCW&rdquo; <b>Kerry Morton</b> on the clock &mdash; if Morton does not win his match in under five minutes, he is <b>fired from JCW</b>.</div>
@@ -1065,6 +1065,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <section class="blk tight">
     <div class="kick">News</div>
     <h2 class="head">Straight from the <em>carnival</em></h2>
+      <div id="news-live"></div>
       <article class="so-article" style="border:1px solid var(--seam);border-radius:12px;overflow:hidden;margin-bottom:22px;background:var(--plate);">
         <img src="article_imgs/article-konley-hero.jpg" alt="Caleb Konley &mdash; JCW Lunacy World Champion" loading="lazy" style="width:100%;display:block;object-fit:cover;object-position:center 38%;max-height:360px;">
         <div style="padding:20px 22px 24px;">
@@ -3775,6 +3776,64 @@ function observeReveals(){
         chRender(l);
         try{window.jcwChatBadge&&window.jcwChatBadge();}catch(_e){}
       }, err=>{ chGoLocal(fbReason(err)); });
+      /* ---- weekly card + news posted from the admin page -------------------
+         Both are optional overlays. If the node is empty the hardcoded card
+         and the hand-built articles stay exactly as they are, so an empty
+         database can never blank the homepage. */
+      fbDB.ref('siteWeekly').on('value',snap=>{
+        try{
+          const w=snap.val(); if(!w)return;
+          const esc=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+          const t=document.getElementById('wk-title'), sb=document.getElementById('wk-sub'), b=document.getElementById('wk-body');
+          if(t&&w.title)t.innerHTML=esc(w.title);
+          if(sb&&w.sub)sb.innerHTML=esc(w.sub);
+          if(b){
+            const cols=['var(--hot)','var(--cyan)','var(--acid)','var(--purple)','var(--gold)','var(--tang)'];
+            let lines=w.lines;
+            if(typeof lines==='string')lines=lines.split('\n');
+            if(!Array.isArray(lines))lines=lines?Object.keys(lines).map(k=>lines[k]):[];
+            lines=lines.map(x=>String(x||'').trim()).filter(Boolean);
+            if(w.intro||lines.length){
+              let h='';
+              if(w.intro)h+='<p style="margin:0 0 16px;">'+esc(w.intro)+'</p>';
+              if(lines.length){
+                h+='<div style="display:flex;flex-direction:column;gap:10px;">';
+                lines.forEach(function(ln,i){
+                  /* "Bold lead. rest of it" — split on the first full stop so a
+                     typed line still reads like the hand-built ones */
+                  const m=ln.match(/^([^.!?]{2,60}[.!?])\s*([\s\S]*)$/);
+                  const lead=m?m[1]:'', rest=m?m[2]:ln;
+                  h+='<div style="border-left:3px solid '+cols[i%cols.length]+';padding:2px 0 2px 12px;">'
+                    +(lead?'<b>'+esc(lead)+'</b> ':'')+esc(rest)+'</div>';
+                });
+                h+='</div>';
+              }
+              const tail=b.querySelector('div[style*="padding-top:18px"]');
+              b.innerHTML=h+(tail?tail.outerHTML:'');
+            }
+          }
+        }catch(_e){}
+      },()=>{});
+      fbDB.ref('siteArticles').on('value',snap=>{
+        try{
+          const box=document.getElementById('news-live'); if(!box)return;
+          const v=snap.val(); if(!v){box.innerHTML='';return;}
+          const esc=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+          const items=Object.keys(v).map(k=>Object.assign({__k:k},v[k]||{}))
+            .filter(a=>a&&(a.t||a.d))
+            .sort((a,b)=>(b.ts||0)-(a.ts||0));
+          box.innerHTML=items.map(function(a){
+            let h='<article class="so-article" style="border:1px solid var(--seam);border-radius:12px;overflow:hidden;margin-bottom:22px;background:var(--plate);">';
+            if(a.img)h+='<img src="'+esc(a.img)+'" alt="'+esc(a.t||'JCW Lunacy')+'" loading="lazy" style="width:100%;display:block;object-fit:cover;max-height:340px;" onerror="this.remove()">';
+            h+='<div style="padding:20px 22px 24px;">';
+            if(a.t)h+='<h3 style="margin:0 0 10px;">'+esc(a.t)+'</h3>';
+            String(a.d||'').split(/\n\s*\n/).forEach(function(par){
+              par=par.trim(); if(par)h+='<p style="margin:0 0 12px;line-height:1.7;">'+esc(par).replace(/\n/g,'<br>')+'</p>';
+            });
+            return h+'</div></article>';
+          }).join('');
+        }catch(_e){}
+      },()=>{});
       fbDB.ref('mods').on('value',snap=>{
         JCW_MODS_LIVE=snap.val()||{};
         try{if(window.jcwUpdateModUI)window.jcwUpdateModUI();}catch(_e){}
