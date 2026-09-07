@@ -3770,7 +3770,18 @@ function observeReveals(){
         h+='<div id="cn-egg"><img id="cn-hatchet" alt="" draggable="false">'
           +'<img id="cn-dollar" src="poop-dollar.png" alt="Poop Dollar" onerror="this.style.display=\'none\'"></div>';
       }
-      const earned=(v.badges||[]).filter(b=>badgeMap[b]);
+      /* A profile used to show only the badge array stored in the person's
+         cloud locker — and that only updates when THEY reload, so a freshly
+         promoted mod or a just-earned Familie was invisible to everyone else
+         until the person happened to sign in again. Re-derive the badges that
+         come from public data (mod from the live mods node, Familie from their
+         ally count, which we already loaded as `rel`) and merge them in, the
+         same way `verified` already is. */
+      const derived=new Set(v.badges||[]);
+      if(typeof isModUid==='function'&&isModUid(uid))derived.add('mod');
+      let allyCount=0;Object.keys(rel).forEach(k=>{if(rel[k]==='ally')allyCount++;});
+      if(allyCount>=10)derived.add('familie');
+      const earned=[...derived].filter(b=>badgeMap[b]);
       const badgeChips=earned.length
         ? '<div style="display:flex;flex-wrap:wrap;gap:8px;">'+earned.map(b=>'<span class="badge2 got'+(b==='verified'?' verified-chip':'')+'">'+pEsc(badgeMap[b])+'</span>').join('')+'</div>'
         : '<p>None yet.</p>';
