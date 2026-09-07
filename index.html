@@ -2341,7 +2341,11 @@ function observeReveals(){
     ['clowngods','The Clown Gods \u00b7 100,000 points'],['dukewicked','The Duke of the Wicked \u00b7 250,000 points'],
     ['boldizar','Boldizar the Great Hunter \u00b7 earned 30 badges'],
     ['grandduke','Digital Duke \u00b7 earned 40 badges'],
-    ['nocturnal','Nocturnal Deadhead \u00b7 stared down the delete button and blinked']];
+    ['nocturnal','Nocturnal Deadhead \u00b7 stared down the delete button and blinked'],
+    ['tunedin','Tuned In \u00b7 heard 10 themes on Lunacy Radio'],
+    ['wallofsound','Wall of Sound \u00b7 heard every theme on Lunacy Radio'],
+    ['rollcall','Roll Call \u00b7 met 25 of the roster'],
+    ['lockerlegend','Locker Room Legend \u00b7 met the whole roster']];
   function lkAddWin(){
     const d=lkGet(); d.wins=(d.wins||0)+1;
     d.badges=d.badges||[]; if(!d.badges.includes('winner'))d.badges.push('winner');
@@ -2349,7 +2353,7 @@ function observeReveals(){
     lkSet(d); lkAward(15,null,'Won a match in JCW Lunacy: The Game');
   }
   window.jcwReportWin=lkAddWin; // game calls this on a win
-  window.lkRender=lkRender;window.lkAward=lkAward;window.toast=toast;window.jcwCloudPush=function(){try{lkCloudPush();}catch(e){}};
+  window.lkRender=lkRender;window.lkAward=lkAward;window.toast=toast;window.lkGet=lkGet;window.lkSet=lkSet;window.jcwCloudPush=function(){try{lkCloudPush();}catch(e){}};
   window.jcwFoundBigfoot=function(){
     const d=lkGet();if((d.badges||[]).includes('bigfoot'))return;
     lkAward(250,'bigfoot','Found Bigfoot \u00b7 +250 points');
@@ -2435,6 +2439,23 @@ function observeReveals(){
       if((d.pts||0)>=250000)add('dukewicked');
       /* Digital Duke — the tier above Boldizar. Forty badges earned. Counts
          every badge but itself, paid once, +750. */
+      /* Lunacy Radio: distinct themes heard live in d.radio (Lunatics perk).
+         Roster: distinct wrestler bios opened live in d.seen. Both are sets
+         that only grow, seeded from nothing and synced like eps. */
+      const heardThemes=Object.keys(d.radio||{}).length;
+      if(heardThemes>=10)add('tunedin');
+      if(window.__radioTotal&&heardThemes>=window.__radioTotal&&!d.badges.includes('wallofsound')){
+        d.badges.push('wallofsound');ch=true;d.pts=(d.pts||0)+500;
+        d.hist=d.hist||[];d.hist.unshift('Wall of Sound \u00b7 heard every theme \u00b7 +500');d.hist=d.hist.slice(0,40);
+        try{setTimeout(function(){toast('\ud83d\udcfb WALL OF SOUND \u2014 heard every theme on Lunacy Radio. +500',5200);},400);}catch(_e){}
+      }
+      const metRoster=Object.keys(d.seen||{}).length;
+      if(metRoster>=25)add('rollcall');
+      if(window.__rosterTotal&&metRoster>=window.__rosterTotal&&!d.badges.includes('lockerlegend')){
+        d.badges.push('lockerlegend');ch=true;d.pts=(d.pts||0)+500;
+        d.hist=d.hist||[];d.hist.unshift('Locker Room Legend \u00b7 met the whole roster \u00b7 +500');d.hist=d.hist.slice(0,40);
+        try{setTimeout(function(){toast('\ud83e\udd3c LOCKER ROOM LEGEND \u2014 met the whole roster. +500',5200);},400);}catch(_e){}
+      }
       const badgeTally=d.badges.filter(function(b){return b&&b!=='grandduke';}).length;
       if(badgeTally>=40&&!d.badges.includes('grandduke')){
         d.badges.push('grandduke');ch=true;
@@ -2978,7 +2999,7 @@ function observeReveals(){
       else say('Could not delete: '+((err&&err.message)||'unknown error'));
     }
   };
-  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:Math.min(d.pts||0,999999),wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:d.picks||{},hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:d.eps||{},lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{})}); }catch(_e){try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
+  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:Math.min(d.pts||0,999999),wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:d.picks||{},hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:d.eps||{},radio:d.radio||{},seen:d.seen||{},lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{})}); }catch(_e){try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
   /* ===== WIPE RECOVERY =====
      Snapshot the best locker this device has ever seen for the signed-in account
      (jcw_locker_best_<uid>). If a later login pulls a cloud copy whose points have
@@ -3003,6 +3024,8 @@ function observeReveals(){
     m.pts=Math.max(d.pts||0,r.pts||0); m.wins=Math.max(d.wins||0,r.wins||0); m.watched=Math.max(d.watched||0,r.watched||0);
     m.badges=[...new Set([...(r.badges||[]),...(d.badges||[])])];
     m.eps=Object.assign({},r.eps||{},d.eps||{});
+    m.radio=Object.assign({},r.radio||{},d.radio||{});
+    m.seen=Object.assign({},r.seen||{},d.seen||{});
     m.cards=Object.assign({},r.cards||{},d.cards||{});
     m.hist=(((r.hist||[]).length>=(d.hist||[]).length)?(r.hist||[]):(d.hist||[])).slice(0,40);
     m.lastCheckin=(d.lastCheckin||'')>(r.lastCheckin||'')?(d.lastCheckin||''):(r.lastCheckin||'');
@@ -4226,6 +4249,8 @@ function observeReveals(){
               ['name','fav','favB','theme','pic'].forEach(k=>{if(!(cloud[k]&&String(cloud[k]).trim())&&d[k])merged[k]=d[k];});
               merged.badges=[...new Set([...(d.badges||[]),...(cloud.badges||[])])];
               merged.eps=Object.assign({},cloud.eps||{},d.eps||{});
+              merged.radio=Object.assign({},cloud.radio||{},d.radio||{});
+              merged.seen=Object.assign({},cloud.seen||{},d.seen||{});
               merged.hist=((d.hist||[]).length>=(cloud.hist||[]).length)?(d.hist||[]):(cloud.hist||[]);
               merged.watched=Math.max(d.watched||0,cloud.watched||0);
               merged.played=!!(d.played||cloud.played);
@@ -4625,9 +4650,13 @@ function observeReveals(){
     if(t&&t.every(m=>STATS[m]))return '<div class="stt">'+t.map(m=>statBlock(STATS[m],m)).join('<div style="height:12px"></div>')+'</div>';
     return '';
   }
+  window.__rosterTotal=(function(){try{return Object.keys(BIOS).length;}catch(e){return 0;}})();
   function openBio(card){
     const name=card.querySelector('h3').textContent;
     const b=BIOS[name];if(!b)return;
+    /* met this wrestler — record into the persistent seen-set for Roll Call
+       and Locker Room Legend, then re-derive so the badge can land */
+    try{if(window.lkGet&&window.lkSet){const d=window.lkGet();d.seen=d.seen||{};if(!d.seen[name]){d.seen[name]=1;window.lkSet(d);if(window.lkRender)window.lkRender();}}}catch(_e){}
     if(name==='Bigfoot'&&window.jcwFoundBigfoot)window.jcwFoundBigfoot();
     document.getElementById('bio-name').textContent=name;
     document.getElementById('bio-role').textContent=card.querySelector('.role').textContent;
@@ -5674,6 +5703,9 @@ route();
     if(audio){try{audio.pause();}catch(e){}audio=null;}
     var tr=queue[qi];if(!tr){return;}
     elNow.textContent=tr.name;
+    try{window.__radioTotal=queue.length;
+      if(window.lkGet&&window.lkSet){var d=window.lkGet();d.radio=d.radio||{};if(!d.radio[tr.name]){d.radio[tr.name]=1;window.lkSet(d);if(window.lkRender)window.lkRender();}}
+    }catch(_e){}
     audio=new Audio(tr.src);
     audio.onended=function(){next();};
     audio.onerror=function(){fails++;if(fails<=queue.length){next();}else{elNow.textContent='no themes found';playing=false;elToggle.innerHTML='▶';}};
