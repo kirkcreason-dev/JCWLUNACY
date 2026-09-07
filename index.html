@@ -812,6 +812,8 @@ img.hm-mast{margin-bottom:20px;}
 /* Chat button: art swaps inactive -> active -> notify off real unread state.
    The label text stays in the DOM for screen readers but is visually hidden,
    so the button still announces itself when the art fails to load. */
+/* chat is members-only: the button does not exist until auth says someone is signed in */
+body:not(.jcw-member) #chat-fab{display:none!important;}
 #chat-fab{position:fixed;right:14px;bottom:14px;z-index:350;width:64px;height:64px;
   background:transparent;border:0;padding:0;font-size:0;color:transparent;
   background-image:url('ui/chat-bubble-inactive.png');
@@ -3036,6 +3038,7 @@ function observeReveals(){
   function chRender(list){
     try{
     if(!chChat)return;
+    if(!lkUser){chChat.innerHTML='<p style="color:var(--steel);font-size:13px;padding:14px;">Lunacy Chat is for members. Log into your Locker to join the family.</p>';return;}
     list=list||[];
     const ADMIN=isMod();
     const nearBottom=(chChat.scrollHeight-chChat.scrollTop-chChat.clientHeight)<90;
@@ -3161,6 +3164,7 @@ function observeReveals(){
   function chGoLocal(reason){fbDB=null;try{document.getElementById('ch-note').textContent='Device mode'+(reason?(' \u2014 '+reason):'')+'.';}catch(e){}try{if(reason)console.warn('[JCW chat] live disabled:',reason);}catch(e){}chRender(chLocal());}
   let chTab='chat';
   function chSend(){
+    if(!lkUser){try{toast('Log into your Locker to chat.',3200);}catch(_e){}return;}
     const t=chMsg.value.trim();if(!t)return;chMsg.value='';
     if(window.jcwCheckEgg&&window.jcwCheckEgg(t))return; /* secret word, not a message */
     if(chTab==='mods'){
@@ -3387,8 +3391,13 @@ function observeReveals(){
           +'.chatpop #chat-panel{right:0!important;left:0!important;top:0!important;bottom:0!important;width:100%!important;height:100%!important;max-width:none!important;transform:none!important;border:0!important;}'
           +'.chatpop #ch-x,.chatpop #ch-pop{display:none!important;}';
         document.head.appendChild(st);
-        const openPop=()=>{chPanel.classList.add('on');if(!fbDB)chRender(chLocal());setTimeout(chScrollBottom,120);};
-        openPop();setTimeout(openPop,600);
+        const openPop=()=>{
+          if(!lkUser){
+            try{chChat.innerHTML='<p style="color:var(--steel);font-size:13px;padding:14px;">Lunacy Chat is for members. <a href="'+location.pathname+'#locker" target="_blank" rel="opener" style="color:var(--gold);">Log into your Locker</a> on the main site, then reopen this window.</p>';}catch(_e){}
+          }
+          chPanel.classList.add('on');if(!fbDB)chRender(chLocal());setTimeout(chScrollBottom,120);
+        };
+        openPop();setTimeout(openPop,600);setTimeout(openPop,2500);
       }
     }catch(e){}
   })();
@@ -3950,6 +3959,15 @@ function observeReveals(){
       fbAuth.onAuthStateChanged(user=>{ try{
         lkUser=user;
         lkCloudReady=false;   /* re-arm the guard on every auth change */
+        /* chat needs an account: show the button only for a signed-in member,
+           and if they sign out with the panel open, close it behind them */
+        try{
+          document.body.classList.toggle('jcw-member',!!user);
+          if(!user){const p=document.getElementById('chat-panel');if(p)p.classList.remove('on');}
+          /* the first chat render usually lands before auth resolves and shows
+             the members-only note — redraw now that we know who this is */
+          if(window.__chatLive)chRender(window.__chatLive);
+        }catch(_e){}
         if(!user){lkPremIsOn=false;window.__lkPremOn=false;}
         lkAuthRender();
         try{if(window.jcwUpdateModUI)window.jcwUpdateModUI();}catch(_e){}
