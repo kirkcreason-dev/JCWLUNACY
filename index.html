@@ -2302,6 +2302,7 @@ function observeReveals(){
     ['binge','Binge \u00b7 watched 5 episodes'],['marathon','Marathon \u00b7 watched 25 episodes'],
     ['historian','Carnival Historian \u00b7 watched 50 episodes'],
     ['secondmile','Son Of Man \u00b7 The Second Mile \u00b7 walked the mile, then walked another \u00b7 100 episodes'],
+    ['familie','3-ZEE \u00b7 Familie \u00b7 marked 10 allies \u00b7 family, in his words'],
     ['gamer','In the Ring \u00b7 played the game'],
     ['prophet','Prophet \u00b7 made your picks'],['winner','Winner \u00b7 won a match'],
     ['brawler','Brawler \u00b7 5 match wins'],['champ','Champion \u00b7 10 match wins'],
@@ -2372,7 +2373,7 @@ function observeReveals(){
         /* 'nocturnal' is earned by facing the delete button, so it is not
            part of the blanket grant — otherwise the one person most likely
            to test it could never see the prompt. */
-        const NOT_HIS={securitysucker:1, violentjeff:1, verified:1, nocturnal:1, secondmile:1};
+        const NOT_HIS={securitysucker:1, violentjeff:1, verified:1, nocturnal:1, secondmile:1, familie:1};
         LK_BADGES.forEach(function(b){ if(!NOT_HIS[b[0]])add(b[0]); });
       }
       /* only ever added, never removed — so strip 'nocturnal' from anyone
@@ -2390,6 +2391,14 @@ function observeReveals(){
       if(watched>=50)add('historian');
       /* Son Of Man · The Second Mile. Historian is the first mile; this is
          going the second. Paid once, like Boldizar, not silently added. */
+      /* 3-ZEE · Familie. Allies are counted live from relations/<uid> into
+         window.__myAllies; the badge is paid once, +250, like the others. */
+      if((window.__myAllies||0)>=10&&!d.badges.includes('familie')){
+        d.badges.push('familie');ch=true;
+        d.pts=(d.pts||0)+250;
+        d.hist=d.hist||[];d.hist.unshift('Familie \u00b7 '+window.__myAllies+' allies \u00b7 +250');d.hist=d.hist.slice(0,40);
+        try{setTimeout(function(){toast('\ud83e\udd1d FAMILIE \u2014 marked 10 allies. Family, in his words. +250',5200);},400);}catch(_e){}
+      }
       if(watched>=100&&!d.badges.includes('secondmile')){
         d.badges.push('secondmile');ch=true;
         d.pts=(d.pts||0)+500;
@@ -4087,6 +4096,20 @@ function observeReveals(){
            until the visitor navigates to another tab. */
         try{lkRender();}catch(_e){}
         setTimeout(function(){try{lkRender();}catch(_e){}},1200);
+        /* ally count for the Familie badge — live, so marking the tenth
+           person grants it on the spot */
+        try{
+          if(window.__allyRef){window.__allyRef.off();window.__allyRef=null;}
+          window.__myAllies=0;
+          if(user&&fbDB){
+            window.__allyRef=fbDB.ref('relations/'+user.uid);
+            window.__allyRef.on('value',function(sn){
+              const r=sn.val()||{};let n=0;Object.keys(r).forEach(function(k){if(r[k]==='ally')n++;});
+              window.__myAllies=n;
+              try{lkRender();}catch(_e){}
+            },function(){});
+          }
+        }catch(_e){}
         if(user){
           try{
             const puRef=fbDB.ref('presenceUsers/'+user.uid);
