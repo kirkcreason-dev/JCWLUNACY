@@ -155,6 +155,20 @@
     <div id="vtList" class="muted" style="margin-top:12px">&mdash;</div>
   </div>
 
+  <div class="card"><label>&#9940; Chat bans</label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <input id="banName" placeholder="Locker name" style="flex:2;min-width:200px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+      <select id="banLen" style="background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+        <option value="3600000">1 hour</option><option value="86400000" selected>24 hours</option><option value="604800000">7 days</option><option value="2592000000">30 days</option><option value="0">Permanent</option>
+      </select>
+      <input id="banReason" maxlength="200" placeholder="Reason (they will see it)" style="flex:2;min-width:200px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
+      <button id="banGo" style="border-color:var(--hot);color:var(--hot)">Ban from chat</button>
+      <span class="status" id="banStatus"></span>
+    </div>
+    <div class="muted" style="margin-top:8px">Enforced by the database, not just the page &mdash; a banned account cannot post even if it bypasses the site. Mods cannot be banned from here. Timed bans lift themselves.</div>
+    <div id="banList" class="muted" style="margin-top:12px">&mdash;</div>
+  </div>
+
   <div class="card"><label>&#128737; Moderators <span class="muted">(grant or remove mod powers)</span></label>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
       <input id="modName" placeholder="Locker name (e.g. Nocturnal Deadhead)" style="flex:2;min-width:200px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
@@ -697,6 +711,50 @@
     }
   });
 
+  /* ===== Chat bans ======================================================== */
+  function banSay(m,c){const el=$('banStatus');if(el){el.textContent=m;el.className='status '+(c||'');}}
+  async function banLoad(){
+    const el=$('banList');if(!el)return;
+    try{
+      const db=await statsInit();
+      const v=(await db.ref('bans').once('value')).val()||{};
+      const now=Date.now();
+      const ids=Object.keys(v).filter(u=>v[u]&&(!v[u].until||v[u].until>now)).sort((a,b)=>(v[b].ts||0)-(v[a].ts||0));
+      el.innerHTML='<div style="margin-bottom:4px;color:var(--txt);font-weight:700">Active &middot; '+ids.length+'</div>'
+        +(ids.length?ids.map(function(u){const b=v[u];
+          return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--seam)">'
+            +'<div style="flex:1;min-width:0"><div style="color:var(--txt);font-weight:700">'+esc(b.name||u)+' <span class="muted" style="font-weight:400">'+(b.until?('until '+new Date(b.until).toLocaleString()):'permanent')+'</span></div>'
+            +'<div class="muted" style="font-size:11.5px">'+esc(b.reason||'')+(b.by?(' &middot; by '+esc(b.by)):'')+'</div></div>'
+            +'<button class="ghost sm" data-unban="'+esc(u)+'">Unban</button></div>';}).join('')
+        :'<div style="padding:6px 0">Nobody is banned.</div>');
+    }catch(e){el.innerHTML='<span class="err">Could not read the ban list — publish the updated rules.</span>';}
+  }
+  $('banGo').onclick=async()=>{
+    const nm=($('banName').value||'').trim().toLowerCase();
+    if(!nm){banSay('Enter a locker name.','err');return;}
+    try{
+      const db=await statsInit();
+      if(!statsAuth||!statsAuth.currentUser){banSay('Sign in above first.','err');return;}
+      const snap=await db.ref('lockers').once('value');
+      let uid=null,found=null;
+      snap.forEach(c=>{const v=c.val();if(v&&String(v.name||'').trim().toLowerCase()===nm){uid=c.key;found=v;}});
+      if(!uid){banSay('No locker with that name.','err');return;}
+      if(MOD_BUILTIN[uid]){banSay('That is a mod. Remove their mod status first.','err');return;}
+      const live=(await db.ref('mods/'+uid).once('value')).val();
+      if(live===true){banSay('That is a mod. Remove their mod status first.','err');return;}
+      const len=parseInt($('banLen').value,10)||0;
+      await db.ref('bans/'+uid).set({by:'Admin',byUid:statsAuth.currentUser.uid,name:String(found.name||'').slice(0,40),reason:($('banReason').value||'').trim().slice(0,200),ts:Date.now(),until:len?Date.now()+len:0});
+      $('banName').value='';$('banReason').value='';
+      banSay((found.name||'They')+' is banned from chat.','ok');banLoad();
+    }catch(e){banSay('Blocked — publish the updated rules, then sign in as an admin.','err');}
+  };
+  document.addEventListener('click',async e=>{
+    const b=e.target.closest('[data-unban]');if(!b)return;
+    if(!confirm('Lift this ban?'))return;
+    try{const db=await statsInit();await db.ref('bans/'+b.getAttribute('data-unban')).remove();banLoad();}
+    catch(_e){alert('Blocked — sign in as an admin.');}
+  });
+
   /* ===== Moderators =====================================================
      Grants and revocations live in the RTDB `mods` node, which index.html
      subscribes to live — a change here takes effect without a deploy.
@@ -851,6 +909,7 @@
 
   statsLoad();
   modLoad();
+  banLoad();
   wkLoad();
   artLoad();
   lunLoad();

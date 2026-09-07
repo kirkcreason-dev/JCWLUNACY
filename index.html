@@ -1839,7 +1839,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <div class="ch-tabs"><button class="on" data-tab="chat">Chat</button><button data-tab="vote">Vote</button><button data-tab="board">Leaders</button><button data-tab="mods" id="ch-mods-tab" style="display:none;color:var(--acid);">Mods</button></div>
   <div class="ch-pane on" id="ch-chat"></div>
   <button id="ch-jump" style="display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:118px;z-index:6;background:var(--acid);color:#000;border:none;border-radius:20px;padding:7px 16px;font:700 12px system-ui;letter-spacing:.04em;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.5);">&#8595; New messages</button>
-  <div class="ch-pane" id="ch-mods"><div style="font-size:12px;color:var(--acid);margin-bottom:10px;border-bottom:1px dashed rgba(157,255,58,.25);padding-bottom:8px;">&#128274; Mods only &mdash; the backstage room. Nobody else sees this.</div><div id="dm-inbox"></div><div id="ch-reports" style="margin-bottom:12px;"></div><div id="ch-mods-list"></div></div>
+  <div class="ch-pane" id="ch-mods"><div style="font-size:12px;color:var(--acid);margin-bottom:10px;border-bottom:1px dashed rgba(157,255,58,.25);padding-bottom:8px;">&#128274; Mods only &mdash; the backstage room. Nobody else sees this.</div><div id="dm-inbox"></div><div id="ch-reports" style="margin-bottom:12px;"></div><div id="ch-bans" style="margin-bottom:12px;"></div><div id="ch-mods-list"></div></div>
   <div class="ch-pane" id="ch-board"><div class="usearch" data-usearch>
   <input type="search" class="us-q" placeholder="Search Juggalos by name&hellip;" aria-label="Search user pages" autocomplete="off" spellcheck="false">
   <div class="us-res" hidden></div>
@@ -3052,7 +3052,7 @@ function observeReveals(){
     const ADMIN=isMod();
     const nearBottom=(chChat.scrollHeight-chChat.scrollTop-chChat.clientHeight)<90;
     const prevCount=chChat.__count||0;
-    chChat.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${(m.__k&&lkUser&&m.u!==lkUser.uid)?`<span data-chrep="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-repn="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--steel);opacity:.5;margin-right:6px;font-size:12px;" title="Report this message">&#9873;</span>`:''}${ADMIN&&m.__k?`<span data-chdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete message">&times;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'').replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:`data-pname="${String(m.n||'').replace(/"/g,'').replace(/</g,'')}"`} style="cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${m.u&&isVerified(m.u)?'<span title="Verified JCW talent" style="color:var(--gold);margin-right:5px;">&#10004;</span>':''}${m.u&&window.__lkPremSet&&window.__lkPremSet[m.u]===true?'<span class="lun-chip" title="Lunatics Only member">&#127914; Lunatic</span>':''}${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;padding:10px;">No messages yet \u2014 say something to the family.</p>';
+    chChat.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${(m.__k&&lkUser&&m.u!==lkUser.uid)?`<span data-chrep="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-repn="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--steel);opacity:.5;margin-right:6px;font-size:12px;" title="Report this message">&#9873;</span>`:''}${ADMIN&&m.__k?`<span data-chdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete message">&times;</span>`:''}${ADMIN&&m.u&&m.u!==lkUser.uid&&!isModUid(m.u)?`<span data-chban="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}" data-bann="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--hot);opacity:.7;margin-right:6px;font-size:11px;" title="Ban from chat">&#9940;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'').replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:`data-pname="${String(m.n||'').replace(/"/g,'').replace(/</g,'')}"`} style="cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${m.u&&isVerified(m.u)?'<span title="Verified JCW talent" style="color:var(--gold);margin-right:5px;">&#10004;</span>':''}${m.u&&window.__lkPremSet&&window.__lkPremSet[m.u]===true?'<span class="lun-chip" title="Lunatics Only member">&#127914; Lunatic</span>':''}${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;padding:10px;">No messages yet \u2014 say something to the family.</p>';
     chChat.__count=list.length;
     if(nearBottom){chChat.scrollTop=chChat.scrollHeight;jcwHideJump();}
     else if(list.length>prevCount){jcwShowJump();}
@@ -3148,6 +3148,8 @@ function observeReveals(){
       }catch(_e){}
       return;
     }
+    const ban=e.target.closest('[data-chban]');
+    if(ban){if(fbDB&&isMod())window.jcwBanOpen(ban.dataset.chban,ban.dataset.bann);return;}
     const del=e.target.closest('[data-chdel]');
     if(del){
       if(fbDB&&isMod()&&confirm('Delete this message?'))
@@ -3174,6 +3176,7 @@ function observeReveals(){
   let chTab='chat';
   function chSend(){
     if(!lkUser){try{toast('Log into your Locker to chat.',3200);}catch(_e){}return;}
+    if(banActive(lkUser.uid)){try{banLockout();toast('You are banned from chat.',3200);}catch(_e){}return;}
     const t=chMsg.value.trim();if(!t)return;chMsg.value='';
     if(window.jcwCheckEgg&&window.jcwCheckEgg(t))return; /* secret word, not a message */
     if(chTab==='mods'){
@@ -3211,6 +3214,93 @@ function observeReveals(){
     el.scrollTop=el.scrollHeight;
     }catch(e){}
   }
+  /* ---- chat bans (mods only) --------------------------------------------
+     A ban lives at bans/<uid> and is enforced by the database rule on chat,
+     so it holds even against somebody who bypasses the UI. until===0 is
+     permanent; otherwise it lifts itself when the clock passes it. Mods
+     cannot be banned from here, and nobody can ban themselves. */
+  const BAN_LENGTHS=[['1h','1 hour',3600e3],['24h','24 hours',86400e3],['7d','7 days',7*86400e3],['30d','30 days',30*86400e3],['perm','Permanent',0]];
+  let __bans={};
+  function banActive(uid){const b=__bans[uid];if(!b)return null;if(b.until&&b.until<Date.now())return null;return b;}
+  function banUntilText(b){return b.until?('until '+new Date(b.until).toLocaleString()):'permanently';}
+  window.jcwBanOpen=function(uid,name){
+    try{
+      if(!isMod()||!uid||uid===(lkUser&&lkUser.uid)||isModUid(uid))return;
+      const esc=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      const old=document.getElementById('ban-modal');if(old)old.remove();
+      const wrap=document.createElement('div');wrap.id='ban-modal';
+      wrap.setAttribute('role','dialog');wrap.setAttribute('aria-modal','true');
+      wrap.style.cssText='position:fixed;inset:0;z-index:610;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:18px;';
+      wrap.innerHTML='<div style="background:#0e0d11;border:1px solid var(--seam,#3d2f52);border-radius:14px;max-width:400px;width:100%;padding:20px;">'
+        +'<div style="font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:var(--hot,#ff3fa4);font-size:15px;margin-bottom:6px;">&#9940; Ban from chat</div>'
+        +'<p style="color:var(--bone,#ffd028);font-size:14px;margin:0 0 12px;"><b>'+esc(name||uid)+'</b></p>'
+        +'<div style="font-size:12px;color:var(--steel,#9aa0aa);margin-bottom:6px;">How long?</div>'
+        +'<div id="ban-len" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">'
+          +BAN_LENGTHS.map(function(l,i){return '<label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--bone,#ffd028);cursor:pointer;border:1px solid var(--seam,#3d2f52);border-radius:8px;padding:5px 9px;"><input type="radio" name="banlen" value="'+l[0]+'"'+(i===1?' checked':'')+' style="accent-color:var(--hot,#ff3fa4);">'+l[1]+'</label>';}).join('')
+        +'</div>'
+        +'<label style="font-size:12px;color:var(--steel,#9aa0aa);display:block;margin-bottom:4px;">Reason <span style="opacity:.7;">(they will see this)</span></label>'
+        +'<input id="ban-reason" maxlength="200" placeholder="e.g. Harassment in chat" style="width:100%;background:#08070a;color:var(--bone,#ffd028);border:1px solid var(--seam,#3d2f52);border-radius:8px;padding:8px;font:inherit;font-size:13px;">'
+        +'<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">'
+          +'<button id="ban-cancel" class="btn line" style="font-size:13px;">Cancel</button>'
+          +'<button id="ban-go" class="btn" style="font-size:13px;background:var(--hot,#ff3fa4);color:#000;">Ban</button>'
+        +'</div></div>';
+      document.body.appendChild(wrap);
+      const close=()=>{try{wrap.remove();}catch(e){}};
+      wrap.addEventListener('click',ev=>{if(ev.target===wrap)close();});
+      wrap.querySelector('#ban-cancel').addEventListener('click',close);
+      wrap.querySelector('#ban-go').addEventListener('click',function(){
+        try{
+          const code=(wrap.querySelector('input[name=banlen]:checked')||{}).value||'24h';
+          const len=BAN_LENGTHS.filter(l=>l[0]===code)[0]||BAN_LENGTHS[1];
+          const reason=String((wrap.querySelector('#ban-reason')||{}).value||'').trim().slice(0,200);
+          fbDB.ref('bans/'+uid).set({by:chName(),byUid:lkUser.uid,name:String(name||'').slice(0,40),reason:reason,ts:Date.now(),until:len[2]?Date.now()+len[2]:0})
+            .then(function(){toast('⛔ '+(name||'They')+' banned from chat '+(len[2]?'for '+len[1].toLowerCase():'permanently')+'.',4200);})
+            .catch(function(er){toast('Could not ban: '+(er&&er.message||er),4200);});
+        }catch(_e){}
+        close();
+      });
+    }catch(_e){}
+  };
+  window.jcwUnban=function(uid){
+    if(!isMod()||!uid)return;
+    fbDB.ref('bans/'+uid).remove().then(function(){toast('Ban lifted.',2600);}).catch(function(er){toast('Could not lift: '+(er&&er.message||er),4200);});
+  };
+  function bansRender(){
+    try{
+      const el=document.getElementById('ch-bans');if(!el)return;
+      const esc=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      const ids=Object.keys(__bans).filter(u=>banActive(u));
+      if(!ids.length){el.innerHTML='';return;}
+      el.innerHTML='<div style="font-size:12px;color:var(--hot);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">&#9940; Banned · '+ids.length+'</div>'
+        +ids.map(function(u){const b=__bans[u];
+          return '<div style="border:1px solid rgba(255,63,164,.3);border-radius:8px;padding:7px 10px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">'
+            +'<div style="flex:1;min-width:0;font-size:12.5px;"><b style="color:var(--bone);">'+esc(b.name||u)+'</b> <span style="color:var(--steel);">'+esc(banUntilText(b))+'</span>'
+            +(b.reason?'<div style="color:var(--steel);font-size:11.5px;">'+esc(b.reason)+'</div>':'')
+            +'<div style="color:var(--steel);font-size:11px;">by '+esc(b.by||'?')+'</div></div>'
+            +'<button data-unban="'+esc(u)+'" style="font-size:11px;padding:3px 8px;cursor:pointer;">Unban</button></div>';
+        }).join('');
+    }catch(e){}
+  }
+  /* the banned person: input locked with the reason, and it unlocks itself
+     the moment the ban expires or is lifted, no reload */
+  function banLockout(){
+    try{
+      const me=lkUser&&lkUser.uid; const b=me?banActive(me):null;
+      const inp=document.getElementById('ch-msg'), btn=document.getElementById('ch-send');
+      if(!inp||!btn)return;
+      if(b){
+        inp.disabled=true;btn.disabled=true;
+        inp.value='';inp.placeholder='Banned from chat '+banUntilText(b)+(b.reason?' — '+b.reason:'');
+      }else if(inp.disabled&&/^Banned from chat/.test(inp.placeholder||'')){
+        inp.disabled=false;btn.disabled=false;inp.placeholder='Say something…';
+      }
+    }catch(e){}
+  }
+  window.jcwBanLockout=banLockout;
+  document.addEventListener('click',e=>{
+    const u=e.target.closest('[data-unban]');
+    if(u&&isMod()&&confirm('Lift this ban?'))window.jcwUnban(u.getAttribute('data-unban'));
+  });
   /* ---- reported messages queue (mods only) ---------------------------- */
   const REPORT_LABEL={harassment:'Harassment',hate:'Hate speech',threat:'Threats',sexual:'Sexual content',spam:'Spam / scam',selfharm:'Self-harm concern',other:'Other'};
   function repRender(list){
@@ -3266,6 +3356,7 @@ function observeReveals(){
               +'background:rgba(0,0,0,.35);border-radius:6px;padding:7px 9px;">'+esc(body||'(message text was not captured \u2014 reported before this update)')+'</div>'
             +who+ctx
             +'<div style="margin-top:9px;">'
+              +((top.whoUid&&top.whoUid!==lkUser.uid&&!isModUid(top.whoUid))?('<button data-repban="'+esc(top.whoUid)+'" data-bann="'+esc(author)+'" style="font-size:11px;padding:3px 8px;margin-right:6px;cursor:pointer;border-color:var(--hot);color:var(--hot);">Ban author</button>'):'')
               +(top.k?('<button data-repdel="'+esc(top.k)+'" data-repid="'+esc(ids)+'" style="font-size:11px;padding:3px 8px;margin-right:6px;cursor:pointer;">'+(gone?'Clear':'Delete message')+'</button>'):'')
               +'<button data-repok="'+esc(ids)+'" style="font-size:11px;padding:3px 8px;cursor:pointer;">Dismiss</button>'
             +'</div></div>';
@@ -3294,6 +3385,8 @@ function observeReveals(){
   }
   document.addEventListener('click',e=>{
     try{
+      const rb=e.target.closest('[data-repban]');
+      if(rb&&fbDB&&isMod()){window.jcwBanOpen(rb.getAttribute('data-repban'),rb.getAttribute('data-bann'));return;}
       const d=e.target.closest('[data-repdel]');
       if(d&&fbDB&&isMod()){
         if(!confirm('Delete the reported message and close these reports?'))return;
@@ -3944,6 +4037,14 @@ function observeReveals(){
           }).join('');
         }catch(_e){}
       },()=>{});
+      fbDB.ref('bans').on('value',snap=>{
+        __bans=snap.val()||{};
+        try{bansRender();}catch(_e){}
+        try{banLockout();}catch(_e){}
+      },()=>{});
+      /* a timed ban lifts on the clock, not on a write — poll the lockout so
+         the box unlocks itself when the time passes */
+      setInterval(function(){try{banLockout();bansRender();}catch(_e){}},30000);
       fbDB.ref('mods').on('value',snap=>{
         JCW_MODS_LIVE=snap.val()||{};
         try{if(window.jcwUpdateModUI)window.jcwUpdateModUI();}catch(_e){}
@@ -3976,6 +4077,7 @@ function observeReveals(){
           /* the first chat render usually lands before auth resolves and shows
              the members-only note — redraw now that we know who this is */
           if(window.__chatLive)chRender(window.__chatLive);
+          if(window.jcwBanLockout)window.jcwBanLockout();
         }catch(_e){}
         if(!user){lkPremIsOn=false;window.__lkPremOn=false;}
         lkAuthRender();
