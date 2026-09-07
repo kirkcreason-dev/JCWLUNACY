@@ -2252,6 +2252,13 @@ function observeReveals(){
      Boldizar never counts toward its own threshold, so it can't award
      itself, and the includes() guard means it's granted exactly once. */
   const BOLDIZAR={key:'boldizar', at:30, pts:500};
+  /* Owner gifts: badges handed to a specific person regardless of the earn
+     rule. Used for the fans these badges are named after and for anyone the
+     crew wants to honor. Applied on their own load (with the Nocturnal receipt
+     when needed) AND merged into their profile so it shows to everyone at once. */
+  const GIFT_BADGES={
+    'itHFBTk2VoNLKk2ZYQbLDZJU6iU2':['nocturnal','secondmile']  /* 3-ZEE germ !JCW! fan */
+  };
   function boldizarCheck(d){          /* mutates d, returns true if just granted */
     try{
       if(!d||!Array.isArray(d.badges))return false;
@@ -2367,6 +2374,7 @@ function observeReveals(){
       /* the man the badge is named after. He did the real thing — lost the
          account and built it back — so his is granted, receipt included. */
       if(lkUser&&lkUser.uid==='LmjvpMlKlVNpyoXajb74P5guaqu2'){d.noct=1;add('nocturnal');}
+      if(lkUser&&GIFT_BADGES[lkUser.uid]){GIFT_BADGES[lkUser.uid].forEach(function(b){if(b==='nocturnal')d.noct=1;add(b);});}
       /* Digital Duke holds the full set except the badges tied to someone
          else's identity. 'mod' and 'verified' aren't listed here — he earns
          those through the checks above, so they stay honest. */
@@ -3797,6 +3805,7 @@ function observeReveals(){
          ally count, which we already loaded as `rel`) and merge them in, the
          same way `verified` already is. */
       const derived=new Set(v.badges||[]);
+      if(typeof GIFT_BADGES!=='undefined'&&GIFT_BADGES[uid])GIFT_BADGES[uid].forEach(function(b){derived.add(b);});
       if(typeof isModUid==='function'&&isModUid(uid))derived.add('mod');
       let allyCount=0;Object.keys(rel).forEach(k=>{if(rel[k]==='ally')allyCount++;});
       if(allyCount>=10)derived.add('familie');
