@@ -2345,7 +2345,12 @@ function observeReveals(){
     ['tunedin','Tuned In \u00b7 heard 10 themes on Lunacy Radio'],
     ['wallofsound','Wall of Sound \u00b7 heard every theme on Lunacy Radio'],
     ['rollcall','Roll Call \u00b7 met 25 of the roster'],
-    ['lockerlegend','Locker Room Legend \u00b7 met the whole roster']];
+    ['lockerlegend','Locker Room Legend \u00b7 met the whole roster'],
+    ['badblood','Bad Blood \u00b7 marked 5 rivals'],
+    ['tagger','Tagger \u00b7 posted on 10 walls'],
+    ['everyday','Every Damn Day \u00b7 7-day check-in streak'],
+    ['diehard','Die Hard \u00b7 30-day check-in streak'],
+    ['dayone','Day One \u00b7 here before the badges']];
   function lkAddWin(){
     const d=lkGet(); d.wins=(d.wins||0)+1;
     d.badges=d.badges||[]; if(!d.badges.includes('winner'))d.badges.push('winner');
@@ -2414,6 +2419,11 @@ function observeReveals(){
          going the second. Paid once, like Boldizar, not silently added. */
       /* 3-ZEE · Familie. Allies are counted live from relations/<uid> into
          window.__myAllies; the badge is paid once, +250, like the others. */
+      if((window.__myRivals||0)>=5)add('badblood');
+      if(Object.keys(d.tagged||{}).length>=10)add('tagger');
+      if((d.streak||0)>=7||(d.streakBest||0)>=7)add('everyday');
+      if((d.streak||0)>=30||(d.streakBest||0)>=30)add('diehard');
+      if(d.dayone)add('dayone');
       if((window.__myAllies||0)>=10&&!d.badges.includes('familie')){
         d.badges.push('familie');ch=true;
         d.pts=(d.pts||0)+250;
@@ -2689,6 +2699,11 @@ function observeReveals(){
     const d=lkGet();
     const today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Detroit'});
     if(d.lastCheckin===today){ if(!(d.badges||[]).includes('first'))lkAward(0,'first',null); return; }
+    /* streak: a check-in the day after the last one continues the run; any gap
+       resets it to 1. Detroit-day math to match lastCheckin's timezone. */
+    const ykey=new Date(Date.now()-86400000).toLocaleDateString('en-CA',{timeZone:'America/Detroit'});
+    d.streak=(d.lastCheckin===ykey)?((d.streak||0)+1):1;
+    if((d.streak||0)>(d.streakBest||0))d.streakBest=d.streak;
     d.lastCheckin=today;lkSet(d);
     lkAward(5,'first','Checked in');
   })();
@@ -2999,7 +3014,7 @@ function observeReveals(){
       else say('Could not delete: '+((err&&err.message)||'unknown error'));
     }
   };
-  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:Math.min(d.pts||0,999999),wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:d.picks||{},hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:d.eps||{},radio:d.radio||{},seen:d.seen||{},lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{})}); }catch(_e){try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
+  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:Math.min(d.pts||0,999999),wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:d.picks||{},hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:d.eps||{},radio:d.radio||{},seen:d.seen||{},tagged:d.tagged||{},streak:d.streak||0,streakBest:d.streakBest||0,dayone:d.dayone?1:0,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{})}); }catch(_e){try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
   /* ===== WIPE RECOVERY =====
      Snapshot the best locker this device has ever seen for the signed-in account
      (jcw_locker_best_<uid>). If a later login pulls a cloud copy whose points have
@@ -3026,6 +3041,9 @@ function observeReveals(){
     m.eps=Object.assign({},r.eps||{},d.eps||{});
     m.radio=Object.assign({},r.radio||{},d.radio||{});
     m.seen=Object.assign({},r.seen||{},d.seen||{});
+    m.tagged=Object.assign({},r.tagged||{},d.tagged||{});
+    m.streakBest=Math.max(d.streakBest||0,r.streakBest||0);m.streak=Math.max(d.streak||0,r.streak||0);
+    m.dayone=(d.dayone||r.dayone)?1:0;
     m.cards=Object.assign({},r.cards||{},d.cards||{});
     m.hist=(((r.hist||[]).length>=(d.hist||[]).length)?(r.hist||[]):(d.hist||[])).slice(0,40);
     m.lastCheckin=(d.lastCheckin||'')>(r.lastCheckin||'')?(d.lastCheckin||''):(r.lastCheckin||'');
@@ -3904,6 +3922,8 @@ function observeReveals(){
       const inp=document.getElementById('prof-post');const t=(inp.value||'').trim();if(!t)return;inp.value='';
       fbDB.ref('walls/'+uid).push({u:lkUser.uid,n:lkGet().name||'A Juggalo',t:t,ts:Date.now()}).then(()=>{
         notifPush(uid,{ty:'post',t:t.slice(0,120)});
+        /* Tagger: distinct walls posted on, own wall excluded */
+        try{if(uid!==lkUser.uid){const dd=lkGet();dd.tagged=dd.tagged||{};if(!dd.tagged[uid]){dd.tagged[uid]=1;lkSet(dd);if(window.lkRender)lkRender();}}}catch(_e){}
         window.profRender(uid);
       });
     }
@@ -4174,11 +4194,24 @@ function observeReveals(){
         try{
           if(window.__allyRef){window.__allyRef.off();window.__allyRef=null;}
           window.__myAllies=0;
+          /* Day One: joined before the badges existed. Read the account's real
+             creation time from auth and stamp it once; the strip never removes
+             it because it is data, not a self-derived guess. */
+          try{
+            if(user){
+              const dd=lkGet();
+              if(!dd.dayone){
+                const ct=user.metadata&&user.metadata.creationTime?Date.parse(user.metadata.creationTime):0;
+                const CUTOFF=Date.parse('2026-09-07T17:26:13Z');
+                if(ct&&ct<CUTOFF){dd.dayone=1;lkSet(dd);if(window.lkRender)lkRender();}
+              }
+            }
+          }catch(_e){}
           if(user&&fbDB){
             window.__allyRef=fbDB.ref('relations/'+user.uid);
             window.__allyRef.on('value',function(sn){
-              const r=sn.val()||{};let n=0;Object.keys(r).forEach(function(k){if(r[k]==='ally')n++;});
-              window.__myAllies=n;
+              const r=sn.val()||{};let n=0,rv=0;Object.keys(r).forEach(function(k){if(r[k]==='ally')n++;else if(r[k]==='rival')rv++;});
+              window.__myAllies=n;window.__myRivals=rv;
               try{lkRender();}catch(_e){}
             },function(){});
           }
@@ -4251,6 +4284,9 @@ function observeReveals(){
               merged.eps=Object.assign({},cloud.eps||{},d.eps||{});
               merged.radio=Object.assign({},cloud.radio||{},d.radio||{});
               merged.seen=Object.assign({},cloud.seen||{},d.seen||{});
+              merged.tagged=Object.assign({},cloud.tagged||{},d.tagged||{});
+              merged.streakBest=Math.max(d.streakBest||0,cloud.streakBest||0);merged.streak=Math.max(d.streak||0,cloud.streak||0);
+              merged.dayone=(d.dayone||cloud.dayone)?1:0;
               merged.hist=((d.hist||[]).length>=(cloud.hist||[]).length)?(d.hist||[]):(cloud.hist||[]);
               merged.watched=Math.max(d.watched||0,cloud.watched||0);
               merged.played=!!(d.played||cloud.played);
