@@ -2301,6 +2301,7 @@ function observeReveals(){
     ['freshpaint','Fresh Paint \u00b7 set a profile pic'],['ownentrance','Own Entrance \u00b7 picked your theme'],
     ['binge','Binge \u00b7 watched 5 episodes'],['marathon','Marathon \u00b7 watched 25 episodes'],
     ['historian','Carnival Historian \u00b7 watched 50 episodes'],
+    ['secondmile','Son Of Man \u00b7 The Second Mile \u00b7 walked the mile, then walked another \u00b7 100 episodes'],
     ['gamer','In the Ring \u00b7 played the game'],
     ['prophet','Prophet \u00b7 made your picks'],['winner','Winner \u00b7 won a match'],
     ['brawler','Brawler \u00b7 5 match wins'],['champ','Champion \u00b7 10 match wins'],
@@ -2371,7 +2372,7 @@ function observeReveals(){
         /* 'nocturnal' is earned by facing the delete button, so it is not
            part of the blanket grant — otherwise the one person most likely
            to test it could never see the prompt. */
-        const NOT_HIS={securitysucker:1, violentjeff:1, verified:1, nocturnal:1};
+        const NOT_HIS={securitysucker:1, violentjeff:1, verified:1, nocturnal:1, secondmile:1};
         LK_BADGES.forEach(function(b){ if(!NOT_HIS[b[0]])add(b[0]); });
       }
       /* only ever added, never removed — so strip 'nocturnal' from anyone
@@ -2387,6 +2388,14 @@ function observeReveals(){
       if(watched>=5)add('binge');
       if(watched>=25)add('marathon');
       if(watched>=50)add('historian');
+      /* Son Of Man · The Second Mile. Historian is the first mile; this is
+         going the second. Paid once, like Boldizar, not silently added. */
+      if(watched>=100&&!d.badges.includes('secondmile')){
+        d.badges.push('secondmile');ch=true;
+        d.pts=(d.pts||0)+500;
+        d.hist=d.hist||[];d.hist.unshift('The Second Mile \u00b7 '+watched+' episodes \u00b7 +500');d.hist=d.hist.slice(0,40);
+        try{setTimeout(function(){toast('\ud83d\udc63 THE SECOND MILE \u2014 walked the mile, then walked another. +500',5200);},400);}catch(_e){}
+      }
       if(d.fav&&d.favB)add('rideordie');
       if(d.pic)add('freshpaint');
       if(d.theme)add('ownentrance');
