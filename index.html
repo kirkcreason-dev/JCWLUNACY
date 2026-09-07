@@ -2357,7 +2357,8 @@ function observeReveals(){
     ['tagger','Tagger \u00b7 posted on 10 walls'],
     ['everyday','Every Damn Day \u00b7 7-day check-in streak'],
     ['diehard','Die Hard \u00b7 30-day check-in streak'],
-    ['dayone','Day One \u00b7 here before the badges']];
+    ['dayone','Day One \u00b7 here before the badges'],
+    ['crossedduke','Crossed the Duke \u00b7 rivaled Digital Duke \u00b7 no takebacks']];
   function lkAddWin(){
     const d=lkGet(); d.wins=(d.wins||0)+1;
     d.badges=d.badges||[]; if(!d.badges.includes('winner'))d.badges.push('winner');
@@ -2400,7 +2401,7 @@ function observeReveals(){
            (Nocturnal, The Second Mile, Familie) — anyone can earn those, so
            they are not exclusive. The receipt is set so the Nocturnal strip
            below leaves his alone. */
-        const NOT_HIS={securitysucker:1, violentjeff:1, verified:1};
+        const NOT_HIS={securitysucker:1, violentjeff:1, verified:1, crossedduke:1};
         LK_BADGES.forEach(function(b){ if(!NOT_HIS[b[0]])add(b[0]); });
         d.noct=1;
       }
@@ -2427,6 +2428,7 @@ function observeReveals(){
       /* 3-ZEE · Familie. Allies are counted live from relations/<uid> into
          window.__myAllies; the badge is paid once, +250, like the others. */
       if((window.__myRivals||0)>=5)add('badblood');
+      if(window.__rivaledDuke&&lkUser&&lkUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1')add('crossedduke');
       if(Object.keys(d.tagged||{}).length>=10)add('tagger');
       if((d.streak||0)>=7||(d.streakBest||0)>=7)add('everyday');
       if((d.streak||0)>=30||(d.streakBest||0)>=30)add('diehard');
@@ -3833,10 +3835,13 @@ function observeReveals(){
         +(v.fav?(' &middot; rides with <b>'+pEsc(v.fav)+'</b>'):'')
         +(v.favB?(' &amp; <b>'+pEsc(v.favB)+'</b>'):'')+'</p>';
       if(v.theme)h+='<p><button class="btn line" id="prof-theme" data-slug="'+pEsc(v.theme)+'" style="margin-top:8px;">&#9654; Play their entrance theme</button></p>';
+      const dukeLocked=(uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1'&&myRel==='rival');
       if(lkUser&&!isMe){
         h+='<p style="margin-top:12px;">'
-          +'<button class="btn line" data-rel="ally" style="margin-right:8px;'+(myRel==='ally'?'border-color:var(--acid);color:var(--acid);':'')+'">'+(myRel==='ally'?'&#10004; ALLY':'Mark as Ally')+'</button>'
-          +'<button class="btn line" data-rel="rival" style="'+(myRel==='rival'?'border-color:var(--hot);color:var(--hot);':'')+'">'+(myRel==='rival'?'&#9876; RIVAL':'Mark as Rival')+'</button>'
+          +(dukeLocked
+            ? '<span class="btn line" style="border-color:var(--hot);color:var(--hot);cursor:not-allowed;opacity:.85;">&#9876; RIVAL OF THE DUKE &middot; no takebacks</span>'
+            : '<button class="btn line" data-rel="ally" style="margin-right:8px;'+(myRel==='ally'?'border-color:var(--acid);color:var(--acid);':'')+'">'+(myRel==='ally'?'&#10004; ALLY':'Mark as Ally')+'</button>'
+              +'<button class="btn line" data-rel="rival" style="'+(myRel==='rival'?'border-color:var(--hot);color:var(--hot);':'')+'">'+(myRel==='rival'?'&#9876; RIVAL':'Mark as Rival')+'</button>')
           +(isMod()&&isModUid(uid)?'<button class="btn" id="prof-dm" style="margin-left:8px;background:var(--acid);color:#000;">&#128172; Message</button>':'')
           +(window.__lkPremOn?'<button class="btn line" id="prof-gift" style="margin-left:8px;">&#127183; Send a card</button>':'')
           +'</p>';
@@ -3909,6 +3914,8 @@ function observeReveals(){
     if(e.target.dataset&&e.target.dataset.rel&&lkUser&&fbDB){
       const kind=e.target.dataset.rel;
       fbDB.ref('relations/'+lkUser.uid+'/'+uid).once('value').then(sn=>{
+        /* the Duke rule: once you've rivaled Digital Duke, that's forever */
+        if(uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1'&&sn.val()==='rival'){try{toast('You rivaled the Duke. There is no going back. \ud83c\udccf',4200);}catch(_e){}window.profRender(uid);return;}
         const nv=sn.val()===kind?null:kind;
         fbDB.ref('relations/'+lkUser.uid+'/'+uid).set(nv).then(()=>{
           if(nv)notifPush(uid,{ty:nv});
@@ -4219,6 +4226,7 @@ function observeReveals(){
             window.__allyRef.on('value',function(sn){
               const r=sn.val()||{};let n=0,rv=0;Object.keys(r).forEach(function(k){if(r[k]==='ally')n++;else if(r[k]==='rival')rv++;});
               window.__myAllies=n;window.__myRivals=rv;
+              window.__rivaledDuke=(r['oYrNiXZywhexmLqRQO7j1iyA1Bh1']==='rival');
               try{lkRender();}catch(_e){}
             },function(){});
           }

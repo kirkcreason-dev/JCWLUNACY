@@ -86,7 +86,10 @@
     "relations": {
       ".read": true,
       "$uid": {
-        ".write": "auth != null && auth.uid === $uid"
+        ".write": "auth != null && auth.uid === $uid",
+        "oYrNiXZywhexmLqRQO7j1iyA1Bh1": {
+          ".validate": "(newData.val()==='ally' || newData.val()==='rival') && (!(data.exists() && data.val()==='rival') || newData.val()==='rival')"
+        }
       }
     },
     "walls": {
