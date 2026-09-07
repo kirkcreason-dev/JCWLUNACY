@@ -2386,6 +2386,11 @@ function observeReveals(){
       if((d.wins||0)>=10)add('champ');
       if((d.hist||[]).some(x=>String(x).indexOf('Found Bigfoot')>-1))add('bigfoot');
       const watched=Math.max(d.watched||0,(d.hist||[]).filter(x=>String(x).startsWith('Watched')).length);
+      /* distinct episodes for The Second Mile. Seed the set once from whatever
+         history still holds (capped at ~40, so existing heavy viewers start
+         from what we can prove, not from an inflated play counter). */
+      if(!d.eps){d.eps={};(d.hist||[]).forEach(function(x){const t=String(x);if(t.indexOf('Watched ')===0)d.eps[t.slice(8)]=1;});ch=true;}
+      const distinctEps=Object.keys(d.eps||{}).length;
       if(watched>=5)add('binge');
       if(watched>=25)add('marathon');
       if(watched>=50)add('historian');
@@ -2399,10 +2404,10 @@ function observeReveals(){
         d.hist=d.hist||[];d.hist.unshift('Familie \u00b7 '+window.__myAllies+' allies \u00b7 +250');d.hist=d.hist.slice(0,40);
         try{setTimeout(function(){toast('\ud83e\udd1d FAMILIE \u2014 marked 10 allies. Family, in his words. +250',5200);},400);}catch(_e){}
       }
-      if(watched>=100&&!d.badges.includes('secondmile')){
+      if(distinctEps>=100&&!d.badges.includes('secondmile')){
         d.badges.push('secondmile');ch=true;
         d.pts=(d.pts||0)+500;
-        d.hist=d.hist||[];d.hist.unshift('The Second Mile \u00b7 '+watched+' episodes \u00b7 +500');d.hist=d.hist.slice(0,40);
+        d.hist=d.hist||[];d.hist.unshift('The Second Mile \u00b7 '+distinctEps+' episodes \u00b7 +500');d.hist=d.hist.slice(0,40);
         try{setTimeout(function(){toast('\ud83d\udc63 THE SECOND MILE \u2014 walked the mile, then walked another. +500',5200);},400);}catch(_e){}
       }
       if(d.fav&&d.favB)add('rideordie');
@@ -2952,7 +2957,7 @@ function observeReveals(){
       else say('Could not delete: '+((err&&err.message)||'unknown error'));
     }
   };
-  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:Math.min(d.pts||0,999999),wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:d.picks||{},hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{})}); }catch(_e){try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
+  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:Math.min(d.pts||0,999999),wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:d.picks||{},hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:d.eps||{},lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{})}); }catch(_e){try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
   /* ===== WIPE RECOVERY =====
      Snapshot the best locker this device has ever seen for the signed-in account
      (jcw_locker_best_<uid>). If a later login pulls a cloud copy whose points have
@@ -2976,6 +2981,7 @@ function observeReveals(){
     const d=lkGet(), r=b.data, m=Object.assign({},r);
     m.pts=Math.max(d.pts||0,r.pts||0); m.wins=Math.max(d.wins||0,r.wins||0); m.watched=Math.max(d.watched||0,r.watched||0);
     m.badges=[...new Set([...(r.badges||[]),...(d.badges||[])])];
+    m.eps=Object.assign({},r.eps||{},d.eps||{});
     m.cards=Object.assign({},r.cards||{},d.cards||{});
     m.hist=(((r.hist||[]).length>=(d.hist||[]).length)?(r.hist||[]):(d.hist||[])).slice(0,40);
     m.lastCheckin=(d.lastCheckin||'')>(r.lastCheckin||'')?(d.lastCheckin||''):(r.lastCheckin||'');
@@ -3971,8 +3977,19 @@ function observeReveals(){
               }
               /* count it as watched once they've stuck around ~30s */
               if(window.__epSecs[ek]>=30){
-                const dt=lkGet();const line='Watched '+(window.__epTitle||'an episode');
-                if(!(dt.hist||[]).includes(line)){dt.watched=(dt.watched||0)+1;dt.hist=dt.hist||[];dt.hist.unshift(line);dt.hist=dt.hist.slice(0,40);lkSet(dt);lkRender();}
+                const dt=lkGet();const title=window.__epTitle||'an episode';const line='Watched '+title;
+                /* dedup on a set that is never truncated. The old guard checked
+                   the 40-entry history, so once a heavy viewer's history rolled
+                   over, re-watching an old episode counted as new every time —
+                   which is how a play counter reached the hundreds off ~30 real
+                   episodes. eps[] is the true distinct set. */
+                dt.eps=dt.eps||{};
+                if(!dt.eps[title]){
+                  dt.eps[title]=1;
+                  dt.watched=(dt.watched||0)+1;
+                  dt.hist=dt.hist||[];dt.hist.unshift(line);dt.hist=dt.hist.slice(0,40);
+                  lkSet(dt);lkRender();
+                }
               }
             }catch(_e){}
           }
@@ -4186,6 +4203,7 @@ function observeReveals(){
               /* a wiped cloud copy carries empty strings — never let them clobber real local values */
               ['name','fav','favB','theme','pic'].forEach(k=>{if(!(cloud[k]&&String(cloud[k]).trim())&&d[k])merged[k]=d[k];});
               merged.badges=[...new Set([...(d.badges||[]),...(cloud.badges||[])])];
+              merged.eps=Object.assign({},cloud.eps||{},d.eps||{});
               merged.hist=((d.hist||[]).length>=(cloud.hist||[]).length)?(d.hist||[]):(cloud.hist||[]);
               merged.watched=Math.max(d.watched||0,cloud.watched||0);
               merged.played=!!(d.played||cloud.played);
