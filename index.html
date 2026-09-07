@@ -2333,6 +2333,7 @@ function observeReveals(){
     ['wickedclown','Wicked Clown \u00b7 50,000 points'],
     ['clowngods','The Clown Gods \u00b7 100,000 points'],['dukewicked','The Duke of the Wicked \u00b7 250,000 points'],
     ['boldizar','Boldizar the Great Hunter \u00b7 earned 30 badges'],
+    ['grandduke','Digital Duke \u00b7 earned 40 badges'],
     ['nocturnal','Nocturnal Deadhead \u00b7 stared down the delete button and blinked']];
   function lkAddWin(){
     const d=lkGet(); d.wins=(d.wins||0)+1;
@@ -2370,11 +2371,14 @@ function observeReveals(){
          else's identity. 'mod' and 'verified' aren't listed here — he earns
          those through the checks above, so they stay honest. */
       if(lkUser&&lkUser.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1'){
-        /* 'nocturnal' is earned by facing the delete button, so it is not
-           part of the blanket grant — otherwise the one person most likely
-           to test it could never see the prompt. */
-        const NOT_HIS={securitysucker:1, violentjeff:1, verified:1, nocturnal:1, secondmile:1, familie:1};
+        /* Digital Duke holds every badge except the three locked to one other
+           person's identity. That includes the named-achievement badges
+           (Nocturnal, The Second Mile, Familie) — anyone can earn those, so
+           they are not exclusive. The receipt is set so the Nocturnal strip
+           below leaves his alone. */
+        const NOT_HIS={securitysucker:1, violentjeff:1, verified:1};
         LK_BADGES.forEach(function(b){ if(!NOT_HIS[b[0]])add(b[0]); });
+        d.noct=1;
       }
       /* only ever added, never removed — so strip 'nocturnal' from anyone
          holding it without the receipt d.noct that says they earned it */
@@ -2421,6 +2425,15 @@ function observeReveals(){
       if((d.pts||0)>=50000)add('wickedclown');
       if((d.pts||0)>=100000)add('clowngods');
       if((d.pts||0)>=250000)add('dukewicked');
+      /* Digital Duke — the tier above Boldizar. Forty badges earned. Counts
+         every badge but itself, paid once, +750. */
+      const badgeTally=d.badges.filter(function(b){return b&&b!=='grandduke';}).length;
+      if(badgeTally>=40&&!d.badges.includes('grandduke')){
+        d.badges.push('grandduke');ch=true;
+        d.pts=(d.pts||0)+750;
+        d.hist=d.hist||[];d.hist.unshift('Digital Duke \u00b7 '+badgeTally+' badges \u00b7 +750');d.hist=d.hist.slice(0,40);
+        try{setTimeout(function(){toast('\ud83c\udccf DIGITAL DUKE \u2014 forty badges. The full deck. +750',5200);},400);}catch(_e){}
+      }
       if(ch)lkSet(d);
     })();
     el.textContent=d.pts||0;
