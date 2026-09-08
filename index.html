@@ -3035,6 +3035,25 @@ function observeReveals(){
       else say('Could not delete: '+((err&&err.message)||'unknown error'));
     }
   };
+  /* Badge reconcile: badges accrue in localStorage and only reach the cloud
+     via best-effort pushes, so a flaky connection (or an async grant that
+     landed before the cloud was ready) leaves the cloud array behind what the
+     Locker computed — which is why a profile/leaderboard can read fewer badges
+     than the owner's own Locker shows. This writes the current badge set up
+     whenever it is larger than what we last synced. Monotonic and safe: badges
+     only grow and the load-time merge already unions cloud+local first. */
+  var __lastBadgeSync=-1;
+  window.jcwReconcileBadges=function(){
+    try{
+      if(!lkCloudReady||!fbAuth||!fbAuth.currentUser||!fbDB)return;
+      const d=lkGet(); const n=(d.badges||[]).length;
+      if(n<=__lastBadgeSync)return;              /* nothing new to push */
+      fbDB.ref('lockers/'+fbAuth.currentUser.uid+'/badges').set(d.badges||[])
+        .then(function(){__lastBadgeSync=n;})
+        .catch(function(){/* try again on the next tick */});
+    }catch(_e){}
+  };
+  setInterval(function(){try{window.jcwReconcileBadges();}catch(_e){}},20000);
   function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); fbDB.ref('lockers/'+lkUser.uid).update({pts:Math.min(d.pts||0,999999),wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:d.picks||{},hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:d.eps||{},radio:d.radio||{},seen:d.seen||{},tagged:d.tagged||{},streak:d.streak||0,streakBest:d.streakBest||0,dayone:d.dayone?1:0,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{})}); }catch(_e){try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
   /* ===== WIPE RECOVERY =====
      Snapshot the best locker this device has ever seen for the signed-in account
@@ -3872,8 +3891,12 @@ function observeReveals(){
       const derived=new Set(v.badges||[]);
       if(typeof GIFT_BADGES!=='undefined'&&GIFT_BADGES[uid])GIFT_BADGES[uid].forEach(function(b){derived.add(b);});
       if(typeof isModUid==='function'&&isModUid(uid))derived.add('mod');
-      let allyCount=0;Object.keys(rel).forEach(k=>{if(rel[k]==='ally')allyCount++;});
+      let allyCount=0,rivalCount=0;Object.keys(rel).forEach(k=>{if(rel[k]==='ally')allyCount++;else if(rel[k]==='rival')rivalCount++;});
       if(allyCount>=10)derived.add('familie');
+      if(allyCount>=50)derived.add('wholecarnival');
+      if(rivalCount>=5)derived.add('badblood');
+      if(rivalCount>=50)derived.add('mosthated');
+      if(uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'&&rel['oYrNiXZywhexmLqRQO7j1iyA1Bh1']==='rival')derived.add('crossedduke');
       const earned=[...derived].filter(b=>badgeMap[b]);
       const badgeChips=earned.length
         ? '<div style="display:flex;flex-wrap:wrap;gap:8px;">'+earned.map(b=>'<span class="badge2 got'+(b==='verified'?' verified-chip':'')+'">'+pEsc(badgeMap[b])+'</span>').join('')+'</div>'
@@ -4240,6 +4263,7 @@ function observeReveals(){
               window.__myAllies=n;window.__myRivals=rv;
               window.__rivaledDuke=(r['oYrNiXZywhexmLqRQO7j1iyA1Bh1']==='rival');
               try{lkRender();}catch(_e){}
+              try{setTimeout(window.jcwReconcileBadges,800);}catch(_e){}
             },function(){});
           }
         }catch(_e){}
@@ -4323,6 +4347,7 @@ function observeReveals(){
               merged.wins=Math.max(d.wins||0,cloud.wins||0);
               lkCloudReady=true;          /* safe to write from here on */
               lkSet(merged);lkRender();
+              try{setTimeout(window.jcwReconcileBadges,1500);setTimeout(window.jcwReconcileBadges,6000);}catch(_e){}
               try{lkBackupKeep(merged);lkWipeCheck(cloud);}catch(_e){}
               /* only now is the badge list complete — safe to test the 30 threshold */
               try{window.jcwCheckBoldizar&&window.jcwCheckBoldizar();}catch(_e){}
