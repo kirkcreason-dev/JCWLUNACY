@@ -2354,6 +2354,8 @@ function observeReveals(){
     ['rollcall','Roll Call \u00b7 met 25 of the roster'],
     ['lockerlegend','Locker Room Legend \u00b7 met the whole roster'],
     ['badblood','Bad Blood \u00b7 marked 5 rivals'],
+    ['wholecarnival','Love the World \u00b7 50 allies'],
+    ['mosthated','Fight the World \u00b7 50 rivals'],
     ['tagger','Tagger \u00b7 posted on 10 walls'],
     ['everyday','Every Damn Day \u00b7 7-day check-in streak'],
     ['diehard','Die Hard \u00b7 30-day check-in streak'],
@@ -2428,6 +2430,16 @@ function observeReveals(){
       /* 3-ZEE · Familie. Allies are counted live from relations/<uid> into
          window.__myAllies; the badge is paid once, +250, like the others. */
       if((window.__myRivals||0)>=5)add('badblood');
+      if((window.__myAllies||0)>=50&&!d.badges.includes('wholecarnival')){
+        d.badges.push('wholecarnival');ch=true;d.pts=(d.pts||0)+500;
+        d.hist=d.hist||[];d.hist.unshift('Love the World \u00b7 '+window.__myAllies+' allies \u00b7 +500');d.hist=d.hist.slice(0,40);
+        try{setTimeout(function(){toast('\ud83c\udfaa LOVE THE WORLD \u2014 50 allies. +500',5200);},400);}catch(_e){}
+      }
+      if((window.__myRivals||0)>=50&&!d.badges.includes('mosthated')){
+        d.badges.push('mosthated');ch=true;d.pts=(d.pts||0)+500;
+        d.hist=d.hist||[];d.hist.unshift('Fight the World \u00b7 '+window.__myRivals+' rivals \u00b7 +500');d.hist=d.hist.slice(0,40);
+        try{setTimeout(function(){toast('\u2694\ufe0f FIGHT THE WORLD \u2014 50 rivals. +500',5200);},400);}catch(_e){}
+      }
       if(window.__rivaledDuke&&lkUser&&lkUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1')add('crossedduke');
       if(Object.keys(d.tagged||{}).length>=10)add('tagger');
       if((d.streak||0)>=7||(d.streakBest||0)>=7)add('everyday');
