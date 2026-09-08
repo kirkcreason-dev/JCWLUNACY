@@ -1418,6 +1418,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <li><span class="w">4</span><b>Don&rsquo;t spam.</b> Flooding chat, spamming links or self-promo blasts get cleaned up.</li>
         <li><span class="w">5</span><b>Play fair.</b> Auto-clickers, exploits and point farming get your points locked.</li>
         <li><span class="w">6</span><b>Mods have the hammer.</b> They can delete messages and posts. Their call is final.</li>
+        <li><span class="w">7</span><b>Backstage isn&rsquo;t private from the boss.</b> Mod-to-mod direct messages can be reviewed by the site owner. Keep anything truly personal off the platform.</li>
       </ul>
     </div>
 
@@ -1843,10 +1844,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
 <button id="chat-fab" aria-label="Open Lunacy Chat" style="position:fixed;"><span class="cf-n" id="cf-count" aria-hidden="true">0</span>CHAT</button>
 <aside id="chat-panel" aria-label="Lunacy Chat">
   <div class="ch-hd"><b>Lunacy Chat</b><span class="np" id="ch-np"></span><button class="ch-x" id="ch-pop" title="Pop out chat" style="background:none;border:none;color:var(--acid);font-size:16px;cursor:pointer;margin-right:2px;">&#8599;</button><button class="ch-x" id="ch-x">&times;</button></div>
-  <div class="ch-tabs"><button class="on" data-tab="chat">Chat</button><button data-tab="vote">Vote</button><button data-tab="board">Leaders</button><button data-tab="mods" id="ch-mods-tab" style="display:none;color:var(--acid);">Mods</button></div>
+  <div class="ch-tabs"><button class="on" data-tab="chat">Chat</button><button data-tab="vote">Vote</button><button data-tab="board">Leaders</button><button data-tab="mods" id="ch-mods-tab" style="display:none;color:var(--acid);">Mods</button><button data-tab="dms" id="ch-dms-tab" style="display:none;color:var(--hot);">DMs</button></div>
   <div class="ch-pane on" id="ch-chat"></div>
   <button id="ch-jump" style="display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:118px;z-index:6;background:var(--acid);color:#000;border:none;border-radius:20px;padding:7px 16px;font:700 12px system-ui;letter-spacing:.04em;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.5);">&#8595; New messages</button>
   <div class="ch-pane" id="ch-mods"><div style="font-size:12px;color:var(--acid);margin-bottom:10px;border-bottom:1px dashed rgba(157,255,58,.25);padding-bottom:8px;">&#128274; Mods only &mdash; the backstage room. Nobody else sees this.</div><div id="dm-inbox"></div><div id="ch-reports" style="margin-bottom:12px;"></div><div id="ch-bans" style="margin-bottom:12px;"></div><div id="ch-mods-list"></div></div>
+  <div class="ch-pane" id="ch-dms"><div style="font-size:12px;color:var(--hot);margin-bottom:10px;border-bottom:1px dashed rgba(255,63,164,.25);padding-bottom:8px;">&#128065; Owner review &mdash; every backstage DM thread. Mods are told this is visible to you.</div><div id="ch-dms-list"><p style="color:var(--steel);font-size:13px;">Loading&hellip;</p></div></div>
   <div class="ch-pane" id="ch-board"><div class="usearch" data-usearch>
   <input type="search" class="us-q" placeholder="Search Juggalos by name&hellip;" aria-label="Search user pages" autocomplete="off" spellcheck="false">
   <div class="us-res" hidden></div>
@@ -3529,6 +3531,8 @@ function observeReveals(){
   function updateModUI(){
     const tab=document.getElementById('ch-mods-tab');
     if(tab)tab.style.display=isMod()?'':'none';
+    const dt=document.getElementById('ch-dms-tab');
+    if(dt)dt.style.display=(lkUser&&lkUser.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1')?'':'none';
     if(isMod()){modWire();dmInboxWire();}
   }
   window.jcwUpdateModUI=updateModUI;
@@ -3628,6 +3632,8 @@ function observeReveals(){
     document.getElementById('ch-vote').classList.toggle('on',chTab==='vote');
     document.getElementById('ch-board').classList.toggle('on',chTab==='board');
     document.getElementById('ch-mods').classList.toggle('on',chTab==='mods');
+    const dmsPane=document.getElementById('ch-dms');if(dmsPane)dmsPane.classList.toggle('on',chTab==='dms');
+    if(chTab==='dms'&&window.jcwDmsRender)window.jcwDmsRender();
     const inp=document.getElementById('ch-msg');
     if(inp)inp.placeholder=chTab==='mods'?'Message the mod crew\u2026':'Say something\u2026';
     if(chTab==='board')boardRender();
@@ -3755,6 +3761,34 @@ function observeReveals(){
   // also refresh mods dots the instant presence changes
   (function(){const _p=window.jcwWatchPresence;})();
 
+  /* ===== OWNER DM REVIEW ================================================
+     Reads every dm/<pair> thread. Needs the owner-read rule on dm/ — until
+     that is published this pane reports permission denied rather than
+     pretending to be empty. Mods see a disclosure in the DM window, so this
+     is oversight they know about, not a hidden camera. */
+  window.jcwDmsRender=async function(){
+    const host=document.getElementById('ch-dms-list');if(!host)return;
+    if(!fbDB||!lkUser||lkUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'){host.innerHTML='<p style="color:var(--steel);font-size:13px;">Owner only.</p>';return;}
+    host.innerHTML='<p style="color:var(--steel);font-size:13px;">Loading threads&hellip;</p>';
+    const esc=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    let all;
+    try{all=(await fbDB.ref('dm').get()).val()||{};}
+    catch(e){host.innerHTML='<p style="color:var(--hot);font-size:13px;">Can’t read the DM threads yet — the owner-read rule on <code>dm</code> isn’t published. Add <code>".read": "auth != null &amp;&amp; auth.uid === \'oYrNiXZywhexmLqRQO7j1iyA1Bh1\'"</code> at the dm root.</p>';return;}
+    const names=await (window.profNames?profNames().catch(()=>({})):Promise.resolve({}));
+    const nm=u=>(names[u]&&names[u].name)||('Juggalo '+String(u).slice(0,6));
+    const threads=Object.keys(all).map(pair=>{
+      const msgs=Object.keys(all[pair]||{}).map(k=>all[pair][k]).filter(m=>m&&m.t).sort((a,b)=>(a.ts||0)-(b.ts||0));
+      const [a,b]=pair.split('__');
+      return {pair,a,b,msgs,last:msgs.length?msgs[msgs.length-1].ts||0:0};
+    }).filter(t=>t.msgs.length).sort((x,y)=>y.last-x.last);
+    if(!threads.length){host.innerHTML='<p style="color:var(--steel);font-size:13px;">No backstage DMs yet.</p>';return;}
+    const when=t=>{try{return new Date(t).toLocaleString();}catch(e){return '';}};
+    host.innerHTML=threads.map((t,i)=>'<details style="border:1px solid rgba(255,63,164,.3);border-radius:8px;padding:7px 10px;margin-bottom:7px;"'+(i===0?' open':'')+'>'
+      +'<summary style="cursor:pointer;font-size:12.5px;color:var(--bone);"><b>'+esc(nm(t.a))+'</b> &harr; <b>'+esc(nm(t.b))+'</b> <span style="color:var(--steel);">&middot; '+t.msgs.length+' msgs &middot; '+esc(when(t.last))+'</span></summary>'
+      +'<div style="margin-top:8px;max-height:260px;overflow:auto;">'
+      +t.msgs.map(m=>'<div style="font-size:12.5px;margin:4px 0;line-height:1.45;"><b style="color:'+(m.u===t.a?'var(--acid)':'var(--cyan)')+';">'+esc(nm(m.u))+'</b> <span style="color:var(--steel);font-size:11px;">'+esc(when(m.ts))+'</span><br>'+esc(m.t)+'</div>').join('')
+      +'</div></details>').join('');
+  };
   /* ===== MOD DIRECT MESSAGES (1:1) ===== */
   function dmPair(a,b){return [a,b].sort().join('__');}
   let dmOther=null,dmOtherName='',dmRef=null;
