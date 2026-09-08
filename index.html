@@ -3784,8 +3784,10 @@ function observeReveals(){
     let all;
     try{all=(await fbDB.ref('dm').get()).val()||{};}
     catch(e){host.innerHTML='<p style="color:var(--hot);font-size:13px;">Can’t read the DM threads yet — the owner-read rule on <code>dm</code> isn’t published. Add <code>".read": "auth != null &amp;&amp; auth.uid === \'oYrNiXZywhexmLqRQO7j1iyA1Bh1\'"</code> at the dm root.</p>';return;}
-    const names=await (window.profNames?profNames().catch(()=>({})):Promise.resolve({}));
-    const nm=u=>(names[u]&&names[u].name)||('Juggalo '+String(u).slice(0,6));
+    /* profNames lives in this same scope — it is not on window, which is why
+       the first cut fell back to 'Juggalo xxxx' for everybody */
+    let names={};try{names=await profNames();}catch(e){names={};}
+    const nm=u=>(names[u]&&names[u].name&&String(names[u].name).trim())||('Juggalo '+String(u).slice(0,6));
     const threads=Object.keys(all).map(pair=>{
       const msgs=Object.keys(all[pair]||{}).map(k=>all[pair][k]).filter(m=>m&&m.t).sort((a,b)=>(a.ts||0)-(b.ts||0));
       const [a,b]=pair.split('__');
