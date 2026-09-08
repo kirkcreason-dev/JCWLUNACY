@@ -2362,7 +2362,8 @@ function observeReveals(){
     ['everyday','Every Damn Day \u00b7 7-day check-in streak'],
     ['diehard','Die Hard \u00b7 30-day check-in streak'],
     ['dayone','Day One \u00b7 here before the badges'],
-    ['crossedduke','Crossed the Duke \u00b7 rivaled Digital Duke \u00b7 no takebacks']];
+    ['crossedduke','Crossed the Duke \u00b7 rivaled Digital Duke \u00b7 no takebacks'],
+    ['miracles','The Miracle Man \u00b7 Miracles \u00b7 found every hidden secret']];
   function lkAddWin(){
     const d=lkGet(); d.wins=(d.wins||0)+1;
     d.badges=d.badges||[]; if(!d.badges.includes('winner'))d.badges.push('winner');
@@ -2488,6 +2489,15 @@ function observeReveals(){
         d.badges.push('lockerlegend');ch=true;d.pts=(d.pts||0)+500;
         d.hist=d.hist||[];d.hist.unshift('Locker Room Legend \u00b7 met the whole roster \u00b7 +500');d.hist=d.hist.slice(0,40);
         try{setTimeout(function(){toast('\ud83e\udd3c LOCKER ROOM LEGEND \u2014 met the whole roster. +500',5200);},400);}catch(_e){}
+      }
+      /* The Miracle Man · Miracles: every hidden egg found. EGG_KEYS is the
+         live list of egg badges, so hiding a new one moves the bar. */
+      const EGG_KEYS=['bigfoot','riddlebox','milenko','hatchet','neden','browngold','bizzar','bangpow','deathpop','faygo'];
+      const eggsFound=EGG_KEYS.filter(function(k){return d.badges.includes(k);}).length;
+      if(eggsFound>=EGG_KEYS.length&&!d.badges.includes('miracles')){
+        d.badges.push('miracles');ch=true;d.pts=(d.pts||0)+500;
+        d.hist=d.hist||[];d.hist.unshift('Miracles \u00b7 found every hidden secret \u00b7 +500');d.hist=d.hist.slice(0,40);
+        try{setTimeout(function(){toast('\u2728 MIRACLES \u2014 found every hidden secret on the site. +500',5200);},400);}catch(_e){}
       }
       const badgeTally=d.badges.filter(function(b){return b&&b!=='grandduke';}).length;
       if(badgeTally>=40&&!d.badges.includes('grandduke')){
@@ -3931,6 +3941,7 @@ function observeReveals(){
       if(rivalCount>=5)derived.add('badblood');
       if(rivalCount>=50)derived.add('mosthated');
       if(uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'&&rel['oYrNiXZywhexmLqRQO7j1iyA1Bh1']==='rival')derived.add('crossedduke');
+      if(['bigfoot','riddlebox','milenko','hatchet','neden','browngold','bizzar','bangpow','deathpop','faygo'].every(function(k){return derived.has(k);}))derived.add('miracles');
       const earned=[...derived].filter(b=>badgeMap[b]);
       const badgeChips=earned.length
         ? '<div style="display:flex;flex-wrap:wrap;gap:8px;">'+earned.map(b=>'<span class="badge2 got'+(b==='verified'?' verified-chip':'')+'">'+pEsc(badgeMap[b])+'</span>').join('')+'</div>'
