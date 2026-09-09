@@ -1278,7 +1278,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <section class="blk">
     <div class="kick">Juggalo Locker</div>
     <h2 class="head">Your <em>locker</em></h2>
-    <p class="lede">Earn points for watching episodes, playing the game and calling your shots. Sign up to sync your points across devices and climb the leaderboard in <b>Lunacy Chat</b>.</p>
+    <p class="lede">Earn points for watching episodes, playing the game and calling your shots. Episodes count after ten minutes &mdash; watch the show. Sign up to sync your points across devices and climb the leaderboard in <b>Lunacy Chat</b>.</p>
     <p class="join-lo-cta" style="margin:4px 0 14px;"><a class="btn line" href="#lunatics">&#127914; Join The Lunatics Only &mdash; arcade, game, cards &amp; more</a></p>
     <div class="usearch" data-usearch>
       <input type="search" class="us-q" placeholder="Search Juggalos by name&hellip;" aria-label="Search user pages" autocomplete="off" spellcheck="false">
@@ -4165,13 +4165,21 @@ function observeReveals(){
               const ek=window.__epWatch;
               window.__epPts=window.__epPts||{};window.__epSecs=window.__epSecs||{};
               window.__epSecs[ek]=(window.__epSecs[ek]||0)+15;
-              /* +5 pts per 15s watched, capped at 30 per episode */
-              if((window.__epPts[ek]||0)<30){
-                window.__epPts[ek]=(window.__epPts[ek]||0)+5;
-                const d=lkGet();d.pts=(d.pts||0)+5;lkSet(d);lkRender();
+              /* Nothing pays before the 10-minute mark. The old rule paid
+                 out fully in 90 seconds and counted a watch at 30s, which
+                 turned badge hunting into opening a hundred embeds and
+                 walking away — real plays with dead retention on the
+                 channel's videos. Now: at 10 minutes the episode counts and
+                 pays +30; from there +5 per 15s up to 60 for a real watch. */
+              const EP_MIN_SECS=600, EP_PTS_CAP=60;
+              if(window.__epSecs[ek]>=EP_MIN_SECS&&(window.__epPts[ek]||0)<EP_PTS_CAP){
+                const first=!(window.__epPts[ek]);
+                const gain=first?30:5;
+                window.__epPts[ek]=(window.__epPts[ek]||0)+gain;
+                const d=lkGet();d.pts=(d.pts||0)+gain;lkSet(d);lkRender();
               }
-              /* count it as watched once they've stuck around ~30s */
-              if(window.__epSecs[ek]>=30){
+              /* count it as watched once they've stayed with it 10 minutes */
+              if(window.__epSecs[ek]>=EP_MIN_SECS){
                 const dt=lkGet();const title=window.__epTitle||'an episode';const line='Watched '+title;
                 /* dedup on a set that is never truncated. The old guard checked
                    the 40-entry history, so once a heavy viewer's history rolled
