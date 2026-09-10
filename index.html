@@ -550,6 +550,8 @@ body.game-lock{overflow:hidden;}
 .tcard.locked .nm{color:#5a5a66;}
 .tcard.foil::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 45%,rgba(120,220,255,.5) 50%,rgba(255,120,220,.45) 55%,transparent 70%);background-size:250% 250%;mix-blend-mode:screen;animation:foilShine 3.2s linear infinite;}
 .tcard.foil .cnt{background:linear-gradient(90deg,#ffd028,#ff6ad5);color:#000;}
+.tcard.art{aspect-ratio:auto;background:#000;}.tcard.art .artslot{display:block;}.tcard.art.locked .artslot{filter:grayscale(1) brightness(.45);}.tcard.art.foil::after{display:none;}.tcard.art .rar{top:8px;left:8px;}.tcard.art .cnt{top:8px;}
+.cards-top #pack-art{filter:drop-shadow(0 6px 14px rgba(0,0,0,.6));}
 @keyframes foilShine{0%{background-position:0% 0%;}100%{background-position:250% 250%;}}
 #pack-modal{display:none;position:fixed;inset:0;z-index:430;background:rgba(0,0,0,.9);backdrop-filter:blur(5px);align-items:center;justify-content:center;padding:16px;}
 #pack-modal.on{display:flex;}
@@ -1347,7 +1349,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <section class="blk">
     <div class="kick">Collect Them All</div>
     <h2 class="head">JCW <em>trading cards</em></h2>
-    <p class="lede">Buy packs and collect the whole roster. Some cards are shiny foil, some are <b>super rare</b>. Every wrestler has more than one card &mdash; pulled straight from their real stats and finishers.</p>
+    <p class="lede">Buy packs and collect the whole roster &mdash; <b>178 photo cards</b>: portraits, ringside shots, tag teams. Some are shiny foil, some are <b>super rare</b>, and every card carries a line from the Lunacy Files.</p>
     <p class="join-lo-cta" style="margin:4px 0 14px;"><a class="btn line" href="#lunatics">&#127914; Cards are a Lunatics Only perk &mdash; join the inner circle</a></p>
     <div class="cards-top">
       <button class="btn gold" id="cards-buy">&#127183; Open a pack &middot; 150 pts</button>
@@ -5008,36 +5010,71 @@ route();
         for(let i=0;i<e.f.length;i++){const str=String(e.f[i]);const p=str.toLowerCase().indexOf(label.toLowerCase()+':');if(p===0)return str.slice(label.length+1).trim();}
       }catch(e){}return '';
     }
+    /* ---- Card artwork ----------------------------------------------------
+       178 photo cards from the JCW Visual Integration kit, one entry each:
+       [id, name, shot (P portrait / R ringside), photo position, collector
+       phrase, Lunacy Files fact]. Photos live in cards/<id>.webp and the
+       card face (frame, logo, foil, burst) is drawn by jcw-visuals.mjs,
+       which is presentation only — it never touches points, packs, trades
+       or Firebase. The whole roster is in the set for now; extras get
+       trimmed later by deleting rows here.                                 */
+    const ART=[["LU-001","Dani Mo","P","50% 0%","BRIGHT LIGHTS. BAD INTENTIONS.",""],["LU-002","2 Tuff Tony","P","50% 0%","TOO TUFF TO STAY DOWN.",""],["LU-003","Caleb Konley","P","50% 0%","ALL EYES ON THE GOLD.",""],["LU-004","Donovan Dijak","P","50% 0%","THIS ONE STAYS IN THE FAMILY.","JCW profiles Dijak at 6 ft 7 in."],["LU-005","Alice Crowley","R","50% 45%","WELCOME TO THE DARK SIDE.",""],["LU-006","EC3","P","50% 0%","STRAIGHT FROM THE CARNIVAL.","JCW profiles EC3 at 6 ft 2 in."],["LU-007","Barnabas The Bizarre","P","50% 0%","THE STRANGE GET STRANGER.",""],["LU-008","Brothers Of Funstruction","P","50% 0%","SEND IN THE CHAOS.",""],["LU-009","Choppa City","P","50% 0%","COLLECT THE CHAOS.",""],["LU-010","Big Vito","P","50% 0%","STRAIGHT FROM THE CARNIVAL.",""],["LU-011","Cokane","P","50% 0%","PURE, UNCUT LUNACY.",""],["LU-012","Abel","P","50% 0%","THE OUTBREAK IS SPREADING.",""],["LU-013","2 Tuff Tony","P","50% 0%","TOO TUFF TO STAY DOWN.",""],["LU-014","2 Tuff Tony","P","50% 0%","TOO TUFF TO STAY DOWN.",""],["LU-015","2 Tuff Tony","P","50% 0%","TOO TUFF TO STAY DOWN.",""],["LU-016","Abel","P","50% 0%","THE OUTBREAK IS SPREADING.",""],["LU-017","Alice Crowley","R","50% 45%","WELCOME TO THE DARK SIDE.",""],["LU-018","Alice Crowley","R","50% 45%","WELCOME TO THE DARK SIDE.",""],["LU-019","Alice Crowley","R","50% 45%","WELCOME TO THE DARK SIDE.",""],["LU-020","Alice Crowley","R","50% 45%","WELCOME TO THE DARK SIDE.",""],["LU-021","Alice Crowley","R","50% 45%","WELCOME TO THE DARK SIDE.",""],["LU-022","Alice Crowley","R","50% 45%","WELCOME TO THE DARK SIDE.",""],["LU-023","Barnabas & The Outbreak","R","50% 45%","KEEP IT WICKED.",""],["LU-024","Barnabas The Bizarre","P","50% 0%","THE STRANGE GET STRANGER.",""],["LU-025","Barnabas The Bizarre","R","50% 45%","THE STRANGE GET STRANGER.",""],["LU-026","Big Vito & Krule","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-027","Big Vito","P","50% 0%","KEEP IT WICKED.",""],["LU-028","Brothers Of Funstruction","P","50% 0%","SEND IN THE CHAOS.",""],["LU-029","Brothers Of Funstruction","P","50% 0%","SEND IN THE CHAOS.",""],["LU-030","Caleb Konley & EC3","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-031","Caleb Konley & EC3","R","50% 45%","KEEP IT WICKED.",""],["LU-032","Caleb Konley & EC3","R","50% 45%","THIS ONE STAYS IN THE FAMILY.",""],["LU-033","Caleb Konley & Jeeves","R","50% 45%","COLLECT THE CHAOS.",""],["LU-034","Caleb Konley & Jeeves","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-035","Caleb Konley & Jeeves","R","50% 45%","KEEP IT WICKED.",""],["LU-036","Caleb Konley & Jeeves","R","50% 45%","THIS ONE STAYS IN THE FAMILY.",""],["LU-037","Caleb Konley & Jeeves","R","50% 45%","COLLECT THE CHAOS.",""],["LU-038","Caleb Konley & Jeeves","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-039","Caleb Konley & Mr. Happy","R","50% 45%","KEEP IT WICKED.",""],["LU-040","Caleb Konley","P","50% 0%","ALL EYES ON THE GOLD.",""],["LU-041","Caleb Konley","P","50% 0%","ALL EYES ON THE GOLD.",""],["LU-042","Caleb Konley","P","50% 0%","ALL EYES ON THE GOLD.",""],["LU-043","Caleb Konley","R","50% 45%","ALL EYES ON THE GOLD.",""],["LU-044","Caleb Konley","R","50% 45%","ALL EYES ON THE GOLD.",""],["LU-045","Choppa City & The Outbreak","R","50% 45%","COLLECT THE CHAOS.",""],["LU-046","Choppa City","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-047","Choppa City","R","50% 45%","KEEP IT WICKED.",""],["LU-048","Cokane & Choppa City","R","50% 45%","THIS ONE STAYS IN THE FAMILY.",""],["LU-049","Cokane & Choppa City","R","50% 45%","COLLECT THE CHAOS.",""],["LU-050","Cokane & Choppa City","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-051","Cokane & Choppa City","R","50% 45%","KEEP IT WICKED.",""],["LU-052","Cokane & Steven Flowe","R","50% 45%","THIS ONE STAYS IN THE FAMILY.",""],["LU-053","Cokane & Steven Flowe","R","50% 45%","COLLECT THE CHAOS.",""],["LU-054","Cokane & Steven Flowe","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-055","Cokane","P","50% 0%","PURE, UNCUT LUNACY.",""],["LU-056","Cokane","R","50% 45%","PURE, UNCUT LUNACY.",""],["LU-057","Cokane","R","50% 45%","PURE, UNCUT LUNACY.",""],["LU-058","Cokane","R","50% 45%","PURE, UNCUT LUNACY.",""],["LU-059","Cokane","R","50% 45%","PURE, UNCUT LUNACY.",""],["LU-060","Dani Mo","P","50% 0%","BRIGHT LIGHTS. BAD INTENTIONS.",""],["LU-061","Dani Mo","R","50% 45%","BRIGHT LIGHTS. BAD INTENTIONS.",""],["LU-062","Dani Mo and The Outbreak","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-063","Donovan Dijak & JWO","R","50% 45%","KEEP IT WICKED.",""],["LU-064","Donovan Dijak & JWO","R","50% 45%","THIS ONE STAYS IN THE FAMILY.",""],["LU-065","Donovan Dijak & JWO","R","50% 45%","COLLECT THE CHAOS.",""],["LU-066","Donovan Dijak & JWO","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-067","Donovan Dijak","P","50% 0%","KEEP IT WICKED.",""],["LU-068","Donovan Dijak","P","50% 0%","THIS ONE STAYS IN THE FAMILY.",""],["LU-069","Donovan Dijak","R","50% 45%","COLLECT THE CHAOS.",""],["LU-070","EC3 & Krule","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-071","EC3","P","50% 0%","KEEP IT WICKED.",""],["LU-072","EC3","R","50% 45%","THIS ONE STAYS IN THE FAMILY.",""],["LU-073","EC3","R","50% 45%","COLLECT THE CHAOS.",""],["LU-074","EC3","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-075","EC3","R","50% 45%","KEEP IT WICKED.",""],["LU-076","EC3","R","50% 45%","THIS ONE STAYS IN THE FAMILY.",""],["LU-077","Facade & Josh Bishop","R","50% 45%","COLLECT THE CHAOS.",""],["LU-078","Facade & Josh Bishop","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-079","Violent J","R","50% 45%","THE CARNIVAL NEVER CLOSES.","Listed by JCW as a company owner."],["LU-080","Krule","P","50% 0%","SOME NIGHTMARES WALK.","JCW profiles Krule at 6 ft 8 in."],["LU-081","Josh Bishop","P","50% 0%","COLLECT THE CHAOS.","Has held the JCW World Heavyweight Championship."],["LU-082","Kerry Morton","P","50% 0%","BIG NAME. BIGGER TARGET.",""],["LU-083","Mr. Happy","P","50% 0%","SMILE. IT GETS WORSE.",""],["LU-084","Facade","P","50% 0%","TOO BRIGHT TO IGNORE.",""],["LU-085","Father Bronson","P","50% 0%","HAVE FAITH. BRACE FOR IMPACT.",""],["LU-086","Jeeves","P","50% 0%","SERVICE WITH A SIDE OF CHAOS.",""],["LU-087","Shane Mercer","P","50% 0%","BUILT FOR THE BREAKING POINT.",""],["LU-088","Jacksyn","P","50% 0%","LET THE WICKED IN.",""],["LU-089","Josh Bishop & Father Bronson","R","50% 45%","COLLECT THE CHAOS.",""],["LU-090","Josh Bishop & Joel Gertner","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-091","Josh Bishop & Joel Gertner","R","50% 45%","KEEP IT WICKED.",""],["LU-092","Josh Bishop & Kerry Morton","R","50% 45%","THIS ONE STAYS IN THE FAMILY.",""],["LU-093","Josh Bishop","P","50% 0%","COLLECT THE CHAOS.",""],["LU-094","Josh Bishop","P","50% 0%","STRAIGHT FROM THE CARNIVAL.",""],["LU-095","JWO","R","50% 45%","LUNACY RUNS IN THE FAMILY.",""],["LU-096","JWO","R","50% 45%","LUNACY RUNS IN THE FAMILY.",""],["LU-097","JWO","R","50% 45%","LUNACY RUNS IN THE FAMILY.",""],["LU-098","JWO","R","50% 45%","LUNACY RUNS IN THE FAMILY.",""],["LU-099","JWO","R","50% 45%","LUNACY RUNS IN THE FAMILY.",""],["LU-100","Kerry Morton","P","50% 0%","BIG NAME. BIGGER TARGET.",""],["LU-101","Kerry Morton","P","50% 0%","BIG NAME. BIGGER TARGET.",""],["LU-102","Kerry Morton","R","50% 45%","BIG NAME. BIGGER TARGET.",""],["LU-103","Kerry Morton","R","50% 45%","BIG NAME. BIGGER TARGET.",""],["LU-104","Kerry Morton","R","50% 45%","BIG NAME. BIGGER TARGET.",""],["LU-105","Kerry Morton","R","50% 45%","BIG NAME. BIGGER TARGET.",""],["LU-106","Kerry Morton","R","50% 45%","BIG NAME. BIGGER TARGET.",""],["LU-107","Kerry Morton","P","50% 0%","BIG NAME. BIGGER TARGET.",""],["LU-108","Kid Cadet","R","50% 45%","THIS ONE STAYS IN THE FAMILY.",""],["LU-109","Kid Cadet","R","50% 45%","COLLECT THE CHAOS.",""],["LU-110","Kid Cadet","R","50% 45%","STRAIGHT FROM THE CARNIVAL.","Ring announcer for JCW Lunacy."],["LU-111","Krule & Sally Boy","R","50% 45%","KEEP IT WICKED.",""],["LU-112","Krule","P","50% 0%","SOME NIGHTMARES WALK.",""],["LU-113","Krule","P","50% 0%","SOME NIGHTMARES WALK.",""],["LU-114","Krule","P","50% 0%","SOME NIGHTMARES WALK.",""],["LU-115","Krule","R","50% 45%","SOME NIGHTMARES WALK.",""],["LU-116","Krule","R","50% 45%","SOME NIGHTMARES WALK.",""],["LU-117","Mr. Anderson & Cokane","R","50% 45%","COLLECT THE CHAOS.",""],["LU-118","Mr. Anderson","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-119","Mr. Anderson","R","50% 45%","KEEP IT WICKED.",""],["LU-120","Mr. Anderson","R","50% 45%","THIS ONE STAYS IN THE FAMILY.",""],["LU-121","Mr. Happy & Kerry Morton","R","50% 45%","COLLECT THE CHAOS.",""],["LU-122","Mr. Happy & Kerry Morton","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-123","Mr. Happy & Kerry Morton","R","50% 45%","KEEP IT WICKED.",""],["LU-124","Mr. Happy & Kerry Morton","R","50% 45%","THIS ONE STAYS IN THE FAMILY.",""],["LU-125","Mr. Happy","P","50% 0%","SMILE. IT GETS WORSE.",""],["LU-126","Mr. Happy","R","50% 45%","SMILE. IT GETS WORSE.",""],["LU-127","Ring Girl","R","50% 45%","KEEP IT WICKED.",""],["LU-128","Ring Girl","R","50% 45%","THIS ONE STAYS IN THE FAMILY.",""],["LU-129","Sally Boy","P","50% 0%","COLLECT THE CHAOS.",""],["LU-130","Sally Boy","P","50% 0%","STRAIGHT FROM THE CARNIVAL.",""],["LU-131","Sally Boy","P","50% 0%","KEEP IT WICKED.",""],["LU-132","Shane Mercer","P","50% 0%","BUILT FOR THE BREAKING POINT.",""],["LU-133","Shane Mercer","P","50% 0%","BUILT FOR THE BREAKING POINT.",""],["LU-134","Steven Flowe","R","50% 45%","TURN IT UP. TEAR IT DOWN.",""],["LU-135","Steven Flowe","P","50% 0%","TURN IT UP. TEAR IT DOWN.",""],["LU-136","The Luciano Family & EC3","R","50% 45%","THIS ONE STAYS IN THE FAMILY.",""],["LU-137","The Luciano Family & EC3","R","50% 45%","COLLECT THE CHAOS.",""],["LU-138","The Luciano Family","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-139","The Luciano Family","R","50% 45%","KEEP IT WICKED.",""],["LU-140","The Luciano Family","R","50% 45%","THIS ONE STAYS IN THE FAMILY.",""],["LU-141","The Outbreak","R","50% 45%","COLLECT THE CHAOS.",""],["LU-142","The Outbreak","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-143","Vince Russo","R","50% 45%","KEEP IT WICKED.","Listed by JCW as a company owner."],["LU-144","Vincenzo","P","50% 0%","THIS ONE STAYS IN THE FAMILY.",""],["LU-145","Violent J","R","50% 45%","THE CARNIVAL NEVER CLOSES.",""],["LU-146","Violent J","R","50% 45%","THE CARNIVAL NEVER CLOSES.",""],["LU-147","Facade & Josh Bishop","R","50% 45%","KEEP IT WICKED.",""],["LU-148","Facade & Josh Bishop","R","50% 45%","THIS ONE STAYS IN THE FAMILY.",""],["LU-149","Facade & Josh Bishop","R","50% 45%","COLLECT THE CHAOS.",""],["LU-150","Facade","P","50% 0%","TOO BRIGHT TO IGNORE.",""],["LU-151","Father Bronson & Kerry Morton","R","50% 45%","KEEP IT WICKED.",""],["LU-152","Father Bronson & Kerry Morton","R","50% 45%","THIS ONE STAYS IN THE FAMILY.",""],["LU-153","Father Bronson & Kerry Morton","R","50% 45%","COLLECT THE CHAOS.",""],["LU-154","Father Bronson","P","50% 0%","HAVE FAITH. BRACE FOR IMPACT.",""],["LU-155","Father Bronson","P","50% 0%","HAVE FAITH. BRACE FOR IMPACT.",""],["LU-156","Father Bronson","P","50% 0%","HAVE FAITH. BRACE FOR IMPACT.",""],["LU-157","Father Bronson","P","50% 0%","HAVE FAITH. BRACE FOR IMPACT.",""],["LU-158","Father Bronson","R","50% 45%","HAVE FAITH. BRACE FOR IMPACT.",""],["LU-159","Father Bronson","R","50% 45%","HAVE FAITH. BRACE FOR IMPACT.",""],["LU-160","Father Bronson","R","50% 45%","HAVE FAITH. BRACE FOR IMPACT.",""],["LU-161","George Ross","P","50% 0%","COLLECT THE CHAOS.","An official referee on the JCW roster."],["LU-162","James Storm","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-163","James Storm","R","50% 45%","KEEP IT WICKED.",""],["LU-164","James Storm","R","50% 45%","THIS ONE STAYS IN THE FAMILY.",""],["LU-165","Jeeves & EC3","P","50% 0%","COLLECT THE CHAOS.",""],["LU-166","Jeeves & EC3","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""],["LU-167","Jeeves & EC3","P","50% 0%","KEEP IT WICKED.",""],["LU-168","Jeeves","P","50% 0%","SERVICE WITH A SIDE OF CHAOS.",""],["LU-169","Jeeves","P","50% 0%","SERVICE WITH A SIDE OF CHAOS.",""],["LU-170","Jeeves","P","50% 0%","SERVICE WITH A SIDE OF CHAOS.",""],["LU-171","Jeeves","P","50% 0%","SERVICE WITH A SIDE OF CHAOS.",""],["LU-172","Jeeves","R","50% 45%","SERVICE WITH A SIDE OF CHAOS.",""],["LU-173","Jeeves","R","50% 45%","SERVICE WITH A SIDE OF CHAOS.",""],["LU-174","Jeeves","R","50% 45%","SERVICE WITH A SIDE OF CHAOS.",""],["LU-175","Jeff The Ref","P","50% 0%","KEEP IT WICKED.","An official referee on the JCW roster."],["LU-176","Joel Gertner","P","50% 0%","THIS ONE STAYS IN THE FAMILY.",""],["LU-177","Josh Bishop & Father Bronson","R","50% 45%","COLLECT THE CHAOS.",""],["LU-178","Josh Bishop & Father Bronson","R","50% 45%","STRAIGHT FROM THE CARNIVAL.",""]];
+    const ART_BY_NAME=(function(){const m={};ART.forEach(a=>{(m[a[1]]=m[a[1]]||[]).push(a);});return m;})();
+    const artCard=a=>({id:a[0],name:a[1],shot:a[2]==='R'?'Ringside':'Portrait',pos:a[3],phrase:a[4],lore:a[5],fact:a[5],art:'cards/'+a[0]+'.webp'});
+    const isTag=n=>/&| and /i.test(n);
     function buildCatalog(){
       if(CATALOG)return CATALOG;
-      const seen={}, cat=[];
+      const seen={}, cat=[], used={};
+      /* what the roster page says about a name: champion, section */
+      const roster={};
       document.querySelectorAll('#view-crew .wr').forEach(card=>{
-        const img=card.querySelector('.pic img'),h=card.querySelector('h3');
-        if(!h)return;
-        const name=(h.textContent||'').trim();
-        /* Slug from the photo when it's there, otherwise from the name.
-           Roster photos carry onerror="this.remove()", so one failed image
-           load (a Pages rebuild, a bad connection) used to drop that fighter
-           from the catalog and hide every card of his in every locker. */
+        const h=card.querySelector('h3');if(!h)return;
+        const name=(h.textContent||'').trim();if(!name||roster[name])return;
+        const img=card.querySelector('.pic img');
         const src=(img&&img.getAttribute('src'))||'';const m=src.match(/roster\/([^\/]+)\.jpg/);
-        const slug=m?m[1]:name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-        if(!slug)return;
-        if(!inGame(name))return;                      /* game characters only */
-        const role=((card.querySelector('.role')||{}).textContent||'').trim();
-        const isChamp=!!card.querySelector('.hof');
-        const era=card.closest('.era'); const section=era?((era.querySelector('.tag')||{}).textContent||''):'';
+        const era=card.closest('.era');
+        roster[name]={slug:m?m[1]:name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''),
+          role:((card.querySelector('.role')||{}).textContent||'').trim(),
+          isChamp:!!card.querySelector('.hof'),
+          section:era?((era.querySelector('.tag')||{}).textContent||''):''};
+      });
+      const baseRar=name=>{const r=roster[name];
+        if(!r)return isTag(name)?'rare':'common';
+        if(r.isChamp||/champion/i.test(r.section))return 'superrare';
+        if(/hall of fame|legend/i.test(r.section))return 'rare';
+        return 'common';};
+      /* 1. The original cards for the game fighters keep their ids
+            (slug#base, #sig, #stat, #champ) so nobody's collection moves.
+            Each one takes a photo from that fighter's artwork: portraits
+            for base/stat, ringside for sig/champ. */
+      GAME_CHARS.forEach(name=>{
+        const r=roster[name];if(!r)return;
+        const arts=(ART_BY_NAME[name]||[]).slice();
+        const take=shot=>{let i=arts.findIndex(a=>a[2]===shot);if(i<0)i=0;if(!arts.length)return null;const a=arts.splice(i,1)[0];used[a[0]]=1;return a;};
         const fin=factVal(name,'Finisher'), home=factVal(name,'Hometown'), nick=factVal(name,'Nickname'),
               ht=factVal(name,'Height'), wt=factVal(name,'Weight');
-        let base='common';
-        if(isChamp||/champion/i.test(section))base='superrare';
-        else if(/hall of fame|legend/i.test(section))base='rare';
-        else if(/official/i.test(section))base='common';
-        const add=(idsuf,kind,rar,fact)=>{const id=slug+'#'+idsuf;if(seen[id])return;seen[id]=1;
-          cat.push({id:id,slug:slug,name:name,kind:kind,rar:rar,fact:fact||''});};
-        add('base','Roster Card',base,home?('Hometown: '+home):(nick||role||'JCW Roster'));
-        if(fin)add('sig','Signature Move',bump[base],fin);
-        if(ht&&wt)add('stat','Stat Line',base,ht+' · '+wt+(nick?(' · '+nick):''));
-        if(isChamp)add('champ','Champion',isChamp?'legendary':bump[base],role||section||'JCW Champion');
+        const base=baseRar(name);
+        const add=(idsuf,kind,rar,fact,shot)=>{const id=r.slug+'#'+idsuf;if(seen[id])return;seen[id]=1;
+          const a=take(shot);
+          cat.push(Object.assign({id:id,slug:r.slug,name:name,kind:kind,rar:rar,fact:fact||'',lore:fact||''},a?{pos:a[3],phrase:a[4],art:'cards/'+a[0]+'.webp',shot:a[2]==='R'?'Ringside':'Portrait'}:{}));};
+        add('base','Roster Card',base,home?('Hometown: '+home):(nick||r.role||'JCW Roster'),'P');
+        if(fin)add('sig','Signature Move',bump[base],fin,'R');
+        if(ht&&wt)add('stat','Stat Line',base,ht+' \u00b7 '+wt+(nick?(' \u00b7 '+nick):''),'P');
+        if(r.isChamp)add('champ','Champion','legendary',r.role||r.section||'JCW Champion','R');
+      });
+      /* 2. Every other photo is its own card. Rarity follows the roster
+            page like before (champions super rare, legends rare, everyone
+            else common; tag teams rare) and a ringside shot bumps one tier,
+            the same way a signature move does. */
+      ART.forEach(a=>{
+        if(used[a[0]]||seen[a[0]])return;seen[a[0]]=1;
+        const c=artCard(a);const r=roster[c.name];
+        c.slug=r?r.slug:c.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+        const base=baseRar(c.name);
+        c.rar=c.shot==='Ringside'?bump[base]:base;
+        c.kind=isTag(c.name)?'Tag Team':(c.shot==='Ringside'?'Ringside':'Roster Card');
+        if(!c.fact)c.fact=c.phrase;
+        cat.push(c);
       });
       CATALOG=cat; byRar={common:[],rare:[],superrare:[],legendary:[]};
       cat.forEach(c=>{(byRar[c.rar]||byRar.common).push(c);});
@@ -5097,6 +5134,7 @@ route();
       }catch(e){try{console.warn('[cards] prune error',e);}catch(_e){}}
     }
     window.jcwPruneLocker=pruneLocker;
+    window.jcwCardCatalog=function(){return buildCatalog().slice();};   /* read-only view for diagnostics */
 
     /* Count only cards that are actually in the set, so progress can't read
        "60 of 14 · 429%" while a locker still holds retired cards. */
@@ -5107,14 +5145,32 @@ route();
     }
     function esc(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
 
+    /* jcw-visuals draws the face when the module has loaded and the card
+       has artwork; otherwise the original photo-and-caption card. Both
+       keep the same outer .tcard, badges and click handlers. */
+    const V_RAR={common:'Common',rare:'Uncommon',superrare:'Rare',legendary:'Very Rare'};
     function cardEl(card,{owned,cnt,foil,locked}={}){
       const el=document.createElement('div');
-      el.className='tcard rc-'+card.rar+(foil?' foil':'')+(locked?' locked':'');
-      el.innerHTML='<div class="ph" style="background-image:url(\''+esc('roster/'+card.slug+'.jpg?v='+(window.ROSTER_V||'1'))+'\')"></div>'
-        +'<div class="grad"></div>'
-        +'<span class="rar">'+RAR_LBL[card.rar]+'</span>'
+      const V=window.JCWV, useArt=!!(V&&card.art);
+      el.className='tcard rc-'+card.rar+(foil?' foil':'')+(locked?' locked':'')+(useArt?' art':'');
+      const badges='<span class="rar">'+RAR_LBL[card.rar]+'</span>'
         +(owned&&cnt>1?'<span class="cnt">'+(cnt===Infinity?'\u221e':'x'+cnt)+'</span>':'')
-        +(foil?'<span class="cnt" style="right:auto;left:'+(owned&&cnt>1?'42px':'6px')+';">✨</span>':'')
+        +(foil?'<span class="cnt" style="right:auto;left:'+(owned&&cnt>1?'42px':'6px')+';">\u2728</span>':'');
+      if(useArt){
+        el.innerHTML='<div class="artslot"></div>'+badges;
+        try{
+          V.enhanceCard(el.querySelector('.artslot'),{
+            name:locked?'???':card.name, image:card.art,
+            rarity:V_RAR[card.rar]||'Common', finish:foil?'Holo Foil':'Standard',
+            editionLabel:RAR_LBL[card.rar]+' \u00b7 '+card.kind,
+            position:card.pos||'50% 50%', contain:card.shot==='Ringside',
+            phrase:locked?'UNDISCOVERED':(card.phrase||''), fact:locked?'':(card.lore||'')
+          });
+          return el;
+        }catch(e){el.classList.remove('art');}
+      }
+      el.innerHTML='<div class="ph" style="background-image:url(\''+esc(card.art||('roster/'+card.slug+'.jpg?v='+(window.ROSTER_V||'1')))+'\')"></div>'
+        +'<div class="grad"></div>'+badges
         +'<div class="meta"><div class="kind">'+esc(card.kind)+'</div>'
         +'<div class="nm">'+esc(locked?'???':card.name)+'</div>'
         +'<div class="fx">'+esc(locked?'Undiscovered':card.fact)+'</div></div>';
@@ -5147,6 +5203,7 @@ route();
       if(top)top.style.display='';
       if(filt)filt.style.display='';
       grid.style.display='';
+      try{if(window.jcwPackArt)window.jcwPackArt();}catch(_e){}
       try{if(window.jcwLoadGifts)jcwLoadGifts();}catch(_e){}
       try{if(window.jcwLoadTrades)jcwLoadTrades();}catch(_e){}
       const d=lkGet();
@@ -5260,12 +5317,19 @@ route();
         const el=cardEl(p.card,{owned:true,cnt:0,foil:p.foil,locked:false});
         if(p.isNew){const n=document.createElement('span');n.className='pk-new';n.textContent='NEW';el.appendChild(n);}
         box.appendChild(el);
+        /* foil burst — presentation only, after the pull is already saved */
+        if(p.foil&&window.JCWV){try{window.JCWV.playFoilBurst(el,{gold:p.card.rar==='legendary'});}catch(_e){}}
       });
       const t=document.getElementById('pk-title');if(t)t.textContent=(pulled.some(p=>p.foil)?'✨ ':'')+'Pack Opened!';
       const m=document.getElementById('pack-modal');if(m)m.classList.add('on');
     }
     (function wire(){
       const buy=document.getElementById('cards-buy');
+      /* booster art beside the button; the button keeps its handler and price */
+      window.jcwPackArt=function(){try{const V=window.JCWV,top=document.querySelector('#view-cards .cards-top');
+        if(!V||!top||document.getElementById('pack-art'))return;
+        const slot=document.createElement('div');slot.id='pack-art';slot.style.cssText='width:78px;flex:0 0 auto;';
+        slot.appendChild(V.createPackArtwork({name:'Lunacy Pack',tone:'lime'}));top.insertBefore(slot,top.firstChild);}catch(_e){}};
       if(buy){
         buy.addEventListener('click',openPack);
         try{const u=curUser();if(u&&(u.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1'||u.uid==='zRLXcejE4dWQRL0l07Bo19SO5j52')){buy.innerHTML='\u{1F0CF} Open a pack \u00b7 FREE';const ag=document.getElementById('pk-again');if(ag)ag.innerHTML='Open another \u00b7 FREE';}}catch(e){}
@@ -5924,5 +5988,14 @@ route();
 })();
 </script>
 <script src="ppv-tab.js?v=150"></script>
+<script type="module">
+/* JCW visuals: card faces, backs, booster art, foil burst. Presentation only.
+   Loads after the page; cards drawn before it arrives use the plain look and
+   the Cards page redraws once it's here. */
+import('./jcw-visuals/jcw-visuals.mjs').then(V=>{
+  window.JCWV=V;
+  if((location.hash||'')==='#cards'&&window.jcwCardsRender)jcwCardsRender();
+}).catch(e=>{try{console.warn('[cards] visuals module unavailable:',e&&e.message);}catch(_e){}});
+</script>
 </body>
 </html>
