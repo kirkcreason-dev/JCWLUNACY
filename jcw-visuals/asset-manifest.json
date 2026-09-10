@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "purpose": "Presentation only. Existing site and app ownership/trading services remain authoritative.",
+  "assets": {
+    "booster": {
+      "file": "assets/booster.webp",
+      "width": 600,
+      "height": 900
+    },
+    "cardBack": {
+      "file": "assets/card-back.webp",
+      "width": 600,
+      "height": 850
+    },
+    "foilBurst": {
+      "file": "assets/foil-burst.webp",
+      "width": 2048,
+      "height": 256,
+      "frameCount": 8,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "durationMs": 950,
+      "loop": false,
+      "blendMode": "screen",
+      "reducedMotion": "hide",
+      "frames": [
+        {
+          "index": 0,
+          "x": 0,
+          "y": 0,
+          "width": 256,
+          "height": 256
+        },
+        {
+          "index": 1,
+          "x": 256,
+          "y": 0,
+          "width": 256,
+          "height": 256
+        },
+        {
+          "index": 2,
+          "x": 512,
+          "y": 0,
+          "width": 256,
+          "height": 256
+        },
+        {
+          "index": 3,
+          "x": 768,
+          "y": 0,
+          "width": 256,
+          "height": 256
+        },
+        {
+          "index": 4,
+          "x": 1024,
+          "y": 0,
+          "width": 256,
+          "height": 256
+        },
+        {
+          "index": 5,
+          "x": 1280,
+          "y": 0,
+          "width": 256,
+          "height": 256
+        },
+        {
+          "index": 6,
+          "x": 1536,
+          "y": 0,
+          "width": 256,
+          "height": 256
+        },
+        {
+          "index": 7,
+          "x": 1792,
+          "y": 0,
+          "width": 256,
+          "height": 256
+        }
+      ]
+    }
+  },
+  "identity": "No Firebase paths, product prices, odds, card IDs, balances, or ownership are defined by this asset manifest."
+}
