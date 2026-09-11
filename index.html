@@ -3193,13 +3193,24 @@ function observeReveals(){
   window.JCW_VERIFIED=JCW_VERIFIED;window.JCW_MODS=JCW_MODS;
   function isVerified(uid){return !!(uid&&JCW_VERIFIED[uid]);}
   window.jcwIsVerified=isVerified;
-  /* slur filter — mask hard slurs in all chat surfaces */
+  /* language filter — hard slurs are blocked out entirely; cuss words keep
+     their first letter and lose the rest (s***), so the line still reads.
+     Applied where messages are drawn, so old messages get it too. Light
+     leetspeak (sh1t, f*ck, a$$) is caught; nothing is stored differently. */
+  const CUSS_RX=(function(){
+    const C={a:'[a@4*]',e:'[e3*]',i:'[i1!|*]',o:'[o0*]',u:'[u|v*]',s:'[s$5z]',t:'[t7]',c:'[c(k]',k:'[k]'};
+    const lt=w=>w.split('').map(ch=>C[ch]||ch).join('[\\W_]{0,1}');
+    const words=['fuck\\w*','motherfuck\\w*','shit\\w*','bullshit','bitch\\w*','asshole\\w*','ass','asses','dumbass\\w*','jackass\\w*',
+      'damn\\w*','goddamn\\w*','dick\\w*','cock\\w*','cunt\\w*','pussy','pussies','piss\\w*','bastard\\w*','whore\\w*','slut\\w*','twat\\w*','prick\\w*','wank\\w*','cum','cums','cumming'];
+    return new RegExp('\\b('+words.map(w=>{const m=w.match(/^([a-z]+)(.*)$/);return lt(m[1])+m[2];}).join('|')+')\\b','gi');
+  })();
   function chClean(t){
     try{
       return String(t||'')
-        .replace(/n+\s*[i1!¡l\|]+\s*g+\s*g*\s*[e3a4@]+\s*r+s?/gi,'\u2588\u2588\u2588\u2588')
-        .replace(/n+\s*[i1!¡l\|]+\s*g+\s*a+s?/gi,'\u2588\u2588\u2588\u2588')
-        .replace(/f+\s*a+\s*g+\s*g*\s*[o0]+\s*t+s?/gi,'\u2588\u2588\u2588\u2588');
+        .replace(/n+\s*[i1!¡l\|]+\s*g+\s*g*\s*[e3a4@]+\s*r+s?/gi,'████')
+        .replace(/n+\s*[i1!¡l\|]+\s*g+\s*a+s?/gi,'████')
+        .replace(/f+\s*a+\s*g+\s*g*\s*[o0]+\s*t+s?/gi,'████')
+        .replace(CUSS_RX,function(w){return w.charAt(0)+'*'.repeat(Math.max(2,w.length-1));});
     }catch(e){return t;}
   }
   function chRender(list){
