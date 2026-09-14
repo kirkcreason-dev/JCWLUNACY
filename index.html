@@ -3750,14 +3750,26 @@ function observeReveals(){
     }catch(_e){}
     try{if(window.toast)toast(title+(body?(' \u00b7 '+body):''),4200);}catch(_e){}
   }
-  function notifRender(list){
+  /* Notifications: the ones since you last opened the Locker are marked NEW;
+     older ones are dimmed and capped, and a Clear button deletes them for
+     good. "Seen" is stored in the cloud locker as well as on the device, so
+     a new phone or a cleared browser doesn't replay the same 25 pings. */
+  function notifRender(list,seen){
     const el=document.getElementById('lk-notifs');if(!el)return;
     if(!list.length){el.innerHTML='Quiet so far. Get in the chat.';return;}
-    el.innerHTML=list.map(n=>'<div style="padding:7px 2px;border-bottom:1px dashed rgba(240,179,43,.14);">'
+    seen=seen||0;
+    const fresh=list.filter(n=>(n.ts||0)>seen), old=list.filter(n=>(n.ts||0)<=seen).slice(0,8);
+    const row=(n,isNew)=>'<div style="padding:7px 2px;border-bottom:1px dashed rgba(240,179,43,.14);'+(isNew?'':'opacity:.55;')+'">'
+      +(isNew?'<span style="font-size:9px;font-weight:800;letter-spacing:.08em;color:#000;background:var(--acid);border-radius:8px;padding:1px 6px;margin-right:6px;vertical-align:middle;">NEW</span>':'')
       +'<b data-puid="'+pEsc(n.fu||'')+'" style="cursor:pointer;text-decoration:underline;">'+pEsc(n.from||'?')+'</b> '
       +pEsc(NOTIF_TXT[n.ty]||'pinged you')
       +(n.t?('<br><span style="color:var(--steel);font-size:12px;">&ldquo;'+pEsc(n.t)+'&rdquo;</span>'):'')
-      +'</div>').join('');
+      +'</div>';
+    el.innerHTML=fresh.map(n=>row(n,true)).join('')
+      +(old.length?('<div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--steel);padding:8px 2px 2px;">Earlier</div>'+old.map(n=>row(n,false)).join('')):'')
+      +'<p style="margin:10px 0 0;"><button class="btn line" id="notif-clear" style="font-size:12px;padding:6px 12px;">Clear all</button></p>';
+    const cb=document.getElementById('notif-clear');
+    if(cb)cb.onclick=function(){try{if(window.jcwClearNotifs)window.jcwClearNotifs();}catch(_e){}};
   }
   document.addEventListener('click',e=>{
     const b=e.target.closest('[data-puid]');
@@ -4404,21 +4416,43 @@ function observeReveals(){
           fbDB.ref('premiumMembers/'+user.uid).on('value',ps=>{const _p=(ps.val()===true)||(user.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1')||(user.uid==='zRLXcejE4dWQRL0l07Bo19SO5j52')||(!!JCW_JEFF&&user.uid===JCW_JEFF);if(_p!==lkPremIsOn){lkPremIsOn=_p;window.__lkPremOn=_p;try{lkPremRender();}catch(_e){}try{if(window.jcwGameLockUI)window.jcwGameLockUI();}catch(_e){}try{if((location.hash||'')==='#cards'&&window.jcwCardsRender)jcwCardsRender();}catch(_e){}}});
           jcwAskNotify();
           const NSEEN='jcw_notif_seen_'+user.uid;
-          window.jcwMarkNotifsSeen=function(newest){try{localStorage.setItem(NSEEN,String(newest||Date.now()));}catch(e){}
-            const b=document.getElementById('notif-badge');if(b)b.style.display='none';};
+          const notifSeen=()=>{let s=0;try{s=parseInt(localStorage.getItem(NSEEN))||0;}catch(e){}return Math.max(s,window.__notifSeenCloud||0);};
+          window.jcwMarkNotifsSeen=function(newest){
+            const ts=newest||Date.now();
+            if(ts<=notifSeen()){const b0=document.getElementById('notif-badge');if(b0)b0.style.display='none';return;}
+            try{localStorage.setItem(NSEEN,String(ts));}catch(e){}
+            window.__notifSeenCloud=Math.max(window.__notifSeenCloud||0,ts);
+            try{fbDB.ref('lockers/'+user.uid+'/notifSeen').set(ts);}catch(e){}
+            const b=document.getElementById('notif-badge');if(b)b.style.display='none';
+            try{notifRender(window.__notifList||[],ts);}catch(_e){}};
+          /* the cloud copy of "seen" rides in the locker node, read below */
+          fbDB.ref('lockers/'+user.uid+'/notifSeen').on('value',s=>{
+            const v=+s.val()||0;
+            if(v>(window.__notifSeenCloud||0)){window.__notifSeenCloud=v;try{if(window.__notifApply)window.__notifApply();}catch(_e){}}
+          });
+          window.jcwClearNotifs=function(){
+            const keys=window.__notifKeys||[];if(!keys.length)return;
+            const upd={};keys.forEach(k=>{upd[k]=null;});
+            fbDB.ref('notifications/'+user.uid).update(upd).then(()=>{try{toast('Notifications cleared',2000);}catch(_e){}}).catch(()=>{try{toast('Could not clear right now',2400);}catch(_e){}});
+          };
           fbDB.ref('notifications/'+user.uid).limitToLast(25).on('value',ns=>{
-            const L=[];ns.forEach(c=>{const v=c.val()||{};L.push(v);});L.reverse();
-            try{notifRender(L);}catch(_e){}
+            const L=[],K=[];ns.forEach(c=>{const v=c.val()||{};L.push(v);K.push(c.key);});L.reverse();
+            window.__notifList=L;window.__notifKeys=K;
+            window.__notifApply=function(){try{notifRender(L,notifSeen());}catch(_e){}
+              const b=document.getElementById('notif-badge');const u=L.filter(n=>(n.ts||0)>notifSeen());
+              if(b){if(u.length){b.textContent=u.length>9?'9+':String(u.length);b.style.display='flex';}else b.style.display='none';}};
+            try{notifRender(L,notifSeen());}catch(_e){}
             const newest=L.length?(L[0].ts||0):0;
-            let seen=0;try{seen=parseInt(localStorage.getItem(NSEEN))||0;}catch(e){}
+            const seen=notifSeen();
             const unseen=L.filter(n=>(n.ts||0)>seen);
             /* badge on the chat button */
             try{let b=document.getElementById('notif-badge');
               if(!b){const fab=document.getElementById('chat-fab');if(fab){b=document.createElement('span');b.id='notif-badge';b.style.cssText='position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--hot,#ff2f6d);color:#fff;font:700 11px system-ui;display:none;align-items:center;justify-content:center;box-shadow:0 0 8px rgba(255,47,109,.8);';fab.appendChild(b);}}
               if(b){if(unseen.length){b.textContent=unseen.length>9?'9+':String(unseen.length);b.style.display='flex';}else b.style.display='none';}
             }catch(_e){}
-            /* toast the newest unseen once */
-            if(unseen.length && newest>(window.__notifToastTs||0)){
+            /* toast the newest unseen once — but only a ping that just landed
+               (or is minutes old), never a replay of last week's on page load */
+            if(unseen.length && newest>(window.__notifToastTs||0) && (Date.now()-newest)<10*60000){
               window.__notifToastTs=newest;
               const n0=unseen[0];
               jcwPush((n0.from||'A Juggalo')+' '+(NOTIF_TXT[n0.ty]||'pinged you'), n0.t||'');
