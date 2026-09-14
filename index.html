@@ -1806,11 +1806,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
 
     <div class="games">
       <div class="game playable rev">
-        <span class="badge">Coming Soon</span>
+        <span class="badge">Lunatics Only</span>
         <h3>Lunacy Unlocked</h3>
-        <div class="sub">2D fighting &middot; Lunatics Only &middot; No download &middot; Online multiplayer</div>
+        <div class="sub">2D fighting &middot; 24 fighters &middot; Lunatics Only &middot; No download &middot; Online multiplayer</div>
         <p>The official JCW Lunacy fighting game &mdash; take the champions of the roster into the ring &mdash; combos, weapons and pinfalls. Play solo against the AI or hit <b>Quick Match</b> for online battles, right on this page. Part of <b>The Lunatics Only</b> &mdash; join the inner circle for the game, backstage content and trading cards.</p>
-        <button class="btn gold" id="play-bmr" disabled style="opacity:.6;cursor:default;">Coming soon</button>
+        <button class="btn gold" id="play-bmr">&#127918; Play Lunacy Unlocked</button>
       </div>
       <div class="game playable rev">
         <span class="badge">Lunatics Only</span>
@@ -2133,7 +2133,12 @@ function observeReveals(){
   const playBtn=document.getElementById('play-bmr');
   const gOverlay=document.getElementById('game-overlay');
   if(playBtn&&gOverlay){
-    function gameLockUI(){ playBtn.innerHTML='Coming soon'; playBtn.disabled=true; playBtn.style.opacity='.6'; playBtn.style.cursor='default'; }
+    /* The game is live. Lunatics get the play button; everyone else gets
+       pointed at the Lunatics Only page instead of a dead button. */
+    function gameLockUI(){
+      playBtn.disabled=false; playBtn.style.opacity=''; playBtn.style.cursor='';
+      playBtn.innerHTML=window.__lkPremOn?'\u{1F3AE} Play Lunacy Unlocked':'\u{1F3AA} Lunatics Only \u00b7 Join to play';
+    }
     window.jcwGameLockUI=gameLockUI;gameLockUI();
     const JCW_GAME_URL='https://kirkcreason-dev.github.io/JCWLUNACYUNLOCKED/';
     window.jcwOpenGame=function(){
@@ -2146,8 +2151,7 @@ function observeReveals(){
     };
     playBtn.addEventListener('click',()=>{
       if(window.__lkPremOn){window.jcwOpenGame();return;}
-      const csm=document.getElementById('cs-modal');
-      if(csm)csm.classList.add('on');
+      location.hash='#lunatics';
     });
     const csClose=document.getElementById('cs-close');
     if(csClose)csClose.addEventListener('click',()=>document.getElementById('cs-modal').classList.remove('on'));
@@ -4397,7 +4401,7 @@ function observeReveals(){
               }
             }catch(_e){}
           }
-          fbDB.ref('premiumMembers/'+user.uid).on('value',ps=>{const _p=(ps.val()===true)||(user.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1')||(user.uid==='zRLXcejE4dWQRL0l07Bo19SO5j52')||(!!JCW_JEFF&&user.uid===JCW_JEFF);if(_p!==lkPremIsOn){lkPremIsOn=_p;window.__lkPremOn=_p;try{lkPremRender();}catch(_e){}try{if((location.hash||'')==='#cards'&&window.jcwCardsRender)jcwCardsRender();}catch(_e){}}});
+          fbDB.ref('premiumMembers/'+user.uid).on('value',ps=>{const _p=(ps.val()===true)||(user.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1')||(user.uid==='zRLXcejE4dWQRL0l07Bo19SO5j52')||(!!JCW_JEFF&&user.uid===JCW_JEFF);if(_p!==lkPremIsOn){lkPremIsOn=_p;window.__lkPremOn=_p;try{lkPremRender();}catch(_e){}try{if(window.jcwGameLockUI)window.jcwGameLockUI();}catch(_e){}try{if((location.hash||'')==='#cards'&&window.jcwCardsRender)jcwCardsRender();}catch(_e){}}});
           jcwAskNotify();
           const NSEEN='jcw_notif_seen_'+user.uid;
           window.jcwMarkNotifsSeen=function(newest){try{localStorage.setItem(NSEEN,String(newest||Date.now()));}catch(e){}
