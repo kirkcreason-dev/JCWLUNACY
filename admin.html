@@ -759,10 +759,11 @@
      Grants and revocations live in the RTDB `mods` node, which index.html
      subscribes to live — a change here takes effect without a deploy.
 
-     The eleven uids baked into JCW_MODS in index.html are a separate,
-     older mechanism. isMod() checks the hardcoded list FIRST, so a
-     built-in mod cannot be switched off from here; they are listed
-     read-only rather than given a button that would quietly do nothing. */
+     The eleven uids baked into JCW_MODS in index.html are the day-one
+     mods. They can be switched off too: a removal writes modsRemoved/<uid>,
+     which index.html checks after the hardcoded list. Digital Duke can't be
+     removed. The house (Digital Duke and Nocturnal Deadhead) can do all of
+     this; index.html also offers the same buttons on profile pages. */
   const MOD_BUILTIN={
     'oYrNiXZywhexmLqRQO7j1iyA1Bh1':'Digital Duke',
     'L1feNpUUBPfe9ONSwxpgwqcVFPv1':'hurray69',
@@ -782,8 +783,9 @@
     const el=$('modList');if(!el)return;
     try{
       const db=await statsInit();
-      const [live,lockers]=await Promise.all([
+      const [live,removed,lockers]=await Promise.all([
         db.ref('mods').once('value').then(s=>s.val()||{}).catch(()=>({})),
+        db.ref('modsRemoved').once('value').then(s=>s.val()||{}).catch(()=>({})),
         db.ref('lockers').once('value')
       ]);
       MOD_NAMES={};
@@ -796,9 +798,11 @@
             +'<div style="color:var(--txt);font-weight:700">'+esc(nm||label||uid)+(dead?' <span class="err" style="font-weight:400">&mdash; no account with this ID</span>':'')+'</div>'
             +'<div class="muted" style="font-size:11px;word-break:break-all">'+esc(uid)+'</div>'
           +'</div>'
-          +(builtin
-             ? '<span class="muted" style="font-size:11.5px;white-space:nowrap">built into the site</span>'
-             : '<button class="ghost sm" data-modrevoke="'+esc(uid)+'" style="border-color:var(--hot);color:var(--hot)">Remove</button>')
+          +(uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1'
+             ? '<span class="muted" style="font-size:11.5px;white-space:nowrap">the owner</span>'
+             : (builtin&&removed[uid]===true)
+               ? '<span class="err" style="font-size:11.5px;white-space:nowrap;margin-right:8px">removed</span><button class="ghost sm" data-modrestore="'+esc(uid)+'">Restore</button>'
+               : '<button class="ghost sm" data-modrevoke="'+esc(uid)+'" data-builtin="'+(builtin?'1':'0')+'" style="border-color:var(--hot);color:var(--hot)">Remove</button>')
         +'</div>';
       };
       const liveIds=Object.keys(live).filter(k=>live[k]===true);
@@ -808,7 +812,7 @@
            : '<div class="muted" style="padding:6px 0">Nobody yet. Add someone above.</div>';
       const builtIds=Object.keys(MOD_BUILTIN);
       html+='<div style="margin:14px 0 4px;color:var(--txt);font-weight:700">Built into index.html &middot; '+builtIds.length+'</div>';
-      html+='<div class="muted" style="font-size:11.5px;margin-bottom:2px">These are hardcoded in the site file. They cannot be removed from this page &mdash; that needs a code change.</div>';
+      html+='<div class="muted" style="font-size:11.5px;margin-bottom:2px">The day-one mods. Remove switches one off (modsRemoved); Restore turns them back on.</div>';
       html+=builtIds.map(u=>row(u,MOD_BUILTIN[u],true)).join('');
       el.innerHTML=html;
     }catch(e){el.innerHTML='<span class="err">Could not read the mod list.</span>';}
@@ -823,13 +827,13 @@
       let uid=null,found=null;
       snap.forEach(c=>{const v=c.val();if(v&&String(v.name||'').trim().toLowerCase()===nm){uid=c.key;found=v;}});
       if(!uid){modSay('No locker with that name. They need to sign in on the site and set their name first.','err');return;}
-      if(MOD_BUILTIN[uid]){modSay((found.name||'They')+' is already a mod, built into the site.','ok');return;}
+      if(MOD_BUILTIN[uid]){await db.ref('modsRemoved/'+uid).remove();modSay((found.name||'They')+' is a day-one mod — switched back on.','ok');modLoad();return;}
       await db.ref('mods/'+uid).set(true);
       $('modName').value='';
       modSay((found.name||'They')+' is a mod now — it takes effect for them straight away.','ok');
       modLoad();
     }catch(e){
-      modSay('Blocked — only Digital Duke’s account can change the mod list. Sign in as that account above.','err');
+      modSay('Blocked — only the house (Digital Duke or Nocturnal Deadhead) can change the mod list. Sign in as one of those above.','err');
     }
   };
   document.addEventListener('click',async e=>{
@@ -841,9 +845,21 @@
       const db=await statsInit();
       if(!statsAuth||!statsAuth.currentUser){modSay('Sign in above first.','err');return;}
       await db.ref('mods/'+uid).remove();
+      if(b.getAttribute('data-builtin')==='1')await db.ref('modsRemoved/'+uid).set(true);
       modSay('Removed '+who+'.','ok');
       modLoad();
-    }catch(_e){modSay('Blocked — sign in as Digital Duke to change the mod list.','err');}
+    }catch(_e){modSay('Blocked — sign in as the house (Digital Duke or Nocturnal Deadhead) to change the mod list.','err');}
+  });
+  document.addEventListener('click',async e=>{
+    const b=e.target.closest('[data-modrestore]');if(!b)return;
+    const uid=b.getAttribute('data-modrestore');
+    try{
+      const db=await statsInit();
+      if(!statsAuth||!statsAuth.currentUser){modSay('Sign in above first.','err');return;}
+      await db.ref('modsRemoved/'+uid).remove();
+      modSay('Restored '+(MOD_NAMES[uid]||uid)+'.','ok');
+      modLoad();
+    }catch(_e){modSay('Blocked — sign in as the house to change the mod list.','err');}
   });
   $('awardBtn').onclick=()=>pointsOp('add');
   $('setBtn').onclick=()=>pointsOp('set');

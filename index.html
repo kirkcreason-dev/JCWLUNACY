@@ -3175,11 +3175,21 @@ function observeReveals(){
      the admin page or the Firebase console without shipping a new index.html.
      The security rules already honour this node. */
   let JCW_MODS_LIVE={};
+  /* modsRemoved/<uid> in the database switches OFF a mod — including the
+     day-one ones baked into JCW_MODS above. Digital Duke can never be
+     switched off. */
+  let JCW_MODS_REMOVED={};
+  /* The house: the owner plus Nocturnal Deadhead. The house can add and
+     remove mods (any of them but the Duke) and can hand out any card in the
+     set from the house collection, the way the Duke does. */
+  const JCW_HOUSE={'oYrNiXZywhexmLqRQO7j1iyA1Bh1':1,'TwkyqKXbJ6NV8VNewfofluB1sji2':1,'LmjvpMlKlVNpyoXajb74P5guaqu2':1};
+  function isHouseUid(uid){return !!(uid&&JCW_HOUSE[uid]);}
+  window.jcwIsHouseUid=isHouseUid;
   /* Anywhere we asked "is this OTHER person a mod" we were reading only the
      hardcoded map, so anyone promoted through the mods node got the mod tab
      but no mod DM, no MOD tag, and no Message button on their profile —
      invisible to the very feature they had just been given. */
-  function isModUid(uid){return !!(uid&&(JCW_MODS[uid]||JCW_MODS_LIVE[uid]===true));}
+  function isModUid(uid){return !!(uid&&(JCW_MODS[uid]||JCW_MODS_LIVE[uid]===true)&&!(JCW_MODS_REMOVED[uid]===true&&uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'));}
   window.jcwIsModUid=isModUid;
   function isMod(){return !!(lkUser&&isModUid(lkUser.uid));}
   window.jcwIsMod=isMod;
@@ -3976,6 +3986,7 @@ function observeReveals(){
               +'<button class="btn line" data-rel="rival" style="'+(myRel==='rival'?'border-color:var(--hot);color:var(--hot);':'')+'">'+(myRel==='rival'?'&#9876; RIVAL':'Mark as Rival')+'</button>')
           +(isMod()&&isModUid(uid)?'<button class="btn" id="prof-dm" style="margin-left:8px;background:var(--acid);color:#000;">&#128172; Message</button>':'')
           +(window.__lkPremOn?'<button class="btn line" id="prof-gift" style="margin-left:8px;">&#127183; Send a card</button>':'')
+          +(isHouseUid(lkUser.uid)&&uid!==DUKE?('<button class="btn line" id="prof-modtoggle" data-on="'+(isModUid(uid)?'0':'1')+'" style="margin-left:8px;'+(isModUid(uid)?'border-color:var(--hot);color:var(--hot);':'border-color:var(--gold);color:var(--gold);')+'">'+(isModUid(uid)?'&#10006; Remove mod':'&#9733; Make mod')+'</button>'):'')
           +'</p>';
       }
       if(uid==='zRLXcejE4dWQRL0l07Bo19SO5j52'){
@@ -4069,6 +4080,13 @@ function observeReveals(){
     if(e.target.dataset&&e.target.dataset.wdel){
       if(fbDB&&isMod()&&confirm('Delete this wall post?'))
         fbDB.ref('walls/'+uid+'/'+e.target.dataset.wdel).remove().then(()=>window.profRender(uid));
+      return;
+    }
+    if(e.target.id==='prof-modtoggle'){
+      const on=e.target.dataset.on==='1';
+      const host2=document.getElementById('prof-body');const nm=(host2&&host2.querySelector('h2'))?host2.querySelector('h2').textContent.replace(/online|offline/gi,'').trim():'this Juggalo';
+      if(!confirm(on?('Make '+nm+' a mod?'):('Remove mod powers from '+nm+'?')))return;
+      window.jcwSetMod(uid,on).then(ok=>{try{toast(ok?(on?(nm+' is a mod now'):(nm+' is no longer a mod')):'Could not change that \u2014 the mods rule may not be published yet',3600);}catch(_e){}if(ok&&window.profRender)setTimeout(()=>window.profRender(uid),300);});
       return;
     }
     if(e.target.id==='prof-dm'){const host2=document.getElementById('prof-body');const nm=(host2&&host2.querySelector('h2'))?host2.querySelector('h2').textContent:'Mod';window.dmOpen(uid,nm);return;}
@@ -4317,6 +4335,22 @@ function observeReveals(){
         try{if(window.jcwUpdateModUI)window.jcwUpdateModUI();}catch(_e){}
         try{if(window.lkRender)window.lkRender();}catch(_e){}
       },()=>{});
+      fbDB.ref('modsRemoved').on('value',snap=>{
+        JCW_MODS_REMOVED=snap.val()||{};
+        try{if(window.jcwUpdateModUI)window.jcwUpdateModUI();}catch(_e){}
+        try{if(window.lkRender)window.lkRender();}catch(_e){}
+        try{if((location.hash||'').indexOf('#u-')===0&&window.profRender)window.profRender((location.hash||'').slice(3));}catch(_e){}
+      },()=>{});
+      /* the house adds / removes mods from a profile page */
+      window.jcwSetMod=function(uid,on){
+        if(!lkUser||!isHouseUid(lkUser.uid)||!uid)return Promise.resolve(false);
+        if(uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1')return Promise.resolve(false);   /* the Duke stays */
+        const builtin=!!JCW_MODS[uid];
+        const w=on
+          ? Promise.all([fbDB.ref('modsRemoved/'+uid).remove(), builtin?Promise.resolve():fbDB.ref('mods/'+uid).set(true)])
+          : Promise.all([fbDB.ref('mods/'+uid).remove(), builtin?fbDB.ref('modsRemoved/'+uid).set(true):Promise.resolve()]);
+        return w.then(()=>true).catch(()=>false);
+      };
       /* who's a Lunatic — powers the LUNATIC chips in chat, profiles and search */
       fbDB.ref('premiumMembers').on('value',snap=>{
         window.__lkPremSet=snap.val()||{};
@@ -5168,6 +5202,9 @@ route();
       return cat;
     }
     function isDuke(){try{const u=curUser();return !!(u&&u.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1');}catch(e){return false;}}
+    /* the house = the Duke or Nocturnal Deadhead: can send / offer any card
+       in the set, from the house collection, without it costing a copy */
+    function isHouse(){try{const u=curUser();return !!(u&&window.jcwIsHouseUid&&window.jcwIsHouseUid(u.uid));}catch(e){return false;}}
     /* Limited editions. editions/<cardId> holds how many copies have been
        claimed; a pull runs a transaction that only succeeds while the count
        is under the card's cap, and the number it lands on is that copy's
@@ -5474,19 +5511,19 @@ route();
       if(!curUser()){toast('Log into your Locker first');location.hash='#locker';return;}
       if(!window.__lkPremOn){toast('Sending cards is Lunatics Only');return;}
       buildCatalog();const c=coll();
-      const dupes=CATALOG.filter(cd=>isDuke()||(c[cd.id]&&c[cd.id].n>=2)); /* Duke is the house — can send any card */
+      const dupes=CATALOG.filter(cd=>isHouse()||(c[cd.id]&&c[cd.id].n>=2)); /* the house can send any card */
       const to=document.getElementById('gift-to'); if(to)to.textContent='Send a card to '+toName;
       const box=document.getElementById('gift-cards'); if(!box)return;
       const m=document.getElementById('gift-modal'); if(m){m.dataset.uid=toUid;m.dataset.name=toName;}
       if(!dupes.length){box.innerHTML='<p class="muted">You need a duplicate (2 or more of a card) to send one &mdash; you always keep your last copy. Open more packs!</p>';}
-      else{box.innerHTML=isDuke()?'<label style="grid-column:1/-1;display:flex;align-items:center;gap:8px;color:var(--gold);font-size:14px;cursor:pointer;"><input type="checkbox" id="gift-foil-tgl" style="width:18px;height:18px;accent-color:#ffd028;"> Send as &#10024; foil</label>':'';
-        if(isDuke()){const tg=document.getElementById('gift-foil-tgl');if(tg){tg.checked=localStorage.getItem('jcw_duke_foil')!=='0';tg.addEventListener('change',()=>{try{localStorage.setItem('jcw_duke_foil',tg.checked?'1':'0');}catch(_e){}});}}
-        dupes.forEach(cd=>{const oo=c[cd.id]||{n:(isDuke()?Infinity:0),foil:false};const el=cardEl(cd,{owned:true,cnt:oo.n,foil:oo.foil,locked:false});el.style.cursor='pointer';el.title='Send this card';el.addEventListener('click',()=>doSendCard(toUid,toName,cd.id));box.appendChild(el);});}
+      else{box.innerHTML=isHouse()?'<label style="grid-column:1/-1;display:flex;align-items:center;gap:8px;color:var(--gold);font-size:14px;cursor:pointer;"><input type="checkbox" id="gift-foil-tgl" style="width:18px;height:18px;accent-color:#ffd028;"> Send as &#10024; foil</label>':'';
+        if(isHouse()){const tg=document.getElementById('gift-foil-tgl');if(tg){tg.checked=localStorage.getItem('jcw_duke_foil')!=='0';tg.addEventListener('change',()=>{try{localStorage.setItem('jcw_duke_foil',tg.checked?'1':'0');}catch(_e){}});}}
+        dupes.forEach(cd=>{const oo=c[cd.id]||{n:(isHouse()?Infinity:0),foil:false};const el=cardEl(cd,{owned:true,cnt:oo.n,foil:oo.foil,locked:false});el.style.cursor='pointer';el.title='Send this card';el.addEventListener('click',()=>doSendCard(toUid,toName,cd.id));box.appendChild(el);});}
       if(m)m.classList.add('on');
     };
     function doSendCard(toUid,toName,cardId){
       if(!db()||!curUser())return;
-      if(!isDuke()){
+      if(!isHouse()){
         const d=lkGet();d.cards=d.cards||{};const cur=d.cards[cardId];
         if(!cur||cur.n<2){if(window.toast)toast('You need to keep at least one copy');return;}
         cur.n-=1;
@@ -5496,7 +5533,7 @@ route();
       }
       const card=catById(cardId);
       /* the house gifting a limited card still burns a real serial */
-      if(isDuke()&&card&&card.cap){
+      if(isHouse()&&card&&card.cap){
         claimSerial(card).then(function(sn){
           if(!sn){if(window.toast)toast(card.name+' is sold out \u2014 all '+card.cap+' are claimed',4200);return;}
           window.__giftSerial=sn; doSendCardNow(toUid,toName,cardId,card);
@@ -5509,7 +5546,7 @@ route();
       const mySerial=window.__giftSerial||0; window.__giftSerial=0;
       /* put the copy back if the write is refused — never claim "sent" unless it landed */
       function refund(why){
-        if(!isDuke()){
+        if(!isHouse()){
           const d2=lkGet();d2.cards=d2.cards||{};
           const c2=d2.cards[cardId]||{n:0,foil:false};
           if(mySerial){c2.serials=(c2.serials||[]).concat([mySerial]);}
@@ -5522,7 +5559,7 @@ route();
       let sendDone=false;
       try{
         const sf=(function(){try{
-          if(isDuke()){const t=document.getElementById('gift-foil-tgl');return !!(t&&t.checked);} /* the house picks */
+          if(isHouse()){const t=document.getElementById('gift-foil-tgl');return !!(t&&t.checked);} /* the house picks */
           const cc=(lkGet().cards||{})[cardId];return !!(cc&&cc.foil);
         }catch(e){return false;}})();
         const gp={id:cardId,from:curUser().uid,fromName:(lkGet().name||'A Juggalo'),ts:Date.now(),foil:sf};
@@ -5619,7 +5656,7 @@ route();
       buildCatalog();
       const want=catById(wantId);if(!want)return;
       const c=coll();
-      const mine=CATALOG.filter(cd=>{if(isDuke())return true;const o=c[cd.id];return o&&o.n>=2;}); /* Duke is the house — can offer any card */
+      const mine=CATALOG.filter(cd=>{if(isHouse())return true;const o=c[cd.id];return o&&o.n>=2;}); /* the house can offer any card */
       const box=document.getElementById('trade-offer-cards');
       const hd=document.getElementById('trade-want');
       const m=document.getElementById('trade-modal');
@@ -5631,10 +5668,10 @@ route();
       if(!mine.length){
         box.innerHTML='<p class="muted">You need a <b>duplicate</b> card to offer (2 or more of one card) so you keep your own copy. Open more packs first!</p>';
       }else{
-        box.innerHTML=isDuke()?'<label style="grid-column:1/-1;display:flex;align-items:center;gap:8px;color:var(--gold);font-size:14px;cursor:pointer;"><input type="checkbox" id="trade-foil-tgl" style="width:18px;height:18px;accent-color:#ffd028;"> Offer as &#10024; foil</label>':'';
-        if(isDuke()){const tg2=document.getElementById('trade-foil-tgl');if(tg2){tg2.checked=localStorage.getItem('jcw_duke_foil')!=='0';tg2.addEventListener('change',()=>{try{localStorage.setItem('jcw_duke_foil',tg2.checked?'1':'0');}catch(_e){}});}}
+        box.innerHTML=isHouse()?'<label style="grid-column:1/-1;display:flex;align-items:center;gap:8px;color:var(--gold);font-size:14px;cursor:pointer;"><input type="checkbox" id="trade-foil-tgl" style="width:18px;height:18px;accent-color:#ffd028;"> Offer as &#10024; foil</label>':'';
+        if(isHouse()){const tg2=document.getElementById('trade-foil-tgl');if(tg2){tg2.checked=localStorage.getItem('jcw_duke_foil')!=='0';tg2.addEventListener('change',()=>{try{localStorage.setItem('jcw_duke_foil',tg2.checked?'1':'0');}catch(_e){}});}}
         mine.forEach(cd=>{
-          const o=c[cd.id]||{n:(isDuke()?Infinity:0),foil:false};
+          const o=c[cd.id]||{n:(isHouse()?Infinity:0),foil:false};
           const el=cardEl(cd,{owned:true,cnt:o.n,foil:o.foil,locked:false});
           el.style.cursor='pointer';el.title='Offer this card';
           el.addEventListener('click',()=>sendTrade(toUid,toName,wantId,cd.id));
@@ -5650,10 +5687,10 @@ route();
       if(!D||!u){toast('Sign in first');return;}
       let offerFoil=false;
       try{
-        if(isDuke()){const tg=document.getElementById('trade-foil-tgl');offerFoil=!!(tg&&tg.checked);} /* the house picks */
+        if(isHouse()){const tg=document.getElementById('trade-foil-tgl');offerFoil=!!(tg&&tg.checked);} /* the house picks */
         else{const cc=(lkGet().cards||{})[offerId];offerFoil=!!(cc&&cc.foil);}
       }catch(e){}
-      if(!isDuke()){
+      if(!isHouse()){
         const d=lkGet();d.cards=d.cards||{};const cur=d.cards[offerId];
         if(!cur||cur.n<2){toast('You need to keep at least one copy');return;}
         cur.n-=1;d.cards[offerId]=cur;lkSet(d);   /* escrow */
@@ -5704,7 +5741,7 @@ route();
       const mineWant=d.cards[t.wantId];
       if(!mineWant||mineWant.n<1){toast('You don’t have that card');return;}
       const wantFoil=!!(mineWant&&mineWant.foil);
-      if(!isDuke()){ mineWant.n-=1; if(mineWant.n<=0)delete d.cards[t.wantId]; else d.cards[t.wantId]=mineWant; }
+      if(!isHouse()){ mineWant.n-=1; if(mineWant.n<=0)delete d.cards[t.wantId]; else d.cards[t.wantId]=mineWant; }
       const got=d.cards[t.offerId]||{n:0,foil:false};got.n=(got.n||0)+1;if(t.offerFoil===true)got.foil=true;d.cards[t.offerId]=got;
       lkSet(d);
       /* send their side to the proposer's inbox */
