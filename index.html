@@ -5124,30 +5124,37 @@ route();
             Each one takes a photo from that fighter's artwork: portraits
             for base/stat, ringside for sig/champ. */
       /* Every approved wrestler on the roster page gets the original cards:
-         Roster Card, Signature Move, Stat Line (and Champion for a title
-         holder), always on their roster photo — the way the set started.
-         The kit photo shots are separate cards on top of these. Ratings
-         come from the talent sheet. */
+         Roster Card on the roster photo, then Signature Move, Stat Line and
+         Champion (for a title holder) — each on a DIFFERENT photo of that
+         wrestler from the kit, so no two cards share a picture. A wrestler
+         with no spare photo only gets the Roster Card. Leftover kit shots
+         become cards of their own. Ratings come from the talent sheet. */
+      const used={};
       Object.keys(roster).forEach(name=>{
         const r=roster[name];if(!r||!hasConsent(name))return;
         const T=TALENT[name]||null;
+        const arts=(ART_BY_NAME[name]||[]).slice();
+        const take=shot=>{if(!arts.length)return null;let i=arts.findIndex(a=>a[2]===shot);if(i<0)i=0;const a=arts.splice(i,1)[0];used[a[0]]=1;return a;};
         const fin=(T&&T[4])||factVal(name,'Finisher'), home=factVal(name,'Hometown'), nick=factVal(name,'Nickname'),
               ht=factVal(name,'Height'), wt=factVal(name,'Weight');
         const base=baseRar(name);
-        const add=(idsuf,kind,rar,fact)=>{const id=r.slug+'#'+idsuf;if(seen[id])return;seen[id]=1;
-          cat.push({id:id,slug:r.slug,name:name,kind:kind,rar:rar,fact:fact||'',lore:fact||'',pos:'50% 0%',phrase:'',art:'roster/'+r.slug+'.jpg',shot:'Portrait'});};
-        add('base','Roster Card',base,home?('Hometown: '+home):(nick||r.role||'JCW Roster'));
-        if(fin)add('sig','Signature Move',bump[base],'Finisher: '+fin);
-        if(T)add('stat','Stat Line',base,'PWR '+T[0]+' \u00b7 SPD '+T[1]+' \u00b7 TEC '+T[2]+' \u00b7 TGH '+T[3]);
-        else if(ht&&wt)add('stat','Stat Line',base,ht+' \u00b7 '+wt+(nick?(' \u00b7 '+nick):''));
-        if(r.isChamp)add('champ','Champion','legendary',r.role||r.section||'JCW Champion');
+        const add=(idsuf,kind,rar,fact,shot)=>{const id=r.slug+'#'+idsuf;if(seen[id])return;
+          let art='roster/'+r.slug+'.jpg',pos='50% 0%',phrase='';
+          if(shot){const a=take(shot);if(!a)return;art='cards/'+a[0]+'.webp';pos=a[3];phrase=a[4];}   /* no spare photo = no card */
+          seen[id]=1;
+          cat.push({id:id,slug:r.slug,name:name,kind:kind,rar:rar,fact:fact||'',lore:fact||'',pos:pos,phrase:phrase,art:art,shot:'Portrait'});};
+        add('base','Roster Card',base,home?('Hometown: '+home):(nick||r.role||'JCW Roster'),null);
+        if(r.isChamp)add('champ','Champion','legendary',r.role||r.section||'JCW Champion','R');
+        if(fin)add('sig','Signature Move',bump[base],'Finisher: '+fin,'R');
+        if(T)add('stat','Stat Line',base,'PWR '+T[0]+' \u00b7 SPD '+T[1]+' \u00b7 TEC '+T[2]+' \u00b7 TGH '+T[3],'P');
+        else if(ht&&wt)add('stat','Stat Line',base,ht+' \u00b7 '+wt+(nick?(' \u00b7 '+nick):''),'P');
       });
       /* 2. Every other photo is its own card. Rarity follows the roster
             page like before (champions super rare, legends rare, everyone
             else common; tag teams rare) and a ringside shot bumps one tier,
             the same way a signature move does. */
       ART.forEach(a=>{
-        if(seen[a[0]]||!hasConsent(a[1]))return;seen[a[0]]=1;
+        if(used[a[0]]||seen[a[0]]||!hasConsent(a[1]))return;seen[a[0]]=1;
         const c=artCard(a);const r=roster[c.name];
         c.slug=r?r.slug:c.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
         const base=baseRar(c.name);
