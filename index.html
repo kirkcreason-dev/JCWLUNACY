@@ -898,28 +898,6 @@ body:not(.jcw-member) #chat-fab{display:none!important;}
 .usearch .us-note{padding:11px 13px;color:var(--steel);font-size:12.5px;}
 #ch-board .usearch{margin:0 0 12px;}
 
-/* ===== PERSISTENT VOTE BANNER — stays until the visitor votes ===== */
-#vote-bar{display:none;position:fixed;top:var(--nav-h);left:0;right:0;z-index:99;
-  background:linear-gradient(180deg,rgba(10,14,4,.98),rgba(6,8,3,.98));
-  border-bottom:1px solid var(--acid);box-shadow:0 6px 22px rgba(0,0,0,.55);}
-#vote-bar.on{display:block;}
-#vote-bar .vb-in{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;
-  gap:8px 14px;padding:9px var(--pad);max-width:1180px;margin:0 auto;}
-#vote-bar .ch-poll{border:none;background:none;padding:0;margin:0;display:flex;
-  align-items:center;flex-wrap:wrap;gap:8px 12px;}
-#vote-bar .ch-poll h5{font-size:12.5px;color:var(--acid);letter-spacing:.08em;margin:0;white-space:nowrap;}
-#vote-bar .ch-poll .po{display:inline-block;width:auto;margin:0;padding:6px 14px;
-  font-size:12.5px;border:1px solid var(--seam);background:rgba(0,0,0,.45);color:var(--bone);border-radius:3px;}
-#vote-bar .ch-poll .po:hover{border-color:var(--acid);color:var(--acid);}
-#vote-bar .vb-more{font-size:11.5px;color:var(--steel);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;}
-#vote-bar .vb-more:hover{color:var(--gold);}
-@media (max-width:899px){#vote-bar{top:var(--nav-h);}}
-@media (max-width:640px){
-  #vote-bar .ch-poll h5{white-space:normal;flex:1 0 100%;text-align:center;}
-  #vote-bar .ch-poll .po{flex:1 1 44%;text-align:center;}
-  #vote-bar .vb-more{flex:1 0 100%;text-align:center;}
-}
-.chatpop #vote-bar{display:none!important;}
 
 
 
@@ -998,16 +976,6 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <a href="#about" data-r="about"><img src="nav/nav-about.webp" onerror="this.onerror=null;this.src='nav/nav-about.png'" alt="About"></a>
   <a href="https://www.psychopathicrecords.com/jcwtours" target="_blank" rel="noopener"><img src="nav/nav-tickets.webp" onerror="this.onerror=null;this.src='nav/nav-tickets.png'" alt="Tickets"></a>
 </nav>
-<div id="vote-bar" role="region" aria-label="Fan vote">
-  <div class="vb-in">
-    <div class="ch-poll" data-poll="belt-importance">
-      <h5>Which belt matters more?</h5>
-      <button class="po" data-i="0"><u></u><span>JCW World Title &mdash; legacy</span></button>
-      <button class="po" data-i="1"><u></u><span>Lunacy Title &mdash; today</span></button>
-    </div>
-    <a class="vb-more" href="#vote">All votes &rarr;</a>
-  </div>
-</div>
 
 
 <!-- ==================== HOME ==================== -->
@@ -5823,52 +5791,6 @@ route();
   fill();
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fill);
   setTimeout(fill,1200);
-})();
-</script>
-<script>
-/* ===== persistent vote banner: sits under the nav until a vote is cast ===== */
-(function(){
-  var KEY='belt-importance', bar=document.getElementById('vote-bar');
-  if(!bar)return;
-  var nav=document.querySelector('nav.top');
-  function voted(){
-    try{var P=JSON.parse(localStorage.getItem('jcw_polls'))||{};
-        return (P.mine||{})[KEY]!==undefined;}catch(e){return false;}
-  }
-  function tally(){
-    try{var P=JSON.parse(localStorage.getItem('jcw_polls'))||{};
-        var t=(P.t||{})[KEY]||{},n=0;for(var k in t)n+=(+t[k]||0);return n;}catch(e){return 0;}
-  }
-  var basePad='';
-  function layout(){
-    if(!bar.classList.contains('on'))return;
-    var navH=(nav&&nav.offsetHeight)||0;
-    if(navH)bar.style.top=navH+'px';          /* else the CSS default stands */
-    var barH=bar.offsetHeight||0;
-    if(navH&&barH)document.body.style.paddingTop=(navH+barH)+'px';
-  }
-  function hide(){
-    bar.classList.remove('on');
-    document.body.style.paddingTop=basePad;
-  }
-  function show(){
-    if(bar.classList.contains('on'))return;
-    bar.classList.add('on');
-    layout();
-  }
-  function tick(){
-    var tot=document.getElementById('vt-total');
-    if(tot){var n=tally();tot.textContent=n?(n+(n===1?' vote':' votes')+' cast'):'Live results';}
-    if(voted()){hide();return true;}
-    show();
-    return false;
-  }
-  addEventListener('resize',function(){clearTimeout(window.__vbT);window.__vbT=setTimeout(layout,120);});
-  addEventListener('hashchange',function(){setTimeout(layout,60);});
-  setTimeout(function(){
-    if(tick())return;
-    var iv=setInterval(function(){if(tick())clearInterval(iv);},1200);
-  },900);
 })();
 </script>
 <script>
