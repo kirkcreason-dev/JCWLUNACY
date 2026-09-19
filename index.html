@@ -4482,7 +4482,17 @@ function observeReveals(){
               merged.watched=Math.max(d.watched||0,cloud.watched||0);
               merged.played=!!(d.played||cloud.played);
               merged.lastCheckin=(d.lastCheckin||'')>(cloud.lastCheckin||'')?(d.lastCheckin||''):(cloud.lastCheckin||'');
-              merged.cards=Object.assign({},window.jcwDecCards(cloud.cards||{}),d.cards||{});
+              /* Cards: the cloud copy is the newest write from ANY device (the
+                 phone app included), so it wins per card. Local-only cards
+                 stay, and a local count can only add to a cloud count when
+                 the cloud has never seen that card — never overwrite it. */
+              (function(){const cc=window.jcwDecCards(cloud.cards||{}),lc=d.cards||{},out={};
+                Object.keys(lc).forEach(k=>{if(lc[k])out[k]=lc[k];});
+                Object.keys(cc).forEach(k=>{if(!cc[k])return;const c=cc[k],l=out[k];
+                  const m={n:c.n||0,foil:!!(c.foil||(l&&l.foil))};
+                  const s=[].concat(c.serials||[],(l&&l.serials)||[]).filter((x,i,a)=>a.indexOf(x)===i);if(s.length)m.serials=s;
+                  out[k]=m;});
+                merged.cards=out;})();
               merged.pts=Math.max(d.pts||0,cloud.pts||0);
               merged.wins=Math.max(d.wins||0,cloud.wins||0);
               lkCloudReady=true;          /* safe to write from here on */
@@ -5155,6 +5165,10 @@ route();
         if(fin)add('sig','Signature Move',bump[base],'Finisher: '+fin,'R');
         if(T)add('stat','Stat Line',base,'PWR '+T[0]+' \u00b7 SPD '+T[1]+' \u00b7 TEC '+T[2]+' \u00b7 TGH '+T[3],'P');
         else if(ht&&wt)add('stat','Stat Line',base,ht+' \u00b7 '+wt+(nick?(' \u00b7 '+nick):''),'P');
+        /* older catalogs (and the phone app) handed out #sig / #stat / #champ
+           for wrestlers who no longer get that card here \u2014 fold those into
+           the Roster Card so the pull still counts */
+        ['champ','sig','stat'].forEach(s=>{const id=r.slug+'#'+s;if(!seen[id]&&!alias[id]&&seen[r.slug+'#base'])alias[id]=r.slug+'#base';});
       });
       /* 2. Every other photo is its own card. Rarity follows the roster
             page like before (champions super rare, legends rare, everyone
