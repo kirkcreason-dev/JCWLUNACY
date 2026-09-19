@@ -5131,7 +5131,7 @@ route();
          wrestler from the kit, so no two cards share a picture. A wrestler
          with no spare photo only gets the Roster Card. Leftover kit shots
          become cards of their own. Ratings come from the talent sheet. */
-      const used={};
+      const used={}, alias={};   /* other ids that mean the same card */
       Object.keys(roster).forEach(name=>{
         const r=roster[name];if(!r||!hasConsent(name))return;
         const T=TALENT[name]||null;
@@ -5142,7 +5142,12 @@ route();
         const base=baseRar(name);
         const add=(idsuf,kind,rar,fact,shot)=>{const id=r.slug+'#'+idsuf;if(seen[id])return;
           let art='roster/'+r.slug+'.jpg',pos='50% 0%',phrase='';
-          if(shot){const a=take(shot);if(!a)return;art='cards/'+a[0]+'.webp';pos=a[3];phrase=a[4];}   /* no spare photo = no card */
+          if(shot){const a=take(shot);
+            /* no spare photo = no card of its own; copies of it fold into
+               the Roster Card so nothing anyone pulled disappears */
+            if(!a){if(seen[r.slug+'#base'])alias[id]=r.slug+'#base';return;}
+            art='cards/'+a[0]+'.webp';pos=a[3];phrase=a[4];
+            alias[a[0]]=id;   /* the photo's own id (pulled in the app, or before) = this card */}
           seen[id]=1;
           cat.push({id:id,slug:r.slug,name:name,kind:kind,rar:rar,fact:fact||'',lore:fact||'',pos:pos,phrase:phrase,art:art,shot:'Portrait'});};
         add('base','Roster Card',base,home?('Hometown: '+home):(nick||r.role||'JCW Roster'),null);
@@ -5165,7 +5170,7 @@ route();
         if(!c.fact)c.fact=c.phrase;
         cat.push(c);
       });
-      CATALOG=cat; byRar={common:[],rare:[],superrare:[],legendary:[]};
+      CATALOG=cat; window.__cardAlias=alias; byRar={common:[],rare:[],superrare:[],legendary:[]};
       cat.forEach(c=>{if(c.giftOnly)return;(byRar[c.rar]||byRar.common).push(c);});   /* gift-only cards are never pulled */
       return cat;
     }
@@ -5192,8 +5197,23 @@ route();
       });
     }
     function editionsLeft(card){const c=+(window.__editions[card.id]||0);return Math.max(0,card.cap-c);}
+    /* Fold aliased ids into their catalog card: counts add, foil sticks,
+       serials carry over. Returns {cards, changed}. */
+    function normCards(src){
+      buildCatalog();const A=window.__cardAlias||{};const out={};let changed=false;
+      Object.keys(src||{}).forEach(k=>{
+        const v=src[k];if(!v)return;const t=A[k]||k;if(t!==k)changed=true;
+        const cur=out[t]||{n:0,foil:false};
+        cur.n=(cur.n||0)+(v.n||0);if(v.foil)cur.foil=true;
+        if(v.serials&&v.serials.length)cur.serials=(cur.serials||[]).concat(v.serials);
+        out[t]=cur;
+      });
+      return {cards:out,changed:changed};
+    }
+    window.jcwNormCards=normCards;
     function coll(){
       const d=lkGet();d.cards=d.cards||{};
+      if(!isDuke()){const r=normCards(d.cards);if(r.changed){d.cards=r.cards;lkSet(d);}}
       if(isDuke()){ /* Duke owns the complete set, infinite copies */
         buildCatalog();const full={};
         CATALOG.forEach(c=>{full[c.id]={n:Infinity,foil:true};});
@@ -5580,6 +5600,7 @@ route();
       const host=document.getElementById('prof-cards');if(!host)return;
       let src=theirCards||{};
       try{if(window.jcwDecCards)src=window.jcwDecCards(src);}catch(_e){} /* cloud copies use '~' keys */
+      try{src=normCards(src).cards;}catch(_e){}                            /* app / older ids → catalog ids */
       try{
         const u=curUser();
         if(u&&u.uid===uid){                       /* my own page */
