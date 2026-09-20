@@ -490,6 +490,16 @@ body.game-lock{overflow:hidden;}
 #lday-modal .box p b{color:var(--bone);}
 #lday-modal .cx{position:absolute;top:8px;right:12px;font-size:22px;color:var(--gold);cursor:pointer;background:none;border:none;}
 #cs-modal.on{display:flex;}
+/* age gate — neutral date-of-birth check before sign-up, log-in and the game */
+#age-modal{display:none;position:fixed;inset:0;z-index:420;background:rgba(0,0,0,.9);backdrop-filter:blur(5px);align-items:center;justify-content:center;padding:20px;}
+#age-modal.on{display:flex;}
+#age-modal .box{max-width:420px;width:100%;border:1px solid var(--gold);background:var(--plate-2);padding:30px 26px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.7);}
+#age-modal h3{font-family:'Rubik Distressed',system-ui,sans-serif;text-transform:uppercase;font-size:30px;color:var(--gold);line-height:1;}
+#age-modal p{color:var(--steel);font-size:14px;line-height:1.6;margin-top:10px;}
+#age-modal .row{display:flex;gap:8px;margin-top:16px;}
+#age-modal select,#age-modal input{flex:1;min-width:0;background:#000;border:1px solid rgba(240,179,43,.4);color:var(--bone);padding:10px 8px;border-radius:6px;font:inherit;font-size:15px;}
+#age-modal .btn{margin-top:16px;width:100%;}
+#age-modal .err{color:var(--hot);font-size:13px;min-height:16px;margin-top:8px;}
 #cs-modal .box{max-width:440px;width:100%;border:1px solid var(--tang);background:var(--plate-2);padding:34px 30px;text-align:center;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.7);}
 #cs-modal .box h3{font-family:'Rubik Distressed',system-ui,sans-serif;text-transform:uppercase;font-size:34px;color:var(--tang);line-height:1;}
 #cs-modal .box p{color:var(--steel);font-size:14px;line-height:1.6;margin-top:12px;}
@@ -1865,6 +1875,19 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   </div>
 </div>
 
+<div id="age-modal" aria-modal="true" role="dialog" aria-labelledby="age-title">
+  <div class="box">
+    <h3 id="age-title">One quick thing</h3>
+    <p>Enter your date of birth to continue.</p>
+    <div class="row">
+      <select id="age-m" aria-label="Month"><option value="">Month</option><option value="1">Jan</option><option value="2">Feb</option><option value="3">Mar</option><option value="4">Apr</option><option value="5">May</option><option value="6">Jun</option><option value="7">Jul</option><option value="8">Aug</option><option value="9">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option></select>
+      <select id="age-d" aria-label="Day"><option value="">Day</option></select>
+      <input id="age-y" type="tel" inputmode="numeric" maxlength="4" placeholder="Year" aria-label="Year" autocomplete="off">
+    </div>
+    <div class="err" id="age-err"></div>
+    <button class="btn gold" id="age-go">Continue</button>
+  </div>
+</div>
 <div id="cs-modal" aria-modal="true" role="dialog">
   <div class="box">
     <button class="cx" id="cs-close" aria-label="Close">&times;</button>
@@ -2096,6 +2119,54 @@ function observeReveals(){
   /* (JWO black-and-white now handled by the shared easter-egg system) */
 
 
+  /* ===== AGE GATE =========================================================
+     Neutral date-of-birth check (no hint of the required age anywhere near
+     it). Runs once per browser before sign-up, log-in and the game. Under
+     the cut-off: nothing proceeds, no account, no locker, no analytics —
+     only a local "blocked" flag so a reload can't re-ask. The date itself
+     is never stored anywhere; only pass/blocked lives in this browser. */
+  const AGE_MIN=13, AGE_OK='jcw_age_ok', AGE_NO='jcw_age_no';
+  function ageFlag(k){try{return localStorage.getItem(k)==='1';}catch(e){return false;}}
+  function ageMark(k){try{localStorage.setItem(k,'1');}catch(e){}}
+  window.jcwAgeBlocked=function(){return ageFlag(AGE_NO);};
+  window.jcwAgeOk=function(){return ageFlag(AGE_OK)&&!ageFlag(AGE_NO);};
+  (function(){
+    const m=document.getElementById('age-modal');if(!m)return;
+    const mo=document.getElementById('age-m'),da=document.getElementById('age-d'),yr=document.getElementById('age-y'),err=document.getElementById('age-err'),go=document.getElementById('age-go');
+    for(let i=1;i<=31;i++){const o=document.createElement('option');o.value=i;o.textContent=i;da.appendChild(o);}
+    let pending=null;
+    function blockedUI(){
+      m.querySelector('h3').textContent='Sorry';
+      m.querySelector('p').textContent='You’re not able to sign up or play right now.';
+      m.querySelector('.row').style.display='none';err.textContent='';
+      go.textContent='OK';go.onclick=()=>{m.classList.remove('on');};
+      m.classList.add('on');
+    }
+    function ask(){
+      err.textContent='';
+      m.classList.add('on');setTimeout(()=>{try{mo.focus();}catch(e){}},50);
+    }
+    go.onclick=function(){
+      const M=+mo.value,D=+da.value,Y=+yr.value;
+      const now=new Date();
+      if(!M||!D||!Y||Y<1900||Y>now.getFullYear()){err.textContent='Enter your full date of birth.';return;}
+      const dob=new Date(Y,M-1,D);
+      if(dob.getMonth()!==M-1||dob.getDate()!==D||dob>now){err.textContent='That date doesn’t look right.';return;}
+      let age=now.getFullYear()-Y;
+      if(now.getMonth()<M-1||(now.getMonth()===M-1&&now.getDate()<D))age--;
+      mo.value='';da.value='';yr.value='';           /* never keep the date around */
+      if(age>=AGE_MIN){ageMark(AGE_OK);m.classList.remove('on');const cb=pending;pending=null;if(cb)cb(true);}
+      else{ageMark(AGE_NO);try{localStorage.removeItem(AGE_OK);}catch(e){}const cb=pending;pending=null;blockedUI();if(cb)cb(false);}
+    };
+    /* jcwAgeGate(cb): cb(true) at once if already passed; shows the gate
+       otherwise; cb(false) (and the sorry screen) if under the cut-off. */
+    window.jcwAgeGate=function(cb){
+      if(ageFlag(AGE_NO)){blockedUI();if(cb)cb(false);return;}
+      if(ageFlag(AGE_OK)){if(cb)cb(true);return;}
+      pending=cb||null;ask();
+    };
+  })();
+
   /* games: fullscreen overlay, no scrolling */
   const playBtn=document.getElementById('play-bmr');
   const gOverlay=document.getElementById('game-overlay');
@@ -2117,8 +2188,11 @@ function observeReveals(){
       gOverlay.classList.add('on');document.body.classList.add('game-lock');
     };
     playBtn.addEventListener('click',()=>{
-      if(window.__lkPremOn){window.jcwOpenGame();return;}
-      location.hash='#lunatics';
+      window.jcwAgeGate(ok=>{
+        if(!ok)return;
+        if(window.__lkPremOn){window.jcwOpenGame();return;}
+        location.hash='#lunatics';
+      });
     });
     const csClose=document.getElementById('cs-close');
     if(csClose)csClose.addEventListener('click',()=>document.getElementById('cs-modal').classList.remove('on'));
@@ -2680,17 +2754,23 @@ function observeReveals(){
     }
     if(e.target.id==='au-login'){
       if(!fbAuth){msg.textContent='Connecting\u2026 try again in a second.';return;}
-      msg.textContent='Logging in\u2026';
-      fbAuth.signInWithEmailAndPassword(email(),pass())
-        .then(()=>{msg.textContent='';})
-        .catch(err=>{msg.textContent=err.message.replace('Firebase: ','');});
+      window.jcwAgeGate(ok=>{
+        if(!ok){msg.textContent='';return;}
+        msg.textContent='Logging in\u2026';
+        fbAuth.signInWithEmailAndPassword(email(),pass())
+          .then(()=>{msg.textContent='';})
+          .catch(err=>{msg.textContent=err.message.replace('Firebase: ','');});
+      });
     }
     if(e.target.id==='au-register'){
       if(!fbAuth){msg.textContent='Connecting\u2026 try again in a second.';return;}
-      msg.textContent='Creating account\u2026';
-      fbAuth.createUserWithEmailAndPassword(email(),pass())
-        .then(()=>{msg.textContent='';lkCloudPush();})
-        .catch(err=>{msg.textContent=err.message.replace('Firebase: ','');});
+      window.jcwAgeGate(ok=>{
+        if(!ok){msg.textContent='';return;}   /* under the cut-off: no account is ever created */
+        msg.textContent='Creating account\u2026';
+        fbAuth.createUserWithEmailAndPassword(email(),pass())
+          .then(()=>{msg.textContent='';lkCloudPush();})
+          .catch(err=>{msg.textContent=err.message.replace('Firebase: ','');});
+      });
     }
     if(e.target.id==='au-logout'){ if(fbAuth)fbAuth.signOut(); }
     if(e.target.id==='au-del-open'){
@@ -4120,6 +4200,7 @@ function observeReveals(){
       firebase.initializeApp(JCW_FB);fbDB=firebase.database();fbAuth=firebase.auth();
       /* ---- lightweight analytics: anonymous visit + section counters ---- */
       try{
+        if(window.jcwAgeBlocked&&window.jcwAgeBlocked())throw 0;   /* failed the age gate: count nothing */
         const dayKey=()=>new Date().toLocaleDateString('en-CA',{timeZone:'America/Detroit'}).replace(/-/g,'');
         const day=dayKey();
         const bump=p=>fbDB.ref(p).transaction(v=>(v||0)+1);
@@ -4336,6 +4417,12 @@ function observeReveals(){
       }, ()=>{});
       // ---- AUTH: sync locker to cloud when signed in ----
       fbAuth.onAuthStateChanged(user=>{ try{
+        /* accounts made before the age gate existed get asked once, on the
+           next visit that finds them still signed in; a fail signs them out */
+        if(user&&window.jcwAgeGate&&!(window.jcwAgeOk&&window.jcwAgeOk())){
+          if(window.jcwAgeBlocked&&window.jcwAgeBlocked()){try{fbAuth.signOut();}catch(_e){}return;}
+          setTimeout(()=>{try{window.jcwAgeGate(ok=>{if(!ok)fbAuth.signOut();});}catch(_e){}},1200);
+        }
         lkUser=user;
         lkCloudReady=false;   /* re-arm the guard on every auth change */
         /* chat needs an account: show the button only for a signed-in member,
