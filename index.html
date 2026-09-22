@@ -3146,7 +3146,7 @@ function observeReveals(){
       }).catch(function(e){try{console.warn('[locker] pts sync failed:',e&&e.message);}catch(_e){}});
     }catch(_e){}
   }
-  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); lkPtsSync(); fbDB.ref('lockers/'+lkUser.uid).update({wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:d.picks||{},hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:d.eps||{},radio:d.radio||{},seen:d.seen||{},tagged:d.tagged||{},streak:d.streak||0,streakBest:d.streakBest||0,dayone:d.dayone?1:0,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{})}); }catch(_e){try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
+  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); lkPtsSync(); fbDB.ref('lockers/'+lkUser.uid).update({wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:d.picks||{},hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:d.eps||{},radio:d.radio||{},seen:d.seen||{},tagged:d.tagged||{},streak:d.streak||0,streakBest:d.streakBest||0,dayone:d.dayone?1:0,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{})}).then(()=>{window.__lockerSync='ok';}).catch(err=>{window.__lockerSync='BLOCKED: '+((err&&err.message)||'rules');window.__cardsSync=window.__lockerSync;try{console.warn('[locker] cloud push rejected:',err&&err.message);}catch(__e){}}); }catch(_e){try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
   /* ===== WIPE RECOVERY =====
      Snapshot the best locker this device has ever seen for the signed-in account
      (jcw_locker_best_<uid>). If a later login pulls a cloud copy whose points have
@@ -5089,7 +5089,12 @@ route();
         const D=db(),u=curUser();
         if(!D||!u){window.__cardsPending=true;return;}   /* retry once signed in */
         if(!(window.__lkCloudReady&&window.__lkCloudReady())){window.__cardsPending=true;return;}   /* data-loss guard: no card writes before the first cloud pull */
-        const payload=(d&&d.cards)||{};
+        /* card ids carry '#', which Firebase refuses as a key — the cloud copy
+           uses '~' (jcwEncCards). Writing the raw ids threw before anything was
+           sent, so this direct sync never worked and the diag line read
+           "error: invalid key" even though the locker save was carrying the
+           cards along. Encode, like every other cloud write does. */
+        const payload=window.jcwEncCards?window.jcwEncCards((d&&d.cards)||{}):((d&&d.cards)||{});
         D.ref('lockers/'+u.uid+'/cards').set(payload)
           .then(()=>{window.__cardsSync='ok '+Object.keys(payload).length;window.__cardsPending=false;})
           .catch(err=>{window.__cardsSync='BLOCKED: '+(err&&err.message||'rules');});
