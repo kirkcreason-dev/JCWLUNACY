@@ -11243,8 +11243,25 @@ const LB = (()=>{
     const r = list.findIndex(e=>e.__probe);
     return r < 10 ? r : -1;
   }
+  /* every win/cleared run also goes to the player's cloud locker, so the
+     website can hand out arcade badges (lockers/<uid>/arcade: wins, per-game
+     counts, best streak/score). Fire-and-forget; never blocks the game. */
+  function report(g, v, kind){
+    try{
+      if(!CFG[g] || !window.firebase || !firebase.auth) return;
+      const u = firebase.auth().currentUser; if(!u) return;
+      const ref = firebase.database().ref('lockers/'+u.uid+'/arcade');
+      const bump = x => (x||0)+1;
+      if(kind==='record'){ ref.child('records').transaction(bump); return; }
+      ref.child('wins').transaction(bump);
+      ref.child('games/'+g).transaction(bump);
+      if(v > 0) ref.child('best/'+g).transaction(x => Math.max(+x||0, v));
+    }catch(e){}
+  }
   function check(g, v, tag){
-    if(!CFG[g] || !(v > 0)) return;
+    if(!CFG[g]) return;
+    report(g, v);
+    if(!(v > 0)) return;
     if(rankOf(g, v) < 0) return;
     queue.push({ g, v, tag: tag||'' });
     if(!pending) nextEntry();
@@ -11272,6 +11289,7 @@ const LB = (()=>{
       list.push(entry); list.sort(sorter(pending.g));
       if(list.length > 10) list.length = 10;
       data[pending.g] = list; save();
+      report(pending.g, 0, 'record');
       render(entry);
       Sound.play('crowdPop', .6);
     }

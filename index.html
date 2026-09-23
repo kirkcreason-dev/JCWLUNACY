@@ -2409,7 +2409,45 @@ function observeReveals(){
     ['diehard','Die Hard \u00b7 30-day check-in streak'],
     ['dayone','Day One \u00b7 here before the badges'],
     ['crossedduke','Crossed the Duke \u00b7 rivaled Digital Duke \u00b7 no takebacks'],
-    ['miracles','The Miracle Man \u00b7 Miracles \u00b7 found every hidden secret']];
+    ['miracles','The Miracle Man \u00b7 Miracles \u00b7 found every hidden secret'],
+    /* ---- Lunacy Unlocked (reported by the game itself) ---- */
+    ['lu_ten','Ten Count \u00b7 10 Lunacy Unlocked matches'],
+    ['lu_fifty','Fifty Falls \u00b7 50 Lunacy Unlocked matches'],
+    ['lu_hundred','Century Mark \u00b7 100 Lunacy Unlocked matches'],
+    ['lu_streak3','Hat Trick \u00b7 3 wins in a row'],
+    ['lu_streak10','Unstoppable \u00b7 10 wins in a row'],
+    ['lu_flawless','Clean Sweep \u00b7 won a match 2\u20130'],
+    ['lu_pin','Three Count \u00b7 won by pinfall'],
+    ['lu_pin25','Pin King \u00b7 25 pinfall wins'],
+    ['lu_tap','Tap Machine \u00b7 10 wins by tap out'],
+    ['lu_timeout','Ran the Clock \u00b7 won on the time limit'],
+    ['lu_kickout','Kick Out \u00b7 kicked out of 25 pins'],
+    ['lu_reversal','Reversal \u00b7 reversed 50 attacks'],
+    ['lu_secondwind','Second Wind \u00b7 came back from a second wind to win'],
+    ['lu_lunacy','Lunacy Meter \u00b7 landed 25 finishers'],
+    ['lu_special100','Full Lunacy \u00b7 landed 100 finishers'],
+    ['lu_arcade_easy','Lunacy Survivor \u00b7 cleared the arcade \u00b7 bronze medal'],
+    ['lu_arcade_normal','Roster Wrecker \u00b7 cleared the arcade on normal \u00b7 silver medal'],
+    ['lu_arcade_hard','Lunacy Legend \u00b7 cleared the arcade on hard \u00b7 gold medal'],
+    ['lu_triple','Triple Crown \u00b7 all three medals with one fighter'],
+    ['lu_crowned','Crowned \u00b7 won the Lunacy Championship'],
+    ['lu_defend5','Title Reign \u00b7 5 title defenses in one run'],
+    ['lu_roster10','Tried Ten \u00b7 won with 10 different fighters'],
+    ['lu_rosterall','Whole Roster \u00b7 won with every fighter'],
+    ['lu_beatall','Nobody Left \u00b7 beaten every fighter on the roster'],
+    ['lu_pole','Pole Position \u00b7 won a weapon-on-a-pole match'],
+    ['lu_online','Online Lunatic \u00b7 won an online match'],
+    /* ---- Psychopathic Arcade ---- */
+    ['pa_first','Midway \u00b7 won an arcade game'],
+    ['pa_five','Midway Rat \u00b7 won in 5 different arcade games'],
+    ['pa_all','Full Midway \u00b7 won in all 11 arcade games'],
+    ['pa_50','Carnival Regular \u00b7 50 arcade wins'],
+    ['pa_record','Carved Your Mark \u00b7 a top-10 arcade record'],
+    ['pa_ttt5','Slam Streak \u00b7 5 straight Tic Tac Slam wins'],
+    ['pa_faygo5','Faygo Fountain \u00b7 5 straight Faygo 4 wins'],
+    ['pa_hockey5','Ice Cold \u00b7 5 straight Air Hockey wins'],
+    ['pa_chess','Checkmate \u00b7 mated the CPU in Juggalo Chess'],
+    ['pa_memory','Total Recall \u00b7 cleared the Joker Card Memory deck']];
   function lkAddWin(){
     const d=lkGet(); d.wins=(d.wins||0)+1;
     d.badges=d.badges||[]; if(!d.badges.includes('winner'))d.badges.push('winner');
@@ -2423,8 +2461,46 @@ function observeReveals(){
     lkAward(250,'bigfoot','Found Bigfoot \u00b7 +250 points');
     toast('YOU FOUND BIGFOOT \u00b7 +250 POINTS',3400);
   };
+  /* Lunacy Unlocked reports every finished match (type 'jcw-game') from its
+     iframe. Counters live in locker.game; badges are derived from them in
+     lkRender, so a missed render never loses a badge. */
+  const LU_GAME_ORIGIN='https://kirkcreason-dev.github.io';
+  window.jcwGameReport=function(r){
+    if(!r||r.game!=='lunacy')return;
+    const d=lkGet();const g=d.game=d.game||{};const before=(d.badges||[]).slice();
+    const inc=(k,n)=>{g[k]=(g[k]||0)+(n||0);};
+    const t=r.tally||{};
+    inc('played',1);
+    inc('specials',t.specials);inc('reversals',t.reversals);inc('kickouts',t.kickouts);inc('secondWinds',t.secondWinds);inc('weapons',t.weapons);
+    if(r.rosterSize>0)g.rosterSize=Math.max(g.rosterSize||0,r.rosterSize);
+    const counted=!!r.won&&!r.local&&r.mode!=='practice';   /* local versus and practice never score a "win" */
+    if(counted){
+      inc('wins',1);d.wins=(d.wins||0)+1;g.streak=(g.streak||0)+1;g.bestStreak=Math.max(g.bestStreak||0,g.streak);
+      inc('pins',t.pins);inc('taps',t.taps);inc('timeouts',t.timeouts);
+      const w=r.wins||[];if(w.length===2&&Math.min(w[0],w[1])===0)inc('flawless',1);
+      if(t.secondWinds>0)inc('comebacks',1);
+      if(r.pole)inc('poleWins',1);
+      if(r.mode==='online')inc('onlineWins',1);
+      if(r.difficulty==='hard')inc('hardWins',1);
+      g.wonWith=g.wonWith||{};if(r.fighter)g.wonWith[String(r.fighter).replace(/[.#$\/\[\]]/g,'_')]=1;
+      g.beaten=g.beaten||{};if(r.opponent)g.beaten[String(r.opponent).replace(/[.#$\/\[\]]/g,'_')]=1;
+    }else if(!r.local&&r.mode!=='practice'){inc('losses',1);g.streak=0;}
+    if(r.arcadeChampion&&r.medal){const m=r.medal.medal;if(m==='bronze')inc('arcadeEasy',1);if(m==='silver')inc('arcadeNormal',1);if(m==='gold')inc('arcadeHard',1);if(r.medal.triple)inc('triple',1);}
+    if(r.championship==='crowned')inc('crowned',1);
+    if(r.championship==='defended')inc('defended',1);
+    if(r.run&&r.run.defenses>0)g.defenses=Math.max(g.defenses||0,r.run.defenses);
+    lkSet(d);
+    if(counted)lkAward(15,null,'Won a match in Lunacy Unlocked'+(r.opponentName?(' vs '+String(r.opponentName).slice(0,40)):''));
+    else lkRender();
+    try{const now=lkGet().badges||[];const fresh=now.filter(b=>before.indexOf(b)<0&&/^(lu_|pa_|winner|brawler|champ|warlord)/.test(b));
+      if(fresh.length){const lbl={};LK_BADGES.forEach(b=>{lbl[b[0]]=b[1];});
+        const names=fresh.map(b=>(lbl[b]||b).split(' \u00b7 ')[0]).join(' + ');
+        setTimeout(()=>toast('\ud83c\udfc5 NEW BADGE \u00b7 '+names,4200),600);}}catch(_e){}
+  };
   window.addEventListener('message',ev=>{
-    if(ev.data&&ev.data.type==='jcw-win'){lkAddWin();}
+    if(!ev.data)return;
+    if(ev.data.type==='jcw-game'){if(ev.origin===LU_GAME_ORIGIN||ev.origin===location.origin)try{window.jcwGameReport(ev.data);}catch(_e){}return;}
+    if(ev.data.type==='jcw-win'){lkAddWin();}   /* older game builds */
   });
   function lkRank(p){return p>=500?'Certified Freak':p>=300?'Lunacy Unlocked':p>=150?'Dark Carnival Regular':p>=50?'Front Row':'Fresh Face';}
   function lkRender(){
@@ -2511,6 +2587,28 @@ function observeReveals(){
       if(d.theme)add('ownentrance');
       if((d.wins||0)>=5)add('brawler');
       if((d.wins||0)>=25)add('warlord');
+      if((d.wins||0)>=1)add('winner');if((d.wins||0)>=10)add('champ');
+      /* Lunacy Unlocked — from the counters the game reports */
+      (function(){const g=d.game||{};const n=o=>Object.keys(o||{}).length;
+        if(g.played>=10)add('lu_ten');if(g.played>=50)add('lu_fifty');if(g.played>=100)add('lu_hundred');
+        if(g.bestStreak>=3)add('lu_streak3');if(g.bestStreak>=10)add('lu_streak10');
+        if(g.flawless>=1)add('lu_flawless');if(g.pins>=1)add('lu_pin');if(g.pins>=25)add('lu_pin25');
+        if(g.taps>=10)add('lu_tap');if(g.timeouts>=1)add('lu_timeout');if(g.kickouts>=25)add('lu_kickout');
+        if(g.reversals>=50)add('lu_reversal');if(g.comebacks>=1)add('lu_secondwind');
+        if(g.specials>=25)add('lu_lunacy');if(g.specials>=100)add('lu_special100');
+        if(g.arcadeEasy>=1)add('lu_arcade_easy');if(g.arcadeNormal>=1)add('lu_arcade_normal');if(g.arcadeHard>=1)add('lu_arcade_hard');
+        if(g.triple>=1)add('lu_triple');if(g.crowned>=1)add('lu_crowned');if(g.defenses>=5)add('lu_defend5');
+        if(n(g.wonWith)>=10)add('lu_roster10');if(g.rosterSize>0&&n(g.wonWith)>=g.rosterSize)add('lu_rosterall');
+        if(g.rosterSize>1&&n(g.beaten)>=g.rosterSize-1)add('lu_beatall');
+        if(g.poleWins>=1)add('lu_pole');if(g.onlineWins>=1)add('lu_online');
+      })();
+      /* Psychopathic Arcade — written straight to the cloud locker by arcade.html */
+      (function(){const a=d.arcade||{};const games=a.games||{},best=a.best||{};const n=Object.keys(games).length;
+        if(a.wins>=1)add('pa_first');if(n>=5)add('pa_five');if(n>=11)add('pa_all');if(a.wins>=50)add('pa_50');
+        if(a.records>=1)add('pa_record');
+        if(best.ttt>=5)add('pa_ttt5');if(best.faygo>=5)add('pa_faygo5');if(best.hockey>=5)add('pa_hockey5');
+        if(games.chess>=1)add('pa_chess');if(games.memory>=1)add('pa_memory');
+      })();
       if((d.pts||0)>=300)add('unlocked');
       if((d.pts||0)>=1000)add('faygoshower');
       if((d.pts||0)>=10000)add('carnivalelite');
@@ -3146,7 +3244,7 @@ function observeReveals(){
       }).catch(function(e){try{console.warn('[locker] pts sync failed:',e&&e.message);}catch(_e){}});
     }catch(_e){}
   }
-  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); lkPtsSync(); fbDB.ref('lockers/'+lkUser.uid).update({wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:d.picks||{},hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:d.eps||{},radio:d.radio||{},seen:d.seen||{},tagged:d.tagged||{},streak:d.streak||0,streakBest:d.streakBest||0,dayone:d.dayone?1:0,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{})}).then(()=>{window.__lockerSync='ok';}).catch(err=>{window.__lockerSync='BLOCKED: '+((err&&err.message)||'rules');window.__cardsSync=window.__lockerSync;try{console.warn('[locker] cloud push rejected:',err&&err.message);}catch(__e){}}); }catch(_e){try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
+  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); lkPtsSync(); fbDB.ref('lockers/'+lkUser.uid).update({wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:d.picks||{},hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:d.eps||{},radio:d.radio||{},seen:d.seen||{},tagged:d.tagged||{},streak:d.streak||0,streakBest:d.streakBest||0,dayone:d.dayone?1:0,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{}),swapped:window.jcwEncCards(d.swapped||{}),game:d.game||{}}).then(()=>{window.__lockerSync='ok';}).catch(err=>{window.__lockerSync='BLOCKED: '+((err&&err.message)||'rules');window.__cardsSync=window.__lockerSync;try{console.warn('[locker] cloud push rejected:',err&&err.message);}catch(__e){}}); }catch(_e){try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
   /* ===== WIPE RECOVERY =====
      Snapshot the best locker this device has ever seen for the signed-in account
      (jcw_locker_best_<uid>). If a later login pulls a cloud copy whose points have
@@ -4079,7 +4177,7 @@ function observeReveals(){
         +'</div>';
       host.innerHTML=h;
       host.dataset.uid=uid;
-      try{if(window.jcwProfileCards)window.jcwProfileCards(uid,(v.cards||{}),(v.name||'this Juggalo'));}catch(_e){}
+      try{if(window.jcwProfileCards)window.jcwProfileCards(uid,(v.cards||{}),(v.name||'this Juggalo'),(v.swapped||{}));}catch(_e){}
       (function(){
         const hx=document.getElementById('cn-hatchet');if(!hx)return;
         try{const fm=document.querySelector('img.hm');if(fm)hx.src=fm.src;}catch(_e){}
@@ -4579,7 +4677,17 @@ function observeReveals(){
                   const m={n:c.n||0,foil:!!(c.foil||(l&&l.foil))};
                   const s=[].concat(c.serials||[],(l&&l.serials)||[]).filter((x,i,a)=>a.indexOf(x)===i);if(s.length)m.serials=s;
                   out[k]=m;});
-                merged.cards=out;})();
+                merged.cards=out;
+                const cs=window.jcwDecCards(cloud.swapped||{}),ls=d.swapped||{},sw={};
+                Object.keys(cs).concat(Object.keys(ls)).forEach(k=>{sw[k]=Math.max(+cs[k]||0,+ls[k]||0);});
+                merged.swapped=sw;
+                const cg=cloud.game||{},lg=d.game||{},mg={};
+                Object.keys(cg).concat(Object.keys(lg)).forEach(k=>{const a=cg[k],b=lg[k];
+                  if(a&&typeof a==='object'||b&&typeof b==='object')mg[k]=Object.assign({},a||{},b||{});
+                  else if(k==='streak')mg[k]=Math.max(+a||0,+b||0);
+                  else mg[k]=Math.max(+a||0,+b||0);});
+                merged.game=mg;
+                merged.arcade=cloud.arcade||d.arcade||{};})();
               merged.pts=Math.max(d.pts||0,cloud.pts||0);
               merged.wins=Math.max(d.wins||0,cloud.wins||0);
               lkCloudReady=true;          /* safe to write from here on */
@@ -5154,7 +5262,9 @@ route();
     const RAR_LBL={common:'Common',rare:'Rare',superrare:'Super Rare',legendary:'Legendary'};
     const PULL_W={common:58,rare:27,superrare:12,legendary:3};
     const bump={common:'rare',rare:'superrare',superrare:'legendary',legendary:'legendary'};
-    let CATALOG=null, byRar={};
+    let CATALOG=null, byRar={}, ROSTER_RAR={}, SWAP_POOL={};
+    /* old rarity of the kit cards that left the set with the consent list */
+    const LEGACY_RAR={"LU-004":"common","LU-007":"common","LU-023":"superrare","LU-024":"common","LU-025":"rare","LU-045":"superrare","LU-062":"superrare","LU-063":"superrare","LU-064":"superrare","LU-065":"superrare","LU-066":"superrare","LU-067":"common","LU-068":"common","LU-069":"rare","LU-095":"rare","LU-096":"rare","LU-097":"rare","LU-098":"rare","LU-099":"rare","LU-108":"rare","LU-109":"rare","LU-110":"rare","LU-117":"superrare","LU-118":"rare","LU-119":"rare","LU-120":"rare","LU-127":"rare","LU-128":"rare","LU-136":"superrare","LU-137":"superrare","LU-138":"rare","LU-139":"rare","LU-140":"rare","LU-141":"rare","LU-142":"rare","LU-162":"rare","LU-163":"rare","LU-164":"rare"};
 
     function factVal(name,label){
       try{const e=bios()[name]||null;if(!e||!e.f)return '';
@@ -5278,6 +5388,11 @@ route();
       });
       CATALOG=cat; window.__cardAlias=alias; byRar={common:[],rare:[],superrare:[],legendary:[]};
       cat.forEach(c=>{if(c.giftOnly)return;(byRar[c.rar]||byRar.common).push(c);});   /* gift-only cards are never pulled */
+      /* what a retired card WAS worth: every roster name (consent or not) keeps
+         its old base rarity here, so a pull of a card that no longer exists can
+         be swapped for a current card of the same tier (see swapRetired) */
+      ROSTER_RAR={};Object.keys(roster).forEach(name=>{ROSTER_RAR[roster[name].slug]=baseRar(name);});
+      SWAP_POOL={};RAR.forEach(r=>{SWAP_POOL[r]=cat.filter(c=>c.rar===r&&!c.giftOnly&&!c.cap);});
       return cat;
     }
     function isDuke(){try{const u=curUser();return !!(u&&u.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1');}catch(e){return false;}}
@@ -5305,21 +5420,60 @@ route();
     function editionsLeft(card){const c=+(window.__editions[card.id]||0);return Math.max(0,card.cap-c);}
     /* Fold aliased ids into their catalog card: counts add, foil sticks,
        serials carry over. Returns {cards, changed}. */
-    function normCards(src){
+    /* ---- retired cards -------------------------------------------------
+       A pull of a card that is no longer in the set (talent off the consent
+       list — the phone app still hands these out) is swapped for a current
+       card of the same rarity. The pick is a hash of uid + old id + copy
+       number, so every device and every viewer lands on the same card, and
+       `swapped` remembers how many copies of each old id were already
+       exchanged so a re-sync from the app can't hand the swap out twice. */
+    function h32(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+    function legacyRar(id){
+      if(LEGACY_RAR[id])return LEGACY_RAR[id];
+      const m=String(id).match(/^(.+)#(base|sig|stat|champ)$/);if(!m)return 'common';
+      const base=ROSTER_RAR[m[1]]||'common';
+      return m[2]==='champ'?'legendary':m[2]==='sig'?bump[base]:base;
+    }
+    function swapPick(uid,oldId,i){
+      let r=legacyRar(oldId),pool=SWAP_POOL[r]||[];
+      let ri=RAR.indexOf(r);while(!pool.length&&ri>0){ri--;pool=SWAP_POOL[RAR[ri]]||[];}
+      if(!pool.length)return null;
+      return pool[h32((uid||'')+'|'+oldId+'|'+i)%pool.length];
+    }
+    /* Fold aliased ids into their catalog card: counts add, foil sticks,
+       serials carry over. Retired ids become swapped cards (see above).
+       Returns {cards, changed, swapped}. */
+    function normCards(src,uid,swappedSoFar){
       buildCatalog();const A=window.__cardAlias||{};const out={};let changed=false;
+      const known={};CATALOG.forEach(c=>{known[c.id]=1;});
+      const swapped=Object.assign({},swappedSoFar||{});
       Object.keys(src||{}).forEach(k=>{
         const v=src[k];if(!v)return;const t=A[k]||k;if(t!==k)changed=true;
+        if(!known[t]){                       /* retired: exchange each copy */
+          const n=v.n||0,done=swapped[t]||0;
+          for(let i=done;i<n;i++){const c=swapPick(uid,t,i);if(!c)break;   /* copies < done were exchanged on an earlier pass */
+            const cur=out[c.id]||{n:0,foil:false};cur.n=(cur.n||0)+1;if(v.foil)cur.foil=true;out[c.id]=cur;}
+          if(n>done)swapped[t]=n;
+          changed=true;return;
+        }
         const cur=out[t]||{n:0,foil:false};
+        if(t!==k){                           /* aliased old id: fold only copies not folded before */
+          const n=v.n||0,done=swapped[k]||0,add=Math.max(0,n-done);
+          cur.n=(cur.n||0)+add;if(v.foil&&add)cur.foil=true;
+          if(add&&v.serials&&v.serials.length)cur.serials=(cur.serials||[]).concat(v.serials);
+          if(n>done)swapped[k]=n;
+          if(cur.n||out[t])out[t]=cur;return;
+        }
         cur.n=(cur.n||0)+(v.n||0);if(v.foil)cur.foil=true;
         if(v.serials&&v.serials.length)cur.serials=(cur.serials||[]).concat(v.serials);
         out[t]=cur;
       });
-      return {cards:out,changed:changed};
+      return {cards:out,changed:changed,swapped:swapped};
     }
     window.jcwNormCards=normCards;
     function coll(){
       const d=lkGet();d.cards=d.cards||{};
-      if(!isDuke()){const r=normCards(d.cards);if(r.changed){d.cards=r.cards;lkSet(d);}}
+      if(!isDuke()){const u=curUser();const r=normCards(d.cards,u&&u.uid,d.swapped);if(r.changed){d.cards=r.cards;d.swapped=r.swapped;lkSet(d);}}
       if(isDuke()){ /* Duke owns the complete set, infinite copies */
         buildCatalog();const full={};
         CATALOG.forEach(c=>{full[c.id]={n:Infinity,foil:true};});
@@ -5701,12 +5855,13 @@ route();
 
 
     /* ================= CARD TRADING (escrow, two-way) ================= */
-    window.jcwProfileCards=function(uid,theirCards,theirName){
+    window.jcwProfileCards=function(uid,theirCards,theirName,theirSwapped){
       buildCatalog();
       const host=document.getElementById('prof-cards');if(!host)return;
       let src=theirCards||{};
       try{if(window.jcwDecCards)src=window.jcwDecCards(src);}catch(_e){} /* cloud copies use '~' keys */
-      try{src=normCards(src).cards;}catch(_e){}                            /* app / older ids → catalog ids */
+      let sw={};try{if(window.jcwDecCards)sw=window.jcwDecCards(theirSwapped||{});}catch(_e){}
+      try{src=normCards(src,uid,sw).cards;}catch(_e){}                     /* app / older ids → catalog ids; retired → swapped */
       try{
         const u=curUser();
         if(u&&u.uid===uid){                       /* my own page */
