@@ -2587,6 +2587,7 @@ function observeReveals(){
       if(d.theme)add('ownentrance');
       if((d.wins||0)>=5)add('brawler');
       if((d.wins||0)>=25)add('warlord');
+      if(d.game&&(d.game.wins||0)>(d.wins||0)){d.wins=d.game.wins;ch=true;}   /* counter never trails the game's own tally */
       if((d.wins||0)>=1)add('winner');if((d.wins||0)>=10)add('champ');
       /* Lunacy Unlocked — from the counters the game reports */
       (function(){const g=d.game||{};const n=o=>Object.keys(o||{}).length;
@@ -3096,6 +3097,13 @@ function observeReveals(){
   window.__lkCloudReady=function(){return lkCloudReady;};
   /* card ids contain '#', which Firebase forbids in keys — encode as '~' in the cloud */
   window.jcwEncCards=function(o){const r={};for(const k in (o||{}))r[String(k).replace(/#/g,'~')]=o[k];return r;};
+  /* Firebase refuses keys containing . # $ / [ ] (or control characters), and
+     a single bad key makes the WHOLE locker save throw before anything is
+     sent. Episode titles ("Episode 18 — St. Louis 12/5", "JCW vs. GCW …") and
+     wrestler names ("Mr. Happy") are used as keys, so every map field is
+     encoded on the way up (%2E, %2F …) and decoded on the way down. */
+  window.jcwEncKeys=function(o){const r={};for(const k in (o||{}))r[String(k).replace(/[%.#$\/\[\]\u0000-\u001f\u007f]/g,c=>'%'+c.charCodeAt(0).toString(16).toUpperCase().padStart(2,'0'))]=o[k];return r;};
+  window.jcwDecKeys=function(o){const r={};for(const k in (o||{}))r[String(k).replace(/%(25|2E|23|24|2F|5B|5D|[01][0-9A-F]|7F)/g,(m,h)=>String.fromCharCode(parseInt(h,16)))]=o[k];return r;};
   window.jcwDecCards=function(o){const r={};for(const k in (o||{}))r[String(k).replace(/~/g,'#')]=o[k];return r;};
   /* one-time heal: merge any '~' ghost keys (from older cached tabs) back into '#' ids */
   (function(){try{
@@ -3244,7 +3252,7 @@ function observeReveals(){
       }).catch(function(e){try{console.warn('[locker] pts sync failed:',e&&e.message);}catch(_e){}});
     }catch(_e){}
   }
-  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); lkPtsSync(); fbDB.ref('lockers/'+lkUser.uid).update({wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:d.picks||{},hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:d.eps||{},radio:d.radio||{},seen:d.seen||{},tagged:d.tagged||{},streak:d.streak||0,streakBest:d.streakBest||0,dayone:d.dayone?1:0,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{}),swapped:window.jcwEncCards(d.swapped||{}),game:d.game||{}}).then(()=>{window.__lockerSync='ok';}).catch(err=>{window.__lockerSync='BLOCKED: '+((err&&err.message)||'rules');window.__cardsSync=window.__lockerSync;try{console.warn('[locker] cloud push rejected:',err&&err.message);}catch(__e){}}); }catch(_e){try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
+  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); lkPtsSync(); fbDB.ref('lockers/'+lkUser.uid).update({wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:window.jcwEncKeys(d.picks||{}),hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:window.jcwEncKeys(d.eps||{}),radio:window.jcwEncKeys(d.radio||{}),seen:window.jcwEncKeys(d.seen||{}),tagged:window.jcwEncKeys(d.tagged||{}),streak:d.streak||0,streakBest:d.streakBest||0,dayone:d.dayone?1:0,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{}),swapped:window.jcwEncCards(d.swapped||{}),game:d.game||{}}).then(()=>{window.__lockerSync='ok';}).catch(err=>{window.__lockerSync='BLOCKED: '+((err&&err.message)||'rules');window.__cardsSync=window.__lockerSync;try{console.warn('[locker] cloud push rejected:',err&&err.message);}catch(__e){}}); }catch(_e){window.__lockerSync='error: '+(_e&&_e.message);try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
   /* ===== WIPE RECOVERY =====
      Snapshot the best locker this device has ever seen for the signed-in account
      (jcw_locker_best_<uid>). If a later login pulls a cloud copy whose points have
@@ -3268,10 +3276,10 @@ function observeReveals(){
     const d=lkGet(), r=b.data, m=Object.assign({},r);
     m.pts=Math.max(d.pts||0,r.pts||0); m.wins=Math.max(d.wins||0,r.wins||0); m.watched=Math.max(d.watched||0,r.watched||0);
     m.badges=[...new Set([...(r.badges||[]),...(d.badges||[])])];
-    m.eps=Object.assign({},r.eps||{},d.eps||{});
-    m.radio=Object.assign({},r.radio||{},d.radio||{});
-    m.seen=Object.assign({},r.seen||{},d.seen||{});
-    m.tagged=Object.assign({},r.tagged||{},d.tagged||{});
+    m.eps=Object.assign({},window.jcwDecKeys(r.eps),d.eps||{});
+    m.radio=Object.assign({},window.jcwDecKeys(r.radio),d.radio||{});
+    m.seen=Object.assign({},window.jcwDecKeys(r.seen),d.seen||{});
+    m.tagged=Object.assign({},window.jcwDecKeys(r.tagged),d.tagged||{});
     m.streakBest=Math.max(d.streakBest||0,r.streakBest||0);m.streak=Math.max(d.streak||0,r.streak||0);
     m.dayone=(d.dayone||r.dayone)?1:0;
     m.cards=Object.assign({},r.cards||{},d.cards||{});
@@ -4657,10 +4665,11 @@ function observeReveals(){
               /* a wiped cloud copy carries empty strings — never let them clobber real local values */
               ['name','fav','favB','theme','pic'].forEach(k=>{if(!(cloud[k]&&String(cloud[k]).trim())&&d[k])merged[k]=d[k];});
               merged.badges=[...new Set([...(d.badges||[]),...(cloud.badges||[])])];
-              merged.eps=Object.assign({},cloud.eps||{},d.eps||{});
-              merged.radio=Object.assign({},cloud.radio||{},d.radio||{});
-              merged.seen=Object.assign({},cloud.seen||{},d.seen||{});
-              merged.tagged=Object.assign({},cloud.tagged||{},d.tagged||{});
+              merged.eps=Object.assign({},window.jcwDecKeys(cloud.eps),d.eps||{});
+              merged.radio=Object.assign({},window.jcwDecKeys(cloud.radio),d.radio||{});
+              merged.seen=Object.assign({},window.jcwDecKeys(cloud.seen),d.seen||{});
+              merged.tagged=Object.assign({},window.jcwDecKeys(cloud.tagged),d.tagged||{});
+              merged.picks=Object.assign({},window.jcwDecKeys(cloud.picks),d.picks||{});
               merged.streakBest=Math.max(d.streakBest||0,cloud.streakBest||0);merged.streak=Math.max(d.streak||0,cloud.streak||0);
               merged.dayone=(d.dayone||cloud.dayone)?1:0;
               merged.hist=((d.hist||[]).length>=(cloud.hist||[]).length)?(d.hist||[]):(cloud.hist||[]);
