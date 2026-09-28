@@ -5278,7 +5278,7 @@ route();
     const bump={common:'rare',rare:'superrare',superrare:'legendary',legendary:'legendary'};
     let CATALOG=null, byRar={}, ROSTER_RAR={}, SWAP_POOL={};
     /* old rarity of the kit cards that left the set with the consent list */
-    const LEGACY_RAR={"LU-004":"common","LU-007":"common","LU-023":"superrare","LU-024":"common","LU-025":"rare","LU-045":"superrare","LU-062":"superrare","LU-063":"superrare","LU-064":"superrare","LU-065":"superrare","LU-066":"superrare","LU-067":"common","LU-068":"common","LU-069":"rare","LU-095":"rare","LU-096":"rare","LU-097":"rare","LU-098":"rare","LU-099":"rare","LU-108":"rare","LU-109":"rare","LU-110":"rare","LU-117":"superrare","LU-118":"rare","LU-119":"rare","LU-120":"rare","LU-127":"rare","LU-128":"rare","LU-136":"superrare","LU-137":"superrare","LU-138":"rare","LU-139":"rare","LU-140":"rare","LU-141":"rare","LU-142":"rare","LU-162":"rare","LU-163":"rare","LU-164":"rare"};
+    const LEGACY_RAR={"LU-143":"rare","LU-004":"common","LU-007":"common","LU-023":"superrare","LU-024":"common","LU-025":"rare","LU-045":"superrare","LU-062":"superrare","LU-063":"superrare","LU-064":"superrare","LU-065":"superrare","LU-066":"superrare","LU-067":"common","LU-068":"common","LU-069":"rare","LU-095":"rare","LU-096":"rare","LU-097":"rare","LU-098":"rare","LU-099":"rare","LU-108":"rare","LU-109":"rare","LU-110":"rare","LU-117":"superrare","LU-118":"rare","LU-119":"rare","LU-120":"rare","LU-127":"rare","LU-128":"rare","LU-136":"superrare","LU-137":"superrare","LU-138":"rare","LU-139":"rare","LU-140":"rare","LU-141":"rare","LU-142":"rare","LU-162":"rare","LU-163":"rare","LU-164":"rare"};
 
     function factVal(name,label){
       try{const e=bios()[name]||null;if(!e||!e.f)return '';
@@ -5304,9 +5304,9 @@ route();
     const CARD_CONSENT=["Alice Crowley", "Josh Bishop", "Dani Mo", "Kerry Morton", "Caleb Konley", "2 Tuff Tony", "Abel", "Atiba", "Big Vito", "Bruce Wayans", "Cokane", "EC3", "Facade", "Father Bronson", "Hokane", "J-Rod", "Jacksyn", "Jeeves", "JP Grayson", "Kongo Kong", "Krule", "Matt Cross", "Mickie Knuckles", "Mosh Pit Mike", "Mr. Happy", "Ring Rat", "Ruffo the Clown", "Sally Boy", "Shane Mercer", "Steven Flowe", "The Green Phantom", "Tommy Grayson", "Vincenzo", "Willie Mack", "Yabo the Clown", "Jeff Lane", "DJ Clay"];
     /* team names that are made of approved people */
     /* Choppa City = JP + Tommy Grayson, Backseat Boyz = Atiba + Bruce Wayans,
-       The Hoarde = Abel + Jacksyn — all approved. Violent J and Vince Russo
-       cleared by the owner. */
-    const CONSENT_ALIAS={'brothers of funstruction':1,'the ring rat':1,'choppa city':1,'backseat boyz':1,'backseat boys':1,'the hoarde':1,'the horde':1,'violent j':1,'vince russo':1,'george ross':1,'jeff the ref':1,'joel gertner':1,'shaggy 2 dope':1,'digital duke':1};
+       The Hoarde = Abel + Jacksyn — all approved. Violent J cleared by the
+       owner. (Vince Russo removed by the owner 9/28.) */
+    const CONSENT_ALIAS={'brothers of funstruction':1,'the ring rat':1,'choppa city':1,'backseat boyz':1,'backseat boys':1,'the hoarde':1,'the horde':1,'violent j':1,'george ross':1,'jeff the ref':1,'joel gertner':1,'shaggy 2 dope':1,'digital duke':1};
     const CONSENT_SET=(function(){const s={};CARD_CONSENT.forEach(n=>{s[n.toLowerCase()]=1;});Object.keys(CONSENT_ALIAS).forEach(k=>{s[k]=1;});return s;})();
     /* Ratings and finishers from the talent sheet — power, speed, technique,
        toughness. These drive the Stat Line and Signature Move cards. */
