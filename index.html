@@ -3351,6 +3351,16 @@ function observeReveals(){
   function isModUid(uid){return !!(uid&&(JCW_MODS[uid]||JCW_MODS_LIVE[uid]===true)&&!(JCW_MODS_REMOVED[uid]===true&&uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'));}
   window.jcwIsModUid=isModUid;
   function isMod(){return !!(lkUser&&isModUid(lkUser.uid));}
+  /* Mods may delete general posts and their own, but never another mod's.
+     Only Digital Duke can remove a mod's chat message or wall post; a mod who
+     objects to one reports it instead (owner's rule, 9/30). */
+  function canDelPost(author){
+    if(!lkUser||!isMod())return false;
+    if(lkUser.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1')return true;   /* Digital Duke */
+    if(!author||author===lkUser.uid)return true;
+    return !isModUid(author);
+  }
+  window.jcwCanDelPost=canDelPost;
   window.jcwIsMod=isMod;
   /* ===== VERIFIED JCW TALENT =====
      Add a wrestler by pasting their Firebase Auth User UID with their roster name.
@@ -3393,7 +3403,7 @@ function observeReveals(){
     const ADMIN=isMod();
     const nearBottom=(chChat.scrollHeight-chChat.scrollTop-chChat.clientHeight)<90;
     const prevCount=chChat.__count||0;
-    chChat.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${(m.__k&&lkUser&&m.u!==lkUser.uid)?`<span data-chrep="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-repn="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--steel);opacity:.5;margin-right:6px;font-size:12px;" title="Report this message">&#9873;</span>`:''}${ADMIN&&m.__k?`<span data-chdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete message">&times;</span>`:''}${ADMIN&&m.u&&m.u!==lkUser.uid&&!isModUid(m.u)?`<span data-chban="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}" data-bann="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--hot);opacity:.7;margin-right:6px;font-size:11px;" title="Ban from chat">&#9940;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'').replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:`data-pname="${String(m.n||'').replace(/"/g,'').replace(/</g,'')}"`} style="cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${m.u&&isVerified(m.u)?'<span title="Verified JCW talent" style="color:var(--gold);margin-right:5px;">&#10004;</span>':''}${m.u&&window.__lkPremSet&&window.__lkPremSet[m.u]===true?'<span class="lun-chip" title="Lunatics Only member">&#127914; Lunatic</span>':''}${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;padding:10px;">No messages yet \u2014 say something to the family.</p>';
+    chChat.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${(m.__k&&lkUser&&m.u!==lkUser.uid)?`<span data-chrep="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-repn="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--steel);opacity:.5;margin-right:6px;font-size:12px;" title="Report this message">&#9873;</span>`:''}${ADMIN&&m.__k&&canDelPost(m.u)?`<span data-chdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-chu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete message">&times;</span>`:''}${ADMIN&&m.u&&m.u!==lkUser.uid&&!isModUid(m.u)?`<span data-chban="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}" data-bann="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--hot);opacity:.7;margin-right:6px;font-size:11px;" title="Ban from chat">&#9940;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'').replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:`data-pname="${String(m.n||'').replace(/"/g,'').replace(/</g,'')}"`} style="cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${m.u&&isVerified(m.u)?'<span title="Verified JCW talent" style="color:var(--gold);margin-right:5px;">&#10004;</span>':''}${m.u&&window.__lkPremSet&&window.__lkPremSet[m.u]===true?'<span class="lun-chip" title="Lunatics Only member">&#127914; Lunatic</span>':''}${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;padding:10px;">No messages yet \u2014 say something to the family.</p>';
     chChat.__count=list.length;
     if(nearBottom){chChat.scrollTop=chChat.scrollHeight;jcwHideJump();}
     else if(list.length>prevCount){jcwShowJump();}
@@ -3493,7 +3503,7 @@ function observeReveals(){
     if(ban){if(fbDB&&isMod())window.jcwBanOpen(ban.dataset.chban,ban.dataset.bann);return;}
     const del=e.target.closest('[data-chdel]');
     if(del){
-      if(fbDB&&isMod()&&confirm('Delete this message?'))
+      if(fbDB&&canDelPost(del.dataset.chu||'')&&confirm('Delete this message?'))
         fbDB.ref('chat/'+del.dataset.chdel).remove();
       return;
     }
@@ -3551,7 +3561,7 @@ function observeReveals(){
     const el=document.getElementById('ch-mods-list');if(!el)return;
     list=list||[];
     window.__modLive=list;
-    el.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${isMod()&&m.__k?`<span data-mdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete">&times;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'').replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:''} style="color:var(--acid);cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;">Quiet backstage. Say something to the crew.</p>';
+    el.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${m.__k&&canDelPost(m.u)?`<span data-mdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-mu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete">&times;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'').replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:''} style="color:var(--acid);cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;">Quiet backstage. Say something to the crew.</p>';
     el.scrollTop=el.scrollHeight;
     }catch(e){}
   }
@@ -3670,7 +3680,7 @@ function observeReveals(){
              body) have blank fields. Resolve them from the live chat by key so
              an old report is still actionable instead of an anonymous blank. */
           const live=(window.__chatLive||[]).filter(function(m){return m&&m.__k===g.k;})[0]||null;
-          const gone=!live&&!!(window.__chatLive&&window.__chatLive.length);
+          const gone=!top.where&&!live&&!!(window.__chatLive&&window.__chatLive.length);   /* wall reports never live in chat */
           const author=top.who||(live&&live.n)||'';
           const body=top.t||(live&&live.t)||'';
           /* every reporter gets their own line: who, why, what they said, when.
@@ -3698,7 +3708,8 @@ function observeReveals(){
             +who+ctx
             +'<div style="margin-top:9px;">'
               +((top.whoUid&&top.whoUid!==lkUser.uid&&!isModUid(top.whoUid))?('<button data-repban="'+esc(top.whoUid)+'" data-bann="'+esc(author)+'" style="font-size:11px;padding:3px 8px;margin-right:6px;cursor:pointer;border-color:var(--hot);color:var(--hot);">Ban author</button>'):'')
-              +(top.k?('<button data-repdel="'+esc(top.k)+'" data-repid="'+esc(ids)+'" style="font-size:11px;padding:3px 8px;margin-right:6px;cursor:pointer;">'+(gone?'Clear':'Delete message')+'</button>'):'')
+              +(top.k&&canDelPost(top.whoUid||'')?('<button data-repdel="'+esc(top.where?'':top.k)+'" data-repwhere="'+esc(top.where||'')+'" data-repid="'+esc(ids)+'" style="font-size:11px;padding:3px 8px;margin-right:6px;cursor:pointer;">'+(gone&&!top.where?'Clear':(top.where?'Delete wall post':'Delete message'))+'</button>'):'')
+              +(top.k&&!canDelPost(top.whoUid||'')?'<span style="font-size:11px;color:var(--gold);margin-right:8px;">Mod post &middot; only Digital Duke can remove it</span>':'')
               +'<button data-repok="'+esc(ids)+'" style="font-size:11px;padding:3px 8px;cursor:pointer;">Dismiss</button>'
             +'</div></div>';
         }).join('');
@@ -3731,7 +3742,8 @@ function observeReveals(){
       const d=e.target.closest('[data-repdel]');
       if(d&&fbDB&&isMod()){
         if(!confirm('Delete the reported message and close these reports?'))return;
-        if(d.dataset.repdel)fbDB.ref('chat/'+d.dataset.repdel).remove()
+        const path=d.dataset.repwhere?d.dataset.repwhere:(d.dataset.repdel?'chat/'+d.dataset.repdel:'');
+        if(path&&/^(chat\/[A-Za-z0-9_-]+|walls\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+)$/.test(path))fbDB.ref(path).remove()
           .catch(er=>{try{toast('Could not delete the message: '+(er&&er.message||er),4200);}catch(_x){}});
         repClose(d.dataset.repid);
         return;
@@ -3748,7 +3760,7 @@ function observeReveals(){
   }
   document.addEventListener('click',e=>{
     const d=e.target.closest('[data-mdel]');
-    if(d&&fbDB&&isMod()&&confirm('Delete this mod message?'))fbDB.ref('modchat/'+d.dataset.mdel).remove();
+    if(d&&fbDB&&canDelPost(d.dataset.mu||'')&&confirm('Delete this mod message?'))fbDB.ref('modchat/'+d.dataset.mdel).remove();
   });
   function updateModUI(){
     const tab=document.getElementById('ch-mods-tab');
@@ -4184,7 +4196,8 @@ function observeReveals(){
       h+='<div class="lk" style="margin-top:14px;"><h3>Rivals</h3><p>'+(rivals.join(' &middot; ')||'No beef&hellip; yet.')+'</p></div>';
       h+='<div class="lk" style="margin-top:14px;"><h3>&#127183; Card Collection</h3><div id="prof-cards"><p class="muted">Loading&hellip;</p></div></div>';
       h+='<div class="lk" style="margin-top:14px;"><h3>The Wall</h3><div id="prof-wall">'
-        +(posts.map(p=>'<div style="padding:8px 2px;border-bottom:1px dashed rgba(240,179,43,.14);">'+(isMod()&&p.__k?'<span data-wdel="'+pEsc(p.__k)+'" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete post">&times;</span>':'')+'<b data-puid="'+pEsc(p.u||'')+'" style="cursor:pointer;text-decoration:underline;">'+pEsc(p.n||'?')+'</b><br>'+pEsc(p.t||'')+'</div>').join('')||'<p>Nothing on the wall. Break the silence.</p>')
+        +(posts.map(p=>'<div style="padding:8px 2px;border-bottom:1px dashed rgba(240,179,43,.14);">'+(p.__k&&canDelPost(p.u)?'<span data-wdel="'+pEsc(p.__k)+'" data-wu="'+pEsc(p.u||'')+'" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete post">&times;</span>':'')
+          +(p.__k&&isMod()&&!canDelPost(p.u)?'<span data-wrep="'+pEsc(p.__k)+'" data-wu="'+pEsc(p.u||'')+'" data-wn="'+pEsc(p.n||'')+'" data-wt="'+pEsc(String(p.t||'').slice(0,300))+'" style="cursor:pointer;color:var(--steel);opacity:.6;margin-right:6px;font-size:12px;" title="Report this post to Digital Duke">&#9873;</span>':'')+'<b data-puid="'+pEsc(p.u||'')+'" style="cursor:pointer;text-decoration:underline;">'+pEsc(p.n||'?')+'</b><br>'+pEsc(p.t||'')+'</div>').join('')||'<p>Nothing on the wall. Break the silence.</p>')
         +'</div>'
         +(lkUser?'<div style="display:flex;gap:8px;margin-top:12px;"><input id="prof-post" maxlength="200" placeholder="Leave something on the wall&hellip;" style="flex:1;background:#000;border:1px solid rgba(240,179,43,.35);color:var(--bone);padding:9px 10px;border-radius:6px;font:inherit;"><button class="btn" id="prof-post-btn">Post</button></div>':'<p style="margin-top:10px;">Log in from your Locker to post.</p>')
         +'</div>';
@@ -4236,8 +4249,19 @@ function observeReveals(){
         });
       });
     }
+    if(e.target.dataset&&e.target.dataset.wrep){
+      const ds=e.target.dataset;
+      if(fbDB&&lkUser&&isMod()&&confirm('Report this post to Digital Duke? Only he can remove another mod\u2019s post.')){
+        fbDB.ref('reports').push({k:'wall~'+uid+'~'+ds.wrep,where:'walls/'+uid+'/'+ds.wrep,t:String(ds.wt||'').slice(0,1000),
+          who:String(ds.wn||'?').slice(0,40),whoUid:ds.wu||'',by:chName(),byUid:lkUser.uid,cat:'other',
+          note:'Wall post on a profile',ctx:[],ts:Date.now(),open:true})
+          .then(()=>{try{toast('Reported to Digital Duke.',3200);}catch(_x){}e.target.remove();})
+          .catch(er=>{try{toast('Could not report: '+(er&&er.message||er),4200);}catch(_x){}});
+      }
+      return;
+    }
     if(e.target.dataset&&e.target.dataset.wdel){
-      if(fbDB&&isMod()&&confirm('Delete this wall post?'))
+      if(fbDB&&canDelPost(e.target.dataset.wu||'')&&confirm('Delete this wall post?'))
         fbDB.ref('walls/'+uid+'/'+e.target.dataset.wdel).remove().then(()=>window.profRender(uid));
       return;
     }
