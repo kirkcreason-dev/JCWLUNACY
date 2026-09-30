@@ -2416,6 +2416,7 @@ function observeReveals(){
     ['dayone','Day One \u00b7 here before the badges'],
     ['crossedduke','Crossed the Duke \u00b7 rivaled Digital Duke \u00b7 no takebacks'],
     ['miracles','The Miracle Man \u00b7 Miracles \u00b7 found every hidden secret'],
+    ['bigbaby','You Big Baby \u00b7 blocked somebody'],
     /* ---- Lunacy Unlocked (reported by the game itself) ---- */
     ['lu_ten','Ten Count \u00b7 10 Lunacy Unlocked matches'],
     ['lu_fifty','Fifty Falls \u00b7 50 Lunacy Unlocked matches'],
@@ -2591,6 +2592,7 @@ function observeReveals(){
       if(d.fav&&d.favB)add('rideordie');
       if(d.pic)add('freshpaint');
       if(d.theme)add('ownentrance');
+      if(Object.keys(d.blocked||{}).length)add('bigbaby');   /* ever blocked anyone — unblocking doesn't take it back */
       if((d.wins||0)>=5)add('brawler');
       if((d.wins||0)>=25)add('warlord');
       if(d.game&&(d.game.wins||0)>(d.wins||0)){d.wins=d.game.wins;ch=true;}   /* counter never trails the game's own tally */
@@ -3425,6 +3427,10 @@ function observeReveals(){
   window.jcwSetBlock=function(uid,on){
     if(!lkUser||!uid||uid===lkUser.uid||uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1')return false;
     const d=lkGet();d.blocked=d.blocked||{};d.blocked[uid]=on?Date.now():-Date.now();lkSet(d);
+    if(on&&!(d.badges||[]).includes('bigbaby')&&window.lkAward){
+      window.lkAward(0,'bigbaby','Blocked somebody \u00b7 You Big Baby');
+      try{setTimeout(()=>toast('\ud83c\udf7c YOU BIG BABY \u00b7 badge earned for blocking somebody',4200),500);}catch(_x){}
+    }
     try{if(window.__chatLive)chRender(window.__chatLive);}catch(_e){}
     try{if(window.__notifApply)window.__notifApply();}catch(_e){}
     return true;
