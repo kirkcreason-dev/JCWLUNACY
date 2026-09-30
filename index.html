@@ -1283,6 +1283,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
           <p>Signed in as</p><div class="big" id="au-who" style="font-size:20px;word-break:break-all;"></div>
           <button class="btn line" id="au-logout" style="margin-top:12px;">Log out</button>
           <p>Your points sync across every device.</p>
+          <div id="lk-blocked" style="margin-top:10px;font-size:13px;"></div>
           <button id="au-del-open" style="background:none;border:none;color:var(--hot,#ff3fa4);font-size:12px;text-decoration:underline;cursor:pointer;padding:0;margin-top:10px;">Delete my account</button>
           <div id="au-del-box" style="display:none;margin-top:12px;padding:12px;border:1px solid rgba(255,63,164,.5);border-radius:10px;background:rgba(255,63,164,.07);">
             <p style="color:#ffd1e8;font-size:13px;line-height:1.6;margin:0 0 10px;"><b>This is forever.</b> Your points, badges, cards, allies and wall get wiped and your login is destroyed. If you&rsquo;re a Lunatic, cancel your subscription too or Stripe keeps billing you.</p>
@@ -1830,7 +1831,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <div class="ch-tabs"><button class="on" data-tab="chat">Chat</button><button data-tab="vote">Vote</button><button data-tab="board">Leaders</button><button data-tab="mods" id="ch-mods-tab" style="display:none;color:var(--acid);">Mods</button><button data-tab="dms" id="ch-dms-tab" style="display:none;color:var(--hot);">DMs</button></div>
   <div class="ch-pane on" id="ch-chat"></div>
   <button id="ch-jump" style="display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:118px;z-index:6;background:var(--acid);color:#000;border:none;border-radius:20px;padding:7px 16px;font:700 12px system-ui;letter-spacing:.04em;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.5);">&#8595; New messages</button>
-  <div class="ch-pane" id="ch-mods"><div style="font-size:12px;color:var(--acid);margin-bottom:10px;border-bottom:1px dashed rgba(157,255,58,.25);padding-bottom:8px;">&#128274; Mods only &mdash; the backstage room. Nobody else sees this.</div><div id="dm-inbox"></div><div id="ch-reports" style="margin-bottom:12px;"></div><div id="ch-bans" style="margin-bottom:12px;"></div><div id="ch-mods-list"></div></div>
+  <div class="ch-pane" id="ch-mods"><div style="font-size:12px;color:var(--acid);margin-bottom:10px;border-bottom:1px dashed rgba(157,255,58,.25);padding-bottom:8px;">&#128274; Mods only &mdash; the backstage room. Nobody else sees this.<div id="mod-idle-note" style="color:var(--steel);margin-top:4px;"></div></div><div id="dm-inbox"></div><div id="ch-reports" style="margin-bottom:12px;"></div><div id="ch-bans" style="margin-bottom:12px;"></div><div id="ch-mods-list"></div></div>
   <div class="ch-pane" id="ch-dms"><div style="font-size:12px;color:var(--hot);margin-bottom:10px;border-bottom:1px dashed rgba(255,63,164,.25);padding-bottom:8px;">&#128065; Owner review &mdash; every backstage DM thread. Mods are told this is visible to you.</div><div id="ch-dms-list"><p style="color:var(--steel);font-size:13px;">Loading&hellip;</p></div></div>
   <div class="ch-pane" id="ch-board"><div class="usearch" data-usearch>
   <input type="search" class="us-q" placeholder="Search Juggalos by name&hellip;" aria-label="Search user pages" autocomplete="off" spellcheck="false">
@@ -2666,6 +2667,21 @@ function observeReveals(){
     el.textContent=d.pts||0;
     document.getElementById('lk-rank').textContent=lkRank(d.pts||0);
     const wEl=document.getElementById('lk-wins');if(wEl)wEl.textContent=d.wins||0;
+    /* blocked list (Account card) with one-tap unblock */
+    try{
+      const bEl=document.getElementById('lk-blocked');
+      if(bEl){
+        const ids=Object.keys(d.blocked||{}).filter(k=>(+d.blocked[k]||0)>0);
+        if(!ids.length)bEl.innerHTML='';
+        else{
+          const draw=names=>{bEl.innerHTML='<div style="color:var(--steel);text-transform:uppercase;letter-spacing:.08em;font-size:11px;margin-bottom:4px;">Blocked &middot; '+ids.length+'</div>'
+            +ids.map(k=>'<div style="display:flex;justify-content:space-between;gap:8px;padding:3px 0;"><span>'+String((names&&names[k]&&names[k].name)||'A Juggalo').replace(/</g,'&lt;')+'</span>'
+              +'<button data-unblock="'+String(k).replace(/[^A-Za-z0-9_-]/g,'')+'" style="background:none;border:none;color:var(--gold);text-decoration:underline;cursor:pointer;font-size:12px;">Unblock</button></div>').join('');};
+          draw(null);
+          if(typeof profNames==='function')profNames().then(draw).catch(()=>{});
+        }
+      }
+    }catch(_e){}
     document.getElementById('lk-badges').innerHTML=LK_BADGES.map(([k,t])=>{
       if(k==='verified'&&lkUser&&JCW_VERIFIED[lkUser.uid])t='JCW Roster \u00b7 '+JCW_VERIFIED[lkUser.uid];
       return `<span class="badge2 ${(d.badges||[]).includes(k)?'got':''}">${t}</span>`;
@@ -3257,7 +3273,7 @@ function observeReveals(){
       }).catch(function(e){try{console.warn('[locker] pts sync failed:',e&&e.message);}catch(_e){}});
     }catch(_e){}
   }
-  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); lkPtsSync(); fbDB.ref('lockers/'+lkUser.uid).update({wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:window.jcwEncKeys(d.picks||{}),hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:window.jcwEncKeys(d.eps||{}),radio:window.jcwEncKeys(d.radio||{}),seen:window.jcwEncKeys(d.seen||{}),tagged:window.jcwEncKeys(d.tagged||{}),streak:d.streak||0,streakBest:d.streakBest||0,dayone:d.dayone?1:0,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{}),swapped:window.jcwEncCards(d.swapped||{}),game:d.game||{}}).then(()=>{window.__lockerSync='ok';}).catch(err=>{window.__lockerSync='BLOCKED: '+((err&&err.message)||'rules');window.__cardsSync=window.__lockerSync;try{console.warn('[locker] cloud push rejected:',err&&err.message);}catch(__e){}}); }catch(_e){window.__lockerSync='error: '+(_e&&_e.message);try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
+  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); lkPtsSync(); fbDB.ref('lockers/'+lkUser.uid).update({wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:window.jcwEncKeys(d.picks||{}),hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:window.jcwEncKeys(d.eps||{}),radio:window.jcwEncKeys(d.radio||{}),seen:window.jcwEncKeys(d.seen||{}),tagged:window.jcwEncKeys(d.tagged||{}),streak:d.streak||0,streakBest:d.streakBest||0,dayone:d.dayone?1:0,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{}),swapped:window.jcwEncCards(d.swapped||{}),game:d.game||{},blocked:d.blocked||{}}).then(()=>{window.__lockerSync='ok';}).catch(err=>{window.__lockerSync='BLOCKED: '+((err&&err.message)||'rules');window.__cardsSync=window.__lockerSync;try{console.warn('[locker] cloud push rejected:',err&&err.message);}catch(__e){}}); }catch(_e){window.__lockerSync='error: '+(_e&&_e.message);try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
   /* ===== WIPE RECOVERY =====
      Snapshot the best locker this device has ever seen for the signed-in account
      (jcw_locker_best_<uid>). If a later login pulls a cloud copy whose points have
@@ -3361,6 +3377,58 @@ function observeReveals(){
     return !isModUid(author);
   }
   window.jcwCanDelPost=canDelPost;
+  /* ---- MOD ACTIVITY (owner's rule 9/30): a mod who goes 30 days straight
+     without using a mod power loses it. Every power use stamps
+     lockers/<uid>/modLast (their own locker, so no rules change); when the
+     house signs in, a sweep removes anyone past the limit. Mods with no stamp
+     yet count from the day the rule started. Digital Duke is exempt. */
+  const MOD_IDLE_DAYS=30, MOD_IDLE_START=Date.UTC(2026,8,30);
+  function jcwModUsed(){
+    try{
+      if(!lkUser||!fbDB||!isMod())return;
+      const k='jcw_modused_'+lkUser.uid;let last=0;try{last=+localStorage.getItem(k)||0;}catch(_e){}
+      if(Date.now()-last<3600000)return;          /* one stamp an hour is plenty */
+      try{localStorage.setItem(k,String(Date.now()));}catch(_e){}
+      fbDB.ref('lockers/'+lkUser.uid+'/modLast').set(firebase.database.ServerValue.TIMESTAMP).catch(()=>{});
+    }catch(_e){}
+  }
+  window.jcwModUsed=jcwModUsed;
+  function jcwModSweep(){
+    try{
+      if(!lkUser||!fbDB||!isHouseUid(lkUser.uid)||window.__modSwept||!window.jcwSetMod)return;
+      window.__modSwept=true;
+      const ids={};Object.keys(JCW_MODS).forEach(k=>{ids[k]=1;});
+      Object.keys(JCW_MODS_LIVE||{}).forEach(k=>{if(JCW_MODS_LIVE[k]===true)ids[k]=1;});
+      Object.keys(ids).forEach(uid=>{
+        if(uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1'||!isModUid(uid))return;
+        Promise.all([fbDB.ref('lockers/'+uid+'/modLast').once('value'),fbDB.ref('lockers/'+uid+'/name').once('value')]).then(([s,n])=>{
+          const last=Math.max(+s.val()||0,MOD_IDLE_START);
+          if(Date.now()-last<=MOD_IDLE_DAYS*86400000)return;
+          window.jcwSetMod(uid,false,true).then(ok=>{
+            if(!ok)return;
+            try{toast((n.val()||'A mod')+' lost mod powers \u2014 unused for '+MOD_IDLE_DAYS+' days.',5200);}catch(_x){}
+          });
+        }).catch(()=>{});
+      });
+    }catch(_e){}
+  }
+  window.jcwModSweep=jcwModSweep;
+  /* ---- BLOCK A USER: stored in the blocker's own locker as blocked/<uid>
+     (+ms = blocked, -ms = unblocked, newest wins across devices). A block
+     hides their chat, wall posts and notifications from you, and stops them
+     posting on your wall or sending you cards and trades. Digital Duke
+     can't be blocked. */
+  function jcwBlocked(uid){try{const b=(lkGet().blocked)||{};return !!uid&&(+b[uid]||0)>0;}catch(e){return false;}}
+  window.jcwIsBlocked=jcwBlocked;
+  document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-unblock]');if(!b)return;
+    if(window.jcwSetBlock(b.getAttribute('data-unblock'),false)){try{toast('Unblocked.',2400);}catch(_x){}try{window.lkRender&&window.lkRender();}catch(_x){}}});
+  window.jcwSetBlock=function(uid,on){
+    if(!lkUser||!uid||uid===lkUser.uid||uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1')return false;
+    const d=lkGet();d.blocked=d.blocked||{};d.blocked[uid]=on?Date.now():-Date.now();lkSet(d);
+    try{if(window.__chatLive)chRender(window.__chatLive);}catch(_e){}
+    try{if(window.__notifApply)window.__notifApply();}catch(_e){}
+    return true;
+  };
   window.jcwIsMod=isMod;
   /* ===== VERIFIED JCW TALENT =====
      Add a wrestler by pasting their Firebase Auth User UID with their roster name.
@@ -3399,7 +3467,7 @@ function observeReveals(){
     try{
     if(!chChat)return;
     if(!lkUser){chChat.innerHTML='<p style="color:var(--steel);font-size:13px;padding:14px;">Lunacy Chat is for members. Log into your Locker to join the family.</p>';return;}
-    list=list||[];
+    list=(list||[]).filter(m=>!(m&&m.u&&jcwBlocked(m.u)));   /* blocked users vanish from my chat */
     const ADMIN=isMod();
     const nearBottom=(chChat.scrollHeight-chChat.scrollTop-chChat.clientHeight)<90;
     const prevCount=chChat.__count||0;
@@ -3504,7 +3572,7 @@ function observeReveals(){
     const del=e.target.closest('[data-chdel]');
     if(del){
       if(fbDB&&canDelPost(del.dataset.chu||'')&&confirm('Delete this message?'))
-        fbDB.ref('chat/'+del.dataset.chdel).remove();
+        {fbDB.ref('chat/'+del.dataset.chdel).remove();jcwModUsed();}
       return;
     }
     const b=e.target.closest('[data-puid],[data-pname]');if(!b)return;
@@ -3604,7 +3672,7 @@ function observeReveals(){
           const code=(wrap.querySelector('input[name=banlen]:checked')||{}).value||'24h';
           const len=BAN_LENGTHS.filter(l=>l[0]===code)[0]||BAN_LENGTHS[1];
           const reason=String((wrap.querySelector('#ban-reason')||{}).value||'').trim().slice(0,200);
-          fbDB.ref('bans/'+uid).set({by:chName(),byUid:lkUser.uid,name:String(name||'').slice(0,40),reason:reason,ts:Date.now(),until:len[2]?Date.now()+len[2]:0})
+          jcwModUsed();fbDB.ref('bans/'+uid).set({by:chName(),byUid:lkUser.uid,name:String(name||'').slice(0,40),reason:reason,ts:Date.now(),until:len[2]?Date.now()+len[2]:0})
             .then(function(){toast('⛔ '+(name||'They')+' banned from chat '+(len[2]?'for '+len[1].toLowerCase():'permanently')+'.',4200);})
             .catch(function(er){toast('Could not ban: '+(er&&er.message||er),4200);});
         }catch(_e){}
@@ -3614,7 +3682,7 @@ function observeReveals(){
   };
   window.jcwUnban=function(uid){
     if(!isMod()||!uid)return;
-    fbDB.ref('bans/'+uid).remove().then(function(){toast('Ban lifted.',2600);}).catch(function(er){toast('Could not lift: '+(er&&er.message||er),4200);});
+    jcwModUsed();fbDB.ref('bans/'+uid).remove().then(function(){toast('Ban lifted.',2600);}).catch(function(er){toast('Could not lift: '+(er&&er.message||er),4200);});
   };
   function bansRender(){
     try{
@@ -3775,7 +3843,7 @@ function observeReveals(){
         const path=d.dataset.repwhere?d.dataset.repwhere:(d.dataset.repdel?'chat/'+d.dataset.repdel:'');
         if(path&&/^(chat\/[A-Za-z0-9_-]+|walls\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+)$/.test(path))fbDB.ref(path).remove()
           .catch(er=>{try{toast('Could not delete the message: '+(er&&er.message||er),4200);}catch(_x){}});
-        repClose(d.dataset.repid);
+        repClose(d.dataset.repid);jcwModUsed();
         return;
       }
       const rv=e.target.closest('[data-revrm]');
@@ -3784,14 +3852,14 @@ function observeReveals(){
         if(!confirm('Remove '+who+' as a mod? Five mods reported them.'))return;
         window.jcwSetMod(rv.dataset.revrm,false,true).then(ok=>{
           try{toast(ok?(who+' is no longer a mod.'):'Could not remove the mod \u2014 check the database rules.',4200);}catch(_x){}
-          if(ok)repClose(rv.dataset.revids);
+          if(ok){repClose(rv.dataset.revids);jcwModUsed();}
         });
         return;
       }
       const rk=e.target.closest('[data-revok]');
-      if(rk&&fbDB&&lkUser&&isHouseUid(lkUser.uid)){repClose(rk.dataset.revok);return;}
+      if(rk&&fbDB&&lkUser&&isHouseUid(lkUser.uid)){repClose(rk.dataset.revok);jcwModUsed();return;}
       const k=e.target.closest('[data-repok]');
-      if(k&&fbDB&&isMod())repClose(k.dataset.repok);
+      if(k&&fbDB&&isMod()){repClose(k.dataset.repok);jcwModUsed();}
     }catch(_e){}
   });
 
@@ -3802,7 +3870,7 @@ function observeReveals(){
   }
   document.addEventListener('click',e=>{
     const d=e.target.closest('[data-mdel]');
-    if(d&&fbDB&&canDelPost(d.dataset.mu||'')&&confirm('Delete this mod message?'))fbDB.ref('modchat/'+d.dataset.mdel).remove();
+    if(d&&fbDB&&canDelPost(d.dataset.mu||'')&&confirm('Delete this mod message?')){fbDB.ref('modchat/'+d.dataset.mdel).remove();jcwModUsed();}
   });
   function updateModUI(){
     const tab=document.getElementById('ch-mods-tab');
@@ -3810,6 +3878,17 @@ function observeReveals(){
     const dt=document.getElementById('ch-dms-tab');
     if(dt)dt.style.display=(lkUser&&lkUser.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1')?'':'none';
     if(isMod()){modWire();dmInboxWire();}
+    try{
+      const note=document.getElementById('mod-idle-note');
+      if(note&&isMod()&&fbDB&&lkUser&&lkUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'&&!note.dataset.done){
+        note.dataset.done='1';
+        fbDB.ref('lockers/'+lkUser.uid+'/modLast').once('value').then(s=>{
+          const last=Math.max(+s.val()||0,MOD_IDLE_START);
+          const left=Math.max(0,Math.ceil((last+MOD_IDLE_DAYS*86400000-Date.now())/86400000));
+          note.textContent='Use a mod power (delete, ban, handle a report) at least once every '+MOD_IDLE_DAYS+' days or it lapses \u00b7 '+left+' day'+(left===1?'':'s')+' left.';
+        }).catch(()=>{});
+      }
+    }catch(_e){}
   }
   window.jcwUpdateModUI=updateModUI;
   document.getElementById('ch-send').addEventListener('click',chSend);
@@ -3978,6 +4057,7 @@ function observeReveals(){
      a new phone or a cleared browser doesn't replay the same 25 pings. */
   function notifRender(list,seen){
     const el=document.getElementById('lk-notifs');if(!el)return;
+    list=(list||[]).filter(n=>!(n&&n.fu&&jcwBlocked(n.fu)));
     if(!list.length){el.innerHTML='Quiet so far. Get in the chat.';return;}
     seen=seen||0;
     const fresh=list.filter(n=>(n.ts||0)>seen), old=list.filter(n=>(n.ts||0)<=seen).slice(0,8);
@@ -4162,7 +4242,10 @@ function observeReveals(){
       const v=rs[0]&&rs[0].val();if(!v){host.innerHTML='<p>No such Juggalo.</p>';return;}
       const rel=(rs[1]&&rs[1].val())||{};const all=rs[3]||{};
       const myRel=rs[4]&&rs[4].val();
-      const posts=[];if(rs[2])rs[2].forEach(c=>{posts.push(Object.assign({__k:c.key},c.val()||{}));});posts.reverse();
+      const posts=[];if(rs[2])rs[2].forEach(c=>{const pv=c.val()||{};if(pv.u&&jcwBlocked(pv.u))return;posts.push(Object.assign({__k:c.key},pv));});posts.reverse();
+      const blockedMe=!!(lkUser&&v.blocked&&(+v.blocked[lkUser.uid]||0)>0&&lkUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1');
+      const iBlocked=!!(lkUser&&jcwBlocked(uid));
+      window.__profBlockedMe=blockedMe;
       const DUKE='oYrNiXZywhexmLqRQO7j1iyA1Bh1';
       const badgeMap={};LK_BADGES.forEach(b=>{badgeMap[b[0]]=b[1];});
       if(JCW_VERIFIED[uid])badgeMap['verified']='JCW Roster \u00b7 '+JCW_VERIFIED[uid];
@@ -4198,10 +4281,12 @@ function observeReveals(){
             : '<button class="btn line" data-rel="ally" style="margin-right:8px;'+(myRel==='ally'?'border-color:var(--acid);color:var(--acid);':'')+'">'+(myRel==='ally'?'&#10004; ALLY':'Mark as Ally')+'</button>'
               +'<button class="btn line" data-rel="rival" style="'+(myRel==='rival'?'border-color:var(--hot);color:var(--hot);':'')+'">'+(myRel==='rival'?'&#9876; RIVAL':'Mark as Rival')+'</button>')
           +(isMod()&&isModUid(uid)?'<button class="btn" id="prof-dm" style="margin-left:8px;background:var(--acid);color:#000;">&#128172; Message</button>':'')
-          +(window.__lkPremOn?'<button class="btn line" id="prof-gift" style="margin-left:8px;">&#127183; Send a card</button>':'')
+          +(window.__lkPremOn&&!blockedMe?'<button class="btn line" id="prof-gift" style="margin-left:8px;">&#127183; Send a card</button>':'')
+          +(uid!==DUKE?'<button class="btn line" id="prof-block" data-on="'+(iBlocked?'0':'1')+'" style="margin-left:8px;border-color:var(--steel);color:var(--steel);">'+(iBlocked?'Unblock':'&#128683; Block')+'</button>':'')
           +(isHouseUid(lkUser.uid)&&uid!==DUKE&&(!isModUid(uid)||lkUser.uid===DUKE)?('<button class="btn line" id="prof-modtoggle" data-on="'+(isModUid(uid)?'0':'1')+'" style="margin-left:8px;'+(isModUid(uid)?'border-color:var(--hot);color:var(--hot);':'border-color:var(--gold);color:var(--gold);')+'">'+(isModUid(uid)?'&#10006; Remove mod':'&#9733; Make mod')+'</button>'):'')
           +'</p>';
       }
+      if(lkUser&&!isMe&&iBlocked)h+='<p style="margin-top:8px;color:var(--steel);font-size:13px;">You blocked this Juggalo. Their chat, wall posts and pings are hidden from you, and they can&rsquo;t post on your wall or send you cards.</p>';
       if(uid==='zRLXcejE4dWQRL0l07Bo19SO5j52'){
         h+='<div id="cn-egg"><img id="cn-hatchet" alt="" draggable="false">'
           +'<img id="cn-dollar" src="poop-dollar.png" alt="Poop Dollar" onerror="this.style.display=\'none\'"></div>';
@@ -4241,7 +4326,7 @@ function observeReveals(){
         +(posts.map(p=>'<div style="padding:8px 2px;border-bottom:1px dashed rgba(240,179,43,.14);">'+(p.__k&&canDelPost(p.u)?'<span data-wdel="'+pEsc(p.__k)+'" data-wu="'+pEsc(p.u||'')+'" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete post">&times;</span>':'')
           +(p.__k&&isMod()&&!canDelPost(p.u)?'<span data-wrep="'+pEsc(p.__k)+'" data-wu="'+pEsc(p.u||'')+'" data-wn="'+pEsc(p.n||'')+'" data-wt="'+pEsc(String(p.t||'').slice(0,300))+'" style="cursor:pointer;color:var(--steel);opacity:.6;margin-right:6px;font-size:12px;" title="Report this post to Digital Duke">&#9873;</span>':'')+'<b data-puid="'+pEsc(p.u||'')+'" style="cursor:pointer;text-decoration:underline;">'+pEsc(p.n||'?')+'</b><br>'+pEsc(p.t||'')+'</div>').join('')||'<p>Nothing on the wall. Break the silence.</p>')
         +'</div>'
-        +(lkUser?'<div style="display:flex;gap:8px;margin-top:12px;"><input id="prof-post" maxlength="200" placeholder="Leave something on the wall&hellip;" style="flex:1;background:#000;border:1px solid rgba(240,179,43,.35);color:var(--bone);padding:9px 10px;border-radius:6px;font:inherit;"><button class="btn" id="prof-post-btn">Post</button></div>':'<p style="margin-top:10px;">Log in from your Locker to post.</p>')
+        +(lkUser&&blockedMe?'<p style="margin-top:10px;color:var(--steel);">You can&rsquo;t post on this wall.</p>':lkUser?'<div style="display:flex;gap:8px;margin-top:12px;"><input id="prof-post" maxlength="200" placeholder="Leave something on the wall&hellip;" style="flex:1;background:#000;border:1px solid rgba(240,179,43,.35);color:var(--bone);padding:9px 10px;border-radius:6px;font:inherit;"><button class="btn" id="prof-post-btn">Post</button></div>':'<p style="margin-top:10px;">Log in from your Locker to post.</p>')
         +'</div>';
       host.innerHTML=h;
       host.dataset.uid=uid;
@@ -4304,7 +4389,7 @@ function observeReveals(){
     }
     if(e.target.dataset&&e.target.dataset.wdel){
       if(fbDB&&canDelPost(e.target.dataset.wu||'')&&confirm('Delete this wall post?'))
-        fbDB.ref('walls/'+uid+'/'+e.target.dataset.wdel).remove().then(()=>window.profRender(uid));
+        {fbDB.ref('walls/'+uid+'/'+e.target.dataset.wdel).remove().then(()=>window.profRender(uid));jcwModUsed();}
       return;
     }
     if(e.target.id==='prof-modtoggle'){
@@ -4318,7 +4403,14 @@ function observeReveals(){
     if(e.target.id==='lo-play'&&window.jcwOpenGame){window.jcwOpenGame();}
     if(e.target.id==='lo-cards'){location.hash='#cards';}
     if(e.target.id==='prof-gift'){const host2=document.getElementById('prof-body');const nm=(host2&&host2.querySelector('h2'))?host2.querySelector('h2').textContent.replace(/online|offline/gi,'').trim():'Juggalo';if(window.jcwSendCardUI)window.jcwSendCardUI(uid,nm);}
+    if(e.target.id==='prof-block'&&lkUser){
+      const on=e.target.dataset.on==='1';
+      if(on&&!confirm('Block this Juggalo? You won\u2019t see their chat, wall posts or pings, and they can\u2019t post on your wall or send you cards.'))return;
+      if(window.jcwSetBlock(uid,on)){try{toast(on?'Blocked.':'Unblocked.',2600);}catch(_x){}}
+      window.profRender(uid);return;
+    }
     if(e.target.id==='prof-post-btn'&&lkUser&&fbDB){
+      if(window.__profBlockedMe){try{toast('You can\u2019t post on this wall.',3000);}catch(_x){}return;}
       const inp=document.getElementById('prof-post');const t=(inp.value||'').trim();if(!t)return;inp.value='';
       fbDB.ref('walls/'+uid).push({u:lkUser.uid,n:lkGet().name||'A Juggalo',t:t,ts:Date.now()}).then(()=>{
         notifPush(uid,{ty:'post',t:t.slice(0,120)});
@@ -4564,6 +4656,7 @@ function observeReveals(){
       fbDB.ref('modsRemoved').on('value',snap=>{
         JCW_MODS_REMOVED=snap.val()||{};
         try{if(window.jcwUpdateModUI)window.jcwUpdateModUI();}catch(_e){}
+        try{setTimeout(jcwModSweep,15000);}catch(_e){}
         try{if(window.lkRender)window.lkRender();}catch(_e){}
         try{if((location.hash||'').indexOf('#u-')===0&&window.profRender)window.profRender((location.hash||'').slice(3));}catch(_e){}
       },()=>{});
@@ -4770,7 +4863,10 @@ function observeReveals(){
                   else if(k==='streak')mg[k]=Math.max(+a||0,+b||0);
                   else mg[k]=Math.max(+a||0,+b||0);});
                 merged.game=mg;
-                merged.arcade=cloud.arcade||d.arcade||{};})();
+                merged.arcade=cloud.arcade||d.arcade||{};
+                const cb=cloud.blocked||{},lb=d.blocked||{},mb={};
+                Object.keys(cb).concat(Object.keys(lb)).forEach(k=>{const a=+cb[k]||0,b=+lb[k]||0;mb[k]=Math.abs(a)>=Math.abs(b)?a:b;});
+                merged.blocked=mb;})();
               merged.pts=Math.max(d.pts||0,cloud.pts||0);
               merged.wins=Math.max(d.wins||0,cloud.wins||0);
               lkCloudReady=true;          /* safe to write from here on */
@@ -5965,7 +6061,7 @@ route();
       owned.sort((a,b)=>(order[a.card.rar]-order[b.card.rar])||a.card.name.localeCompare(b.card.name));
       host.innerHTML='<div class="prof-cardgrid"></div>';
       const grid=host.querySelector('.prof-cardgrid');
-      const canTrade=!!(window.__lkPremOn&&curUser()&&curUser().uid!==uid);
+      const canTrade=!!(window.__lkPremOn&&curUser()&&curUser().uid!==uid&&!window.__profBlockedMe);
       owned.forEach(o=>{
         const el=cardEl(o.card,{owned:true,cnt:o.own.n,foil:o.own.foil,locked:false,serial:o.own.serials&&o.own.serials[0]});
         el.title=canTrade?('Ask '+theirName+' to trade for this'):o.card.name;

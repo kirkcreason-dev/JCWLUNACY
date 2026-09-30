@@ -789,7 +789,8 @@
         db.ref('lockers').once('value')
       ]);
       MOD_NAMES={};
-      lockers.forEach(c=>{const v=c.val();if(v&&v.name)MOD_NAMES[c.key]=String(v.name);});
+      const MOD_LAST={};
+      lockers.forEach(c=>{const v=c.val();if(v&&v.name)MOD_NAMES[c.key]=String(v.name);if(v&&v.modLast)MOD_LAST[c.key]=+v.modLast;});
       const row=(uid,label,builtin)=>{
         const nm=MOD_NAMES[uid];
         const dead=!nm;
@@ -797,6 +798,12 @@
           +'<div style="flex:1;min-width:0">'
             +'<div style="color:var(--txt);font-weight:700">'+esc(nm||label||uid)+(dead?' <span class="err" style="font-weight:400">&mdash; no account with this ID</span>':'')+'</div>'
             +'<div class="muted" style="font-size:11px;word-break:break-all">'+esc(uid)+'</div>'
+            +(uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1'?'':(function(){
+              /* mods lose powers after 30 days without using them (clock started 9/30) */
+              const last=Math.max(MOD_LAST[uid]||0,Date.UTC(2026,8,30));const days=Math.floor((Date.now()-last)/86400000);
+              const left=30-days;
+              return '<div style="font-size:11px;'+(left<=7?'color:var(--hot)':'color:var(--muted,#9a9aa5)')+'">'
+                +(MOD_LAST[uid]?('Last used powers '+(days<1?'today':days+'d ago')):'No power use yet')+' &middot; '+(left>0?(left+'d until they lapse'):'lapses on the next house sign-in')+'</div>';})())
           +'</div>'
           +(uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1'
              ? '<span class="muted" style="font-size:11.5px;white-space:nowrap">the owner</span>'
