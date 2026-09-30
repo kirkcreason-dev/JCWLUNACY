@@ -840,6 +840,10 @@
     const b=e.target.closest('[data-modrevoke]');if(!b)return;
     const uid=b.getAttribute('data-modrevoke');
     const who=MOD_NAMES[uid]||uid;
+    if(statsAuth&&statsAuth.currentUser&&statsAuth.currentUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'){
+      /* owner's rule 9/30: only Digital Duke removes a mod directly; Nocturnal
+         removes one only through a 5-mod review on the site */
+      modSay('Only Digital Duke can remove a mod directly. A mod reported by 5 mods shows up for review on the site.','err');return;}
     if(!confirm('Remove mod powers from '+who+'?'))return;
     try{
       const db=await statsInit();

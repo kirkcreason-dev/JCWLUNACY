@@ -3782,7 +3782,7 @@ function observeReveals(){
       if(rv&&fbDB&&lkUser&&isHouseUid(lkUser.uid)){
         const who=rv.dataset.revn||'this mod';
         if(!confirm('Remove '+who+' as a mod? Five mods reported them.'))return;
-        window.jcwSetMod(rv.dataset.revrm,false).then(ok=>{
+        window.jcwSetMod(rv.dataset.revrm,false,true).then(ok=>{
           try{toast(ok?(who+' is no longer a mod.'):'Could not remove the mod \u2014 check the database rules.',4200);}catch(_x){}
           if(ok)repClose(rv.dataset.revids);
         });
@@ -4199,7 +4199,7 @@ function observeReveals(){
               +'<button class="btn line" data-rel="rival" style="'+(myRel==='rival'?'border-color:var(--hot);color:var(--hot);':'')+'">'+(myRel==='rival'?'&#9876; RIVAL':'Mark as Rival')+'</button>')
           +(isMod()&&isModUid(uid)?'<button class="btn" id="prof-dm" style="margin-left:8px;background:var(--acid);color:#000;">&#128172; Message</button>':'')
           +(window.__lkPremOn?'<button class="btn line" id="prof-gift" style="margin-left:8px;">&#127183; Send a card</button>':'')
-          +(isHouseUid(lkUser.uid)&&uid!==DUKE?('<button class="btn line" id="prof-modtoggle" data-on="'+(isModUid(uid)?'0':'1')+'" style="margin-left:8px;'+(isModUid(uid)?'border-color:var(--hot);color:var(--hot);':'border-color:var(--gold);color:var(--gold);')+'">'+(isModUid(uid)?'&#10006; Remove mod':'&#9733; Make mod')+'</button>'):'')
+          +(isHouseUid(lkUser.uid)&&uid!==DUKE&&(!isModUid(uid)||lkUser.uid===DUKE)?('<button class="btn line" id="prof-modtoggle" data-on="'+(isModUid(uid)?'0':'1')+'" style="margin-left:8px;'+(isModUid(uid)?'border-color:var(--hot);color:var(--hot);':'border-color:var(--gold);color:var(--gold);')+'">'+(isModUid(uid)?'&#10006; Remove mod':'&#9733; Make mod')+'</button>'):'')
           +'</p>';
       }
       if(uid==='zRLXcejE4dWQRL0l07Bo19SO5j52'){
@@ -4568,9 +4568,12 @@ function observeReveals(){
         try{if((location.hash||'').indexOf('#u-')===0&&window.profRender)window.profRender((location.hash||'').slice(3));}catch(_e){}
       },()=>{});
       /* the house adds / removes mods from a profile page */
-      window.jcwSetMod=function(uid,on){
+      window.jcwSetMod=function(uid,on,viaReview){
         if(!lkUser||!isHouseUid(lkUser.uid)||!uid)return Promise.resolve(false);
         if(uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1')return Promise.resolve(false);   /* the Duke stays */
+        /* owner's rule 9/30: only Digital Duke removes a mod directly. Nocturnal
+           can still make mods, but removes one only through a 5-mod review. */
+        if(!on&&lkUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'&&!viaReview)return Promise.resolve(false);
         const builtin=!!JCW_MODS[uid];
         const w=on
           ? Promise.all([fbDB.ref('modsRemoved/'+uid).remove(), builtin?Promise.resolve():fbDB.ref('mods/'+uid).set(true)])
