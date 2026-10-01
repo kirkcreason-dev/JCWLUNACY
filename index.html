@@ -4185,7 +4185,16 @@ function observeReveals(){
   }
   window.dmOpen=function(otherUid,otherName){
     if(!fbDB||!lkUser||!isMod()||!isModUid(otherUid)||otherUid===lkUser.uid)return;
+    if(jcwBlocked(otherUid)){try{toast('You blocked '+(otherName||'them')+' \u2014 unblock them to message.',3600);}catch(_x){}return;}
     dmOther=otherUid;dmOtherName=otherName||'Mod';
+    /* blocks cover DMs too: if they blocked me, the thread is read-only */
+    window.__dmBlockedMe=false;
+    const dmInp=document.getElementById('dm-msg');if(dmInp){dmInp.disabled=false;dmInp.placeholder='Message\u2026';}
+    if(lkUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1')fbDB.ref('lockers/'+otherUid+'/blocked/'+lkUser.uid).once('value').then(s=>{
+      if(dmOther!==otherUid)return;
+      window.__dmBlockedMe=(+s.val()||0)>0;
+      if(window.__dmBlockedMe&&dmInp){dmInp.disabled=true;dmInp.value='';dmInp.placeholder='You can\u2019t message '+dmOtherName+'.';}
+    }).catch(()=>{});
     document.getElementById('dm-with').textContent='DM \u00b7 '+dmOtherName;
     document.getElementById('dm-list').innerHTML='<p style="color:var(--steel);font-size:13px;">Loading\u2026</p>';
     document.getElementById('dm-modal').classList.add('on');
@@ -4197,7 +4206,20 @@ function observeReveals(){
   };
   function dmSend(){
     const inp=document.getElementById('dm-msg');const t=(inp.value||'').trim();
-    if(!t||!fbDB||!lkUser||!dmOther)return;inp.value='';
+    if(!t||!fbDB||!lkUser||!dmOther)return;
+    if(window.__dmBlockedMe||jcwBlocked(dmOther)){try{toast('You can\u2019t message '+dmOtherName+'.',3200);}catch(_x){}return;}
+    const target=dmOther;
+    if(lkUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'){
+      fbDB.ref('lockers/'+target+'/blocked/'+lkUser.uid).once('value').then(s=>{
+        if((+s.val()||0)>0){window.__dmBlockedMe=true;try{toast('You can\u2019t message '+dmOtherName+'.',3200);}catch(_x){}return;}
+        dmDeliver(target,t,inp);
+      }).catch(()=>dmDeliver(target,t,inp));
+      return;
+    }
+    dmDeliver(target,t,inp);
+  }
+  function dmDeliver(dmOther,t,inp){
+    if(inp)inp.value='';
     const msg={u:lkUser.uid,t:t,ts:Date.now()};
     fbDB.ref('dm/'+dmPair(lkUser.uid,dmOther)).push(msg);
     const myName=lkGet().name||'A Mod';
@@ -4217,7 +4239,7 @@ function observeReveals(){
     if(dmInboxWired||!fbDB||!lkUser||!isMod())return;dmInboxWired=true;
     fbDB.ref('dmIndex/'+lkUser.uid).on('value',s=>{
       const box=document.getElementById('dm-inbox');if(!box)return;
-      const rows=[];s.forEach(c=>{const v=c.val()||{};v.__k=c.key;rows.push(v);});
+      const rows=[];s.forEach(c=>{const v=c.val()||{};v.__k=c.key;if(jcwBlocked(c.key))return;rows.push(v);});
       rows.sort((a,b)=>(b.ts||0)-(a.ts||0));
       box.innerHTML=rows.length?('<div style="font-size:11px;color:var(--steel);text-transform:uppercase;letter-spacing:.08em;margin:2px 0 6px;">Direct messages</div>'+rows.map(r=>
         '<div data-dm="'+pEsc(r.__k)+'" data-dmn="'+pEsc(r.n||'Mod')+'" style="cursor:pointer;padding:7px 2px;border-bottom:1px dashed rgba(157,255,58,.15);">'
@@ -4292,7 +4314,7 @@ function observeReveals(){
             ? '<span class="btn line" style="border-color:var(--hot);color:var(--hot);cursor:not-allowed;opacity:.85;">&#9876; RIVAL OF THE DUKE &middot; no takebacks</span>'
             : '<button class="btn line" data-rel="ally" style="margin-right:8px;'+(myRel==='ally'?'border-color:var(--acid);color:var(--acid);':'')+'">'+(myRel==='ally'?'&#10004; ALLY':'Mark as Ally')+'</button>'
               +'<button class="btn line" data-rel="rival" style="'+(myRel==='rival'?'border-color:var(--hot);color:var(--hot);':'')+'">'+(myRel==='rival'?'&#9876; RIVAL':'Mark as Rival')+'</button>')
-          +(isMod()&&isModUid(uid)?'<button class="btn" id="prof-dm" style="margin-left:8px;background:var(--acid);color:#000;">&#128172; Message</button>':'')
+          +(isMod()&&isModUid(uid)&&!blockedMe&&!iBlocked?'<button class="btn" id="prof-dm" style="margin-left:8px;background:var(--acid);color:#000;">&#128172; Message</button>':'')
           +(window.__lkPremOn&&!blockedMe?'<button class="btn line" id="prof-gift" style="margin-left:8px;">&#127183; Send a card</button>':'')
           +(uid!==DUKE?'<button class="btn line" id="prof-block" data-on="'+(iBlocked?'0':'1')+'" style="margin-left:8px;border-color:var(--steel);color:var(--steel);">'+(iBlocked?'Unblock':'&#128683; Block')+'</button>':'')
           +(isHouseUid(lkUser.uid)&&uid!==DUKE&&(!isModUid(uid)||lkUser.uid===DUKE)?('<button class="btn line" id="prof-modtoggle" data-on="'+(isModUid(uid)?'0':'1')+'" style="margin-left:8px;'+(isModUid(uid)?'border-color:var(--hot);color:var(--hot);':'border-color:var(--gold);color:var(--gold);')+'">'+(isModUid(uid)?'&#10006; Remove mod':'&#9733; Make mod')+'</button>'):'')
