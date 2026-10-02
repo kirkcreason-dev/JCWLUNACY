@@ -1795,8 +1795,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
       <div class="game playable rev">
         <span class="badge">Lunatics Only</span>
         <h3>Psychopathic Arcade</h3>
-        <div class="sub">13 arcade games &middot; Online VS &middot; No download &middot; Lunatics Only</div>
-        <p>The midway, in your browser &mdash; <b>Carnival Claw</b> (collect all 540 roster pieces), <b>Carnival Crossfire</b>, <b>Tic Tac Slam</b>, <b>Juggalo Chess</b>, <b>Juggalo Checkers</b>, <b>Dark Carnival Pinball</b>, <b>Joker Card Four</b>, <b>Blackjack 21</b>, <b>Joker Card Memory</b>, <b>Gathering Camper</b>, <b>Dark Carnival Solitaire</b>, <b>Juggalo 31</b> and <b>Juggalo Air Hockey</b>. Head-to-head <b>online play</b> with speakable room codes, and arcade-style top-10 records in every game.</p>
+        <div class="sub">14 arcade games &middot; Online VS &middot; No download &middot; Lunatics Only</div>
+        <p>The midway, in your browser &mdash; <b>Carnival Claw</b> (collect all 540 roster pieces), <b>Carnival Crossfire</b>, <b>Chicken Huntin&rsquo;</b>, <b>Tic Tac Slam</b>, <b>Juggalo Chess</b>, <b>Juggalo Checkers</b>, <b>Dark Carnival Pinball</b>, <b>Joker Card Four</b>, <b>Blackjack 21</b>, <b>Joker Card Memory</b>, <b>Gathering Camper</b>, <b>Dark Carnival Solitaire</b>, <b>Juggalo 31</b> and <b>Juggalo Air Hockey</b>. Head-to-head <b>online play</b> with speakable room codes, and arcade-style top-10 records in every game.</p>
         <a class="btn gold" id="arcade-enter" href="arcade.html" target="_blank" rel="noopener" onclick="if(!window.__lkPremOn){event.preventDefault();location.hash='#lunatics';return false;}">&#127918; Enter the Arcade</a>
       </div>
       <div class="game playable rev">
@@ -2475,7 +2475,7 @@ function observeReveals(){
     /* ---- Psychopathic Arcade ---- */
     ['pa_first','Midway \u00b7 won an arcade game'],
     ['pa_five','Midway Rat \u00b7 won in 5 different arcade games'],
-    ['pa_all','Full Midway \u00b7 won in all 13 arcade games'],
+    ['pa_all','Full Midway \u00b7 won in all 14 arcade games'],
     ['pa_50','Carnival Regular \u00b7 50 arcade wins'],
     ['pa_record','Carved Your Mark \u00b7 a top-10 arcade record'],
     ['pa_ttt5','Slam Streak \u00b7 5 straight Tic Tac Slam wins'],
@@ -2548,6 +2548,27 @@ function observeReveals(){
     ['sh_acc90','Steady Aim \u00b7 90% accuracy in a Crossfire round'],
     ['sh_runs25','Gallery Regular \u00b7 25 Crossfire rounds'],
     ['sh_runs100','Gallery Lifer \u00b7 100 Crossfire rounds'],
+    /* ---- Psychopathic Arcade: Chicken Huntin' ---- */
+    ['kh_first','Opening Day \u00b7 finished a Chicken Huntin\u2019 round'],
+    ['kh_1000','Feather Chaser \u00b7 1,000 in Chicken Huntin\u2019'],
+    ['kh_3000','Henchman \u00b7 3,000 in Chicken Huntin\u2019'],
+    ['kh_6000','Barnyard Menace \u00b7 6,000 in Chicken Huntin\u2019'],
+    ['kh_10000','Chicken Legend \u00b7 10,000 in Chicken Huntin\u2019'],
+    ['kh_streak10','Pluck Streak \u00b7 10 chickens in a row'],
+    ['kh_streak25','Cock-a-Doodle Done \u00b7 25 chickens in a row'],
+    ['kh_gold1','Golden Goose \u00b7 shot a golden chicken'],
+    ['kh_gold5run','Golden Hour \u00b7 5 golden chickens in one round'],
+    ['kh_gold25','Gold Rush \u00b7 25 golden chickens'],
+    ['kh_birds100','Coop Cleaner \u00b7 100 chickens bagged'],
+    ['kh_birds1000','Fox in the Henhouse \u00b7 1,000 chickens bagged'],
+    ['kh_bull50','Clean Shot \u00b7 50 centre shots on chickens'],
+    ['kh_bull250','Dead-Eye Farmer \u00b7 250 centre shots on chickens'],
+    ['kh_frenzy','Feather Frenzy \u00b7 set off a Feather Frenzy'],
+    ['kh_frenzy25','Feathers Everywhere \u00b7 25 Feather Frenzies'],
+    ['kh_acc90','Sure Shot \u00b7 90% accuracy in a Chicken Huntin\u2019 round'],
+    ['kh_noescape','None Got Away \u00b7 20+ chickens, not one escaped'],
+    ['kh_runs25','Hunting Season \u00b7 25 Chicken Huntin\u2019 rounds'],
+    ['kh_runs100','Lifetime License \u00b7 100 Chicken Huntin\u2019 rounds'],
     /* ---- Psychopathic Arcade: Carnival Claw ---- */
     ['cl_first','Lucky Grab \u00b7 won a Carnival Claw prize'],
     ['cl_25','Cabinet Started \u00b7 25 claw collectibles'],
@@ -2768,7 +2789,7 @@ function observeReveals(){
       })();
       /* Psychopathic Arcade — written straight to the cloud locker by arcade.html */
       (function(){const a=d.arcade||{};const games=a.games||{},best=a.best||{};const n=Object.keys(games).length;
-        if(a.wins>=1)add('pa_first');if(n>=5)add('pa_five');if(n>=13)add('pa_all');if(a.wins>=50)add('pa_50');
+        if(a.wins>=1)add('pa_first');if(n>=5)add('pa_five');if(n>=14)add('pa_all');if(a.wins>=50)add('pa_50');
         if(a.records>=1)add('pa_record');
         if(best.ttt>=5)add('pa_ttt5');if(best.faygo>=5)add('pa_faygo5');if(best.hockey>=5)add('pa_hockey5');
         if(games.chess>=1)add('pa_chess');if(games.memory>=1)add('pa_memory');
@@ -2777,6 +2798,14 @@ function observeReveals(){
         if(sh.runs>=1)add('sh_first');if(sh.best>=1000)add('sh_trick');if(sh.best>=3000)add('sh_sharp');if(sh.best>=6000)add('sh_ace');if(sh.best>=10000)add('sh_legend');
         if(sh.streak>=10)add('sh_streak10');if(sh.streak>=25)add('sh_streak25');if(sh.bullseyes>=50)add('sh_bull50');if(sh.bullseyes>=250)add('sh_bull250');
         if(sh.acc90)add('sh_acc90');if(sh.runs>=25)add('sh_runs25');if(sh.runs>=100)add('sh_runs100');
+        /* Chicken Huntin' (arcade/chicken) */
+        const kh=a.chicken||{};
+        if(kh.runs>=1)add('kh_first');if(kh.best>=1000)add('kh_1000');if(kh.best>=3000)add('kh_3000');if(kh.best>=6000)add('kh_6000');if(kh.best>=10000)add('kh_10000');
+        if(kh.streak>=10)add('kh_streak10');if(kh.streak>=25)add('kh_streak25');
+        if(kh.golden>=1)add('kh_gold1');if(kh.goldRun>=5)add('kh_gold5run');if(kh.golden>=25)add('kh_gold25');
+        if(kh.hits>=100)add('kh_birds100');if(kh.hits>=1000)add('kh_birds1000');if(kh.bullseyes>=50)add('kh_bull50');if(kh.bullseyes>=250)add('kh_bull250');
+        if(kh.frenzies>=1)add('kh_frenzy');if(kh.frenzies>=25)add('kh_frenzy25');if(kh.acc90)add('kh_acc90');if(kh.clean)add('kh_noescape');
+        if(kh.runs>=25)add('kh_runs25');if(kh.runs>=100)add('kh_runs100');
         /* Carnival Claw (arcade/claw = {rosterId: 5-bit mask}, bit 0 = legendary) */
         const cm=a.claw||{};const bits=v=>{v=+v||0;let c=0;while(v){c+=v&1;v>>=1;}return c;};
         let pieces=0,sets=0,legends=0;const grp=[0,0,0,0],grpAll=[0,0,0,0];

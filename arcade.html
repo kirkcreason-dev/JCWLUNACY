@@ -94,7 +94,7 @@
     var d=e.data;
     if(!d||d.type!=='jcw-arcade'||e.source!==frame.contentWindow)return;
     var g=String(d.g||'');
-    var EXTRA={shooter:1,claw:1,clawrun:1};
+    var EXTRA={shooter:1,claw:1,clawrun:1,chicken:1};
     if(!EXTRA[d.ev]&&!/^[a-z0-9_]{1,24}$/.test(g))return;
     window.__arcFirebase(function(ok){
       if(!ok)return;
@@ -116,6 +116,16 @@
           add('shooter/runs',1);mx('shooter/best',num(d.score,1e7));mx('shooter/streak',num(d.streak,10000));
           add('shooter/bullseyes',num(d.bullseyes,500));
           if(shots>=20&&hits/shots>=0.9)ref.child('shooter/acc90').set(1);
+          return;
+        }
+        /* Chicken Huntin': every finished round */
+        if(d.ev==='chicken'){
+          var cs=num(d.shots,10000),chh=num(d.hits,10000),gold=num(d.golden,200);
+          add('chicken/runs',1);mx('chicken/best',num(d.score,1e7));mx('chicken/streak',num(d.streak,10000));
+          add('chicken/hits',Math.min(chh,1000));add('chicken/bullseyes',num(d.bullseyes,500));add('chicken/golden',gold);mx('chicken/goldRun',gold);
+          add('chicken/frenzies',num(d.frenzies,100));
+          if(cs>=20&&chh/cs>=0.9)ref.child('chicken/acc90').set(1);
+          if(chh>=20&&!num(d.escaped,10000))ref.child('chicken/clean').set(1);
           return;
         }
         /* Carnival Claw: the cabinet, one 5-bit mask per roster name, OR-merged */
