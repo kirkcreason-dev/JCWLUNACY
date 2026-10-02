@@ -419,12 +419,12 @@
       }).join(''):'<span class="muted">No episodes found.</span>';
 
       // arcade games played
-      const ARC_NAMES={ttt:'Tic Tac Slam',chess:'Juggalo Chess',checkers:'Juggalo Checkers',faygo:'Faygo 4',pinball:'Dark Carnival Pinball',bj:'Blackjack 21',memory:'Joker Card Memory',camper:'Gathering Camper',solitaire:'Dark Carnival Solitaire',j31:'Juggalo 31',hockey:'Juggalo Air Hockey'};
+      const ARC_NAMES={claw:'Carnival Claw',chicken:'Chicken Huntin\u2019',shooter:'Carnival Crossfire',ttt:'Tic Tac Slam',chess:'Juggalo Chess',checkers:'Juggalo Checkers',faygo:'Joker Card Four',pinball:'Dark Carnival Pinball',bj:'Blackjack 21',memory:'Joker Card Memory',camper:'Gathering Camper',solitaire:'Dark Carnival Solitaire',j31:'Juggalo 31',hockey:'Juggalo Air Hockey'};
       const arc=st.arcade||{};
       const arows=Object.keys(ARC_NAMES).map(k=>[ARC_NAMES[k],arc[k]||0]).sort((a,b)=>b[1]-a[1]);
       const atot=st.arcadeTotal||arows.reduce((a,x)=>a+x[1],0);
       const amax=Math.max(1,...arows.map(x=>x[1]));
-      let ah='<div style="border:1px solid var(--seam);border-radius:8px;padding:12px;background:#101015;text-align:center;margin-bottom:12px"><div style="font-size:24px;font-weight:800;color:var(--gold)">'+atot+'</div><div class="muted" style="font-size:12px">total games played \u00b7 11 games live</div></div>';
+      let ah='<div style="border:1px solid var(--seam);border-radius:8px;padding:12px;background:#101015;text-align:center;margin-bottom:12px"><div style="font-size:24px;font-weight:800;color:var(--gold)">'+atot+'</div><div class="muted" style="font-size:12px">total games played \u00b7 '+Object.keys(ARC_NAMES).length+' games live</div></div>';
       ah+=arows.some(x=>x[1]>0)?arows.map(x=>barRow(x[0],x[1],amax)).join(''):'<span class="muted">No plays yet \u2014 starts counting once the arcade with the counter is live.</span>';
       $('statArcade').innerHTML=ah;
 
