@@ -2389,6 +2389,8 @@ function observeReveals(){
     }catch(e){}
   };
   try{setTimeout(window.jcwCheckBoldizar,900);}catch(e){}
+  /* Carnival Claw sets (Psychopathic Arcade): [roster id, name, group 0 Champions/1 Crew/2 Legends & Alumni/3 Roster, legendary piece] */
+  const CLAW_SETS=[["caleb-konley","Caleb Konley",0,"belt"],["josh-bishop","Josh Bishop",0,"belt"],["dani-mo","Dani Mo",0,"belt"],["father-bronson","Father Bronson",0,"belt"],["choppa-city","Choppa City",0,"belt"],["2-tuff-tony","2 Tuff Tony",3,"glove"],["alice-crowley","Alice Crowley",3,"jacket"],["backseat-boyz","Backseat Boyz",3,"jacket"],["barnabas-the-bizarre","Barnabas the Bizarre",3,"mask"],["big-vito","Big Vito",3,"hat"],["breyer-wellington","Breyer Wellington",3,"bowtie"],["brothers-of-funstruction","Brothers of Funstruction",3,"mask"],["cokane","Cokane",3,"chain"],["donovan-dijak","Donovan Dijak",3,"glasses"],["ec3","EC3",3,"jacket"],["facade","Facade",3,"mask"],["forty-winks","Forty Winks",3,"cap"],["freya-the-slaya","Freya the Slaya",3,"glove"],["gisele-shaw","Gisele Shaw",3,"robe"],["the-green-phantom","The Green Phantom",3,"mask"],["hollyhood-haley-j","Hollyhood Haley J",3,"jacket"],["hokane","Hokane",3,"mask"],["j-rod","J-Rod",3,"jacket"],["james-storm","James Storm",3,"hat"],["jasmine-st-claire","Jasmin St. Claire",3,"jacket"],["jeeves","Jeeves",3,"bowtie"],["joel-gertner","Joel Gertner",3,"bowtie"],["kerry-morton","Kerry Morton",3,"jacket"],["kongo-kong","Kongo Kong",3,"mask"],["krule","Krule",3,"mask"],["luigi-primo","Luigi Primo",3,"hat"],["mad-man-pondo","Mad Man Pondo",3,"sign"],["matt-cross","Matt Cross",3,"jacket"],["mecha-wolf","Mecha Wolf",3,"mask"],["mickie-knuckles","Mickie Knuckles",3,"glove"],["moshpit-mike","Mosh Pit Mike",3,"vest"],["mr-anderson","Mr. Anderson",3,"mic"],["mr-happy","Mr. Happy",3,"mask"],["nic-nemeth","Nic Nemeth",3,"jacket"],["ninja-mack","Ninja Mack",3,"mask"],["outbreak","The Outbreak",3,"mask"],["7-foot-tall-painful-paul","7 Foot Tall Painful Paul",3,"glove"],["ricky-morton","Ricky Morton",3,"bandana"],["the-ring-rat","The Ring Rat",3,"pants"],["sally-boy","Sally Boy",3,"hat"],["sewacide","Sewacide",3,"chair"],["shane-mercer","Shane Mercer",3,"chain"],["sonny-kiss","Sonny Kiss",3,"jacket"],["sohpia-rose","Sophia Rose",3,"robe"],["steven-flowe","Steven Flowe",3,"jacket"],["vincenzo","Vincenzo",3,"hat"],["zach-gowen","Zach Gowen",3,"jacket"],["willie-mack","Willie Mack",3,"jacket"],["violent-j","Violent J",1,"chain"],["vince-russo","Vince Russo",1,"clipboard"],["joe-dombrowski","Joe Dombrowski",1,"headphones"],["mark-roberts","Mark Roberts",1,"headphones"],["dj-clay","DJ Clay",1,"record"],["veda-scott","Veda Scott",1,"headphones"],["zac-amico","Zac Amico",1,"headphones"],["mac-davis","Mac Davis",1,"headphones"],["kid-cadet","Kid Cadet",1,"headphones"],["jeff-the-ref","Jeff the Ref",1,"refshirt"],["george-ross","George Ross",1,"refshirt"],["the-iron-sheik","The Iron Sheik",2,"flag"],["king-kong-bundy","King Kong Bundy",2,"jacket"],["abdullah-the-butcher","Abdullah the Butcher",2,"robe"],["icp-founders","Handsome Harley Guestella & Diamond Donovan Douglas",2,"jacket"],["evil-dead","Evil Dead",0,"mask"],["corporal-robinson","Corporal Robinson",2,"vest"],["the-rude-boy","The Rude Boy",2,"jacket"],["vampiro","Vampiro",0,"jacket"],["necro-butcher","Necro Butcher",2,"chair"],["human-tornado","Human Tornado",2,"jacket"],["trent-acid","Trent Acid",2,"jacket"],["the-great-muta","The Great Muta",2,"mask"],["chris-hero","Chris Hero",2,"jacket"],["scott-hall","Scott Hall",2,"vest"],["raven","Raven",2,"jacket"],["scott-damore","Scott D’Amore",2,"jacket"],["officer-colt-cabana","Officer Colt Cabana",2,"cap"],["cash-flo","Cash Flo",2,"jacket"],["rob-conway","Rob Conway",2,"jacket"],["jwo","JWO",2,"shirt"],["kevin-nash","Kevin Nash",2,"vest"],["sean-waltman","Sean Waltman",2,"bandana"],["the-weedman","The Weedman",2,"cap"],["vanilla-ice","Vanilla Ice",2,"mic"],["terry-funk","Terry Funk",2,"hat"],["dusty-rhodes","Dusty Rhodes",2,"elbow"],["pat-tanaka","Pat Tanaka",2,"jacket"],["the-ring-ryders","The Ring Ryders",2,"jacket"],["the-thomaselli-brothers","The Thomaselli Brothers",2,"jacket"],["hollywood-chuck-hogan","Hollywood Chuck Hogan",2,"bandana"],["tracy-smothers","Tracy Smothers",2,"jacket"],["steve-corino","Steve Corino",2,"jacket"],["roddy-piper","“Rowdy” Roddy Piper",2,"kilt"],["greg-valentine","Greg “The Hammer” Valentine",2,"elbow"],["kamala","Kamala",2,"mask"],["tito-santana","Tito Santana",2,"jacket"],["kid-kash","Kid Kash",2,"jacket"],["monty-brown","Monty Brown",2,"jacket"],["kevin-thorn","Kevin Thorn",2,"jacket"],["bobby-lashley","Bobby Lashley",2,"glove"],["balls-mahoney","Balls Mahoney",2,"chair"],["ian-rotten","Ian Rotten",2,"chair"],["bull-pain","Bull Pain",2,"vest"],["sabu","Sabu",2,"chair"]];
   const LK_BADGES=[['mod','Moderator \u00b7 keeps the family right'],['first','First Blood \u00b7 showed up'],['fan','Down With the Clown \u00b7 set a favorite'],
     ['rideordie','Ride or Die \u00b7 picked your girl AND your boy'],
     ['freshpaint','Fresh Paint \u00b7 set a profile pic'],['ownentrance','Own Entrance \u00b7 picked your theme'],
@@ -2473,7 +2475,7 @@ function observeReveals(){
     /* ---- Psychopathic Arcade ---- */
     ['pa_first','Midway \u00b7 won an arcade game'],
     ['pa_five','Midway Rat \u00b7 won in 5 different arcade games'],
-    ['pa_all','Full Midway \u00b7 won in all 11 arcade games'],
+    ['pa_all','Full Midway \u00b7 won in all 13 arcade games'],
     ['pa_50','Carnival Regular \u00b7 50 arcade wins'],
     ['pa_record','Carved Your Mark \u00b7 a top-10 arcade record'],
     ['pa_ttt5','Slam Streak \u00b7 5 straight Tic Tac Slam wins'],
@@ -2532,7 +2534,40 @@ function observeReveals(){
     ['dcc_t300','Afterlife Royalty \u00b7 300 carnival tickets'],
     ['dcc_t1000','Ticket Hoarder \u00b7 1,000 carnival tickets'],
     ['dcc_plays50','Booth Hopper \u00b7 played 50 booth rounds'],
-    ['dcc_allchars','Full Cast \u00b7 won as all six characters']];
+    ['dcc_allchars','Full Cast \u00b7 won as all six characters'],
+    /* ---- Psychopathic Arcade: Carnival Crossfire ---- */
+    ['sh_first','Gallery Opener \u00b7 finished a Carnival Crossfire round'],
+    ['sh_trick','Trick Shot \u00b7 1,000 in Carnival Crossfire'],
+    ['sh_sharp','Sharpshooter \u00b7 3,000 in Carnival Crossfire'],
+    ['sh_ace','Carnival Ace \u00b7 6,000 in Carnival Crossfire'],
+    ['sh_legend','Midway Legend \u00b7 10,000 in Carnival Crossfire'],
+    ['sh_streak10','Hot Hand \u00b7 a 10-hit Crossfire streak'],
+    ['sh_streak25','Can\u2019t Miss \u00b7 a 25-hit Crossfire streak'],
+    ['sh_bull50','Bullseye \u00b7 50 Crossfire bullseyes'],
+    ['sh_bull250','Dead Center \u00b7 250 Crossfire bullseyes'],
+    ['sh_acc90','Steady Aim \u00b7 90% accuracy in a Crossfire round'],
+    ['sh_runs25','Gallery Regular \u00b7 25 Crossfire rounds'],
+    ['sh_runs100','Gallery Lifer \u00b7 100 Crossfire rounds'],
+    /* ---- Psychopathic Arcade: Carnival Claw ---- */
+    ['cl_first','Lucky Grab \u00b7 won a Carnival Claw prize'],
+    ['cl_25','Cabinet Started \u00b7 25 claw collectibles'],
+    ['cl_100','Memorabilia Hound \u00b7 100 claw collectibles'],
+    ['cl_250','Vault Rat \u00b7 250 claw collectibles'],
+    ['cl_all','The Whole Vault \u00b7 every claw collectible'],
+    ['cl_set1','Five of Five \u00b7 completed a claw set'],
+    ['cl_set10','Set Collector \u00b7 10 complete claw sets'],
+    ['cl_set50','Hall of Sets \u00b7 50 complete claw sets'],
+    ['cl_champs','Title Vault \u00b7 every Champions claw set'],
+    ['cl_crew','Behind the Curtain \u00b7 every Crew claw set'],
+    ['cl_legends','Legends Wing \u00b7 every Legends & Alumni claw set'],
+    ['cl_roster','Full Roster \u00b7 every Roster claw set'],
+    ['cl_legend10','Legendary Haul \u00b7 10 legendary claw pieces'],
+    ['cl_legendall','Every Legend \u00b7 every legendary claw piece'],
+    ['cl_sweep','Clean Sweep \u00b7 5 for 5 in one claw haul'],
+    ['cl_perfect25','Steady Hands \u00b7 25 perfect claw grabs'],
+    ['cl_runs50','Quarter Feeder \u00b7 50 claw hauls']]
+    /* one badge per complete Carnival Claw set: all five pieces of a roster name */
+    .concat(CLAW_SETS.map(c=>['cl_set_'+c[0],c[1]+' Collection \u00b7 all five '+c[1]+' claw pieces']));
   function lkAddWin(){
     const d=lkGet(); d.wins=(d.wins||0)+1;
     d.badges=d.badges||[]; if(!d.badges.includes('winner'))d.badges.push('winner');
@@ -2733,10 +2768,25 @@ function observeReveals(){
       })();
       /* Psychopathic Arcade — written straight to the cloud locker by arcade.html */
       (function(){const a=d.arcade||{};const games=a.games||{},best=a.best||{};const n=Object.keys(games).length;
-        if(a.wins>=1)add('pa_first');if(n>=5)add('pa_five');if(n>=11)add('pa_all');if(a.wins>=50)add('pa_50');
+        if(a.wins>=1)add('pa_first');if(n>=5)add('pa_five');if(n>=13)add('pa_all');if(a.wins>=50)add('pa_50');
         if(a.records>=1)add('pa_record');
         if(best.ttt>=5)add('pa_ttt5');if(best.faygo>=5)add('pa_faygo5');if(best.hockey>=5)add('pa_hockey5');
         if(games.chess>=1)add('pa_chess');if(games.memory>=1)add('pa_memory');
+        /* Carnival Crossfire (arcade/shooter) */
+        const sh=a.shooter||{};
+        if(sh.runs>=1)add('sh_first');if(sh.best>=1000)add('sh_trick');if(sh.best>=3000)add('sh_sharp');if(sh.best>=6000)add('sh_ace');if(sh.best>=10000)add('sh_legend');
+        if(sh.streak>=10)add('sh_streak10');if(sh.streak>=25)add('sh_streak25');if(sh.bullseyes>=50)add('sh_bull50');if(sh.bullseyes>=250)add('sh_bull250');
+        if(sh.acc90)add('sh_acc90');if(sh.runs>=25)add('sh_runs25');if(sh.runs>=100)add('sh_runs100');
+        /* Carnival Claw (arcade/claw = {rosterId: 5-bit mask}, bit 0 = legendary) */
+        const cm=a.claw||{};const bits=v=>{v=+v||0;let c=0;while(v){c+=v&1;v>>=1;}return c;};
+        let pieces=0,sets=0,legends=0;const grp=[0,0,0,0],grpAll=[0,0,0,0];
+        CLAW_SETS.forEach(c=>{const m=(+cm[c[0]]||0)&31;pieces+=bits(m);if(m&1)legends++;grpAll[c[2]]++;
+          if(m===31){sets++;grp[c[2]]++;add('cl_set_'+c[0]);}});
+        if(pieces>=1)add('cl_first');if(pieces>=25)add('cl_25');if(pieces>=100)add('cl_100');if(pieces>=250)add('cl_250');if(pieces>=CLAW_SETS.length*5)add('cl_all');
+        if(sets>=1)add('cl_set1');if(sets>=10)add('cl_set10');if(sets>=50)add('cl_set50');
+        if(grp[0]>=grpAll[0])add('cl_champs');if(grp[1]>=grpAll[1])add('cl_crew');if(grp[2]>=grpAll[2])add('cl_legends');if(grp[3]>=grpAll[3])add('cl_roster');
+        if(legends>=10)add('cl_legend10');if(legends>=CLAW_SETS.length)add('cl_legendall');
+        if(a.clawSweeps>=1)add('cl_sweep');if(a.clawPerfects>=25)add('cl_perfect25');if(a.clawRuns>=50)add('cl_runs50');
       })();
       /* Big Money Rustlas + Dark Chaos Carnival — counters in locker.game (bmr_* / dcc_*) */
       (function(){const G=d.game||{},b=k=>+G['bmr_'+k]||0,c=k=>+G['dcc_'+k]||0;
@@ -2826,10 +2876,13 @@ function observeReveals(){
         }
       }
     }catch(_e){}
+    const clawGot=(d.badges||[]).filter(k=>k.indexOf('cl_set_')===0).length;
     document.getElementById('lk-badges').innerHTML=LK_BADGES.map(([k,t])=>{
       if(k==='verified'&&lkUser&&JCW_VERIFIED[lkUser.uid])t='JCW Roster \u00b7 '+JCW_VERIFIED[lkUser.uid];
-      return `<span class="badge2 ${(d.badges||[]).includes(k)?'got':''}">${t}</span>`;
-    }).join('');
+      const got=(d.badges||[]).includes(k);
+      if(k.indexOf('cl_set_')===0)return got?`<span class="badge2 got">${t}</span>`:'';   /* 108 set badges: only the earned ones show */
+      return `<span class="badge2 ${got?'got':''}">${t}</span>`;
+    }).join('')+`<span class="badge2 ${clawGot?'got':''}">Carnival Claw Sets \u00b7 ${clawGot} of ${CLAW_SETS.length} collected</span>`;
     document.getElementById('lk-hist').innerHTML=(d.hist&&d.hist.length)?d.hist.map(x=>'&raquo; '+x).join('<br>'):'Nothing yet. Hit the episodes.';
     const nm=document.getElementById('lk-name');if(nm&&document.activeElement!==nm)nm.value=d.name||'';
     const GIRLS=['Dani Mo','Alice Crowley','Gisele Shaw','Hollyhood Haley J','Hokane','J-Rod','Jasmin St. Claire','Mickie Knuckles','Sonny Kiss','Sophia Rose','The Ring Rat','Veda Scott','Kid Cadet','Freya the Slaya'];

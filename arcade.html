@@ -90,24 +90,47 @@
   start(0);
 
   /* ---------- messages from the arcade ---------- */
-  var GAMES={ttt:1,chess:1,checkers:1,faygo:1,pinball:1,bj:1,memory:1,camper:1,solitaire:1,j31:1,hockey:1};
   window.addEventListener('message',function(e){
     var d=e.data;
     if(!d||d.type!=='jcw-arcade'||e.source!==frame.contentWindow)return;
     var g=String(d.g||'');
-    if(!/^[a-z0-9_]{1,24}$/.test(g))return;
+    var EXTRA={shooter:1,claw:1,clawrun:1};
+    if(!EXTRA[d.ev]&&!/^[a-z0-9_]{1,24}$/.test(g))return;
     window.__arcFirebase(function(ok){
       if(!ok)return;
       try{
         var db=firebase.database(),bump=function(x){return (x||0)+1;};
         if(d.ev==='play'){
-          if(!GAMES[g])return;
           db.ref('stats/arcade/'+g).transaction(bump);
           db.ref('stats/arcadeTotal').transaction(bump);
           return;
         }
         var u=firebase.auth().currentUser; if(!u)return;
         var ref=db.ref('lockers/'+u.uid+'/arcade');
+        var num=function(x,cap){x=+x;return isFinite(x)&&x>0?Math.min(Math.floor(x),cap):0;};
+        var mx=function(c,v){ref.child(c).transaction(function(x){return Math.max(+x||0,v);});};
+        var add=function(c,v){if(v)ref.child(c).transaction(function(x){return (+x||0)+v;});};
+        /* Carnival Crossfire: every finished round */
+        if(d.ev==='shooter'){
+          var shots=num(d.shots,10000),hits=num(d.hits,10000);
+          add('shooter/runs',1);mx('shooter/best',num(d.score,1e7));mx('shooter/streak',num(d.streak,10000));
+          add('shooter/bullseyes',num(d.bullseyes,500));
+          if(shots>=20&&hits/shots>=0.9)ref.child('shooter/acc90').set(1);
+          return;
+        }
+        /* Carnival Claw: the cabinet, one 5-bit mask per roster name, OR-merged */
+        var clawMerge=function(m){
+          if(!m||typeof m!=='object')return;var ok={};
+          Object.keys(m).slice(0,300).forEach(function(id){var v=+m[id];if(/^[a-z0-9-]{1,48}$/.test(id)&&v>0&&v<32&&v===Math.floor(v))ok[id]=v;});
+          if(!Object.keys(ok).length)return;
+          ref.child('claw').transaction(function(cur){cur=cur&&typeof cur==='object'?cur:{};Object.keys(ok).forEach(function(id){cur[id]=((+cur[id]||0)|ok[id]);});return cur;});
+        };
+        if(d.ev==='claw'){clawMerge(d.masks);return;}
+        if(d.ev==='clawrun'){
+          clawMerge(d.masks);add('clawRuns',1);mx('clawBest',num(d.score,1e7));add('clawPerfects',num(d.perfects,5));
+          if(num(d.wins,5)>=5)add('clawSweeps',1);
+          return;
+        }
         if(d.ev==='record'){ref.child('records').transaction(bump);return;}
         if(d.ev==='win'){
           ref.child('wins').transaction(bump);
