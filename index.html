@@ -1795,8 +1795,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
       <div class="game playable rev">
         <span class="badge">Lunatics Only</span>
         <h3>Psychopathic Arcade</h3>
-        <div class="sub">14 arcade games &middot; Online VS &middot; No download &middot; Lunatics Only</div>
-        <p>The midway, in your browser &mdash; <b>Carnival Claw</b> (collect all 540 roster pieces), <b>Carnival Crossfire</b>, <b>Chicken Huntin&rsquo;</b>, <b>Tic Tac Slam</b>, <b>Juggalo Chess</b>, <b>Juggalo Checkers</b>, <b>Dark Carnival Pinball</b>, <b>Joker Card Four</b>, <b>Blackjack 21</b>, <b>Joker Card Memory</b>, <b>Gathering Camper</b>, <b>Dark Carnival Solitaire</b>, <b>Juggalo 31</b> and <b>Juggalo Air Hockey</b>. Head-to-head <b>online play</b> with speakable room codes, and arcade-style top-10 records in every game.</p>
+        <div class="sub">15 arcade games &middot; Online VS &middot; No download &middot; Lunatics Only</div>
+        <p>The midway, in your browser &mdash; <b>JCW Rumble</b> (an over-the-top-rope battle royal with the Lunacy Unlocked roster), <b>Carnival Claw</b> (collect all 540 roster pieces), <b>Carnival Crossfire</b>, <b>Chicken Huntin&rsquo;</b>, <b>Tic Tac Slam</b>, <b>Juggalo Chess</b>, <b>Juggalo Checkers</b>, <b>Dark Carnival Pinball</b>, <b>Joker Card Four</b>, <b>Blackjack 21</b>, <b>Joker Card Memory</b>, <b>Gathering Camper</b>, <b>Dark Carnival Solitaire</b>, <b>Juggalo 31</b> and <b>Juggalo Air Hockey</b>. Head-to-head <b>online play</b> with speakable room codes, and arcade-style top-10 records in every game.</p>
         <a class="btn gold" id="arcade-enter" href="arcade.html" target="_blank" rel="noopener" onclick="if(!window.__lkPremOn){event.preventDefault();location.hash='#lunatics';return false;}">&#127918; Enter the Arcade</a>
       </div>
       <div class="game playable rev">
@@ -2391,6 +2391,8 @@ function observeReveals(){
   try{setTimeout(window.jcwCheckBoldizar,900);}catch(e){}
   /* Carnival Claw sets (Psychopathic Arcade): [roster id, name, group 0 Champions/1 Crew/2 Legends & Alumni/3 Roster, legendary piece] */
   const CLAW_SETS=[["caleb-konley","Caleb Konley",0,"belt"],["josh-bishop","Josh Bishop",0,"belt"],["dani-mo","Dani Mo",0,"belt"],["father-bronson","Father Bronson",0,"belt"],["choppa-city","Choppa City",0,"belt"],["2-tuff-tony","2 Tuff Tony",3,"glove"],["alice-crowley","Alice Crowley",3,"jacket"],["backseat-boyz","Backseat Boyz",3,"jacket"],["barnabas-the-bizarre","Barnabas the Bizarre",3,"mask"],["big-vito","Big Vito",3,"hat"],["breyer-wellington","Breyer Wellington",3,"bowtie"],["brothers-of-funstruction","Brothers of Funstruction",3,"mask"],["cokane","Cokane",3,"chain"],["donovan-dijak","Donovan Dijak",3,"glasses"],["ec3","EC3",3,"jacket"],["facade","Facade",3,"mask"],["forty-winks","Forty Winks",3,"cap"],["freya-the-slaya","Freya the Slaya",3,"glove"],["gisele-shaw","Gisele Shaw",3,"robe"],["the-green-phantom","The Green Phantom",3,"mask"],["hollyhood-haley-j","Hollyhood Haley J",3,"jacket"],["hokane","Hokane",3,"mask"],["j-rod","J-Rod",3,"jacket"],["james-storm","James Storm",3,"hat"],["jasmine-st-claire","Jasmin St. Claire",3,"jacket"],["jeeves","Jeeves",3,"bowtie"],["joel-gertner","Joel Gertner",3,"bowtie"],["kerry-morton","Kerry Morton",3,"jacket"],["kongo-kong","Kongo Kong",3,"mask"],["krule","Krule",3,"mask"],["luigi-primo","Luigi Primo",3,"hat"],["mad-man-pondo","Mad Man Pondo",3,"sign"],["matt-cross","Matt Cross",3,"jacket"],["mecha-wolf","Mecha Wolf",3,"mask"],["mickie-knuckles","Mickie Knuckles",3,"glove"],["moshpit-mike","Mosh Pit Mike",3,"vest"],["mr-anderson","Mr. Anderson",3,"mic"],["mr-happy","Mr. Happy",3,"mask"],["nic-nemeth","Nic Nemeth",3,"jacket"],["ninja-mack","Ninja Mack",3,"mask"],["outbreak","The Outbreak",3,"mask"],["7-foot-tall-painful-paul","7 Foot Tall Painful Paul",3,"glove"],["ricky-morton","Ricky Morton",3,"bandana"],["the-ring-rat","The Ring Rat",3,"pants"],["sally-boy","Sally Boy",3,"hat"],["sewacide","Sewacide",3,"chair"],["shane-mercer","Shane Mercer",3,"chain"],["sonny-kiss","Sonny Kiss",3,"jacket"],["sohpia-rose","Sophia Rose",3,"robe"],["steven-flowe","Steven Flowe",3,"jacket"],["vincenzo","Vincenzo",3,"hat"],["zach-gowen","Zach Gowen",3,"jacket"],["willie-mack","Willie Mack",3,"jacket"],["violent-j","Violent J",1,"chain"],["vince-russo","Vince Russo",1,"clipboard"],["joe-dombrowski","Joe Dombrowski",1,"headphones"],["mark-roberts","Mark Roberts",1,"headphones"],["dj-clay","DJ Clay",1,"record"],["veda-scott","Veda Scott",1,"headphones"],["zac-amico","Zac Amico",1,"headphones"],["mac-davis","Mac Davis",1,"headphones"],["kid-cadet","Kid Cadet",1,"headphones"],["jeff-the-ref","Jeff the Ref",1,"refshirt"],["george-ross","George Ross",1,"refshirt"],["the-iron-sheik","The Iron Sheik",2,"flag"],["king-kong-bundy","King Kong Bundy",2,"jacket"],["abdullah-the-butcher","Abdullah the Butcher",2,"robe"],["icp-founders","Handsome Harley Guestella & Diamond Donovan Douglas",2,"jacket"],["evil-dead","Evil Dead",0,"mask"],["corporal-robinson","Corporal Robinson",2,"vest"],["the-rude-boy","The Rude Boy",2,"jacket"],["vampiro","Vampiro",0,"jacket"],["necro-butcher","Necro Butcher",2,"chair"],["human-tornado","Human Tornado",2,"jacket"],["trent-acid","Trent Acid",2,"jacket"],["the-great-muta","The Great Muta",2,"mask"],["chris-hero","Chris Hero",2,"jacket"],["scott-hall","Scott Hall",2,"vest"],["raven","Raven",2,"jacket"],["scott-damore","Scott D’Amore",2,"jacket"],["officer-colt-cabana","Officer Colt Cabana",2,"cap"],["cash-flo","Cash Flo",2,"jacket"],["rob-conway","Rob Conway",2,"jacket"],["jwo","JWO",2,"shirt"],["kevin-nash","Kevin Nash",2,"vest"],["sean-waltman","Sean Waltman",2,"bandana"],["the-weedman","The Weedman",2,"cap"],["vanilla-ice","Vanilla Ice",2,"mic"],["terry-funk","Terry Funk",2,"hat"],["dusty-rhodes","Dusty Rhodes",2,"elbow"],["pat-tanaka","Pat Tanaka",2,"jacket"],["the-ring-ryders","The Ring Ryders",2,"jacket"],["the-thomaselli-brothers","The Thomaselli Brothers",2,"jacket"],["hollywood-chuck-hogan","Hollywood Chuck Hogan",2,"bandana"],["tracy-smothers","Tracy Smothers",2,"jacket"],["steve-corino","Steve Corino",2,"jacket"],["roddy-piper","“Rowdy” Roddy Piper",2,"kilt"],["greg-valentine","Greg “The Hammer” Valentine",2,"elbow"],["kamala","Kamala",2,"mask"],["tito-santana","Tito Santana",2,"jacket"],["kid-kash","Kid Kash",2,"jacket"],["monty-brown","Monty Brown",2,"jacket"],["kevin-thorn","Kevin Thorn",2,"jacket"],["bobby-lashley","Bobby Lashley",2,"glove"],["balls-mahoney","Balls Mahoney",2,"chair"],["ian-rotten","Ian Rotten",2,"chair"],["bull-pain","Bull Pain",2,"vest"],["sabu","Sabu",2,"chair"]];
+  /* JCW Rumble wrestlers (Psychopathic Arcade): [id, name] */
+  const RUMBLE_ROSTER=[["violent-j","Violent J"],["2-tuff-tony","2 Tuff Tony"],["willie-mack","Willie Mack"],["mickie-knuckles","Mickie Knuckles"],["kerry-morton","Kerry Morton"],["mr-happy","Mr. Happy"],["moshpit-mike","Moshpit Mike"],["cokane","Cokane"],["yabo","Yabo"],["able","Able"],["dani-mo","Dani Mo"],["facade","Facade"],["j-rod","J-Rod"],["matt-cross","Matt Cross"],["vincenzo","Vincenzo"],["caleb-konley","Caleb Konley"],["sally-boy","Sally Boy"],["big-vito","Big Vito"],["bruce-wayans","Bruce Wayans"],["alice-crowley","Alice Crowley"],["ruffo","Ruffo"],["kongo-kong","Kongo Kong"]];
   const LK_BADGES=[['mod','Moderator \u00b7 keeps the family right'],['first','First Blood \u00b7 showed up'],['fan','Down With the Clown \u00b7 set a favorite'],
     ['rideordie','Ride or Die \u00b7 picked your girl AND your boy'],
     ['freshpaint','Fresh Paint \u00b7 set a profile pic'],['ownentrance','Own Entrance \u00b7 picked your theme'],
@@ -2475,7 +2477,7 @@ function observeReveals(){
     /* ---- Psychopathic Arcade ---- */
     ['pa_first','Midway \u00b7 won an arcade game'],
     ['pa_five','Midway Rat \u00b7 won in 5 different arcade games'],
-    ['pa_all','Full Midway \u00b7 won in all 14 arcade games'],
+    ['pa_all','Full Midway \u00b7 won in all 15 arcade games'],
     ['pa_50','Carnival Regular \u00b7 50 arcade wins'],
     ['pa_record','Carved Your Mark \u00b7 a top-10 arcade record'],
     ['pa_ttt5','Slam Streak \u00b7 5 straight Tic Tac Slam wins'],
@@ -2569,6 +2571,21 @@ function observeReveals(){
     ['kh_noescape','None Got Away \u00b7 20+ chickens, not one escaped'],
     ['kh_runs25','Hunting Season \u00b7 25 Chicken Huntin\u2019 rounds'],
     ['kh_runs100','Lifetime License \u00b7 100 Chicken Huntin\u2019 rounds'],
+    /* ---- Psychopathic Arcade: JCW Rumble ---- */
+    ['ru_first','Over the Top \u00b7 finished a JCW Rumble'],
+    ['ru_win','Last Lunatic Standing \u00b7 won a JCW Rumble'],
+    ['ru_win22','Royal Mess \u00b7 won a 22-wrestler Rumble'],
+    ['ru_wins10','Rumble Regular \u00b7 10 Rumble wins'],
+    ['ru_wins25','Rumble King \u00b7 25 Rumble wins'],
+    ['ru_kills5','Clearing House \u00b7 5 eliminations in one Rumble'],
+    ['ru_kills10','Ten Over the Ropes \u00b7 10 eliminations in one Rumble'],
+    ['ru_elim100','Bouncer \u00b7 100 Rumble eliminations'],
+    ['ru_elim500','Throwing Out the Trash \u00b7 500 Rumble eliminations'],
+    ['ru_score10k','Main Event \u00b7 10,000 in one Rumble'],
+    ['ru_score20k','Headliner \u00b7 20,000 in one Rumble'],
+    ['ru_runs25','Rumble Junkie \u00b7 25 Rumbles'],
+    ['ru_wonwith5','Mixed Bag \u00b7 won the Rumble as 5 different wrestlers'],
+    ['ru_wonwithall','Whole Locker Room \u00b7 won the Rumble as every wrestler'],
     /* ---- Psychopathic Arcade: Carnival Claw ---- */
     ['cl_first','Lucky Grab \u00b7 won a Carnival Claw prize'],
     ['cl_25','Cabinet Started \u00b7 25 claw collectibles'],
@@ -2588,7 +2605,9 @@ function observeReveals(){
     ['cl_perfect25','Steady Hands \u00b7 25 perfect claw grabs'],
     ['cl_runs50','Quarter Feeder \u00b7 50 claw hauls']]
     /* one badge per complete Carnival Claw set: all five pieces of a roster name */
-    .concat(CLAW_SETS.map(c=>['cl_set_'+c[0],c[1]+' Collection \u00b7 all five '+c[1]+' claw pieces']));
+    .concat(CLAW_SETS.map(c=>['cl_set_'+c[0],c[1]+' Collection \u00b7 all five '+c[1]+' claw pieces']))
+    /* one badge per JCW Rumble wrestler you've won it with */
+    .concat(RUMBLE_ROSTER.map(r=>['ru_w_'+r[0],r[1]+' Rumble Win \u00b7 won the JCW Rumble as '+r[1]]));
   function lkAddWin(){
     const d=lkGet(); d.wins=(d.wins||0)+1;
     d.badges=d.badges||[]; if(!d.badges.includes('winner'))d.badges.push('winner');
@@ -2789,7 +2808,7 @@ function observeReveals(){
       })();
       /* Psychopathic Arcade — written straight to the cloud locker by arcade.html */
       (function(){const a=d.arcade||{};const games=a.games||{},best=a.best||{};const n=Object.keys(games).length;
-        if(a.wins>=1)add('pa_first');if(n>=5)add('pa_five');if(n>=14)add('pa_all');if(a.wins>=50)add('pa_50');
+        if(a.wins>=1)add('pa_first');if(n>=5)add('pa_five');if(n>=15)add('pa_all');if(a.wins>=50)add('pa_50');
         if(a.records>=1)add('pa_record');
         if(best.ttt>=5)add('pa_ttt5');if(best.faygo>=5)add('pa_faygo5');if(best.hockey>=5)add('pa_hockey5');
         if(games.chess>=1)add('pa_chess');if(games.memory>=1)add('pa_memory');
@@ -2806,6 +2825,13 @@ function observeReveals(){
         if(kh.hits>=100)add('kh_birds100');if(kh.hits>=1000)add('kh_birds1000');if(kh.bullseyes>=50)add('kh_bull50');if(kh.bullseyes>=250)add('kh_bull250');
         if(kh.frenzies>=1)add('kh_frenzy');if(kh.frenzies>=25)add('kh_frenzy25');if(kh.acc90)add('kh_acc90');if(kh.clean)add('kh_noescape');
         if(kh.runs>=25)add('kh_runs25');if(kh.runs>=100)add('kh_runs100');
+        /* JCW Rumble (arcade/rumble) */
+        const ru=a.rumble||{},ww=ru.wonWith||{};
+        if(ru.runs>=1)add('ru_first');if(ru.wins>=1)add('ru_win');if(ru.wins22>=1)add('ru_win22');if(ru.wins>=10)add('ru_wins10');if(ru.wins>=25)add('ru_wins25');
+        if(ru.bestKills>=5)add('ru_kills5');if(ru.bestKills>=10)add('ru_kills10');if(ru.kills>=100)add('ru_elim100');if(ru.kills>=500)add('ru_elim500');
+        if(ru.best>=10000)add('ru_score10k');if(ru.best>=20000)add('ru_score20k');if(ru.runs>=25)add('ru_runs25');
+        let wonAs=0;RUMBLE_ROSTER.forEach(r=>{if(ww[r[0]]){wonAs++;add('ru_w_'+r[0]);}});
+        if(wonAs>=5)add('ru_wonwith5');if(wonAs>=RUMBLE_ROSTER.length)add('ru_wonwithall');
         /* Carnival Claw (arcade/claw = {rosterId: 5-bit mask}, bit 0 = legendary) */
         const cm=a.claw||{};const bits=v=>{v=+v||0;let c=0;while(v){c+=v&1;v>>=1;}return c;};
         let pieces=0,sets=0,legends=0;const grp=[0,0,0,0],grpAll=[0,0,0,0];
@@ -2909,7 +2935,7 @@ function observeReveals(){
     document.getElementById('lk-badges').innerHTML=LK_BADGES.map(([k,t])=>{
       if(k==='verified'&&lkUser&&JCW_VERIFIED[lkUser.uid])t='JCW Roster \u00b7 '+JCW_VERIFIED[lkUser.uid];
       const got=(d.badges||[]).includes(k);
-      if(k.indexOf('cl_set_')===0)return got?`<span class="badge2 got">${t}</span>`:'';   /* 108 set badges: only the earned ones show */
+      if(k.indexOf('cl_set_')===0||k.indexOf('ru_w_')===0)return got?`<span class="badge2 got">${t}</span>`:'';   /* claw set + rumble wrestler badges: only the earned ones show */
       return `<span class="badge2 ${got?'got':''}">${t}</span>`;
     }).join('')+`<span class="badge2 ${clawGot?'got':''}">Carnival Claw Sets \u00b7 ${clawGot} of ${CLAW_SETS.length} collected</span>`;
     document.getElementById('lk-hist').innerHTML=(d.hist&&d.hist.length)?d.hist.map(x=>'&raquo; '+x).join('<br>'):'Nothing yet. Hit the episodes.';
@@ -3022,7 +3048,7 @@ function observeReveals(){
         :'<button class="btn line" style="margin-top:16px;width:100%;justify-content:center;" disabled>Coming soon</button>';
       box.innerHTML='<div style="text-align:center;margin-bottom:16px;"><span style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:#ff3fa4;border:1px solid rgba(255,63,164,.5);border-radius:999px;padding:5px 16px;font-size:.82rem;">Members Only</span><p style="margin:12px 0 4px;color:#fff;font-weight:800;font-size:1.1rem;">You&rsquo;re not a Lunatic&hellip; yet.</p><p style="margin:0;color:var(--steel,#9aa0aa);line-height:1.55;">Join the inner circle &mdash; the arcade and the games now, plus trading cards, backstage content and PPV as they drop.</p></div>'
         +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;opacity:.85;">'
-        +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('arcade','Psychopathic Arcade')+'<p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">14 games with online VS. <b style="color:#7CFF4F;">Live now.</b></p></div>'
+        +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('arcade','Psychopathic Arcade')+'<p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">15 games with online VS. <b style="color:#7CFF4F;">Live now.</b></p></div>'
         +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('lunacy-game','Lunacy &mdash; The Game')+'<p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">The official JCW fighting game &mdash; 40 fighters, online play. <b style="color:#7CFF4F;">Live now.</b></p></div>'
         +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('arcade','Big Money Rustlas &amp; Dark Chaos Carnival')+'<p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">Two more full games &mdash; a 12-chapter Western and a Joker&rsquo;s Cards party game. <b style="color:#7CFF4F;">Live now.</b></p></div>'
         +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('trading-cards','JCW Trading Cards')+'<p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">Collect the roster, chase foils, trade the family. <b style="color:#7CFF4F;">Live now.</b></p></div>'
@@ -3036,7 +3062,7 @@ function observeReveals(){
       +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('lunacy-game','Lunacy &mdash; The Game')+'<p style="margin:6px 0 0;">The official JCW fighting game &mdash; 40 fighters, playable right on this page.</p><a class="btn" href="#games" style="margin-top:8px;width:100%;justify-content:center;">Play now</a></div>'
       +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('arcade','Big Money Rustlas &amp; Dark Chaos Carnival')+'<p style="margin:6px 0 0;">Two more full games &mdash; ride through 12 chapters of Big Money Rustlas, or run the midway in Dark Chaos Carnival.</p><a class="btn" href="#games" style="margin-top:8px;width:100%;justify-content:center;">Play now</a></div>'
       +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('trading-cards','JCW Trading Cards')+'<p style="margin:6px 0 0;">Collect the whole roster &mdash; buy packs, chase foils and super rares, trade with the family.</p><button class="btn" id="lo-cards" style="margin-top:8px;width:100%;justify-content:center;">Open the collection</button></div>'
-      +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('arcade','Psychopathic Arcade')+'<p style="margin:6px 0 0;">14 games &mdash; Carnival Claw, Chicken Huntin&rsquo;, Crossfire, Chess, Pinball, Air Hockey and more, with online VS.</p><a class="btn" href="arcade.html" target="_blank" rel="noopener" style="margin-top:8px;width:100%;justify-content:center;">Enter the arcade</a></div>'
+      +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('arcade','Psychopathic Arcade')+'<p style="margin:6px 0 0;">15 games &mdash; JCW Rumble, Carnival Claw, Chicken Huntin&rsquo;, Crossfire, Chess, Pinball, Air Hockey and more, with online VS.</p><a class="btn" href="arcade.html" target="_blank" rel="noopener" style="margin-top:8px;width:100%;justify-content:center;">Enter the arcade</a></div>'
       +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('comic','JCW Comic Book')+'<p style="margin:6px 0 0;">The carnival hits the page &mdash; an all-original JCW comic. <b>Coming soon.</b></p></div>'
       +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('backstage','Backstage Pass')+'<p style="margin:6px 0 0;">Behind the curtain &mdash; locker room, promos, the stuff that never airs. <b>Coming soon.</b></p></div>'
       +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('bloopers','Bloopers')+'<p style="margin:6px 0 0;">Botches, breaks and bleeps &mdash; the outtakes reel. <b>Coming soon.</b></p></div>'
@@ -3071,7 +3097,7 @@ function observeReveals(){
       const loH=document.querySelector('#lo-modal h3');if(loH)loH.textContent='The Lunatics Only';
       const body=document.getElementById('lo-modal-body');
       if(body){
-        let h=(lkUser?'<p><b style="color:#ff3fa4;">&#10060; YOU ARE NOT A LUNATIC&hellip; yet.</b></p>':'')+'<p><b>Live now:</b> Lunacy Unlocked &middot; the 14-game Psychopathic Arcade &middot; Big Money Rustlas &middot; Dark Chaos Carnival &middot; JCW trading cards (open packs, gift and trade) &middot; Lunacy Radio &middot; members-only drops.</p><p style="color:#9aa0aa;"><b>Coming soon:</b> Backstage Pass &middot; Bloopers &middot; PPV streams &middot; the JCW comic book.</p>';
+        let h=(lkUser?'<p><b style="color:#ff3fa4;">&#10060; YOU ARE NOT A LUNATIC&hellip; yet.</b></p>':'')+'<p><b>Live now:</b> Lunacy Unlocked &middot; the 15-game Psychopathic Arcade &middot; Big Money Rustlas &middot; Dark Chaos Carnival &middot; JCW trading cards (open packs, gift and trade) &middot; Lunacy Radio &middot; members-only drops.</p><p style="color:#9aa0aa;"><b>Coming soon:</b> Backstage Pass &middot; Bloopers &middot; PPV streams &middot; the JCW comic book.</p>';
         if(!JCW_STRIPE_LINK){h+='<p><b>Coming soon. Keep your eyes on the carnival.</b></p>';}
         else if(!lkUser){h+='<p><b>Log in from your Juggalo Locker, then come knock again.</b></p>';}
         else{h+='<a class="btn" style="margin-top:14px;display:inline-flex;justify-content:center;" href="'+JCW_STRIPE_LINK+(JCW_STRIPE_LINK.indexOf('?')>-1?'&':'?')+'client_reference_id='+encodeURIComponent(lkUser.uid)+'" target="_blank" rel="noopener">Join The Lunatics Only</a>';}

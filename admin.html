@@ -419,7 +419,7 @@
       }).join(''):'<span class="muted">No episodes found.</span>';
 
       // arcade games played
-      const ARC_NAMES={claw:'Carnival Claw',chicken:'Chicken Huntin\u2019',shooter:'Carnival Crossfire',ttt:'Tic Tac Slam',chess:'Juggalo Chess',checkers:'Juggalo Checkers',faygo:'Joker Card Four',pinball:'Dark Carnival Pinball',bj:'Blackjack 21',memory:'Joker Card Memory',camper:'Gathering Camper',solitaire:'Dark Carnival Solitaire',j31:'Juggalo 31',hockey:'Juggalo Air Hockey'};
+      const ARC_NAMES={rumble:'JCW Rumble',claw:'Carnival Claw',chicken:'Chicken Huntin\u2019',shooter:'Carnival Crossfire',ttt:'Tic Tac Slam',chess:'Juggalo Chess',checkers:'Juggalo Checkers',faygo:'Joker Card Four',pinball:'Dark Carnival Pinball',bj:'Blackjack 21',memory:'Joker Card Memory',camper:'Gathering Camper',solitaire:'Dark Carnival Solitaire',j31:'Juggalo 31',hockey:'Juggalo Air Hockey'};
       const arc=st.arcade||{};
       const arows=Object.keys(ARC_NAMES).map(k=>[ARC_NAMES[k],arc[k]||0]).sort((a,b)=>b[1]-a[1]);
       const atot=st.arcadeTotal||arows.reduce((a,x)=>a+x[1],0);

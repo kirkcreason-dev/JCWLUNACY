@@ -94,7 +94,7 @@
     var d=e.data;
     if(!d||d.type!=='jcw-arcade'||e.source!==frame.contentWindow)return;
     var g=String(d.g||'');
-    var EXTRA={shooter:1,claw:1,clawrun:1,chicken:1};
+    var EXTRA={shooter:1,claw:1,clawrun:1,chicken:1,rumble:1};
     if(!EXTRA[d.ev]&&!/^[a-z0-9_]{1,24}$/.test(g))return;
     window.__arcFirebase(function(ok){
       if(!ok)return;
@@ -116,6 +116,14 @@
           add('shooter/runs',1);mx('shooter/best',num(d.score,1e7));mx('shooter/streak',num(d.streak,10000));
           add('shooter/bullseyes',num(d.bullseyes,500));
           if(shots>=20&&hits/shots>=0.9)ref.child('shooter/acc90').set(1);
+          return;
+        }
+        /* JCW Rumble: every finished battle royal */
+        if(d.ev==='rumble'){
+          var rk=num(d.kills,30);
+          add('rumble/runs',1);mx('rumble/best',num(d.score,1e6));add('rumble/kills',rk);mx('rumble/bestKills',rk);
+          if(d.won===true){add('rumble/wins',1);if(num(d.entrants,30)>=22)add('rumble/wins22',1);
+            var rid=String(d.roster||'');if(/^[a-z0-9-]{1,40}$/.test(rid))ref.child('rumble/wonWith/'+rid).set(1);}
           return;
         }
         /* Chicken Huntin': every finished round */
