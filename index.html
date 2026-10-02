@@ -1804,14 +1804,14 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <h3>Big Money Rustlas</h3>
         <div class="sub">Western action platformer &middot; 8 chapters &middot; No download &middot; Lunatics Only</div>
         <p>The first official <b>Big Money Rustlas</b> video game. Ride as <b>Sugar Wolf</b> through eight chapters of Western action &mdash; six-shooter, dodge rolls and the pimp hand &mdash; collect the lost badges, survive four boss fights and take <b>Mud Bug</b> back from <b>Big Baby Chips</b>.</p>
-        <a class="btn gold" id="bmr-enter" href="https://kirkcreason-dev.github.io/BigMoneyRustlas/" target="_blank" rel="noopener" onclick="if(!window.__lkPremOn){event.preventDefault();location.hash='#lunatics';return false;}">&#129312; Play Big Money Rustlas</a>
+        <a class="btn gold" id="bmr-enter" href="https://kirkcreason-dev.github.io/BigMoneyRustlas/">&#129312; Play Big Money Rustlas</a>
       </div>
       <div class="game playable rev">
         <span class="badge">Lunatics Only &middot; Alpha</span>
         <h3>Dark Chaos Carnival</h3>
         <div class="sub">Horrorcore party game &middot; Alpha 0.8 &middot; No download &middot; Lunatics Only</div>
         <p>A party game built around the <b>Joker&rsquo;s Cards</b>. Play as <b>Violent J</b>, <b>Shaggy 2 Dope</b>, <b>Ringmaster</b>, <b>The Great Milenko</b>, <b>Jack Jeckel</b> or <b>The Wraith</b> &mdash; hatchets, claws and spectral attacks. Early alpha: new stuff lands all the time.</p>
-        <a class="btn gold" id="dcc-enter" href="https://kirkcreason-dev.github.io/dark-chaos-carnival/?v=0.8.0.3" target="_blank" rel="noopener" onclick="if(!window.__lkPremOn){event.preventDefault();location.hash='#lunatics';return false;}">&#127914; Play Dark Chaos Carnival</a>
+        <a class="btn gold" id="dcc-enter" href="https://kirkcreason-dev.github.io/dark-chaos-carnival/?v=0.8.0.3">&#127914; Play Dark Chaos Carnival</a>
       </div>
       <div class="game rev">
         <span class="badge">Coming soon</span>
@@ -2211,6 +2211,20 @@ function observeReveals(){
         location.hash='#lunatics';
       });
     });
+    /* Big Money Rustlas + Dark Chaos Carnival play in the same overlay, so they
+       can report badges and pass the Lunatics Only check */
+    window.jcwOpenHosted=function(url){
+      let fr=gOverlay.querySelector('iframe');
+      if(!fr){fr=document.createElement('iframe');fr.setAttribute('allow','autoplay; fullscreen; gamepad');gOverlay.appendChild(fr);}
+      fr.src=url;gOverlay.classList.add('on');document.body.classList.add('game-lock');
+    };
+    ['bmr-enter','dcc-enter'].forEach(function(id){
+      const a=document.getElementById(id);if(!a)return;
+      a.addEventListener('click',function(e){
+        e.preventDefault();e.stopImmediatePropagation();
+        window.jcwAgeGate(ok=>{if(!ok)return;if(window.__lkPremOn){window.jcwOpenHosted(a.href);return;}location.hash='#lunatics';});
+      });
+    });
     const csClose=document.getElementById('cs-close');
     if(csClose)csClose.addEventListener('click',()=>document.getElementById('cs-modal').classList.remove('on'));
     document.getElementById('cs-modal').addEventListener('click',e=>{if(e.target.id==='cs-modal')e.target.classList.remove('on');});
@@ -2466,7 +2480,59 @@ function observeReveals(){
     ['pa_faygo5','Faygo Fountain \u00b7 5 straight Faygo 4 wins'],
     ['pa_hockey5','Ice Cold \u00b7 5 straight Air Hockey wins'],
     ['pa_chess','Checkmate \u00b7 mated the CPU in Juggalo Chess'],
-    ['pa_memory','Total Recall \u00b7 cleared the Joker Card Memory deck']];
+    ['pa_memory','Total Recall \u00b7 cleared the Joker Card Memory deck'],
+    /* ---- Big Money Rustlas (reported by the game while it runs on this site) ---- */
+    ['bmr_ride','Saddle Up \u00b7 played Big Money Rustlas'],
+    ['bmr_ch1','Back to Mud Bug \u00b7 cleared your first chapter'],
+    ['bmr_stank','Raw Deal \u00b7 put down Raw Stank'],
+    ['bmr_poot','Pie in the Sky \u00b7 put down Dusty Poot'],
+    ['bmr_tank','Tank Buster \u00b7 put down Tank'],
+    ['bmr_chips','Big Baby Down \u00b7 put down Big Baby Chips'],
+    ['bmr_half','Halfway to Mud Bug \u00b7 cleared half the chapters'],
+    ['bmr_allch','Mud Bug Is Free \u00b7 cleared every chapter'],
+    ['bmr_badge1','Lost & Found \u00b7 recovered a lost sheriff badge'],
+    ['bmr_badge12','Badge Collector \u00b7 12 lost sheriff badges'],
+    ['bmr_badgeall','Full Tin Star \u00b7 every lost sheriff badge'],
+    ['bmr_threestar','Three Stars \u00b7 all 3 badges in one chapter'],
+    ['bmr_clean','Not a Scratch \u00b7 cleared a chapter without dying'],
+    ['bmr_cleanall','Untouchable \u00b7 cleared every chapter without dying'],
+    ['bmr_secret1','Strange Trail \u00b7 found a Rustlas secret'],
+    ['bmr_secret24','Trail Weird \u00b7 24 Rustlas secrets'],
+    ['bmr_secretall','Tumbleweed Marshal \u00b7 every Rustlas secret'],
+    ['bmr_deadeye','Deadeye \u00b7 cleared a chapter on Deadeye'],
+    ['bmr_deadeyechips','Legend of Mud Bug \u00b7 beat Big Baby Chips on Deadeye'],
+    ['bmr_parry','Return to Sender \u00b7 sent back 25 shots'],
+    ['bmr_combo','Pimp Hand Strong \u00b7 a 10-hit combo'],
+    ['bmr_kills100','Wanted Poster \u00b7 took down 100 outlaws'],
+    ['bmr_kills500','Bounty Hunter \u00b7 took down 500 outlaws'],
+    ['bmr_shop','Kitted Out \u00b7 bought every upgrade'],
+    ['bmr_gold','Big Money \u00b7 1,000 gold in the saddlebag'],
+    /* ---- Dark Chaos Carnival ---- */
+    ['dcc_enter','Step Right Up \u00b7 played Dark Chaos Carnival'],
+    ['dcc_win','Midway Champion \u00b7 won a Dark Chaos Carnival match'],
+    ['dcc_win10','Carnival Royalty \u00b7 10 Dark Chaos Carnival wins'],
+    ['dcc_win25','Ruler of the Midway \u00b7 25 Dark Chaos Carnival wins'],
+    ['dcc_cups25','Carnival Regular \u00b7 finished 25 matches'],
+    ['dcc_wicked','Wicked Night \u00b7 won a match on Wicked'],
+    ['dcc_tour','Grand Tour \u00b7 rode all six Joker\u2019s Cards'],
+    ['dcc_crown','The Carnival Knows Your Name \u00b7 won the Grand Tour'],
+    ['dcc_crown3','Three Crowns \u00b7 crowned 3 characters'],
+    ['dcc_crown6','Every Card Crowned \u00b7 crowned all 6 characters'],
+    ['dcc_secret1','A Record Is Stirring \u00b7 found a hidden record'],
+    ['dcc_secret6','The Vault \u00b7 found all 6 hidden records'],
+    ['dcc_medal','Booth Rookie \u00b7 earned a mastery medal'],
+    ['dcc_booths6','Every Booth \u00b7 a medal in all 6 booths'],
+    ['dcc_gold','Gold Standard \u00b7 earned a gold mastery medal'],
+    ['dcc_gold6','Master of the Midway \u00b7 gold in all 6 booths'],
+    ['dcc_daily','Daily Midway \u00b7 ran a Daily Midway'],
+    ['dcc_daily10','Daily Grind \u00b7 10 Daily Midway runs'],
+    ['dcc_days7','Return Visitor \u00b7 visited on 7 different days'],
+    ['dcc_days30','Season Pass \u00b7 visited on 30 different days'],
+    ['dcc_t100','Neon Night \u00b7 100 carnival tickets'],
+    ['dcc_t300','Afterlife Royalty \u00b7 300 carnival tickets'],
+    ['dcc_t1000','Ticket Hoarder \u00b7 1,000 carnival tickets'],
+    ['dcc_plays50','Booth Hopper \u00b7 played 50 booth rounds'],
+    ['dcc_allchars','Full Cast \u00b7 won as all six characters']];
   function lkAddWin(){
     const d=lkGet(); d.wins=(d.wins||0)+1;
     d.badges=d.badges||[]; if(!d.badges.includes('winner'))d.badges.push('winner');
@@ -2516,9 +2582,50 @@ function observeReveals(){
         const names=fresh.map(b=>(lbl[b]||b).split(' \u00b7 ')[0]).join(' + ');
         setTimeout(()=>toast('\ud83c\udfc5 NEW BADGE \u00b7 '+names,4200),600);}}catch(_e){}
   };
+  /* Big Money Rustlas + Dark Chaos Carnival report progress the same way while
+     they run in the game overlay. Summaries are kept as running maxima in
+     locker.game (bmr_* / dcc_*) so replays never lose ground; per-run stats
+     (outlaws, parries, wins) add up. Badges derive from these in lkRender. */
+  window.jcwSideGameReport=function(r){
+    if(!r||(r.game!=='bmr'&&r.game!=='dcc'))return;
+    const d=lkGet();const g=d.game=d.game||{};const before=(d.badges||[]).slice();const P=r.game+'_';
+    let ch=false;const s=r.summary||{};
+    const mx=(k,v)=>{v=Math.max(0,Math.min(1e7,+v||0));if(v>(+g[P+k]||0)){g[P+k]=v;ch=true;}};
+    const add=(k,v)=>{v=Math.max(0,Math.min(1000,+v||0));if(v){g[P+k]=(+g[P+k]||0)+v;ch=true;}};
+    mx('played',1);
+    if(r.game==='bmr'){
+      ['cleared','badges','threeStar','clean','secrets','items','itemsTotal','gold','chapters','secretsTotal'].forEach(k=>mx(k,s[k]));
+      if(s.beaten)mx('beaten',1);
+      (Array.isArray(s.bosses)?s.bosses:[]).concat(r.ev==='boss'?[r.boss]:[]).forEach(b=>{if(/^[a-z]{2,12}$/.test(b||''))mx('boss_'+b,1);});
+      if(r.ev==='complete'){
+        add('kills',r.kills);add('parries',r.parries);mx('combo',Math.min(+r.bestCombo||0,999));
+        if(r.difficulty==='legend'){add('deadeye',1);if(r.final)mx('deadeyeChips',1);}
+      }
+    }else{
+      ['tickets','cups','secrets','days','tourVisits','crowns','medals','golds','booths','plays','dailyRuns','dailyBest'].forEach(k=>mx(k,s[k]));
+      if(r.ev==='match'&&r.won&&r.mode!=='practice'){
+        add('wins',1);if(r.level==='wicked')add('wickedWins',1);
+        if(/^[a-z0-9-]{2,24}$/.test(r.character||'')){g[P+'wonWith']=g[P+'wonWith']||{};if(!g[P+'wonWith'][r.character]){g[P+'wonWith'][r.character]=1;ch=true;}}
+      }
+    }
+    if(!ch)return;
+    lkSet(d);lkRender();
+    try{const now=lkGet().badges||[];const fresh=now.filter(b=>before.indexOf(b)<0&&/^(bmr_|dcc_)/.test(b));
+      if(fresh.length){const lbl={};LK_BADGES.forEach(b=>{lbl[b[0]]=b[1];});
+        const names=fresh.map(b=>(lbl[b]||b).split(' \u00b7 ')[0]).join(' + ');
+        setTimeout(()=>toast('\ud83c\udfc5 NEW BADGE \u00b7 '+names,4200),600);}}catch(_e){}
+  };
+  /* Lunatics Only handshake: a hosted game asks the page that framed it whether
+     it may run. Only the game overlay on this site gets an answer. */
+  window.addEventListener('message',function(e){
+    if(!e.data||e.data.type!=='jcw-pass-req')return;
+    const fr=document.querySelector('#game-overlay iframe');
+    if(!fr||e.source!==fr.contentWindow)return;
+    try{e.source.postMessage({type:'jcw-pass',ok:!!window.__lkPremOn},e.origin);}catch(_e){}
+  });
   window.addEventListener('message',ev=>{
     if(!ev.data)return;
-    if(ev.data.type==='jcw-game'){if(ev.origin===LU_GAME_ORIGIN||ev.origin===location.origin)try{window.jcwGameReport(ev.data);}catch(_e){}return;}
+    if(ev.data.type==='jcw-game'){if(ev.origin===LU_GAME_ORIGIN||ev.origin===location.origin)try{(ev.data.game==='lunacy'?window.jcwGameReport:window.jcwSideGameReport)(ev.data);}catch(_e){}return;}
     if(ev.data.type==='jcw-win'){lkAddWin();}   /* older game builds */
   });
   function lkRank(p){return p>=500?'Certified Freak':p>=300?'Lunacy Unlocked':p>=150?'Dark Carnival Regular':p>=50?'Front Row':'Fresh Face';}
@@ -2630,6 +2737,28 @@ function observeReveals(){
         if(a.records>=1)add('pa_record');
         if(best.ttt>=5)add('pa_ttt5');if(best.faygo>=5)add('pa_faygo5');if(best.hockey>=5)add('pa_hockey5');
         if(games.chess>=1)add('pa_chess');if(games.memory>=1)add('pa_memory');
+      })();
+      /* Big Money Rustlas + Dark Chaos Carnival — counters in locker.game (bmr_* / dcc_*) */
+      (function(){const G=d.game||{},b=k=>+G['bmr_'+k]||0,c=k=>+G['dcc_'+k]||0;
+        if(b('played'))add('bmr_ride');if(b('cleared')>=1)add('bmr_ch1');
+        if(b('boss_stank'))add('bmr_stank');if(b('boss_poot'))add('bmr_poot');if(b('boss_tank'))add('bmr_tank');if(b('boss_chips')||b('beaten'))add('bmr_chips');
+        const chs=b('chapters')||12,sec=b('secretsTotal')||48;   /* the game reports its own totals */
+        if(b('cleared')>=Math.ceil(chs/2))add('bmr_half');if(b('cleared')>=chs||b('beaten'))add('bmr_allch');
+        if(b('badges')>=1)add('bmr_badge1');if(b('badges')>=12)add('bmr_badge12');if(b('badges')>=chs*3)add('bmr_badgeall');
+        if(b('threeStar')>=1)add('bmr_threestar');if(b('clean')>=1)add('bmr_clean');if(b('clean')>=chs)add('bmr_cleanall');
+        if(b('secrets')>=1)add('bmr_secret1');if(b('secrets')>=24)add('bmr_secret24');if(b('secrets')>=sec)add('bmr_secretall');
+        if(b('deadeye')>=1)add('bmr_deadeye');if(b('deadeyeChips')>=1)add('bmr_deadeyechips');
+        if(b('parries')>=25)add('bmr_parry');if(b('combo')>=10)add('bmr_combo');
+        if(b('kills')>=100)add('bmr_kills100');if(b('kills')>=500)add('bmr_kills500');
+        if(b('itemsTotal')>0&&b('items')>=b('itemsTotal'))add('bmr_shop');if(b('gold')>=1000)add('bmr_gold');
+        if(c('played'))add('dcc_enter');if(c('wins')>=1)add('dcc_win');if(c('wins')>=10)add('dcc_win10');if(c('wins')>=25)add('dcc_win25');
+        if(c('cups')>=25)add('dcc_cups25');if(c('wickedWins')>=1)add('dcc_wicked');
+        if(c('tourVisits')>=1)add('dcc_tour');if(c('crowns')>=1)add('dcc_crown');if(c('crowns')>=3)add('dcc_crown3');if(c('crowns')>=6)add('dcc_crown6');
+        if(c('secrets')>=1)add('dcc_secret1');if(c('secrets')>=6)add('dcc_secret6');
+        if(c('medals')>=1)add('dcc_medal');if(c('booths')>=6)add('dcc_booths6');if(c('golds')>=1)add('dcc_gold');if(c('golds')>=6)add('dcc_gold6');
+        if(c('dailyRuns')>=1)add('dcc_daily');if(c('dailyRuns')>=10)add('dcc_daily10');if(c('days')>=7)add('dcc_days7');if(c('days')>=30)add('dcc_days30');
+        if(c('tickets')>=100)add('dcc_t100');if(c('tickets')>=300)add('dcc_t300');if(c('tickets')>=1000)add('dcc_t1000');
+        if(c('plays')>=50)add('dcc_plays50');if(Object.keys(G.dcc_wonWith||{}).length>=6)add('dcc_allchars');
       })();
       if((d.pts||0)>=300)add('unlocked');
       if((d.pts||0)>=1000)add('faygoshower');
