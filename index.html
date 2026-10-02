@@ -1294,7 +1294,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         </div>
       </div>
       <div class="lk rev"><h3>Points</h3><div class="big" id="lk-pts">0</div><p id="lk-rank">Fresh Face</p></div>
-      <div class="lk rev"><h3>Game Record</h3><div class="big" id="lk-wins">0</div><p>Match wins in JCW Lunacy: The Game</p></div>
+      <div class="lk rev"><h3>Game Record</h3><div class="big" id="lk-wins">0</div><p id="lk-wins-sub">Wins across every game on the site</p></div>
       <div class="lk rev"><h3>Profile</h3>
         <input id="lk-name" maxlength="20" placeholder="Your name">
         <select id="lk-fav"><option value="">Favorite girl wrestler&hellip;</option></select>
@@ -2915,7 +2915,16 @@ function observeReveals(){
     })();
     el.textContent=d.pts||0;
     document.getElementById('lk-rank').textContent=lkRank(d.pts||0);
-    const wEl=document.getElementById('lk-wins');if(wEl)wEl.textContent=d.wins||0;
+    /* Game Record: wins from every game, not just Lunacy Unlocked. The arcade
+       writes straight to the cloud locker (lockers/<uid>/arcade) and the live
+       locker listener merges it in, so this updates while the page is open. */
+    (function(){
+      const A=d.arcade||{},G=d.game||{},n=v=>Math.max(0,Math.floor(+v||0));
+      const lu=n(d.wins),arc=Math.max(0,n(A.wins)-n(A.games&&A.games.rumble)),ru=n(A.rumble&&A.rumble.wins),dcc=n(G.dcc_wins),bmr=n(G.bmr_cleared),bmrT=n(G.bmr_chapters)||12;
+      const wEl=document.getElementById('lk-wins');if(wEl)wEl.textContent=(lu+arc+ru+dcc).toLocaleString();
+      const sEl=document.getElementById('lk-wins-sub');
+      if(sEl)sEl.textContent='Lunacy Unlocked '+lu+' \u00b7 Arcade '+arc+' \u00b7 JCW Rumble '+ru+' \u00b7 Dark Chaos Carnival '+dcc+' \u00b7 Big Money Rustlas '+bmr+'/'+bmrT+' chapters';
+    })();
     /* blocked list (Account card) with one-tap unblock */
     try{
       const bEl=document.getElementById('lk-blocked');
