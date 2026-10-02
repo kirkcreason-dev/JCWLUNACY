@@ -3071,7 +3071,7 @@ function observeReveals(){
       const loH=document.querySelector('#lo-modal h3');if(loH)loH.textContent='The Lunatics Only';
       const body=document.getElementById('lo-modal-body');
       if(body){
-        let h=(lkUser?'<p><b style="color:#ff3fa4;">&#10060; YOU ARE NOT A LUNATIC&hellip; yet.</b></p>':'')+'<p>Backstage Pass &middot; Bloopers &middot; PPV streams &middot; game beta access &mdash; straight from the carnival.</p>';
+        let h=(lkUser?'<p><b style="color:#ff3fa4;">&#10060; YOU ARE NOT A LUNATIC&hellip; yet.</b></p>':'')+'<p><b>Live now:</b> Lunacy Unlocked &middot; the 14-game Psychopathic Arcade &middot; Big Money Rustlas &middot; Dark Chaos Carnival &middot; JCW trading cards (open packs, gift and trade) &middot; Lunacy Radio &middot; members-only drops.</p><p style="color:#9aa0aa;"><b>Coming soon:</b> Backstage Pass &middot; Bloopers &middot; PPV streams &middot; the JCW comic book.</p>';
         if(!JCW_STRIPE_LINK){h+='<p><b>Coming soon. Keep your eyes on the carnival.</b></p>';}
         else if(!lkUser){h+='<p><b>Log in from your Juggalo Locker, then come knock again.</b></p>';}
         else{h+='<a class="btn" style="margin-top:14px;display:inline-flex;justify-content:center;" href="'+JCW_STRIPE_LINK+(JCW_STRIPE_LINK.indexOf('?')>-1?'&':'?')+'client_reference_id='+encodeURIComponent(lkUser.uid)+'" target="_blank" rel="noopener">Join The Lunatics Only</a>';}
