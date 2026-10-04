@@ -122,7 +122,7 @@
         if(d.ev==='rumble'){
           var rk=num(d.kills,30);
           add('rumble/runs',1);mx('rumble/best',num(d.score,1e6));add('rumble/kills',rk);mx('rumble/bestKills',rk);
-          if(d.won===true){add('rumble/wins',1);if(num(d.entrants,30)>=22)add('rumble/wins22',1);
+          if(d.won===true){add('rumble/wins',1);if(num(d.entrants,30)>=21)add('rumble/wins22',1);
             var rid=String(d.roster||'');if(/^[a-z0-9-]{1,40}$/.test(rid))ref.child('rumble/wonWith/'+rid).set(1);}
           return;
         }
