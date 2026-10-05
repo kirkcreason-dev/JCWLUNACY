@@ -2974,12 +2974,15 @@ function observeReveals(){
       }
     }catch(_e){}
     const clawGot=(d.badges||[]).filter(k=>k.indexOf('cl_set_')===0).length;
+    const rumGot=(d.badges||[]).filter(k=>k.indexOf('ru_w_')===0).length,ladGot=(d.badges||[]).filter(k=>k.indexOf('lw_w_')===0).length;
     document.getElementById('lk-badges').innerHTML=LK_BADGES.map(([k,t])=>{
       if(k==='verified'&&lkUser&&JCW_VERIFIED[lkUser.uid])t='JCW Roster \u00b7 '+JCW_VERIFIED[lkUser.uid];
       const got=(d.badges||[]).includes(k);
-      if(k.indexOf('cl_set_')===0||k.indexOf('ru_w_')===0)return got?`<span class="badge2 got">${t}</span>`:'';   /* claw set + rumble wrestler badges: only the earned ones show */
+      if(k.indexOf('cl_set_')===0||k.indexOf('ru_w_')===0||k.indexOf('lw_w_')===0)return got?`<span class="badge2 got">${t}</span>`:'';   /* claw set + rumble/ladder wrestler badges: only the earned ones show */
       return `<span class="badge2 ${got?'got':''}">${t}</span>`;
-    }).join('')+`<span class="badge2 ${clawGot?'got':''}">Carnival Claw Sets \u00b7 ${clawGot} of ${CLAW_SETS.length} collected</span>`;
+    }).join('')+`<span class="badge2 ${clawGot?'got':''}">Carnival Claw Sets \u00b7 ${clawGot} of ${CLAW_SETS.length} collected</span>`
+      +`<span class="badge2 ${rumGot?'got':''}">JCW Rumble Wins \u00b7 won as ${rumGot} of ${RUMBLE_ROSTER.length} wrestlers</span>`
+      +`<span class="badge2 ${ladGot?'got':''}">Ladder Wars Champions \u00b7 won as ${ladGot} of ${RUMBLE_ROSTER.length} wrestlers</span>`;
     document.getElementById('lk-hist').innerHTML=(d.hist&&d.hist.length)?d.hist.map(x=>'&raquo; '+x).join('<br>'):'Nothing yet. Hit the episodes.';
     const nm=document.getElementById('lk-name');if(nm&&document.activeElement!==nm)nm.value=d.name||'';
     const GIRLS=['Dani Mo','Alice Crowley','Gisele Shaw','Hollyhood Haley J','Hokane','J-Rod','Jasmin St. Claire','Mickie Knuckles','Sonny Kiss','Sophia Rose','The Ring Rat','Veda Scott','Kid Cadet','Freya the Slaya'];
