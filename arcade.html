@@ -161,6 +161,51 @@
 })();
 </script>
 <script>
+/* LIVE ACTIVITY — while this tab is in front, the member shows as
+   "Playing Carnival Claw · Psychopathic Arcade" (or just "Playing Psychopathic
+   Arcade" on the menu) next to their name on jcwlunacy.net. Same contract as
+   the main site: lockers/<uid>/act {k,t,n,ts}, deleted server-side when the
+   tab drops. This tab also keeps their online dot lit (the site tab pauses
+   its heartbeat while it's in the background). Honors the Locker's
+   "show what I'm doing" switch (jcw_act_off). */
+(function(){
+  if(!/(^|\.)jcwlunacy\.net$/i.test(location.hostname))return;
+  var NAMES={ladder:'Ladder Wars',rumble:'JCW Rumble',claw:'Carnival Claw',chicken:'Chicken Huntin’',shooter:'Carnival Crossfire',ttt:'Tic Tac Slam',chess:'Juggalo Chess',checkers:'Juggalo Checkers',faygo:'Joker Card Four',pinball:'Dark Carnival Pinball',bj:'Blackjack 21',memory:'Joker Card Memory',camper:'Gathering Camper',solitaire:'Dark Carnival Solitaire',j31:'Juggalo 31',hockey:'Juggalo Air Hockey'};
+  var SCR={lwScreen:'ladder',ruScreen:'rumble',clScreen:'claw',khScreen:'chicken',shScreen:'shooter',tttScreen:'ttt',chessScreen:'chess',checkersScreen:'checkers',faygoScreen:'faygo',pinballScreen:'pinball',bjScreen:'bj',mmScreen:'memory',gcScreen:'camper',soScreen:'solitaire',j31Screen:'j31',ahScreen:'hockey'};
+  var frame=document.getElementById('arcade');
+  function current(){
+    try{var d=frame&&frame.contentDocument;if(!d)return '';
+      for(var id in SCR){var el=d.getElementById(id);if(el&&!el.hidden)return NAMES[SCR[id]]||'';}
+    }catch(e){}
+    return '';
+  }
+  function off(){try{return localStorage.getItem('jcw_act_off')==='1';}catch(e){return false;}}
+  window.__arcFirebase(function(ok){
+    if(!ok)return;
+    try{
+      var started=false;
+      firebase.auth().onAuthStateChanged(function(u){
+        if(!u||started)return;started=true;
+        var db=firebase.database(),ref=db.ref('lockers/'+u.uid+'/act'),last='',name='';
+        var pu=db.ref('presenceUsers/'+u.uid),ls=db.ref('lastSeen/'+u.uid);
+        function beat(){if(document.hidden)return;pu.set(Date.now()).catch(function(){});ls.set(Date.now()).catch(function(){});}
+        function tick(force){
+          if(document.hidden)return;
+          if(off()){if(force||last!=='off'){last='off';ref.remove().catch(function(){});}return;}
+          var g=current(),t=g?('Playing '+g+' · Psychopathic Arcade'):'Playing Psychopathic Arcade';
+          if(!force&&t===last)return;last=t;
+          ref.set({k:'game',t:t.slice(0,70),n:(name||'Juggalo').slice(0,40),ts:Date.now()}).catch(function(){last='';});
+        }
+        db.ref('lockers/'+u.uid+'/name').once('value').then(function(s){name=String(s.val()||'').trim();tick(true);}).catch(function(){});
+        db.ref('.info/connected').on('value',function(s){if(s.val()!==true)return;try{ref.onDisconnect().remove();}catch(e){}tick(true);});
+        beat();setInterval(beat,30000);setInterval(function(){tick(false);},4000);
+        document.addEventListener('visibilitychange',function(){if(!document.hidden){beat();tick(true);}});
+      });
+    }catch(e){}
+  });
+})();
+</script>
+<script>
 /* Psychopathic Arcade is Lunatics Only on the website. Gates on premiumMembers. */
 (function(){
   if(!/(^|\.)jcwlunacy\.net$/i.test(location.hostname))return;

@@ -859,6 +859,12 @@ body:not(.jcw-member) #chat-fab{display:none!important;}
 .ch-tabs{display:flex;border-bottom:1px solid var(--seam);}
 .ch-tabs button{flex:1;padding:11px 0;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--steel);}
 .ch-tabs button.on{color:var(--gold);box-shadow:inset 0 -2px 0 var(--gold);}
+#ch-live{display:none;gap:6px;overflow-x:auto;padding:8px 12px;border-bottom:1px solid var(--seam);flex:none;align-items:stretch;scrollbar-width:thin;}
+#ch-live .chl-h{flex:none;align-self:center;font:800 10px system-ui;letter-spacing:.12em;text-transform:uppercase;color:var(--acid);padding-right:2px;white-space:nowrap;}
+#ch-live .chl{flex:none;display:flex;flex-direction:column;align-items:flex-start;gap:2px;max-width:170px;padding:5px 10px;border:1px solid var(--seam);border-radius:10px;background:#111;cursor:pointer;text-align:left;color:var(--bone);font-family:system-ui,sans-serif;}
+#ch-live .chl:hover{border-color:var(--acid);}
+#ch-live .chl b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;}
+#ch-live .chl small{font-size:10.5px;color:var(--steel);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;}
 .ch-pane{flex:1;overflow-y:auto;padding:12px 14px;display:none;}
 .ch-pane.on{display:block;}
 .ch-msg{margin-bottom:10px;font-size:13.5px;line-height:1.5;color:var(--bone);word-wrap:break-word;}
@@ -1309,7 +1315,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
       <div class="lk rev"><h3>Badges</h3>
         <div class="badges" id="lk-badges"></div></div>
       <div class="lk rev"><h3>Watch History</h3><div class="hist" id="lk-hist">Nothing yet. Hit the episodes.</div></div>
-      <div class="lk rev"><h3>Notifications</h3><div id="lk-notifs">Log in to get shout-outs, wall posts and ally news.</div></div>
+      <div class="lk rev"><h3>Notifications</h3><div id="lk-notifs">Log in to get shout-outs, wall posts and ally news.</div><p style="margin:12px 0 0;font-size:12.5px;color:var(--steel);"><label style="cursor:pointer;"><input type="checkbox" id="act-show" checked style="vertical-align:middle;margin-right:6px;">Show what I’m doing (playing, watching, listening) next to my name</label></p></div>
     </div>
   </section>
 </main>
@@ -1838,6 +1844,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
 <aside id="chat-panel" aria-label="Lunacy Chat">
   <div class="ch-hd"><b>Lunacy Chat</b><span class="np" id="ch-np"></span><button class="ch-x" id="ch-pop" title="Pop out chat" style="background:none;border:none;color:var(--acid);font-size:16px;cursor:pointer;margin-right:2px;">&#8599;</button><button class="ch-x" id="ch-x">&times;</button></div>
   <div class="ch-tabs"><button class="on" data-tab="chat">Chat</button><button data-tab="vote">Vote</button><button data-tab="board">Leaders</button><button data-tab="mods" id="ch-mods-tab" style="display:none;color:var(--acid);">Mods</button><button data-tab="dms" id="ch-dms-tab" style="display:none;color:var(--hot);">DMs</button></div>
+  <div id="ch-live" aria-label="Who is on right now"></div>
   <div class="ch-pane on" id="ch-chat"></div>
   <button id="ch-jump" style="display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:118px;z-index:6;background:var(--acid);color:#000;border:none;border-radius:20px;padding:7px 16px;font:700 12px system-ui;letter-spacing:.04em;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.5);">&#8595; New messages</button>
   <div class="ch-pane" id="ch-mods"><div style="font-size:12px;color:var(--acid);margin-bottom:10px;border-bottom:1px dashed rgba(157,255,58,.25);padding-bottom:8px;">&#128274; Mods only &mdash; the backstage room. Nobody else sees this.<div id="mod-idle-note" style="color:var(--steel);margin-top:4px;"></div></div><div id="dm-inbox"></div><div id="ch-reports" style="margin-bottom:12px;"></div><div id="ch-bans" style="margin-bottom:12px;"></div><div id="ch-mods-list"></div></div>
@@ -3740,7 +3747,7 @@ function observeReveals(){
     const ADMIN=isMod();
     const nearBottom=(chChat.scrollHeight-chChat.scrollTop-chChat.clientHeight)<90;
     const prevCount=chChat.__count||0;
-    chChat.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${(m.__k&&lkUser&&m.u!==lkUser.uid)?`<span data-chrep="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-repn="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--steel);opacity:.5;margin-right:6px;font-size:12px;" title="Report this message">&#9873;</span>`:''}${ADMIN&&m.__k&&canDelPost(m.u)?`<span data-chdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-chu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete message">&times;</span>`:''}${ADMIN&&m.u&&m.u!==lkUser.uid&&!isModUid(m.u)?`<span data-chban="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}" data-bann="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--hot);opacity:.7;margin-right:6px;font-size:11px;" title="Ban from chat">&#9940;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'').replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:`data-pname="${String(m.n||'').replace(/"/g,'').replace(/</g,'')}"`} style="cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${m.u&&isVerified(m.u)?'<span title="Verified JCW talent" style="color:var(--gold);margin-right:5px;">&#10004;</span>':''}${m.u&&window.__lkPremSet&&window.__lkPremSet[m.u]===true?'<span class="lun-chip" title="Lunatics Only member">&#127914; Lunatic</span>':''}${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;padding:10px;">No messages yet \u2014 say something to the family.</p>';
+    chChat.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${(m.__k&&lkUser&&m.u!==lkUser.uid)?`<span data-chrep="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-repn="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--steel);opacity:.5;margin-right:6px;font-size:12px;" title="Report this message">&#9873;</span>`:''}${ADMIN&&m.__k&&canDelPost(m.u)?`<span data-chdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-chu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete message">&times;</span>`:''}${ADMIN&&m.u&&m.u!==lkUser.uid&&!isModUid(m.u)?`<span data-chban="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}" data-bann="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--hot);opacity:.7;margin-right:6px;font-size:11px;" title="Ban from chat">&#9940;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String(((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'')+((window.jcwActText&&window.jcwActText(m.u))?(' \u00b7 '+window.jcwActText(m.u)):'')).replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:`data-pname="${String(m.n||'').replace(/"/g,'').replace(/</g,'')}"`} style="cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${m.u&&isVerified(m.u)?'<span title="Verified JCW talent" style="color:var(--gold);margin-right:5px;">&#10004;</span>':''}${m.u&&window.__lkPremSet&&window.__lkPremSet[m.u]===true?'<span class="lun-chip" title="Lunatics Only member">&#127914; Lunatic</span>':''}${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;padding:10px;">No messages yet \u2014 say something to the family.</p>';
     chChat.__count=list.length;
     if(nearBottom){chChat.scrollTop=chChat.scrollHeight;jcwHideJump();}
     else if(list.length>prevCount){jcwShowJump();}
@@ -3898,7 +3905,7 @@ function observeReveals(){
     const el=document.getElementById('ch-mods-list');if(!el)return;
     list=list||[];
     window.__modLive=list;
-    el.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${m.__k&&canDelPost(m.u)?`<span data-mdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-mu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete">&times;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'').replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:''} style="color:var(--acid);cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;">Quiet backstage. Say something to the crew.</p>';
+    el.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${m.__k&&canDelPost(m.u)?`<span data-mdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-mu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete">&times;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String(((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'')+((window.jcwActText&&window.jcwActText(m.u))?(' \u00b7 '+window.jcwActText(m.u)):'')).replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:''} style="color:var(--acid);cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;">Quiet backstage. Say something to the crew.</p>';
     el.scrollTop=el.scrollHeight;
     }catch(e){}
   }
@@ -4386,17 +4393,126 @@ function observeReveals(){
     fbDB.ref('lastSeen').on('value',s=>{window.__lastSeen=s.val()||{};},()=>{});
     fbDB.ref('presenceUsers').on('value',s=>{
       window.__presence=s.val()||{};
+      try{if(window.jcwActSync)window.jcwActSync();}catch(_e){}
       try{if(window.__chatLive&&document.getElementById('ch-chat').classList.contains('on'))chRender(window.__chatLive);}catch(_e){}
       try{if(window.__modLive&&document.getElementById('ch-mods').classList.contains('on'))modRender(window.__modLive);}catch(_e){}
     });
     // re-tick dots every 30s so they flip to offline as heartbeats age out
     setInterval(()=>{try{
+      if(window.jcwActSync)window.jcwActSync();
       if(window.__chatLive&&document.getElementById('ch-chat').classList.contains('on'))chRender(window.__chatLive);
       if(window.__modLive&&document.getElementById('ch-mods').classList.contains('on'))modRender(window.__modLive);
     }catch(_e){}},30000);
   };
   // also refresh mods dots the instant presence changes
   (function(){const _p=window.jcwWatchPresence;})();
+
+  /* ===== LIVE ACTIVITY ===================================================
+     "Playing Big Money Rustlas", "Watching Episode 101", "Listening to Lunacy
+     Radio · Shaggy 2 Dope". The member's VISIBLE tab writes what they're doing
+     to lockers/<uid>/act {k,t,n,ts} only when it changes (owner-only write,
+     public read — the existing locker rules cover it), the server deletes it
+     the moment they drop, and it's only ever shown next to a fresh online dot,
+     so a stale one can't lie. The arcade tab (arcade.html) writes its own.
+     Members can switch it off in their Locker (Notifications card). */
+  window.__acts=window.__acts||{};
+  const ACT_ICON={game:'\u{1F3AE}',watch:'\u{1F4FA}',radio:'\u{1F4FB}',chat:'\u{1F4AC}',cards:'\u{1F0CF}',browse:'\u{1F3AA}'};
+  const ACT_ROUTE={home:'Hanging out on the homepage',episodes:'Browsing episodes',clips:'Watching clips',events:'Checking out upcoming events',crew:'Checking out the roster',games:'Browsing the games',merch:'Shopping merch',cards:'Collecting cards',comics:'Reading comics',vote:'Voting in the polls',locker:'In their Locker',lunatics:'Checking out The Lunatics Only',about:'Reading about JCW',profile:'Visiting a Juggalo’s page'};
+  const ACT_GAMES=[[/JCWLUNACYUNLOCKED/i,'Lunacy Unlocked'],[/BigMoneyRustlas/i,'Big Money Rustlas'],[/dark-chaos-carnival/i,'Dark Chaos Carnival'],[/PsychopathicArcade/i,'Psychopathic Arcade']];
+  function actClean(a){
+    if(!a||typeof a!=='object'||typeof a.t!=='string'||!a.t.trim())return null;
+    return {k:ACT_ICON[a.k]?a.k:'browse',t:a.t.trim().slice(0,70),n:typeof a.n==='string'?a.n.trim().slice(0,40):''};
+  }
+  window.jcwActivity=function(uid){return (uid&&isOnline(uid))?actClean(window.__acts[uid]):null;};
+  window.jcwActText=function(uid){const a=window.jcwActivity(uid);return a?(ACT_ICON[a.k]+' '+a.t):'';};
+  /* who's on: one tiny listener per ONLINE member (lockers/<uid>/act only) */
+  const actRefs={},actNames={};
+  window.jcwActSync=function(){
+    if(!fbDB)return;
+    const want={};
+    Object.keys(window.__presence||{}).filter(isOnline).slice(0,150).forEach(u=>{if(/^[A-Za-z0-9_-]{1,64}$/.test(u))want[u]=1;});
+    Object.keys(actRefs).forEach(u=>{if(!want[u]){try{actRefs[u].off();}catch(_e){}delete actRefs[u];delete window.__acts[u];}});
+    Object.keys(want).forEach(u=>{
+      if(actRefs[u])return;
+      const r=fbDB.ref('lockers/'+u+'/act');actRefs[u]=r;
+      r.on('value',sn=>{window.__acts[u]=sn.val();actPaint();},()=>{});
+    });
+    actPaint();
+  };
+  let actPaintT=0;
+  function actPaint(){if(actPaintT)return;actPaintT=setTimeout(()=>{actPaintT=0;try{actStrip();}catch(_e){}try{actProf();}catch(_e){}},250);}
+  function actProf(){
+    const el=document.getElementById('prof-act');if(!el)return;
+    const t=window.jcwActText(el.dataset.uid);el.textContent=t?(' · '+t):'';
+  }
+  function actStrip(){
+    const el=document.getElementById('ch-live');if(!el)return;
+    if(!lkUser){el.style.display='none';return;}
+    const rows=[];
+    Object.keys(window.__presence||{}).forEach(u=>{
+      if(!isOnline(u)||jcwBlocked(u))return;
+      const a=window.jcwActivity(u);
+      let nm=(a&&a.n)||actNames[u]||'';
+      if(!nm&&actNames[u]===undefined&&fbDB&&/^[A-Za-z0-9_-]{1,64}$/.test(u)){
+        actNames[u]='';fbDB.ref('lockers/'+u+'/name').once('value').then(sn=>{actNames[u]=String(sn.val()||'').trim().slice(0,40);if(actNames[u])actPaint();}).catch(()=>{});
+      }
+      if(nm)rows.push({u,a,nm,me:u===lkUser.uid});
+    });
+    if(!rows.length){el.style.display='none';el.innerHTML='';return;}
+    rows.sort((x,y)=>(y.me-x.me)||((y.a?1:0)-(x.a?1:0))||x.nm.localeCompare(y.nm));
+    el.innerHTML='<span class="chl-h">On now &middot; '+rows.length+'</span>'+rows.slice(0,40).map(r=>
+      '<button class="chl" data-puid="'+pEsc(r.u)+'" title="'+pEsc(r.nm+(r.a?(' · '+r.a.t):''))+'"><b><span class="pdot on"></span>'+pEsc(r.me?(r.nm+' (you)'):r.nm)+'</b><small>'+pEsc(r.a?(ACT_ICON[r.a.k]+' '+r.a.t):'Online')+'</small></button>').join('');
+    el.style.display='flex';
+  }
+  /* my own activity */
+  function actOff(){try{return localStorage.getItem('jcw_act_off')==='1';}catch(e){return false;}}
+  function actNow(){
+    const ov=document.getElementById('game-overlay');
+    if(ov&&ov.classList.contains('on')){
+      const fr=ov.querySelector('iframe'),src=fr?String(fr.src||''):'';
+      for(const g of ACT_GAMES)if(g[0].test(src))return {k:'game',t:'Playing '+g[1]};
+      return {k:'game',t:'Playing a JCW game'};
+    }
+    const r=((document.querySelector('.view.active')||{}).id||'').replace(/^view-/,'');
+    const pl=document.getElementById('ep-player');
+    if(r==='episodes'&&pl&&pl.classList.contains('on')&&window.__epTitle)return {k:'watch',t:'Watching '+String(window.__epTitle)};
+    const cp=document.getElementById('chat-panel');
+    if(cp&&cp.classList.contains('on'))return {k:'chat',t:'In Lunacy Chat'};
+    const rn=window.jcwRadioNow?window.jcwRadioNow():'';
+    if(rn)return {k:'radio',t:'Listening to Lunacy Radio · '+rn};
+    return {k:r==='cards'?'cards':'browse',t:ACT_ROUTE[r]||'Browsing JCW Lunacy'};
+  }
+  let actLast='',actUid=null;
+  function actWrite(force){
+    if(!fbDB||!lkUser||document.hidden)return;
+    const ref=fbDB.ref('lockers/'+lkUser.uid+'/act');
+    if(actOff()){if(force||actLast!=='off'){actLast='off';ref.remove().catch(()=>{});}return;}
+    const a=actNow(),key=a.k+'|'+a.t;
+    if(!force&&key===actLast)return;
+    actLast=key;
+    const n=(String(lkGet().name||'').trim()||'Juggalo').slice(0,40);
+    ref.set({k:a.k,t:a.t.slice(0,70),n:n,ts:Date.now()}).catch(()=>{actLast='';});
+  }
+  window.jcwActStart=function(user){
+    if(!fbDB||!user)return;
+    if(actUid===user.uid)return;
+    actUid=user.uid;actLast='';
+    /* re-arm the server-side delete on every (re)connect */
+    try{fbDB.ref('.info/connected').on('value',sn=>{
+      if(sn.val()!==true||!lkUser||lkUser.uid!==actUid)return;
+      try{fbDB.ref('lockers/'+actUid+'/act').onDisconnect().remove();}catch(_e){}
+      actWrite(true);
+    });}catch(_e){}
+    if(!window.__actTick){
+      window.__actTick=setInterval(()=>actWrite(false),4000);
+      let deb=0;const soon=()=>{clearTimeout(deb);deb=setTimeout(()=>actWrite(false),350);};
+      window.addEventListener('hashchange',soon);document.addEventListener('click',soon,true);
+      document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(()=>actWrite(true),300);});
+    }
+    const cb=document.getElementById('act-show');
+    if(cb){cb.checked=!actOff();cb.onchange=function(){try{localStorage.setItem('jcw_act_off',cb.checked?'0':'1');}catch(_e){}actWrite(true);try{toast(cb.checked?'Your activity shows next to your name':'Your activity is hidden',2200);}catch(_e){}};}
+    setTimeout(()=>actWrite(true),1500);
+  };
 
   /* ===== OWNER DM REVIEW ================================================
      Reads every dm/<pair> thread. Needs the owner-read rule on dm/ — until
@@ -4537,6 +4653,7 @@ function observeReveals(){
       const blockedMe=!!(lkUser&&v.blocked&&(+v.blocked[lkUser.uid]||0)>0&&lkUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1');
       const iBlocked=!!(lkUser&&jcwBlocked(uid));
       window.__profBlockedMe=blockedMe;
+      if(v&&v.act&&!window.__acts[uid])window.__acts[uid]=v.act;
       const DUKE='oYrNiXZywhexmLqRQO7j1iyA1Bh1';
       const badgeMap={};LK_BADGES.forEach(b=>{badgeMap[b[0]]=b[1];});
       if(JCW_VERIFIED[uid])badgeMap['verified']='JCW Roster \u00b7 '+JCW_VERIFIED[uid];
@@ -4558,7 +4675,8 @@ function observeReveals(){
       (function(){
         const ls=(window.jcwLastSeen?window.jcwLastSeen(uid):'');
         if(ls)h+='<p style="margin-top:6px;font-size:12.5px;color:'+(ls==='Online now'?'var(--acid)':'var(--steel)')+';">'
-          +(ls==='Online now'?'<span class="pdot on"></span>':'<span class="pdot off"></span>')+' '+ls+'</p>';
+          +(ls==='Online now'?'<span class="pdot on"></span>':'<span class="pdot off"></span>')+' '+ls
+          +(ls==='Online now'?'<span id="prof-act" data-uid="'+pEsc(uid)+'" style="color:var(--bone);">'+(window.jcwActText&&jcwActText(uid)?(' \u00b7 '+pEsc(jcwActText(uid))):'')+'</span>':'')+'</p>';
       })();
       h+='<p style="margin-top:6px;"><b style="color:var(--gold);">'+(v.pts||0)+' pts</b> &middot; '+(v.wins||0)+' game wins'
         +(v.fav?(' &middot; rides with <b>'+pEsc(v.fav)+'</b>'):'')
@@ -5048,6 +5166,7 @@ function observeReveals(){
                   lsRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);}catch(_e){}
             document.addEventListener('visibilitychange',()=>{if(!document.hidden)beat();});
           }catch(_e){}
+          try{if(window.jcwActStart)window.jcwActStart(user);}catch(_e){}
           if(isMod()&&user.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'){
             try{
               const seen=localStorage.getItem('jcw_mod_greet_'+user.uid);
@@ -5127,6 +5246,10 @@ function observeReveals(){
           if((location.hash||'')==='#locker'&&window.jcwMarkNotifsSeen)setTimeout(()=>window.jcwMarkNotifsSeen(window.__notifNewest),1500);
           fbDB.ref('lockers/'+user.uid).on('value',snap=>{
             const cloud=snap.val();
+            /* live activity rides in the locker node; it isn't locker data, so
+               strip it and don't re-merge when it's the only thing that moved */
+            if(cloud&&typeof cloud==='object'){delete cloud.act;
+              try{const sig=JSON.stringify(cloud);if(lkCloudReady&&sig===window.__lkSnapSig)return;window.__lkSnapSig=sig;}catch(_e){}}
             const firstPull=!lkCloudReady;
             if(cloud){ // merge cloud into local, cloud wins on points
               const d=lkGet();
@@ -6790,6 +6913,7 @@ route();
   if(!fab||!bar)return;
   function isLunatic(){return !!window.__lkPremOn;} /* radio is a Lunatics Only perk */
   var audio=null,queue=[],qi=0,playing=false,fails=0,started=false;
+  window.jcwRadioNow=function(){return (playing&&audio&&!audio.paused&&queue[qi])?String(queue[qi].name||''):'';};
   var FIX={ec3:'EC3','j-rod':'J-Rod',jcw:'JCW',jwo:'JWO','dj-clay':'DJ Clay'};
   function pretty(slug){
     if(FIX[slug])return FIX[slug];
