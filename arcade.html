@@ -94,7 +94,7 @@
     var d=e.data;
     if(!d||d.type!=='jcw-arcade'||e.source!==frame.contentWindow)return;
     var g=String(d.g||'');
-    var EXTRA={shooter:1,claw:1,clawrun:1,chicken:1,rumble:1};
+    var EXTRA={shooter:1,claw:1,clawrun:1,chicken:1,rumble:1,ladder:1};
     if(!EXTRA[d.ev]&&!/^[a-z0-9_]{1,24}$/.test(g))return;
     window.__arcFirebase(function(ok){
       if(!ok)return;
@@ -116,6 +116,34 @@
           add('shooter/runs',1);mx('shooter/best',num(d.score,1e7));mx('shooter/streak',num(d.streak,10000));
           add('shooter/bullseyes',num(d.bullseyes,500));
           if(shots>=20&&hits/shots>=0.9)ref.child('shooter/acc90').set(1);
+          return;
+        }
+        /* Ladder Wars: commit a completed match atomically; repeated deliveries do not award twice. */
+        if(d.ev==='ladder'){
+          var receipt=String(d.resultId||'');
+          if(!/^[a-zA-Z0-9-]{16,64}$/.test(receipt))return;
+          var roster=["violent-j","2-tuff-tony","willie-mack","mickie-knuckles","kerry-morton","mr-happy","moshpit-mike","cokane","able","dani-mo","facade","j-rod","matt-cross","vincenzo","caleb-konley","sally-boy","big-vito","bruce-wayans","alice-crowley","ruffo","kongo-kong"],lid=String(d.roster||'');
+          if(roster.indexOf(lid)<0||![2,4].includes(d.entrants)||typeof d.won!=='boolean')return;
+          var validCount=function(v,cap){return Number.isSafeInteger(v)&&v>=0&&v<=cap;};
+          if(!validCount(d.grabs,4)||!validCount(d.misses,1000)||!validCount(d.falls,1000)||!validCount(d.tips,1000)||!validCount(d.score,1000000)||!Number.isFinite(d.elapsed)||d.elapsed<0||d.elapsed>121)return;
+          if(d.won&&d.grabs!==4)return;
+          ref.child('ladder').transaction(function(cur){
+            cur=cur&&typeof cur==='object'?cur:{};
+            var receipts=Array.isArray(cur.receipts)?cur.receipts:[];
+            if(receipts.indexOf(receipt)>=0)return;
+            cur.receipts=receipts.concat(receipt).slice(-64);
+            var inc=function(k,v){cur[k]=num(cur[k],1e9)+v;};
+            inc('runs',1);inc('grabs',d.grabs);inc('tips',d.tips);cur.best=Math.max(num(cur.best,1e6),d.score);
+            if(d.won){
+              inc('wins',1);if(d.entrants===4)inc('chaosWins',1);
+              if(d.elapsed>0&&d.elapsed<=30)cur.fast=1;
+              if(d.misses===0&&d.falls===0)cur.clean=1;
+              if(d.falls>0)cur.comeback=1;
+              if(d.online===true)inc('onlineWins',1);
+              cur.wonWith=cur.wonWith&&typeof cur.wonWith==='object'?cur.wonWith:{};cur.wonWith[lid]=1;
+            }
+            return cur;
+          });
           return;
         }
         /* JCW Rumble: every finished battle royal */
