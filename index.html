@@ -4459,26 +4459,39 @@ function observeReveals(){
      so a stale one can't lie. The arcade tab (arcade.html) writes its own.
      Members can switch it off in their Locker (Notifications card). */
   window.__acts=window.__acts||{};
-  const ACT_ICON={game:'\u{1F3AE}',watch:'\u{1F4FA}',radio:'\u{1F4FB}',chat:'\u{1F4AC}',cards:'\u{1F0CF}',browse:'\u{1F3AA}'};
+  const ACT_ICON={app:'\u{1F4F1}',web:'\u{1F7E2}',game:'\u{1F3AE}',watch:'\u{1F4FA}',radio:'\u{1F4FB}',chat:'\u{1F4AC}',cards:'\u{1F0CF}',browse:'\u{1F3AA}'};
   const ACT_ROUTE={home:'Hanging out on the homepage',episodes:'Browsing episodes',clips:'Watching clips',events:'Checking out upcoming events',crew:'Checking out the roster',games:'Browsing the games',merch:'Shopping merch',cards:'Collecting cards',comics:'Reading comics',vote:'Voting in the polls',locker:'In their Locker',lunatics:'Checking out The Lunatics Only',about:'Reading about JCW',profile:'Visiting a Juggalo’s page'};
   const ACT_GAMES=[[/JCWLUNACYUNLOCKED/i,'Lunacy Unlocked'],[/BigMoneyRustlas/i,'Big Money Rustlas'],[/dark-chaos-carnival/i,'Dark Chaos Carnival'],[/PsychopathicArcade/i,'Psychopathic Arcade']];
   function actClean(a){
+    if(a&&typeof a==='object'&&a.k==='web')return {k:'web',t:'Online',n:typeof a.n==='string'?a.n.trim().slice(0,40):''};   /* site visitor who hides their activity */
     if(!a||typeof a!=='object'||typeof a.t!=='string'||!a.t.trim())return null;
     return {k:ACT_ICON[a.k]?a.k:'browse',t:a.t.trim().slice(0,70),n:typeof a.n==='string'?a.n.trim().slice(0,40):''};
   }
-  window.jcwActivity=function(uid){return (uid&&isOnline(uid))?actClean(window.__acts[uid]):null;};
-  window.jcwActText=function(uid){const a=window.jcwActivity(uid);return a?(ACT_ICON[a.k]+' '+a.t):'';};
+  /* The website always writes an act while a member's tab is up (a plain
+     "web" marker when they've hidden their activity). The phone apps keep the
+     online dot lit but never write one, so: online + act loaded + nothing
+     there = they're on the app. (If an app ever writes its own act with
+     k:'app', that wins.) */
+  window.__actsLoaded=window.__actsLoaded||{};
+  window.jcwActivity=function(uid){
+    if(!uid||!isOnline(uid))return null;
+    const a=actClean(window.__acts[uid]);
+    if(a)return a;
+    if(window.__actsLoaded[uid])return {k:'app',t:'On the JCW Lunacy app',n:''};
+    return null;
+  };
+  window.jcwActText=function(uid){const a=window.jcwActivity(uid);return (a&&a.k!=='web')?(ACT_ICON[a.k]+' '+a.t):'';};
   /* who's on: one tiny listener per ONLINE member (lockers/<uid>/act only) */
   const actRefs={},actNames={};
   window.jcwActSync=function(){
     if(!fbDB)return;
     const want={};
     Object.keys(window.__presence||{}).filter(isOnline).slice(0,150).forEach(u=>{if(/^[A-Za-z0-9_-]{1,64}$/.test(u))want[u]=1;});
-    Object.keys(actRefs).forEach(u=>{if(!want[u]){try{actRefs[u].off();}catch(_e){}delete actRefs[u];delete window.__acts[u];}});
+    Object.keys(actRefs).forEach(u=>{if(!want[u]){try{actRefs[u].off();}catch(_e){}delete actRefs[u];delete window.__acts[u];delete window.__actsLoaded[u];}});
     Object.keys(want).forEach(u=>{
       if(actRefs[u])return;
       const r=fbDB.ref('lockers/'+u+'/act');actRefs[u]=r;
-      r.on('value',sn=>{window.__acts[u]=sn.val();actPaint();},()=>{});
+      r.on('value',sn=>{window.__acts[u]=sn.val();window.__actsLoaded[u]=true;actPaint();},()=>{});
     });
     actPaint();
   };
@@ -4504,7 +4517,7 @@ function observeReveals(){
     if(!rows.length){el.style.display='none';el.innerHTML='';return;}
     rows.sort((x,y)=>(y.me-x.me)||((y.a?1:0)-(x.a?1:0))||x.nm.localeCompare(y.nm));
     el.innerHTML='<span class="chl-h">On now &middot; '+rows.length+'</span>'+rows.slice(0,40).map(r=>
-      '<button class="chl" data-puid="'+pEsc(r.u)+'" title="'+pEsc(r.nm+(r.a?(' · '+r.a.t):''))+'"><b><span class="pdot on"></span>'+pEsc(r.me?(r.nm+' (you)'):r.nm)+'</b><small>'+pEsc(r.a?(ACT_ICON[r.a.k]+' '+r.a.t):'Online')+'</small></button>').join('');
+      '<button class="chl" data-puid="'+pEsc(r.u)+'" title="'+pEsc(r.nm+(window.jcwActText(r.u)?(' · '+window.jcwActText(r.u)):''))+'"><b><span class="pdot on"></span>'+pEsc(r.me?(r.nm+' (you)'):r.nm)+'</b><small>'+pEsc(window.jcwActText(r.u)||'Online')+'</small></button>').join('');
     el.style.display='flex';
   }
   /* my own activity */
@@ -4529,7 +4542,7 @@ function observeReveals(){
   function actWrite(force){
     if(!fbDB||!lkUser||document.hidden)return;
     const ref=fbDB.ref('lockers/'+lkUser.uid+'/act');
-    if(actOff()){if(force||actLast!=='off'){actLast='off';ref.remove().catch(()=>{});}return;}
+    if(actOff()){if(force||actLast!=='off'){actLast='off';ref.set({k:'web',t:'',n:(String(lkGet().name||'').trim()||'Juggalo').slice(0,40),ts:Date.now()}).catch(()=>{actLast='';});}return;}
     const a=actNow(),key=a.k+'|'+a.t;
     if(!force&&key===actLast)return;
     actLast=key;

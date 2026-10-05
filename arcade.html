@@ -219,7 +219,7 @@
         function beat(){if(document.hidden)return;pu.set(Date.now()).catch(function(){});ls.set(Date.now()).catch(function(){});}
         function tick(force){
           if(document.hidden)return;
-          if(off()){if(force||last!=='off'){last='off';ref.remove().catch(function(){});}return;}
+          if(off()){if(force||last!=='off'){last='off';ref.set({k:'web',t:'',n:(name||'Juggalo').slice(0,40),ts:Date.now()}).catch(function(){last='';});}return;}
           var g=current(),t=g?('Playing '+g+' · Psychopathic Arcade'):'Playing Psychopathic Arcade';
           if(!force&&t===last)return;last=t;
           ref.set({k:'game',t:t.slice(0,70),n:(name||'Juggalo').slice(0,40),ts:Date.now()}).catch(function(){last='';});
