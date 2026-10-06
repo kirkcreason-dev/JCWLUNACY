@@ -3718,6 +3718,36 @@ function observeReveals(){
      posting on your wall or sending you cards and trades. Digital Duke
      can't be blocked. */
   function jcwBlocked(uid){try{const b=(lkGet().blocked)||{};return !!uid&&(+b[uid]||0)>0;}catch(e){return false;}}
+  /* Blocking is two-way invisibility: jcwBlocked = I blocked them (my own
+     locker), jcwBlockedMe = they blocked me (their public
+     lockers/<uid>/blocked/<me>, watched per person as they turn up on screen).
+     Mods and the house still see people who blocked them, so nobody can dodge
+     moderation by blocking every mod. */
+  const __bm={},__bmRefs={};
+  function jcwBlockExempt(){try{return !!(lkUser&&(isMod()||JCW_HOUSE[lkUser.uid]));}catch(e){return false;}}
+  function jcwBlockedMe(uid){
+    if(!uid||!lkUser||!fbDB||uid===lkUser.uid||jcwBlockExempt())return false;
+    if(!/^[A-Za-z0-9_-]{1,64}$/.test(uid))return false;
+    if(!__bmRefs[uid]&&Object.keys(__bmRefs).length<500){
+      const r=fbDB.ref('lockers/'+uid+'/blocked/'+lkUser.uid);__bmRefs[uid]=r;
+      r.on('value',sn=>{const was=!!__bm[uid];__bm[uid]=(+sn.val()||0)>0;if(was!==__bm[uid])jcwBlockRepaint();},()=>{});
+    }
+    return !!__bm[uid];
+  }
+  /* same test from a locker we already have in hand (leaderboard, profile pages) */
+  function jcwBlockedMeIn(v){try{return !!(v&&v.blocked&&lkUser&&(+v.blocked[lkUser.uid]||0)>0&&!jcwBlockExempt());}catch(e){return false;}}
+  function jcwHidden(uid){return jcwBlocked(uid)||jcwBlockedMe(uid);}
+  window.jcwHidden=jcwHidden;window.jcwBlockExempt=jcwBlockExempt;
+  let __bmPaintT=0;
+  function jcwBlockRepaint(){
+    if(__bmPaintT)return;
+    __bmPaintT=setTimeout(()=>{__bmPaintT=0;
+      try{if(window.__chatLive)chRender(window.__chatLive);}catch(_e){}
+      try{if(window.__notifApply)window.__notifApply();}catch(_e){}
+      try{if(window.jcwActSync)window.jcwActSync();}catch(_e){}
+      try{if(window.jcwLoadTrades&&(location.hash||'')==='#cards')window.jcwLoadTrades();}catch(_e){}
+    },300);
+  }
   window.jcwIsBlocked=jcwBlocked;
   document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-unblock]');if(!b)return;
     if(window.jcwSetBlock(b.getAttribute('data-unblock'),false)){try{toast('Unblocked.',2400);}catch(_x){}try{window.lkRender&&window.lkRender();}catch(_x){}}});
@@ -3774,7 +3804,7 @@ function observeReveals(){
     try{
     if(!chChat)return;
     if(!lkUser){chChat.innerHTML='<p style="color:var(--steel);font-size:13px;padding:14px;">Lunacy Chat is for members. Log into your Locker to join the family.</p>';return;}
-    list=(list||[]).filter(m=>!(m&&m.u&&jcwBlocked(m.u)));   /* blocked users vanish from my chat */
+    list=(list||[]).filter(m=>!(m&&m.u&&jcwHidden(m.u)));   /* blocked users (either way) vanish from my chat */
     const ADMIN=isMod();
     const nearBottom=(chChat.scrollHeight-chChat.scrollTop-chChat.clientHeight)<90;
     const prevCount=chChat.__count||0;
@@ -3934,8 +3964,8 @@ function observeReveals(){
   function modRender(list){
     try{
     const el=document.getElementById('ch-mods-list');if(!el)return;
-    list=list||[];
-    window.__modLive=list;
+    window.__modLive=list||[];
+    list=(list||[]).filter(m=>!(m&&m.u&&jcwHidden(m.u)));
     el.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${m.__k&&canDelPost(m.u)?`<span data-mdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-mu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete">&times;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String(((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'')+((window.jcwActText&&window.jcwActText(m.u))?(' \u00b7 '+window.jcwActText(m.u)):'')).replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:''} style="color:var(--acid);cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;">Quiet backstage. Say something to the crew.</p>';
     el.scrollTop=el.scrollHeight;
     }catch(e){}
@@ -4313,6 +4343,7 @@ function observeReveals(){
       const snap=await fbDB.ref('lockers').once('value');
       const rows=[];snap.forEach(c=>{const v=c.val();if(v&&(v.pts||v.name)){v.__k=c.key;rows.push(v);}});
       rows.sort((a,b)=>(b.pts||0)-(a.pts||0));
+      if(lkUser){const keep=rows.filter(x=>!(x.__k!==lkUser.uid&&(jcwBlocked(x.__k)||jcwBlockedMeIn(x))));rows.length=0;keep.forEach(x=>rows.push(x));}
       host.innerHTML=mine+(rows.length?rows.slice(0,20).map((x,i)=>
         '<div style="display:flex;gap:10px;padding:7px 2px;border-bottom:1px dashed rgba(240,179,43,.14);align-items:baseline;">'
         +'<span style="flex:0 0 28px;color:'+(i===0?'var(--gold)':i===1?'var(--cyan)':i===2?'var(--acid)':'var(--steel)')+';font-family:\'Rubik Distressed\',system-ui,sans-serif;">#'+(i+1)+'</span>'
@@ -4364,7 +4395,7 @@ function observeReveals(){
      a new phone or a cleared browser doesn't replay the same 25 pings. */
   function notifRender(list,seen){
     const el=document.getElementById('lk-notifs');if(!el)return;
-    list=(list||[]).filter(n=>!(n&&n.fu&&jcwBlocked(n.fu)));
+    list=(list||[]).filter(n=>!(n&&n.fu&&jcwHidden(n.fu)));
     if(!list.length){el.innerHTML='Quiet so far. Get in the chat.';return;}
     seen=seen||0;
     const fresh=list.filter(n=>(n.ts||0)>seen), old=list.filter(n=>(n.ts||0)<=seen).slice(0,8);
@@ -4506,7 +4537,7 @@ function observeReveals(){
     if(!lkUser){el.style.display='none';return;}
     const rows=[];
     Object.keys(window.__presence||{}).forEach(u=>{
-      if(!isOnline(u)||jcwBlocked(u))return;
+      if(!isOnline(u)||jcwHidden(u))return;
       const a=window.jcwActivity(u);
       let nm=(a&&a.n)||actNames[u]||'';
       if(!nm&&actNames[u]===undefined&&fbDB&&/^[A-Za-z0-9_-]{1,64}$/.test(u)){
@@ -4705,16 +4736,19 @@ function observeReveals(){
       const v=rs[0]&&rs[0].val();if(!v){host.innerHTML='<p>No such Juggalo.</p>';return;}
       const rel=(rs[1]&&rs[1].val())||{};const all=rs[3]||{};
       const myRel=rs[4]&&rs[4].val();
-      const posts=[];if(rs[2])rs[2].forEach(c=>{const pv=c.val()||{};if(pv.u&&jcwBlocked(pv.u))return;posts.push(Object.assign({__k:c.key},pv));});posts.reverse();
+      const posts=[];if(rs[2])rs[2].forEach(c=>{const pv=c.val()||{};if(pv.u&&(jcwHidden(pv.u)||jcwBlockedMeIn((rs[3]||{})[pv.u])))return;posts.push(Object.assign({__k:c.key},pv));});posts.reverse();
       const blockedMe=!!(lkUser&&v.blocked&&(+v.blocked[lkUser.uid]||0)>0&&lkUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1');
       const iBlocked=!!(lkUser&&jcwBlocked(uid));
       window.__profBlockedMe=blockedMe;
+      /* they blocked you: their page is gone for you (mods still see it) */
+      if(blockedMe&&!jcwBlockExempt()){host.innerHTML='<p style="color:var(--steel);">This Juggalo&rsquo;s page isn&rsquo;t available.</p>';return;}
       if(v&&v.act&&!window.__acts[uid])window.__acts[uid]=v.act;
       const DUKE='oYrNiXZywhexmLqRQO7j1iyA1Bh1';
       const badgeMap={};LK_BADGES.forEach(b=>{badgeMap[b[0]]=b[1];});
       if(JCW_VERIFIED[uid])badgeMap['verified']='JCW Roster \u00b7 '+JCW_VERIFIED[uid];
       const allies=[],rivals=[];
       Object.keys(rel).forEach(k=>{
+        if(lkUser&&k!==lkUser.uid&&(jcwHidden(k)||jcwBlockedMeIn(all[k])))return;   /* blocked either way: not listed */
         const nm=(all[k]&&all[k].name)||'Juggalo';
         const link='<b data-puid="'+pEsc(k)+'" style="cursor:pointer;text-decoration:underline;">'+pEsc(nm)+'</b>';
         if(rel[k]==='ally')allies.push(link);else if(rel[k]==='rival')rivals.push(link);
@@ -6630,7 +6664,7 @@ route();
       const D=db(),u=curUser();
       if(!host)return; if(!D||!u){host.innerHTML='';return;}
       D.ref('trades/'+u.uid).once('value').then(s=>{
-        const list=[];s.forEach(ch=>{const v=ch.val()||{};v.__k=ch.key;list.push(v);});
+        const list=[];s.forEach(ch=>{const v=ch.val()||{};v.__k=ch.key;if(v.fromUid&&window.jcwHidden&&window.jcwHidden(v.fromUid))return;list.push(v);});   /* offers from blocked people stay hidden */
         if(!list.length){host.innerHTML='';return;}
         buildCatalog();
         host.innerHTML='<div class="trade-inbox"><b>&#128257; Trade offers ('+list.length+')</b><div id="trade-list"></div></div>';
@@ -6763,7 +6797,7 @@ route();
       var out=[];
       sn.forEach(function(c){
         var v=c.val()||{};
-        if(v&&v.name)out.push({uid:c.key,name:String(v.name),pts:(+v.pts||0),pic:(v.pic||'')});
+        if(v&&v.name)out.push({uid:c.key,name:String(v.name),pts:(+v.pts||0),pic:(v.pic||''),bl:(v.blocked&&typeof v.blocked==='object')?v.blocked:null});
       });
       out.sort(function(a,b){return b.pts-a.pts;});
       CACHE=out;CACHE_T=Date.now();INFLIGHT=null;return out;
@@ -6806,7 +6840,16 @@ route();
       load().then(function(all){
         if((q.value||'').trim().toLowerCase()!==term)return;   /* stale */
         if(!all){note('Search goes live once the connection is up.');return;}
-        var hits=all.filter(function(u){return u.name.toLowerCase().indexOf(term)>-1;});
+        var me=null;try{me=firebase.auth().currentUser;}catch(e){}
+        var ex=false;try{ex=!!(window.jcwBlockExempt&&window.jcwBlockExempt());}catch(e){}
+        var hits=all.filter(function(u){
+          if(u.name.toLowerCase().indexOf(term)<0)return false;
+          if(me&&u.uid!==me.uid){
+            try{if(window.jcwHidden&&window.jcwHidden(u.uid))return false;}catch(e){}
+            if(!ex&&u.bl&&(+u.bl[me.uid]||0)>0)return false;    /* they blocked you */
+          }
+          return true;
+        });
         /* exact and starts-with float to the top */
         hits.sort(function(a,b){
           var an=a.name.toLowerCase(),bn=b.name.toLowerCase();
