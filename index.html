@@ -1265,7 +1265,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <div class="kick">Juggalo Locker</div>
     <h2 class="head">Your <em>locker</em></h2>
     <p class="lede">Earn points for watching episodes, playing the game and calling your shots. Episodes count after ten minutes &mdash; watch the show. Sign up to sync your points across devices and climb the leaderboard in <b>Lunacy Chat</b>.</p>
-    <p class="join-lo-cta" style="margin:4px 0 14px;"><a class="btn line" href="#lunatics">&#127914; Join The Lunatics Only &mdash; arcade, game, cards &amp; more</a></p>
+    <p class="join-lo-cta" style="margin:4px 0 14px;"><a class="btn line" href="#lunatics">&#127914; Join The Lunatics Only &mdash; the arcade, the games, Lunacy Radio &amp; more</a></p>
     <div class="usearch" data-usearch>
       <input type="search" class="us-q" placeholder="Search Juggalos by name&hellip;" aria-label="Search user pages" autocomplete="off" spellcheck="false">
       <div class="us-res" hidden></div>
@@ -1335,7 +1335,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <div class="kick">Collect Them All</div>
     <h2 class="head">JCW <em>trading cards</em></h2>
     <p class="lede">Buy packs and collect the whole roster &mdash; <b><span id="cards-set-count">a full set of</span> photo cards</b>: portraits, ringside shots, tag teams. Some are shiny foil, some are <b>super rare</b>, and every card carries a line from the Lunacy Files.</p>
-    <p class="join-lo-cta" style="margin:4px 0 14px;"><a class="btn line" href="#lunatics">&#127914; Cards are a Lunatics Only perk &mdash; join the inner circle</a></p>
+    <p style="margin:4px 0 14px;color:var(--steel);">&#127183; Free for every Juggalo &mdash; open packs with your points, chase foils and trade with the family.</p>
     <div class="cards-top">
       <button class="btn gold" id="cards-buy">&#127183; Open a pack &middot; 150 pts</button>
       <div class="cards-stats">
@@ -1419,7 +1419,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <li><span class="t">Conduct</span>No hate speech, harassment, threats, doxxing, sexual content involving minors, piracy links, scams or spam. Slurs are auto-filtered. Mods can delete anything and their call is final.</li>
         <li><span class="t">Fair play</span>No auto-clickers, bots, exploits, or point farming. No tampering with the site, database or game. Cheating gets your points locked, reset, or your account removed.</li>
         <li><span class="t">Points &amp; cards</span>Points, badges and trading cards are for fun only. They have <b>no cash value</b>, aren&rsquo;t property, can&rsquo;t be bought, sold or traded for money, and may be changed, reset or removed at any time.</li>
-        <li><span class="t">Lunatics Only</span>Membership unlocks bonus content, the game and trading cards. Content is added over time and may change. If billing is added, terms and cancellation details will be shown at checkout.</li>
+        <li><span class="t">Lunatics Only</span>Membership unlocks bonus content, the games and Lunacy Radio. Trading cards are free for everyone. Content is added over time and may change. If billing is added, terms and cancellation details will be shown at checkout.</li>
         <li><span class="t">Content</span>JCW, JCW Lunacy, the hatchetman and all related names, logos, photos, video and music are trademarks and property of <b>Psychopathic Records</b>. Personal fan use only &mdash; no re-uploading, reselling, or commercial use without permission.</li>
         <li><span class="t">Third parties</span>The site links to YouTube, ticket sellers, the Psychopathic Vault and other sites. We don&rsquo;t control those and aren&rsquo;t responsible for their content, purchases or policies.</li>
         <li><span class="t">As-is</span>The site, game and features are provided &ldquo;as is,&rdquo; without warranty. We&rsquo;re not liable for downtime, lost points, lost cards, or lost data.</li>
@@ -1494,7 +1494,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
       </p>
       <button class="btn gold" disabled style="display:inline-flex;justify-content:center;opacity:.6;cursor:default;">Tickets on sale soon</button>
       <p style="color:var(--steel,#9aa0aa);font-size:.82rem;margin:14px 0 0;">Ticket sales open here before the show. One payment unlocks the live stream on this page.</p>
-      <p class="join-lo-cta" style="margin:12px 0 0;"><a href="#lunatics" style="color:var(--gold,#ffd028);font-size:.85rem;">&#127914; Want the arcade, game and cards too? Join The Lunatics Only &rarr;</a></p>
+      <p class="join-lo-cta" style="margin:12px 0 0;"><a href="#lunatics" style="color:var(--gold,#ffd028);font-size:.85rem;">&#127914; Want the arcade and the games too? Join The Lunatics Only &rarr;</a></p>
     </div>
 
     <!-- AFTER PURCHASE -->
@@ -1793,7 +1793,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <span class="badge">Lunatics Only</span>
         <h3>Lunacy Unlocked</h3>
         <div class="sub">2D fighting &middot; 39 fighters &middot; Lunatics Only &middot; No download &middot; Online multiplayer</div>
-        <p>The official JCW Lunacy fighting game &mdash; take the champions of the roster into the ring &mdash; combos, weapons and pinfalls. Play solo against the AI or hit <b>Quick Match</b> for online battles, right on this page. Part of <b>The Lunatics Only</b> &mdash; join the inner circle for all the games, backstage content and trading cards.</p>
+        <p>The official JCW Lunacy fighting game &mdash; take the champions of the roster into the ring &mdash; combos, weapons and pinfalls. Play solo against the AI or hit <b>Quick Match</b> for online battles, right on this page. Part of <b>The Lunatics Only</b> &mdash; join the inner circle for all the games, Lunacy Radio and backstage content.</p>
         <button class="btn gold" id="play-bmr">&#127918; Play Lunacy Unlocked</button>
       </div>
       <div class="game playable rev">
@@ -3086,17 +3086,16 @@ function observeReveals(){
     return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:2px;">'+loIcon(name)+'<b>'+title+'</b></div>';
   }
   function lkPremFill(box){
-    if(!lkUser){ box.innerHTML='<div style="text-align:center;padding:10px 6px;"><div style="font-size:34px;">&#127914;</div><p style="margin:10px 0 0;color:var(--steel,#9aa0aa);line-height:1.55;">The inner circle of the carnival &mdash; the arcade and the games, trading cards, backstage content and more.<br><b style="color:#fff;">Log into your Juggalo Locker to join.</b></p><a class="btn gold" href="#locker" style="margin-top:16px;display:inline-flex;justify-content:center;">Go to my Locker</a></div>'; return; }
+    if(!lkUser){ box.innerHTML='<div style="text-align:center;padding:10px 6px;"><div style="font-size:34px;">&#127914;</div><p style="margin:10px 0 0;color:var(--steel,#9aa0aa);line-height:1.55;">The inner circle of the carnival &mdash; the arcade and the games, Lunacy Radio, backstage content and more.<br><b style="color:#fff;">Log into your Juggalo Locker to join.</b></p><a class="btn gold" href="#locker" style="margin-top:16px;display:inline-flex;justify-content:center;">Go to my Locker</a></div>'; return; }
     if(!lkPremIsOn){
       const btn=JCW_STRIPE_LINK
         ?'<a class="btn gold" style="margin-top:16px;width:100%;justify-content:center;font-size:1rem;" href="'+JCW_STRIPE_LINK+(JCW_STRIPE_LINK.indexOf('?')>-1?'&':'?')+'client_reference_id='+encodeURIComponent(lkUser.uid)+'" target="_blank" rel="noopener">Join The Lunatics Only</a>'
         :'<button class="btn line" style="margin-top:16px;width:100%;justify-content:center;" disabled>Coming soon</button>';
-      box.innerHTML='<div style="text-align:center;margin-bottom:16px;"><span style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:#ff3fa4;border:1px solid rgba(255,63,164,.5);border-radius:999px;padding:5px 16px;font-size:.82rem;">Members Only</span><p style="margin:12px 0 4px;color:#fff;font-weight:800;font-size:1.1rem;">You&rsquo;re not a Lunatic&hellip; yet.</p><p style="margin:0;color:var(--steel,#9aa0aa);line-height:1.55;">Join the inner circle &mdash; the arcade and the games now, plus trading cards, backstage content and PPV as they drop.</p></div>'
+      box.innerHTML='<div style="text-align:center;margin-bottom:16px;"><span style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:#ff3fa4;border:1px solid rgba(255,63,164,.5);border-radius:999px;padding:5px 16px;font-size:.82rem;">Members Only</span><p style="margin:12px 0 4px;color:#fff;font-weight:800;font-size:1.1rem;">You&rsquo;re not a Lunatic&hellip; yet.</p><p style="margin:0;color:var(--steel,#9aa0aa);line-height:1.55;">Join the inner circle &mdash; the arcade, the games and Lunacy Radio now, plus backstage content and PPV as they drop.</p></div>'
         +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;opacity:.85;">'
         +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('arcade','Psychopathic Arcade')+'<p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">15 games with online VS. <b style="color:#7CFF4F;">Live now.</b></p></div>'
         +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('lunacy-game','Lunacy &mdash; The Game')+'<p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">The official JCW fighting game &mdash; 39 fighters, online play. <b style="color:#7CFF4F;">Live now.</b></p></div>'
         +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('arcade','Big Money Rustlas &amp; Dark Chaos Carnival')+'<p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">Two more full games &mdash; a 12-chapter Western and a Joker&rsquo;s Cards party game. <b style="color:#7CFF4F;">Live now.</b></p></div>'
-        +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('trading-cards','JCW Trading Cards')+'<p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">Collect the roster, chase foils, trade the family. <b style="color:#7CFF4F;">Live now.</b></p></div>'
         +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('comic','JCW Comic Book')+'<p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">An all-original JCW comic. <b>Coming soon.</b></p></div>'
         +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('backstage','Backstage &amp; Bloopers')+'<p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">The stuff that never airs. <b>Coming soon.</b></p></div>'
         +'</div>'+btn;
@@ -3106,7 +3105,6 @@ function observeReveals(){
       +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;">'
       +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('lunacy-game','Lunacy &mdash; The Game')+'<p style="margin:6px 0 0;">The official JCW fighting game &mdash; 39 fighters, playable right on this page.</p><a class="btn" href="#games" style="margin-top:8px;width:100%;justify-content:center;">Play now</a></div>'
       +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('arcade','Big Money Rustlas &amp; Dark Chaos Carnival')+'<p style="margin:6px 0 0;">Two more full games &mdash; ride through 12 chapters of Big Money Rustlas, or run the midway in Dark Chaos Carnival.</p><a class="btn" href="#games" style="margin-top:8px;width:100%;justify-content:center;">Play now</a></div>'
-      +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('trading-cards','JCW Trading Cards')+'<p style="margin:6px 0 0;">Collect the whole roster &mdash; buy packs, chase foils and super rares, trade with the family.</p><button class="btn" id="lo-cards" style="margin-top:8px;width:100%;justify-content:center;">Open the collection</button></div>'
       +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('arcade','Psychopathic Arcade')+'<p style="margin:6px 0 0;">15 games &mdash; JCW Rumble, Carnival Claw, Chicken Huntin&rsquo;, Crossfire, Chess, Pinball, Air Hockey and more, with online VS.</p><a class="btn" href="arcade.html" target="_blank" rel="noopener" style="margin-top:8px;width:100%;justify-content:center;">Enter the arcade</a></div>'
       +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('comic','JCW Comic Book')+'<p style="margin:6px 0 0;">The carnival hits the page &mdash; an all-original JCW comic. <b>Coming soon.</b></p></div>'
       +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('backstage','Backstage Pass')+'<p style="margin:6px 0 0;">Behind the curtain &mdash; locker room, promos, the stuff that never airs. <b>Coming soon.</b></p></div>'
@@ -3142,7 +3140,7 @@ function observeReveals(){
       const loH=document.querySelector('#lo-modal h3');if(loH)loH.textContent='The Lunatics Only';
       const body=document.getElementById('lo-modal-body');
       if(body){
-        let h=(lkUser?'<p><b style="color:#ff3fa4;">&#10060; YOU ARE NOT A LUNATIC&hellip; yet.</b></p>':'')+'<p><b>Live now:</b> Lunacy Unlocked &middot; the 15-game Psychopathic Arcade &middot; Big Money Rustlas &middot; Dark Chaos Carnival &middot; JCW trading cards (open packs, gift and trade) &middot; Lunacy Radio &middot; members-only drops.</p><p style="color:#9aa0aa;"><b>Coming soon:</b> Backstage Pass &middot; Bloopers &middot; PPV streams &middot; the JCW comic book.</p>';
+        let h=(lkUser?'<p><b style="color:#ff3fa4;">&#10060; YOU ARE NOT A LUNATIC&hellip; yet.</b></p>':'')+'<p><b>Live now:</b> Lunacy Unlocked &middot; the 15-game Psychopathic Arcade &middot; Big Money Rustlas &middot; Dark Chaos Carnival &middot; Lunacy Radio &middot; members-only drops.</p><p style="color:#9aa0aa;"><b>Coming soon:</b> Backstage Pass &middot; Bloopers &middot; PPV streams &middot; the JCW comic book.</p>';
         if(!JCW_STRIPE_LINK){h+='<p><b>Coming soon. Keep your eyes on the carnival.</b></p>';}
         else if(!lkUser){h+='<p><b>Log in from your Juggalo Locker, then come knock again.</b></p>';}
         else{h+='<a class="btn" style="margin-top:14px;display:inline-flex;justify-content:center;" href="'+JCW_STRIPE_LINK+(JCW_STRIPE_LINK.indexOf('?')>-1?'&':'?')+'client_reference_id='+encodeURIComponent(lkUser.uid)+'" target="_blank" rel="noopener">Join The Lunatics Only</a>';}
@@ -4781,7 +4779,7 @@ function observeReveals(){
             : '<button class="btn line" data-rel="ally" style="margin-right:8px;'+(myRel==='ally'?'border-color:var(--acid);color:var(--acid);':'')+'">'+(myRel==='ally'?'&#10004; ALLY':'Mark as Ally')+'</button>'
               +'<button class="btn line" data-rel="rival" style="'+(myRel==='rival'?'border-color:var(--hot);color:var(--hot);':'')+'">'+(myRel==='rival'?'&#9876; RIVAL':'Mark as Rival')+'</button>')
           +(isMod()&&isModUid(uid)&&!blockedMe&&!iBlocked?'<button class="btn" id="prof-dm" style="margin-left:8px;background:var(--acid);color:#000;">&#128172; Message</button>':'')
-          +(window.__lkPremOn&&!blockedMe?'<button class="btn line" id="prof-gift" style="margin-left:8px;">&#127183; Send a card</button>':'')
+          +(lkUser&&!blockedMe?'<button class="btn line" id="prof-gift" style="margin-left:8px;">&#127183; Send a card</button>':'')
           +(uid!==DUKE?'<button class="btn line" id="prof-block" data-on="'+(iBlocked?'0':'1')+'" style="margin-left:8px;border-color:var(--steel);color:var(--steel);">'+(iBlocked?'Unblock':'&#128683; Block')+'</button>':'')
           +(isHouseUid(lkUser.uid)&&uid!==DUKE&&(!isModUid(uid)||lkUser.uid===DUKE)?('<button class="btn line" id="prof-modtoggle" data-on="'+(isModUid(uid)?'0':'1')+'" style="margin-left:8px;'+(isModUid(uid)?'border-color:var(--hot);color:var(--hot);':'border-color:var(--gold);color:var(--gold);')+'">'+(isModUid(uid)?'&#10006; Remove mod':'&#9733; Make mod')+'</button>'):'')
           +'</p>';
@@ -6283,7 +6281,7 @@ route();
       const grid=document.getElementById('cards-grid');if(!grid)return;
       const top=document.querySelector('#view-cards .cards-top'), filt=document.getElementById('cards-filters');
       const signedIn=!!curUser();
-      const cardsReady = signedIn && (curUser().uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1' || window.__lkPremOn===true); /* Lunatics Only */
+      const cardsReady = signedIn; /* free for every signed-in Juggalo (no Lunatics membership needed) */
       if(!cardsReady){
         if(top)top.style.display='none';
         if(filt)filt.style.display='none';
@@ -6292,11 +6290,9 @@ route();
           +'<div style="font-size:40px;">&#127183;</div>'
           +(!signedIn
             ? '<h3 style="color:var(--gold);font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;margin:6px 0;">Log in first</h3>'
-              +'<p style="color:var(--steel);line-height:1.6;">Your card collection lives on your account. <b>Log into your Juggalo Locker</b> to open packs, collect and trade.</p>'
+              +'<p style="color:var(--steel);line-height:1.6;">JCW Trading Cards are <b>free for every Juggalo</b>. Your collection lives on your account &mdash; <b>log into your Juggalo Locker</b> to open packs, collect and trade.</p>'
               +'<a class="btn gold" href="#locker" style="margin-top:14px;display:inline-flex;">Go to my Locker</a>'
-            : '<h3 style="color:var(--gold);font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;margin:6px 0;">Lunatics Only</h3>'
-              +'<p style="color:var(--steel);line-height:1.6;">JCW Trading Cards are part of <b>The Lunatics Only</b> &mdash; buy packs, chase foils and super rares, trade with the family.</p>'
-              +'<a class="btn gold" href="#lunatics" style="margin-top:14px;display:inline-flex;">Get Lunatics access</a>')
+            : '')
           +'</div>';
         return;
       }
@@ -6462,7 +6458,6 @@ route();
     function catById(id){buildCatalog();for(let i=0;i<CATALOG.length;i++)if(CATALOG[i].id===id)return CATALOG[i];return null;}
     window.jcwSendCardUI=function(toUid,toName){
       if(!curUser()){toast('Log into your Locker first');location.hash='#locker';return;}
-      if(!window.__lkPremOn){toast('Sending cards is Lunatics Only');return;}
       buildCatalog();const c=coll();
       const dupes=CATALOG.filter(cd=>isHouse()||(c[cd.id]&&c[cd.id].n>=2)); /* the house can send any card */
       const to=document.getElementById('gift-to'); if(to)to.textContent='Send a card to '+toName;
@@ -6587,7 +6582,7 @@ route();
       owned.sort((a,b)=>(order[a.card.rar]-order[b.card.rar])||a.card.name.localeCompare(b.card.name));
       host.innerHTML='<div class="prof-cardgrid"></div>';
       const grid=host.querySelector('.prof-cardgrid');
-      const canTrade=!!(window.__lkPremOn&&curUser()&&curUser().uid!==uid&&!window.__profBlockedMe);
+      const canTrade=!!(curUser()&&curUser().uid!==uid&&!window.__profBlockedMe);
       owned.forEach(o=>{
         const el=cardEl(o.card,{owned:true,cnt:o.own.n,foil:o.own.foil,locked:false,serial:o.own.serials&&o.own.serials[0]});
         el.title=canTrade?('Ask '+theirName+' to trade for this'):o.card.name;
@@ -6607,7 +6602,6 @@ route();
     /* ---- propose: pick which of your cards to offer ---- */
     function openTradeUI(toUid,toName,wantId){
       if(!curUser()){toast('Log into your Locker first');location.hash='#locker';return;}
-      if(!window.__lkPremOn){toast('Trading is Lunatics Only');return;}
       buildCatalog();
       const want=catById(wantId);if(!want)return;
       const c=coll();
@@ -6934,8 +6928,7 @@ route();
 </script>
 <script>
 /* ===== AUTO-CLAIM GIFTED CARDS =====
-   The Claim button lives on the Cards page, which is Lunatics-only — so anyone
-   outside the inner circle could be sent a card and never able to accept it.
+   Gifts bank themselves so nobody has to visit the Cards page to accept one.
    This runs for every signed-in user on every page and banks gifts automatically. */
 (function(){
   var BUSY=false, DONE={};
