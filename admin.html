@@ -65,6 +65,16 @@
     <div class="muted" style="margin-top:8px"><b>Award</b> adds the points on top (negative subtracts). <b>Set total</b> makes their balance exactly the number entered — use it when someone spends points. <b>Reset to 0</b> wipes the balance. All of it updates the leaderboard instantly and syncs to their device next visit.</div>
   </div>
 
+  <div class="card"><label>&#127873; Points gift history <span class="muted">(every Award / Set total / Reset made from this page, newest first)</span> <button class="ghost sm" id="giftReload" style="margin-left:8px">Refresh</button></label>
+    <div id="giftSummary" class="muted" style="margin:6px 0 10px">Sign in to load the history.</div>
+    <div id="giftLog" class="muted">&mdash;</div>
+  </div>
+  <div class="card"><label>&#9851;&#65039; Reset everyone&rsquo;s points to 0 <span class="muted">(skips Digital Duke only. Members whose site already finished the reset are skipped, so running it again only catches stragglers &mdash; e.g. an old open tab or the app pushing an old total back up.)</span></label>
+    <div id="rsSummary" class="muted" style="margin:6px 0 10px">Sign in to check.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="ghost sm" id="rsCheck">Check</button><button class="sm" id="rsGo" style="border-color:var(--hot);color:var(--hot)">Reset now</button></div>
+    <div id="rsStatus" class="status"></div>
+  </div>
+
   <div class="card"><label>&#127909; Episodes <span class="muted">(add the new episode here &mdash; it appears on the site instantly, no redeploy)</span></label>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
       <input id="epUrl" placeholder="YouTube link or video ID" style="flex:2;min-width:220px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
@@ -531,8 +541,16 @@
       snap.forEach(c=>{const v=c.val();if(v&&String(v.name||'').trim().toLowerCase()===nm){uid=c.key;cur=v;}});
       if(!uid){say('No locker named that. They need to sign in and set their name on the site first.','err');return;}
       const newPts=mode==='zero'?0:mode==='set'?Math.max(0,pts):Math.max(0,(cur.pts||0)+pts);
+      const before=Math.max(0,+cur.pts||0);
       await db.ref('lockers/'+uid+'/pts').set(newPts);
+      /* gift ledger: lives in the signed-in admin's own locker (only they can write
+         it). Logged after the points land, so it never records a gift that failed. */
+      try{
+        const me=statsAuth&&statsAuth.currentUser;
+        if(me)await db.ref('lockers/'+me.uid+'/giftLog').push({to:uid,name:String(cur.name||'').slice(0,40),mode:mode,amount:mode==='zero'?0:pts,before:before,after:newPts,delta:newPts-before,ts:Date.now()});
+      }catch(_e){}
       say('Done \u2014 '+(cur.name||'them')+' now has '+newPts+' pts.','ok');
+      try{giftLoad();}catch(_e){}
       statsLoad();
     }catch(e){say('Blocked: Firebase rules don\u2019t allow writing pts \u2014 publish the rules I gave you (lockers \u2192 $uid \u2192 pts \u2192 .write true), then try again.','err');}
   }
@@ -872,6 +890,88 @@
       modLoad();
     }catch(_e){modSay('Blocked — sign in as the house to change the mod list.','err');}
   });
+  /* ===== Points gift history ===== */
+  async function giftLoad(){
+    const box=$('giftLog'),sum=$('giftSummary');
+    try{
+      const db=await statsInit();
+      const me=statsAuth&&statsAuth.currentUser;
+      if(!me){sum.textContent='Sign in to load the history.';box.textContent='\u2014';return;}
+      const snap=await db.ref('lockers/'+me.uid+'/giftLog').once('value');
+      const rows=[];snap.forEach(c=>{const v=c.val();if(v&&typeof v==='object')rows.push(v);});
+      rows.sort((a,b)=>(b.ts||0)-(a.ts||0));
+      if(!rows.length){sum.textContent='No gifts logged yet. Gifts are tracked from now on \u2014 earlier ones weren\u2019t recorded anywhere.';box.textContent='\u2014';return;}
+      const esc=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      const given=rows.reduce((t,r)=>t+Math.max(0,+r.delta||0),0),taken=rows.reduce((t,r)=>t+Math.min(0,+r.delta||0),0);
+      const per={};rows.forEach(r=>{const k=r.name||r.to;per[k]=(per[k]||0)+(+r.delta||0);});
+      const top=Object.keys(per).sort((a,b)=>per[b]-per[a]).slice(0,10).map(k=>esc(k)+' <b>'+(per[k]>0?'+':'')+per[k].toLocaleString()+'</b>').join(' &middot; ');
+      sum.innerHTML='<b style="color:var(--txt)">'+rows.length+'</b> changes &middot; <b style="color:var(--txt)">+'+given.toLocaleString()+'</b> pts given'+(taken?(' &middot; <b>'+taken.toLocaleString()+'</b> taken away'):'')+' &middot; '+Object.keys(per).length+' members<br>By member: '+top;
+      const ML={add:'Award',set:'Set total',zero:'Reset to 0',resetAll:'Reset everyone to 0'};
+      box.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:13px">'
+        +'<tr style="color:var(--mut);text-align:left"><th style="padding:4px 6px">When</th><th style="padding:4px 6px">Member</th><th style="padding:4px 6px">Action</th><th style="padding:4px 6px;text-align:right">Change</th><th style="padding:4px 6px;text-align:right">Balance</th></tr>'
+        +rows.slice(0,300).map(r=>'<tr style="border-top:1px solid var(--seam)"><td style="padding:4px 6px;white-space:nowrap">'+new Date(r.ts||0).toLocaleString()+'</td><td style="padding:4px 6px">'+esc(r.name||r.to)+'</td><td style="padding:4px 6px">'+esc(ML[r.mode]||r.mode)+(r.mode==='set'?(' '+esc(r.amount)):'')+'</td>'
+          +'<td style="padding:4px 6px;text-align:right;color:'+((+r.delta||0)>=0?'var(--ok,#7CFF4F)':'var(--hot,#ff3fa4)')+'">'+((+r.delta||0)>0?'+':'')+(+r.delta||0).toLocaleString()+'</td><td style="padding:4px 6px;text-align:right">'+(+r.before||0).toLocaleString()+' &rarr; '+(+r.after||0).toLocaleString()+'</td></tr>').join('')
+        +'</table>';
+    }catch(e){sum.textContent='Couldn\u2019t load the history: '+(e.message||e);}
+  }
+  $('giftReload').onclick=giftLoad;
+  /* ===== Reset everyone's points (Oct 7 2026) =====
+     Must match JCW_PTS_RESET in index.html: the site drops each device's own
+     total on first sight of this id and waits until its cloud copy is 0, then
+     stamps lockers/<uid>/ptsReset = id. This sweep zeroes every unstamped,
+     non-KEEP locker (Duke can write anyone's pts), after saving each member's
+     old total to lockers/<admin>/ptsResetBackup/<id>/<uid>. Safe to re-run. */
+  const PTS_RESET={id:'r1-2026-10-07',keep:{'oYrNiXZywhexmLqRQO7j1iyA1Bh1':1}};
+  let rsArm=0,rsTimer=null;
+  function rsSay(m,c){const el=$('rsStatus');el.textContent=m;el.className='status '+(c||'');}
+  async function rsScan(){
+    const db=await statsInit();
+    const all=(await db.ref('lockers').once('value')).val()||{};
+    const todo=[],kept=[];let done=0;
+    Object.keys(all).forEach(uid=>{const v=all[uid];if(!v||typeof v!=='object')return;
+      const pts=+v.pts||0,name=String(v.name||'').slice(0,40)||uid.slice(0,6);
+      if(PTS_RESET.keep[uid]){kept.push(name+' ('+pts.toLocaleString()+')');return;}
+      if(v.ptsReset===PTS_RESET.id){done++;return;}
+      if(pts>0)todo.push({uid,name,pts});});
+    todo.sort((a,b)=>b.pts-a.pts);
+    return {todo,kept,done};
+  }
+  async function rsShow(){
+    try{
+      if(!(statsAuth&&statsAuth.currentUser)){$('rsSummary').textContent='Sign in to check.';return null;}
+      const r=await rsScan(),tot=r.todo.reduce((t,x)=>t+x.pts,0);
+      const esc2=x=>String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      $('rsSummary').innerHTML=(r.todo.length?('<b style="color:var(--txt)">'+r.todo.length+'</b> members still holding points &middot; <b style="color:var(--txt)">'+tot.toLocaleString()+'</b> pts to clear<br>Biggest: '+r.todo.slice(0,8).map(x=>esc2(x.name)+' '+x.pts.toLocaleString()).join(' &middot; ')):'Nobody left to reset.')
+        +'<br>Already reset on their own: '+r.done+' &middot; Keeping: '+esc2(r.kept.join(', ')||'none');
+      return r;
+    }catch(e){$('rsSummary').textContent='Couldn\u2019t check: '+(e.message||e);return null;}
+  }
+  $('rsCheck').onclick=rsShow;
+  $('rsGo').onclick=async()=>{
+    const me=statsAuth&&statsAuth.currentUser;if(!me){rsSay('Sign in first.','err');return;}
+    if(!rsArm){const r=await rsShow();if(!r||!r.todo.length){rsSay('Nothing to reset.','ok');return;}
+      rsArm=1;$('rsGo').textContent='Tap again to reset '+r.todo.length+' members';
+      clearTimeout(rsTimer);rsTimer=setTimeout(()=>{rsArm=0;$('rsGo').textContent='Reset now';},8000);return;}
+    rsArm=0;clearTimeout(rsTimer);$('rsGo').textContent='Reset now';$('rsGo').disabled=true;
+    try{
+      const db=await statsInit(),r=await rsScan();
+      const bref=db.ref('lockers/'+me.uid+'/ptsResetBackup/'+PTS_RESET.id);
+      const had=(await bref.once('value')).val()||{},bk={};
+      r.todo.forEach(x=>{if(had[x.uid]==null)bk[x.uid]=x.pts;});
+      if(Object.keys(bk).length)await bref.update(bk);
+      let ok=0,bad=0,cleared=0;
+      for(let i=0;i<r.todo.length;i+=25){
+        await Promise.all(r.todo.slice(i,i+25).map(x=>db.ref('lockers/'+x.uid+'/pts').set(0).then(()=>{ok++;cleared+=x.pts;}).catch(()=>{bad++;})));
+        rsSay('Resetting\u2026 '+(ok+bad)+' / '+r.todo.length);
+      }
+      if(ok)await db.ref('lockers/'+me.uid+'/giftLog').push({to:'*',name:ok+' members',mode:'resetAll',amount:0,before:cleared,after:0,delta:-cleared,ts:Date.now()});
+      rsSay('Reset '+ok+' members to 0 ('+cleared.toLocaleString()+' pts cleared)'+(bad?(' \u00b7 '+bad+' failed \u2014 run it again'):'')+'. Old totals saved in your locker under ptsResetBackup.',bad?'err':'ok');
+      giftLoad();rsShow();
+    }catch(e){rsSay('Reset stopped: '+(e.message||e),'err');}
+    $('rsGo').disabled=false;
+  };
+  try{statsInit().then(()=>{statsAuth.onAuthStateChanged(u=>{if(u)rsShow();});});}catch(_e){}
+  try{statsInit().then(()=>{statsAuth.onAuthStateChanged(u=>{if(u)giftLoad();});});}catch(_e){}
   $('awardBtn').onclick=()=>pointsOp('add');
   $('setBtn').onclick=()=>pointsOp('set');
   $('zeroBtn').onclick=()=>pointsOp('zero');

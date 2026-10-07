@@ -3606,10 +3606,51 @@ function observeReveals(){
      and history stuck on the device. Now pts is its own transaction that
      steps toward the local total 1000 at a time, one step per few seconds,
      so a legit gap clears in under a minute and the cap still holds. */
+  /* ===== POINTS RESET (Oct 7 2026: everyone back to 0) ======================
+     Kirk reset every locker's points to 0 (Digital Duke keeps his house total). A plain cloud
+     write can't do it alone — every device keeps max(device, cloud) and walks
+     the cloud back up — so each device, the first time it sees this reset id,
+     drops its own remembered total to 0 and then WAITS (no upward pts sync, the
+     cloud total ignored) until the cloud copy shows the reset landed (pts 0 from
+     the admin sweep) or another device already finished it (ptsReset stamp).
+     Points earned while waiting stay on the device and sync once it lands. */
+  const JCW_PTS_RESET={id:'r1-2026-10-07',at:1791415089845,keep:{'oYrNiXZywhexmLqRQO7j1iyA1Bh1':1}};
+  function jcwPtsResetKey(){return lkUser?('jcw_pts_reset_'+lkUser.uid):null;}
+  function jcwPtsPending(){try{
+    if(!lkUser||JCW_PTS_RESET.keep[lkUser.uid])return false;
+    return localStorage.getItem(jcwPtsResetKey())==='wait:'+JCW_PTS_RESET.id;
+  }catch(e){return false;}}
+  window.jcwPtsPending=jcwPtsPending;
+  /* called with the device copy d (mutated) + the cloud copy; true = still waiting */
+  function jcwPtsResetCheck(d,cloud){try{
+    if(!lkUser||JCW_PTS_RESET.keep[lkUser.uid])return false;
+    const k=jcwPtsResetKey(),id=JCW_PTS_RESET.id,st=localStorage.getItem(k);
+    const cp=+(cloud&&cloud.pts)||0,stamped=!!(cloud&&cloud.ptsReset===id);
+    if(st===id){
+      /* finished here, but the cloud copy is unstamped AND above this device:
+         something old pushed a pre-reset total back up — wait for the sweep */
+      if(cloud&&!stamped&&cp>(+d.pts||0)){localStorage.setItem(k,'wait:'+id);return true;}
+      return false;
+    }
+    const done=function(){localStorage.setItem(k,id);window.__ptsJustReset=Date.now();
+      if(!stamped){try{fbDB.ref('lockers/'+lkUser.uid+'/ptsReset').set(id);}catch(_e){}}return false;};
+    const born=Date.parse((lkUser.metadata&&lkUser.metadata.creationTime)||'')||0;
+    if(st!=='wait:'+id){
+      if(born>JCW_PTS_RESET.at)return done();          /* account made after the reset */
+      d.pts=0;
+      localStorage.setItem(LK_KEY,JSON.stringify(d));
+      try{localStorage.removeItem('jcw_locker_best_'+lkUser.uid);}catch(_e){}
+      localStorage.setItem(k,'wait:'+id);
+      try{setTimeout(function(){toast('\ud83c\udfaa POINTS RESET \u2014 everybody starts fresh at 0. Go earn \u2019em back!',5200);},1200);}catch(_e){}
+    }
+    if(stamped||!(cp>0))return done();
+    return true;
+  }catch(e){return false;}}
   var __ptsSyncTimer=null;
   function lkPtsSync(){
     try{
       if(!lkCloudReady||!fbAuth||!lkUser||!fbDB)return;
+      if(jcwPtsPending())return;               /* reset not landed yet: never walk the old total back up */
       const target=Math.min(lkGet().pts||0,999999);
       fbDB.ref('lockers/'+lkUser.uid+'/pts').transaction(function(cur){
         cur=(typeof cur==='number'&&cur>=0)?cur:0;
@@ -3636,7 +3677,7 @@ function observeReveals(){
         fbDB.ref('lockers/'+lkUser.uid+'/pts').transaction(function(cur){
           cur=(typeof cur==='number'&&cur>=0)?cur:0;
           const local=+(lkGet().pts)||0;
-          if(Math.max(cur,local)<n){ok=false;return;}      /* not enough: abort */
+          if((jcwPtsPending()?local:Math.max(cur,local))<n){ok=false;return;}      /* not enough: abort */
           ok=true;return Math.max(0,cur-n);
         }).then(function(r){
           if(!(r&&r.committed&&ok)){done(false);return;}
@@ -5490,6 +5531,7 @@ function observeReveals(){
             const firstPull=!lkCloudReady;
             if(cloud){ // merge cloud into local, cloud wins on points
               const d=lkGet();
+              const ptsWait=jcwPtsResetCheck(d,cloud);
               const merged=Object.assign({},d,cloud);
               /* a wiped cloud copy carries empty strings — never let them clobber real local values */
               ['name','fav','favB','theme','pic'].forEach(k=>{if(!(cloud[k]&&String(cloud[k]).trim())&&d[k])merged[k]=d[k];});
@@ -5534,16 +5576,17 @@ function observeReveals(){
                 const cgp=(cloud.gpaid&&typeof cloud.gpaid==='object')?cloud.gpaid:null,lgp=(d.gpaid&&typeof d.gpaid==='object')?d.gpaid:null;
                 if(cgp||lgp){const gp={};Object.keys(Object.assign({},cgp||{},lgp||{})).forEach(k=>{gp[k]=Math.max(+((cgp||{})[k])||0,+((lgp||{})[k])||0);});merged.gpaid=gp;}
                 })();
-              merged.pts=Math.max(d.pts||0,cloud.pts||0);
+              merged.pts=ptsWait?(d.pts||0):Math.max(d.pts||0,cloud.pts||0);
               merged.wins=Math.max(d.wins||0,cloud.wins||0);
               lkCloudReady=true;          /* safe to write from here on */
               lkSet(merged);lkRender();
               try{setTimeout(window.jcwReconcileBadges,1500);setTimeout(window.jcwReconcileBadges,6000);}catch(_e){}
-              try{lkBackupKeep(merged);lkWipeCheck(cloud);}catch(_e){}
+              try{lkBackupKeep(merged);if(!ptsWait&&!(Date.now()-(window.__ptsJustReset||0)<120000))lkWipeCheck(cloud);}catch(_e){}
               /* only now is the badge list complete — safe to test the 30 threshold */
               try{window.jcwCheckBoldizar&&window.jcwCheckBoldizar();}catch(_e){}
             } else {
               /* genuinely new account — nothing to lose, allow the first write */
+              try{if(lkUser&&!JCW_PTS_RESET.keep[lkUser.uid]){localStorage.setItem(jcwPtsResetKey(),JCW_PTS_RESET.id);fbDB.ref('lockers/'+lkUser.uid+'/ptsReset').set(JCW_PTS_RESET.id);}}catch(_e){}
               lkCloudReady=true;
               if(firstPull)lkCloudPush();
               /* …unless this device remembers a real locker for this uid: offer restore */
