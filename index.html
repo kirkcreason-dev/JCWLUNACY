@@ -5576,6 +5576,26 @@ function observeReveals(){
                 const cgp=(cloud.gpaid&&typeof cloud.gpaid==='object')?cloud.gpaid:null,lgp=(d.gpaid&&typeof d.gpaid==='object')?d.gpaid:null;
                 if(cgp||lgp){const gp={};Object.keys(Object.assign({},cgp||{},lgp||{})).forEach(k=>{gp[k]=Math.max(+((cgp||{})[k])||0,+((lgp||{})[k])||0);});merged.gpaid=gp;}
                 })();
+              /* House card returns (Kirk): copies of a capped card taken back out
+                 of one collection and put back in the pack pool by lowering the
+                 editions counter. Applied once per device, so a device that still
+                 remembers the old count can't push the copies back up. */
+              try{[{id:'ret1-clay',uid:'LmjvpMlKlVNpyoXajb74P5guaqu2',card:'LU-181',keep:1,from:100,to:8}].forEach(function(r){
+                if(!lkUser||lkUser.uid!==r.uid)return;
+                const k='jcw_cardret_'+r.id;if(localStorage.getItem(k)==='1')return;
+                const stamped=!!(cloud.cardRet&&cloud.cardRet[r.id]);
+                const cc=(window.jcwDecCards(cloud.cards||{})[r.card])||{};
+                const want=stamped?(+cc.n||0):r.keep;
+                const c=merged.cards&&merged.cards[r.card];
+                if(c&&(+c.n||0)>want){const m=Object.assign({},c,{n:want});
+                  const sr=(stamped?(cc.serials||[]):(c.serials||[]).slice().sort(function(a,b){return a-b;})).slice(0,want);
+                  if(sr.length)m.serials=sr;else delete m.serials;merged.cards[r.card]=m;}
+                localStorage.setItem(k,'1');
+                if(!stamped){
+                  fbDB.ref('lockers/'+lkUser.uid+'/cardRet/'+r.id).set(1).catch(function(){});
+                  fbDB.ref('editions/'+r.card).transaction(function(cur){cur=+cur||0;if(cur!==r.from)return;return r.to;}).catch(function(){});
+                }
+              });}catch(_e){}
               merged.pts=ptsWait?(d.pts||0):Math.max(d.pts||0,cloud.pts||0);
               merged.wins=Math.max(d.wins||0,cloud.wins||0);
               lkCloudReady=true;          /* safe to write from here on */
@@ -6582,14 +6602,22 @@ route();
         const card=pickCard(rar);if(card)picks.push(card);
       }
       /* limited editions: claim a serial for each capped pull; a sold-out or
-         failed claim is re-rolled to an uncapped card of the same tier */
+         failed claim is re-rolled to an uncapped card of the same tier.
+         ONE PER PERSON: a limited card you already own (or already pulled in
+         this pack) is re-rolled the same way, without burning a serial. */
+      const ownedNow=(lkGet().cards)||{},capSeen={};
+      const reroll=function(card){
+        const pool=(byRar[card.rar]||[]).filter(c=>!c.cap);
+        const alt=pool.length?pool[Math.floor(Math.random()*pool.length)]:pickCard('superrare');
+        return {card:(alt&&!alt.cap)?alt:card,serial:null};
+      };
       const resolve=picks.map(function(card){
         if(!card.cap)return Promise.resolve({card:card,serial:null});
+        if(capSeen[card.id]||((ownedNow[card.id]&&ownedNow[card.id].n)||0)>=1)return Promise.resolve(reroll(card));
+        capSeen[card.id]=1;
         return claimSerial(card).then(function(sn){
           if(sn)return {card:card,serial:sn};
-          const pool=(byRar[card.rar]||[]).filter(c=>!c.cap);
-          const alt=pool.length?pool[Math.floor(Math.random()*pool.length)]:pickCard('superrare');
-          return {card:alt||card,serial:null};
+          return reroll(card);
         });
       });
       Promise.all(resolve).then(function(res){
@@ -6660,8 +6688,18 @@ route();
         dupes.forEach(cd=>{const oo=c[cd.id]||{n:(isHouse()?Infinity:0),foil:false};const el=cardEl(cd,{owned:true,cnt:oo.n,foil:oo.foil,locked:false});el.style.cursor='pointer';el.title='Send this card';el.addEventListener('click',()=>doSendCard(toUid,toName,cd.id));box.appendChild(el);});}
       if(m)m.classList.add('on');
     };
+    window.jcwCardCap=function(id){try{const c=catById(id);return (c&&c.cap)?c.cap:0;}catch(e){return 0;}};
     function doSendCard(toUid,toName,cardId){
       if(!db()||!curUser())return;
+      const capC=catById(cardId);
+      /* limited cards are one per person — check the recipient first */
+      if(capC&&capC.cap&&!window.__capChecked){
+        db().ref('lockers/'+toUid+'/cards/'+String(cardId).replace(/#/g,'~')+'/n').once('value').then(function(sn){
+          if((+sn.val()||0)>=1){if(window.toast)toast(toName+' already has '+capC.name+' — limited cards are one per person',4600);return;}
+          window.__capChecked=true;try{doSendCard(toUid,toName,cardId);}finally{window.__capChecked=false;}
+        }).catch(function(){if(window.toast)toast('Could not check their collection — try again',3600);});
+        return;
+      }
       if(!isHouse()){
         const d=lkGet();d.cards=d.cards||{};const cur=d.cards[cardId];
         if(!cur||cur.n<2){if(window.toast)toast('You need to keep at least one copy');return;}
@@ -6734,9 +6772,11 @@ route();
     };
     function claimGift(key,cardId,foil){
       if(!db()||!curUser())return;
-      const d=lkGet();d.cards=d.cards||{};const cur=d.cards[cardId]||{n:0,foil:false};cur.n=(cur.n||0)+1;if(foil)cur.foil=true;d.cards[cardId]=cur;lkSet(d);
+      const d=lkGet();d.cards=d.cards||{};const cur=d.cards[cardId]||{n:0,foil:false};
+      const capped=(window.jcwCardCap&&window.jcwCardCap(cardId))&&(cur.n||0)>=1;
+      if(!capped){cur.n=(cur.n||0)+1;if(foil)cur.foil=true;d.cards[cardId]=cur;lkSet(d);}
       try{db().ref('gifts/'+curUser().uid+'/'+key).remove();}catch(e){}
-      if(window.toast)toast('Card claimed!');
+      if(window.toast)toast(capped?'You already have this one — limited cards are one per person':'Card claimed!');
       jcwLoadGifts();jcwCardsRender();
     }
     (function(){
@@ -6825,6 +6865,9 @@ route();
     function sendTrade(toUid,toName,wantId,offerId){
       const D=db(),u=curUser();
       if(!D||!u){toast('Sign in first');return;}
+      /* limited cards are one per person */
+      if(window.jcwCardCap&&window.jcwCardCap(wantId)&&((((lkGet().cards||{})[wantId])||{}).n||0)>=1){toast('You already have that one \u2014 limited cards are one per person',4200);return;}
+      if(window.jcwCardCap&&window.jcwCardCap(offerId)){toast('Limited cards can\u2019t go in trades \u2014 one per person',4200);return;}
       let offerFoil=false;
       try{
         if(isHouse()){const tg=document.getElementById('trade-foil-tgl');offerFoil=!!(tg&&tg.checked);} /* the house picks */
@@ -6880,6 +6923,7 @@ route();
       const d=lkGet();d.cards=d.cards||{};
       const mineWant=d.cards[t.wantId];
       if(!mineWant||mineWant.n<1){toast('You don’t have that card');return;}
+      if(window.jcwCardCap&&window.jcwCardCap(t.offerId)&&(((d.cards[t.offerId]||{}).n)||0)>=1){toast('You already have that one \u2014 limited cards are one per person',4200);return;}
       const wantFoil=!!(mineWant&&mineWant.foil);
       if(!isHouse()){ mineWant.n-=1; if(mineWant.n<=0)delete d.cards[t.wantId]; else d.cards[t.wantId]=mineWant; }
       const got=d.cards[t.offerId]||{n:0,foil:false};got.n=(got.n||0)+1;if(t.offerFoil===true)got.foil=true;d.cards[t.offerId]=got;
@@ -7142,6 +7186,7 @@ route();
         var cards=(window.jcwDecCards?window.jcwDecCards(cs.val()||{}):(cs.val()||{}));
         gifts.forEach(function(g){
           var c=cards[g.id]||{n:0,foil:false};
+          if(window.jcwCardCap&&window.jcwCardCap(g.id)&&(c.n||0)>=1)return; /* limited: one per person */
           c.n=(c.n||0)+1; if(g.foil)c.foil=true; if(g.serial){c.serials=(c.serials||[]).concat([g.serial]);} cards[g.id]=c;
         });
         return db.ref('lockers/'+u.uid+'/cards').set(window.jcwEncCards?window.jcwEncCards(cards):cards).then(function(){
