@@ -3570,6 +3570,32 @@ function observeReveals(){
       }).catch(function(e){try{console.warn('[locker] pts sync failed:',e&&e.message);}catch(_e){}});
     }catch(_e){}
   }
+  /* SPENDING points (card packs). lkPtsSync above only ever moves the cloud
+     total UP, and every cloud pull keeps the higher of device vs cloud — so a
+     deduction made only on the device came straight back on the next sync and
+     packs were effectively free. A spend now takes the points off the cloud
+     copy first (one atomic transaction, within the rules' 500-per-write drop
+     cap), then off the device. Balance = the higher of the two, as everywhere. */
+  window.jcwSpendPts=function(n){
+    n=Math.floor(+n||0);
+    return new Promise(function(done){
+      try{
+        if(!(n>0)||n>500||!lkCloudReady||!fbDB||!lkUser){done(false);return;}
+        let ok=false;
+        fbDB.ref('lockers/'+lkUser.uid+'/pts').transaction(function(cur){
+          cur=(typeof cur==='number'&&cur>=0)?cur:0;
+          const local=+(lkGet().pts)||0;
+          if(Math.max(cur,local)<n){ok=false;return;}      /* not enough: abort */
+          ok=true;return Math.max(0,cur-n);
+        }).then(function(r){
+          if(!(r&&r.committed&&ok)){done(false);return;}
+          const d=lkGet();d.pts=Math.max(0,(+d.pts||0)-n);lkSet(d);
+          try{lkRender();}catch(_e){}
+          done(true);
+        }).catch(function(){done(false);});
+      }catch(_e){done(false);}
+    });
+  };
   function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); lkPtsSync(); fbDB.ref('lockers/'+lkUser.uid).update({wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:window.jcwEncKeys(d.picks||{}),hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:window.jcwEncKeys(d.eps||{}),radio:window.jcwEncKeys(d.radio||{}),seen:window.jcwEncKeys(d.seen||{}),tagged:window.jcwEncKeys(d.tagged||{}),streak:d.streak||0,streakBest:d.streakBest||0,dayone:d.dayone?1:0,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{}),swapped:window.jcwEncCards(d.swapped||{}),game:d.game||{},blocked:d.blocked||{}}).then(()=>{window.__lockerSync='ok';}).catch(err=>{window.__lockerSync='BLOCKED: '+((err&&err.message)||'rules');window.__cardsSync=window.__lockerSync;try{console.warn('[locker] cloud push rejected:',err&&err.message);}catch(__e){}}); }catch(_e){window.__lockerSync='error: '+(_e&&_e.message);try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
   /* ===== WIPE RECOVERY =====
      Snapshot the best locker this device has ever seen for the signed-in account
@@ -6386,7 +6412,11 @@ route();
       const d0=lkGet();
       const FREE=(curUser()&&(curUser().uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1'||curUser().uid==='zRLXcejE4dWQRL0l07Bo19SO5j52'));
       if(!FREE&&(d0.pts||0)<PACK_COST){window.__packBusy=false;if(window.toast)toast('Need '+PACK_COST+' points to open a pack');return;}
-      /* roll the pack first */
+      /* pay first, on the cloud copy (see jcwSpendPts) — a device-only deduction
+         used to bounce back on the next sync, so packs were free */
+      (FREE?Promise.resolve(true):(window.jcwSpendPts?window.jcwSpendPts(PACK_COST):Promise.resolve(false))).then(function(paid){
+      if(!paid){window.__packBusy=false;try{toast('Need '+PACK_COST+' points to open a pack (or the connection is still warming up \u2014 try again)',3600);}catch(_e){}return;}
+      /* roll the pack */
       const picks=[];let gotRarePlus=false;
       for(let i=0;i<PACK_SIZE;i++){
         let rar=pickRarity();if(rar!=='common')gotRarePlus=true;
@@ -6406,7 +6436,6 @@ route();
       });
       Promise.all(resolve).then(function(res){
         const d=lkGet();
-        if(!FREE)d.pts=(d.pts||0)-PACK_COST;
         d.cards=d.cards||{};
         const pulled=[];
         res.forEach(function(r){
@@ -6422,8 +6451,12 @@ route();
         lkSet(d);
         showPack(pulled);
         jcwCardsRender();
-      }).catch(function(){try{toast('Pack hiccup \u2014 nothing was charged. Try again.',3200);}catch(_e){}})
+      }).catch(function(){
+          /* refund: give the points back on the device; the normal sync raises the cloud again */
+          if(!FREE){try{const r=lkGet();r.pts=(+r.pts||0)+PACK_COST;lkSet(r);}catch(_e){}}
+          try{toast('Pack hiccup \u2014 your points were refunded. Try again.',3200);}catch(_e){}})
         .then(function(){window.__packBusy=false;});
+      });
     }
     function showPack(pulled){
       const box=document.getElementById('pk-cards');if(!box)return;
