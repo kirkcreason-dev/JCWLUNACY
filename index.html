@@ -1299,7 +1299,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
           </div>
         </div>
       </div>
-      <div class="lk rev"><h3>Points</h3><div class="big" id="lk-pts">0</div><p id="lk-rank">Fresh Face</p></div>
+      <div class="lk rev"><h3>Points</h3><div class="big" id="lk-pts">0</div><p id="lk-rank">Fresh Face</p><button class="btn line jcw-buy-pts" type="button" style="margin-top:10px;font-size:12.5px;padding:7px 12px;">&#128176; Buy 10,000 points &middot; $10</button></div>
       <div class="lk rev"><h3>Game Record</h3><div class="big" id="lk-wins">0</div><p id="lk-wins-sub">Wins across every game on the site</p></div>
       <div class="lk rev"><h3>Profile</h3>
         <input id="lk-name" maxlength="20" placeholder="Your name">
@@ -1338,6 +1338,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <p style="margin:4px 0 14px;color:var(--steel);">&#127183; Free for every Juggalo &mdash; open packs with your points, chase foils and trade with the family.</p>
     <div class="cards-top">
       <button class="btn gold" id="cards-buy">&#127183; Open a pack &middot; 150 pts</button>
+      <button class="btn line jcw-buy-pts" type="button" style="font-size:12.5px;">&#128176; Get 10,000 points &middot; $10</button>
       <div class="cards-stats">
         <div><b id="cards-pts">0</b><i>Points</i></div>
         <div><b id="cards-own">0</b><i>Collected</i></div>
@@ -1418,7 +1419,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
         <li><span class="t">Your posts</span>Chat, wall posts, profiles and names are <b>public</b>. Don&rsquo;t post anything you wouldn&rsquo;t want the whole family reading. You keep ownership of what you post, but you give us permission to display it on the site.</li>
         <li><span class="t">Conduct</span>No hate speech, harassment, threats, doxxing, sexual content involving minors, piracy links, scams or spam. Slurs are auto-filtered. Mods can delete anything and their call is final.</li>
         <li><span class="t">Fair play</span>No auto-clickers, bots, exploits, or point farming. No tampering with the site, database or game. Cheating gets your points locked, reset, or your account removed.</li>
-        <li><span class="t">Points &amp; cards</span>Points, badges and trading cards are for fun only. They have <b>no cash value</b>, aren&rsquo;t property, can&rsquo;t be bought, sold or traded for money, and may be changed, reset or removed at any time.</li>
+        <li><span class="t">Points &amp; cards</span>Points can be bought on the site (10,000 points for $10) and earned for free. Points, badges and trading cards are for fun only: they have <b>no cash value</b>, aren&rsquo;t property, can&rsquo;t be cashed out, sold or traded for money, and may be changed, reset or removed at any time.</li>
         <li><span class="t">Lunatics Only</span>Membership unlocks bonus content, the games and Lunacy Radio. Trading cards are free for everyone. Content is added over time and may change. If billing is added, terms and cancellation details will be shown at checkout.</li>
         <li><span class="t">Content</span>JCW, JCW Lunacy, the hatchetman and all related names, logos, photos, video and music are trademarks and property of <b>Psychopathic Records</b>. Personal fan use only &mdash; no re-uploading, reselling, or commercial use without permission.</li>
         <li><span class="t">Third parties</span>The site links to YouTube, ticket sellers, the Psychopathic Vault and other sites. We don&rsquo;t control those and aren&rsquo;t responsible for their content, purchases or policies.</li>
@@ -3596,6 +3597,65 @@ function observeReveals(){
       }catch(_e){done(false);}
     });
   };
+  /* ===== BUY POINTS ($10 → 10,000) =========================================
+     Stripe Payment Link (client_reference_id = the buyer's uid). Stripe sends
+     them back to ?pts_session=<checkout session>#locker; the jcw-points
+     Cloudflare Worker checks the session is paid, belongs to THIS account and
+     was never redeemed before, then we add the points (the normal sync walks
+     the cloud total up 1,000 at a time). The session id waits in localStorage
+     until it's redeemed, so a sign-in after the return still collects it. */
+  const JCW_POINTS_LINK='https://buy.stripe.com/dRm9AV77y72HbdE5zj4c802';
+  const JCW_POINTS_API='https://jcw-points.kirkcreason-e83.workers.dev';
+  const PTS_PEND='jcw_pts_pending';
+  function ptsPending(){try{return (JSON.parse(localStorage.getItem(PTS_PEND))||[]).filter(x=>/^cs_(live|test)_[A-Za-z0-9]+$/.test(x));}catch(e){return [];}}
+  function ptsPendingSet(a){try{localStorage.setItem(PTS_PEND,JSON.stringify(a.slice(-10)));}catch(e){}}
+  (function(){try{
+    const q=new URLSearchParams(location.search),sid=q.get('pts_session');
+    if(sid&&/^cs_(live|test)_[A-Za-z0-9]+$/.test(sid)){
+      const a=ptsPending();if(a.indexOf(sid)<0)a.push(sid);ptsPendingSet(a);
+      q.delete('pts_session');
+      history.replaceState(null,'',location.pathname+(q.toString()?'?'+q.toString():'')+(location.hash||'#locker'));
+    }
+  }catch(_e){}})();
+  document.addEventListener('click',function(e){
+    const b=e.target.closest&&e.target.closest('.jcw-buy-pts');if(!b)return;
+    e.preventDefault();
+    if(!lkUser){try{window.toast('Log into your Locker first — the points go to your account',3600);}catch(_e){}location.hash='#locker';return;}
+    location.href=JCW_POINTS_LINK+(JCW_POINTS_LINK.indexOf('?')>-1?'&':'?')+'client_reference_id='+encodeURIComponent(lkUser.uid);
+  });
+  let __ptsBusy=false,__ptsTries={};
+  async function jcwRedeemPoints(){
+    if(__ptsBusy||!lkUser||!lkCloudReady||!fbAuth)return;
+    const a=ptsPending();if(!a.length)return;
+    __ptsBusy=true;
+    const sid=a[0];
+    const drop=()=>{ptsPendingSet(ptsPending().filter(x=>x!==sid));};
+    try{
+      const idToken=await fbAuth.currentUser.getIdToken();
+      const r=await fetch(JCW_POINTS_API+'/redeem',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:sid,idToken:idToken})});
+      let j={};try{j=await r.json();}catch(_e){}
+      if(r.ok&&j.ok&&j.points>0){
+        drop();
+        const d=lkGet();d.pts=(+d.pts||0)+j.points;
+        d.hist=d.hist||[];d.hist.unshift('Bought '+j.points.toLocaleString()+' points');d.hist=d.hist.slice(0,40);
+        lkSet(d);try{lkRender();}catch(_e){}
+        try{window.toast('\u{1F4B0} +'+j.points.toLocaleString()+' points added. Whoop whoop!',4200);}catch(_e){}
+      }else if(r.ok&&j.already){
+        drop();try{window.toast('Those points were already added to your Locker.',3200);}catch(_e){}
+      }else if(r.status===409&&j.pending){
+        __ptsTries[sid]=(__ptsTries[sid]||0)+1;               /* Stripe still settling: try again shortly */
+        if(__ptsTries[sid]>20){try{window.toast('Your payment is still processing — the points will land the next time you open the site.',4200);}catch(_e){}}
+      }else if(r.status===401){
+        /* token hiccup: leave it pending, next pass retries */
+      }else if(r.status===400||r.status===403||r.status===404){
+        drop();try{window.toast('Couldn’t add those points: '+(j.error||'purchase not found')+'. If you were charged, contact us.',5200);}catch(_e){}
+      }
+      /* 5xx / network: keep it pending for the next pass */
+    }catch(_e){}
+    __ptsBusy=false;
+  }
+  setInterval(function(){try{jcwRedeemPoints();}catch(_e){}},4000);
+
   function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); lkPtsSync(); fbDB.ref('lockers/'+lkUser.uid).update({wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:window.jcwEncKeys(d.picks||{}),hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:window.jcwEncKeys(d.eps||{}),radio:window.jcwEncKeys(d.radio||{}),seen:window.jcwEncKeys(d.seen||{}),tagged:window.jcwEncKeys(d.tagged||{}),streak:d.streak||0,streakBest:d.streakBest||0,dayone:d.dayone?1:0,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{}),swapped:window.jcwEncCards(d.swapped||{}),game:d.game||{},blocked:d.blocked||{}}).then(()=>{window.__lockerSync='ok';}).catch(err=>{window.__lockerSync='BLOCKED: '+((err&&err.message)||'rules');window.__cardsSync=window.__lockerSync;try{console.warn('[locker] cloud push rejected:',err&&err.message);}catch(__e){}}); }catch(_e){window.__lockerSync='error: '+(_e&&_e.message);try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
   /* ===== WIPE RECOVERY =====
      Snapshot the best locker this device has ever seen for the signed-in account
