@@ -2645,7 +2645,7 @@ function observeReveals(){
     const d=lkGet(); d.wins=(d.wins||0)+1;
     d.badges=d.badges||[]; if(!d.badges.includes('winner'))d.badges.push('winner');
     if(d.wins>=10&&!d.badges.includes('champ'))d.badges.push('champ');
-    lkSet(d); lkAward(15,null,'Won a match in JCW Lunacy: The Game');
+    lkSet(d); lkAward(50,null,'Won a match in JCW Lunacy: The Game \u00b7 +50');
   }
   window.jcwReportWin=lkAddWin; // game calls this on a win
   window.lkRender=lkRender;window.lkAward=lkAward;window.toast=toast;window.lkGet=lkGet;window.lkSet=lkSet;window.jcwCloudPush=function(){try{lkCloudPush();}catch(e){}};
@@ -2683,7 +2683,7 @@ function observeReveals(){
     if(r.championship==='defended')inc('defended',1);
     if(r.run&&r.run.defenses>0)g.defenses=Math.max(g.defenses||0,r.run.defenses);
     lkSet(d);
-    if(counted)lkAward(15,null,'Won a match in Lunacy Unlocked'+(r.opponentName?(' vs '+String(r.opponentName).slice(0,40)):''));
+    if(counted)lkAward(50,null,'Won a match in Lunacy Unlocked'+(r.opponentName?(' vs '+String(r.opponentName).slice(0,40)):'')+' \u00b7 +50');
     else lkRender();
     try{const now=lkGet().badges||[];const fresh=now.filter(b=>before.indexOf(b)<0&&/^(lu_|pa_|winner|brawler|champ|warlord)/.test(b));
       if(fresh.length){const lbl={};LK_BADGES.forEach(b=>{lbl[b[0]]=b[1];});
@@ -2938,6 +2938,53 @@ function observeReveals(){
          crosses 30 through those never hit the check until some later
          paid event. Run it every render; it's idempotent and pays once. */
       if(boldizarCheck(d)){ch=true;try{setTimeout(function(){toast('🏹 BOLDIZAR THE GREAT HUNTER · 30 badges · +'+BOLDIZAR.pts,5200);},400);}catch(_e){}}
+      /* EVERY BADGE PAYS. Each badge pays once (+100, or +50 for the big
+         per-wrestler / per-set collections), tracked in d.bpaid — synced to
+         the cloud locker and merged as a union, so a second device can't pay
+         twice. Badges that already pay their own bonus (the hidden-word eggs,
+         Bigfoot, Boldizar, Familie, Second Mile…) aren't paid again. Badges
+         earned before this shipped are paid the first time the member signs
+         in. Only runs signed in AND merged with the cloud copy. */
+      if(lkUser&&lkCloudReady){
+        const OWN={boldizar:1,grandduke:1,wholecarnival:1,mosthated:1,familie:1,secondmile:1,wallofsound:1,lockerlegend:1,miracles:1,
+          bigfoot:1,browngold:1,jokerscards:1,whoop:1,riddlebox:1,milenko:1,hatchet:1,neden:1,jwo:1,carnage:1,ringmaster:1,jeckel:1,
+          shangrila:1,bizzar:1,bangpow:1,deathpop:1,faygo:1,bloodymania:1};
+        const bpts=b=>OWN[b]?0:((b.indexOf('cl_set_')===0||b.indexOf('ru_w_')===0||b.indexOf('lw_w_')===0)?50:100);
+        d.bpaid=(d.bpaid&&typeof d.bpaid==='object')?d.bpaid:{};
+        let bGain=0;const bNew=[];
+        d.badges.forEach(function(b){
+          if(!b||typeof b!=='string'||d.bpaid[b])return;
+          d.bpaid[b]=1;ch=true;
+          const a=bpts(b);if(a){bGain+=a;bNew.push(b);}
+        });
+        if(bGain){
+          d.pts=(d.pts||0)+bGain;
+          const lab=k=>{const e=LK_BADGES.find(x=>x[0]===k);return e?String(e[1]).split(' \u00b7 ')[0]:k;};
+          const line=bNew.length===1?('Badge \u00b7 '+lab(bNew[0])+' \u00b7 +'+bGain):('Badge bonus \u00b7 '+bNew.length+' badges \u00b7 +'+bGain.toLocaleString());
+          d.hist=d.hist||[];d.hist.unshift(line);d.hist=d.hist.slice(0,40);
+          try{setTimeout(function(){toast('\ud83c\udfc5 '+(bNew.length===1?(lab(bNew[0])+' \u00b7 +'+bGain):('+'+bGain.toLocaleString()+' points for '+bNew.length+' badges')),4200);},700);}catch(_e){}
+        }
+        /* ARCADE + SIDE-GAME WINS PAY too (Lunacy Unlocked wins already pay
+           +50 through the game report). d.gpaid remembers the totals already
+           paid; the first time it's seen it just starts counting from now. */
+        const A=d.arcade||{},G=d.game||{},nn=v=>Math.max(0,Math.floor(+v||0));
+        const gNow={arc:Math.max(0,nn(A.wins)-nn(A.games&&A.games.rumble)-nn(A.games&&A.games.ladder)),ru:nn(A.rumble&&A.rumble.wins),
+          lw:nn(A.ladder&&A.ladder.wins),dcc:nn(G.dcc_wins),bmr:nn(G.bmr_cleared)};
+        const RATE={arc:25,ru:50,lw:50,dcc:50,bmr:100};
+        if(!d.gpaid||typeof d.gpaid!=='object'){d.gpaid=gNow;ch=true;}
+        else{
+          let gGain=0;
+          Object.keys(RATE).forEach(function(k){
+            const was=nn(d.gpaid[k]),now=gNow[k];
+            if(now>was){gGain+=Math.min(now-was,40)*RATE[k];d.gpaid[k]=now;ch=true;}
+          });
+          if(gGain){
+            d.pts=(d.pts||0)+gGain;
+            d.hist=d.hist||[];d.hist.unshift('Game wins \u00b7 +'+gGain);d.hist=d.hist.slice(0,40);
+            try{setTimeout(function(){toast('\ud83c\udfae Game wins \u00b7 +'+gGain+' points',3600);},900);}catch(_e){}
+          }
+        }
+      }
       const badgeTally=d.badges.filter(function(b){return b&&b!=='grandduke';}).length;
       if(badgeTally>=40&&!d.badges.includes('grandduke')){
         d.badges.push('grandduke');ch=true;
@@ -3033,7 +3080,7 @@ function observeReveals(){
       const d=lkGet();
       const key=e.target.id==='lk-fav'?'fav':'favB';
       const prev=d[key];d[key]=e.target.value;lkSet(d);
-      if(!prev&&d[key])lkAward(5,'fan');else lkRender();
+      if(!prev&&d[key])lkAward(25,'fan');else lkRender();
       if(fbDB&&d[key]!==prev){const fk=n=>String(n).replace(/[.#$\/\[\]]/g,'');
         if(prev)fbDB.ref('stats/favs/'+fk(prev)).transaction(v=>Math.max(0,(v||1)-1));
         if(d[key])fbDB.ref('stats/favs/'+fk(d[key])).transaction(v=>(v||0)+1);}}
@@ -3213,7 +3260,10 @@ function observeReveals(){
     d.streak=(d.lastCheckin===ykey)?((d.streak||0)+1):1;
     if((d.streak||0)>(d.streakBest||0))d.streakBest=d.streak;
     d.lastCheckin=today;lkSet(d);
-    lkAward(5,'first','Checked in');
+    /* daily check-in: 50, plus 10 more for every day of the streak (tops out at +100) */
+    const ckPts=50+Math.min(Math.max((d.streak||1)-1,0),10)*10;
+    lkAward(ckPts,'first','Checked in'+((d.streak||1)>1?(' \u00b7 '+d.streak+'-day streak'):'')+' \u00b7 +'+ckPts);
+    try{setTimeout(function(){if(window.toast)toast('\u2705 Daily check-in \u00b7 +'+ckPts+((d.streak||1)>1?(' \u00b7 '+d.streak+'-day streak'):''),3600);},1800);}catch(_e){}
   })();
 
   /* ================= EPISODE HUB ================= */
@@ -3387,7 +3437,7 @@ function observeReveals(){
       const dd=lkGet();dd.picks=dd.picks||{};
       const had=dd.picks[key]!==undefined;
       dd.picks[key]=idx;lkSet(dd);
-      if(!had)lkAward(5,'prophet','Made a Bloodymania pick');
+      if(!had)lkAward(25,'prophet','Made a Bloodymania pick \u00b7 +25');
     });
   });
 
@@ -3656,7 +3706,7 @@ function observeReveals(){
   }
   setInterval(function(){try{jcwRedeemPoints();}catch(_e){}},4000);
 
-  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); lkPtsSync(); fbDB.ref('lockers/'+lkUser.uid).update({wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:window.jcwEncKeys(d.picks||{}),hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:window.jcwEncKeys(d.eps||{}),radio:window.jcwEncKeys(d.radio||{}),seen:window.jcwEncKeys(d.seen||{}),tagged:window.jcwEncKeys(d.tagged||{}),streak:d.streak||0,streakBest:d.streakBest||0,dayone:d.dayone?1:0,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{}),swapped:window.jcwEncCards(d.swapped||{}),game:d.game||{},blocked:d.blocked||{}}).then(()=>{window.__lockerSync='ok';}).catch(err=>{window.__lockerSync='BLOCKED: '+((err&&err.message)||'rules');window.__cardsSync=window.__lockerSync;try{console.warn('[locker] cloud push rejected:',err&&err.message);}catch(__e){}}); }catch(_e){window.__lockerSync='error: '+(_e&&_e.message);try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
+  function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); lkPtsSync(); fbDB.ref('lockers/'+lkUser.uid).update({wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:window.jcwEncKeys(d.picks||{}),hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:window.jcwEncKeys(d.eps||{}),radio:window.jcwEncKeys(d.radio||{}),seen:window.jcwEncKeys(d.seen||{}),tagged:window.jcwEncKeys(d.tagged||{}),streak:d.streak||0,streakBest:d.streakBest||0,dayone:d.dayone?1:0,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{}),swapped:window.jcwEncCards(d.swapped||{}),game:d.game||{},blocked:d.blocked||{},bpaid:d.bpaid||{},gpaid:d.gpaid||null}).then(()=>{window.__lockerSync='ok';}).catch(err=>{window.__lockerSync='BLOCKED: '+((err&&err.message)||'rules');window.__cardsSync=window.__lockerSync;try{console.warn('[locker] cloud push rejected:',err&&err.message);}catch(__e){}}); }catch(_e){window.__lockerSync='error: '+(_e&&_e.message);try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
   /* ===== WIPE RECOVERY =====
      Snapshot the best locker this device has ever seen for the signed-in account
      (jcw_locker_best_<uid>). If a later login pulls a cloud copy whose points have
@@ -4039,7 +4089,7 @@ function observeReveals(){
       if(c.d!==today){c={d:today,t:0,n:0};}
       if(now-(c.t||0)>20000 && (c.n||0)<30){
         c.t=now;c.n=(c.n||0)+1;localStorage.setItem('jcw_chatpt',JSON.stringify(c));
-        lkAward(1,null,null);
+        lkAward(5,null,null);
       }
     }catch(_e){}
   }
@@ -5038,7 +5088,7 @@ function observeReveals(){
     localStorage.setItem('jcw_polls',JSON.stringify(P));
     if(fbDB)fbDB.ref('polls/'+key+'/'+i).transaction(v=>(v||0)+1);
     pollRender();
-    if(prev===undefined)lkAward(2,'prophet','Voted in Lunacy Chat');
+    if(prev===undefined)lkAward(10,'prophet','Voted in Lunacy Chat \u00b7 +10');
   }));
   pollRender();
 
@@ -5119,10 +5169,10 @@ function observeReveals(){
                  walking away — real plays with dead retention on the
                  channel's videos. Now: at 10 minutes the episode counts and
                  pays +30; from there +5 per 15s up to 60 for a real watch. */
-              const EP_MIN_SECS=600, EP_PTS_CAP=60;
+              const EP_MIN_SECS=600, EP_PTS_CAP=200;
               if(window.__epSecs[ek]>=EP_MIN_SECS&&(window.__epPts[ek]||0)<EP_PTS_CAP){
                 const first=!(window.__epPts[ek]);
-                const gain=first?30:5;
+                const gain=first?100:10;
                 window.__epPts[ek]=(window.__epPts[ek]||0)+gain;
                 const d=lkGet();d.pts=(d.pts||0)+gain;lkSet(d);lkRender();
               }
@@ -5478,7 +5528,12 @@ function observeReveals(){
                 merged.arcade=cloud.arcade||d.arcade||{};
                 const cb=cloud.blocked||{},lb=d.blocked||{},mb={};
                 Object.keys(cb).concat(Object.keys(lb)).forEach(k=>{const a=+cb[k]||0,b=+lb[k]||0;mb[k]=Math.abs(a)>=Math.abs(b)?a:b;});
-                merged.blocked=mb;})();
+                merged.blocked=mb;
+                /* badge / game payouts already made: union + max, never shrink (no double pay) */
+                merged.bpaid=Object.assign({},(cloud.bpaid&&typeof cloud.bpaid==='object')?cloud.bpaid:{},d.bpaid||{});
+                const cgp=(cloud.gpaid&&typeof cloud.gpaid==='object')?cloud.gpaid:null,lgp=(d.gpaid&&typeof d.gpaid==='object')?d.gpaid:null;
+                if(cgp||lgp){const gp={};Object.keys(Object.assign({},cgp||{},lgp||{})).forEach(k=>{gp[k]=Math.max(+((cgp||{})[k])||0,+((lgp||{})[k])||0);});merged.gpaid=gp;}
+                })();
               merged.pts=Math.max(d.pts||0,cloud.pts||0);
               merged.wins=Math.max(d.wins||0,cloud.wins||0);
               lkCloudReady=true;          /* safe to write from here on */
