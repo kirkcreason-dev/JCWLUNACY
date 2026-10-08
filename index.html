@@ -3686,21 +3686,29 @@ function observeReveals(){
   window.jcwSpendPts=function(n){
     n=Math.floor(+n||0);
     return new Promise(function(done){
+      let fin=false;const end=function(ok,why){if(fin)return;fin=true;window.__spendWhy=ok?'':why;done(ok);};
+      /* never leave the pack button dead: a write that can't reach the database gives up after 12s */
+      setTimeout(function(){end(false,'offline');},12000);
       try{
-        if(!(n>0)||n>500||!lkCloudReady||!fbDB||!lkUser){done(false);return;}
-        let ok=false;
-        fbDB.ref('lockers/'+lkUser.uid+'/pts').transaction(function(cur){
-          cur=(typeof cur==='number'&&cur>=0)?cur:0;
+        if(!(n>0)||n>500){end(false,'bad amount');return;}
+        if(!lkUser||!fbDB){end(false,'signed out');return;}
+        if(!lkCloudReady){end(false,'syncing');return;}
+        let ok=false,seen=0;
+        const ref=fbDB.ref('lockers/'+lkUser.uid+'/pts');
+        /* read the real total first: a transaction that starts from an empty
+           cache and aborts never asks the server */
+        ref.once('value').then(function(){return ref.transaction(function(cur){
+          cur=(typeof cur==='number'&&cur>=0)?cur:0;seen=cur;
           const local=+(lkGet().pts)||0;
           if((jcwPtsPending()?local:Math.max(cur,local))<n){ok=false;return;}      /* not enough: abort */
           ok=true;return Math.max(0,cur-n);
-        }).then(function(r){
-          if(!(r&&r.committed&&ok)){done(false);return;}
+        });}).then(function(r){
+          if(!(r&&r.committed&&ok)){end(false,'short:'+seen+'/'+(+(lkGet().pts)||0));return;}
           const d=lkGet();d.pts=Math.max(0,(+d.pts||0)-n);lkSet(d);
           try{lkRender();}catch(_e){}
-          done(true);
-        }).catch(function(){done(false);});
-      }catch(_e){done(false);}
+          end(true);
+        }).catch(function(e){end(false,'db:'+((e&&(e.code||e.message))||'error'));});
+      }catch(_e){end(false,'error');}
     });
   };
   /* ===== BUY POINTS ($10 → 10,000) =========================================
@@ -6615,7 +6623,9 @@ route();
       /* pay first, on the cloud copy (see jcwSpendPts) — a device-only deduction
          used to bounce back on the next sync, so packs were free */
       (FREE?Promise.resolve(true):(window.jcwSpendPts?window.jcwSpendPts(PACK_COST):Promise.resolve(false))).then(function(paid){
-      if(!paid){window.__packBusy=false;try{toast('Need '+PACK_COST+' points to open a pack (or the connection is still warming up \u2014 try again)',3600);}catch(_e){}return;}
+      if(!paid){window.__packBusy=false;try{const w=String(window.__spendWhy||'');
+        toast(/^short/.test(w)?('Need '+PACK_COST+' points to open a pack'):w==='syncing'?'Your Locker is still syncing \u2014 try again in a few seconds':w==='offline'?'Can\u2019t reach the card server \u2014 check your connection and try again':('Pack didn\u2019t open ('+w+') \u2014 refresh and try again'),4200);
+        try{console.warn('[cards] pack spend failed:',w);}catch(_e){}}catch(_e){}return;}
       /* roll the pack */
       const picks=[];let gotRarePlus=false;
       for(let i=0;i<PACK_SIZE;i++){
