@@ -5609,8 +5609,11 @@ function observeReveals(){
                   if(sr.length)m.serials=sr;else delete m.serials;merged.cards[r.card]=m;}
                 localStorage.setItem(k,'1');
                 if(!stamped){
-                  fbDB.ref('lockers/'+lkUser.uid+'/cardRet/'+r.id).set(1).catch(function(){});
-                  fbDB.ref('editions/'+r.card).transaction(function(cur){cur=+cur||0;if(cur!==r.from)return;return r.to;}).catch(function(){});
+                  /* read the counter first: a transaction that starts from an
+                     empty cache and returns nothing aborts without asking the server */
+                  const er=fbDB.ref('editions/'+r.card),me=lkUser.uid;
+                  er.once('value').then(function(){return er.transaction(function(cur){cur=+cur||0;if(cur!==r.from)return;return r.to;});})
+                    .then(function(){return fbDB.ref('lockers/'+me+'/cardRet/'+r.id).set(1);}).catch(function(){});
                 }
               });}catch(_e){}
               merged.lunaPay=String(d.lunaPay||'')>String(cloud.lunaPay||'')?String(d.lunaPay||''):String(cloud.lunaPay||'');
