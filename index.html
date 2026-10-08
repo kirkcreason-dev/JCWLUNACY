@@ -3779,14 +3779,14 @@ function observeReveals(){
   function jcwResetAt(){try{return JCW_PTS_RESET.at;}catch(e){return 0;}}
   function lkWipeCheck(cloud){try{
     const b=lkBackupGet(); if(!b||!b.data)return;
-    if((b.ts||0)<jcwResetAt())return;   /* a snapshot from before the points reset is not a wipe */
+    if(Date.now()<jcwResetAt()+30*864e5)return;   /* points were reset to 0 on purpose — for 30 days a low cloud total is not a wipe */
     const bp=b.data.pts||0, cp=(cloud&&cloud.pts)||0;
     if(bp>=500&&cp<bp/10)lkWipeBanner(b);
   }catch(e){}}
   window.jcwLockerRestore=function(){try{
     const b=lkBackupGet(); if(!b||!b.data)return;
     const d=lkGet(), r=b.data, m=Object.assign({},r);
-    m.pts=((b.ts||0)<jcwResetAt())?(d.pts||0):Math.max(d.pts||0,r.pts||0);   /* never restore pre-reset points */ m.wins=Math.max(d.wins||0,r.wins||0); m.watched=Math.max(d.watched||0,r.watched||0);
+    m.pts=(((b.ts||0)<jcwResetAt())||Date.now()<jcwResetAt()+30*864e5)?(d.pts||0):Math.max(d.pts||0,r.pts||0);   /* never restore pre-reset points */ m.wins=Math.max(d.wins||0,r.wins||0); m.watched=Math.max(d.watched||0,r.watched||0);
     m.badges=[...new Set([...(r.badges||[]),...(d.badges||[])])];
     m.eps=Object.assign({},window.jcwDecKeys(r.eps),d.eps||{});
     m.radio=Object.assign({},window.jcwDecKeys(r.radio),d.radio||{});
@@ -5593,29 +5593,22 @@ function observeReveals(){
                 const cgp=(cloud.gpaid&&typeof cloud.gpaid==='object')?cloud.gpaid:null,lgp=(d.gpaid&&typeof d.gpaid==='object')?d.gpaid:null;
                 if(cgp||lgp){const gp={};Object.keys(Object.assign({},cgp||{},lgp||{})).forEach(k=>{gp[k]=Math.max(+((cgp||{})[k])||0,+((lgp||{})[k])||0);});merged.gpaid=gp;}
                 })();
-              /* House card returns (Kirk): copies of a capped card taken back out
-                 of one collection and put back in the pack pool by lowering the
-                 editions counter. Applied once per device, so a device that still
-                 remembers the old count can't push the copies back up. */
-              try{[{id:'ret1-clay',uid:'LmjvpMlKlVNpyoXajb74P5guaqu2',card:'LU-181',keep:1,from:100,to:8}].forEach(function(r){
-                if(!lkUser||lkUser.uid!==r.uid)return;
-                const k='jcw_cardret_'+r.id;if(localStorage.getItem(k)==='1')return;
-                const stamped=!!(cloud.cardRet&&cloud.cardRet[r.id]);
-                const cc=(window.jcwDecCards(cloud.cards||{})[r.card])||{};
-                const want=stamped?(+cc.n||0):r.keep;
-                const c=merged.cards&&merged.cards[r.card];
-                if(c&&(+c.n||0)>want){const m=Object.assign({},c,{n:want});
-                  const sr=(stamped?(cc.serials||[]):(c.serials||[]).slice().sort(function(a,b){return a-b;})).slice(0,want);
-                  if(sr.length)m.serials=sr;else delete m.serials;merged.cards[r.card]=m;}
-                localStorage.setItem(k,'1');
-                if(!stamped){
-                  /* read the counter first: a transaction that starts from an
-                     empty cache and returns nothing aborts without asking the server */
-                  const er=fbDB.ref('editions/'+r.card),me=lkUser.uid;
-                  er.once('value').then(function(){return er.transaction(function(cur){cur=+cur||0;if(cur!==r.from)return;return r.to;});})
-                    .then(function(){return fbDB.ref('lockers/'+me+'/cardRet/'+r.id).set(1);}).catch(function(){});
-                }
-              });}catch(_e){}
+              /* LIMITED CARDS ARE ONE PER PERSON: any numbered card held more than
+                 once is folded to a single copy (the lowest serial) on every sync,
+                 so a device that still remembers extra copies can't push them back. */
+              try{if(merged.cards&&window.jcwCardCap)Object.keys(merged.cards).forEach(function(id){
+                const c=merged.cards[id];if(!c||(+c.n||0)<=1||!window.jcwCardCap(id))return;
+                const m=Object.assign({},c,{n:1});const sr=(c.serials||[]).slice().sort(function(a,b){return a-b;}).slice(0,1);
+                if(sr.length)m.serials=sr;else delete m.serials;merged.cards[id]=m;});}catch(_e){}
+              /* Kirk put 92 DJ Clay Prismatic Foils (LU-181) back in the pack pool:
+                 Nocturnal's next visit lowers the claimed counter 100 -> 8, once.
+                 Read the counter first — a transaction that starts from an empty
+                 cache and returns nothing aborts without asking the server. */
+              try{if(lkUser&&lkUser.uid==='LmjvpMlKlVNpyoXajb74P5guaqu2'&&!(cloud.cardRet&&cloud.cardRet['ret2-clay'])&&!window.__ret2clay){
+                window.__ret2clay=1;const er=fbDB.ref('editions/LU-181'),me=lkUser.uid;
+                er.once('value').then(function(){return er.transaction(function(cur){cur=+cur||0;if(cur!==100)return;return 8;});})
+                  .then(function(){return fbDB.ref('lockers/'+me+'/cardRet/ret2-clay').set(1);}).catch(function(){window.__ret2clay=0;});
+              }}catch(_e){}
               merged.lunaPay=String(d.lunaPay||'')>String(cloud.lunaPay||'')?String(d.lunaPay||''):String(cloud.lunaPay||'');
               merged.pts=ptsWait?(d.pts||0):Math.max(d.pts||0,cloud.pts||0);
               merged.wins=Math.max(d.wins||0,cloud.wins||0);
