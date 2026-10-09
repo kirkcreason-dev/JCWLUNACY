@@ -3674,19 +3674,34 @@ function observeReveals(){
       if(!lkCloudReady||!fbAuth||!lkUser||!fbDB)return;
       if(jcwPtsPending())return;               /* reset not landed yet: never walk the old total back up */
       if(__ptsTx||window.__spendBusy){__ptsSyncAgain=true;return;}
-      const target=Math.min(lkGet().pts||0,999999);
+      let target=Math.min(lkGet().pts||0,999999);
       __ptsTx++;__ptsSyncAgain=false;
       const fin=function(){__ptsTx=Math.max(0,__ptsTx-1);
         if(__ptsSyncAgain&&!window.__spendBusy&&!__ptsSyncTimer){__ptsSyncTimer=setTimeout(function(){__ptsSyncTimer=null;lkPtsSync();},600);}};
+      let base=null;
       fbDB.ref('lockers/'+lkUser.uid+'/pts').transaction(function(cur){
         cur=(typeof cur==='number'&&cur>=0)?cur:0;
+        /* A retry runs because the cloud total moved under us. If it went DOWN,
+           another device spent those points — take them off this device too
+           before deciding how far up to go, or this raise would hand them back. */
+        const d=lkGet();
+        if(base!==null&&cur<base){
+          d.pts=Math.max(0,(+d.pts||0)-(base-cur));d.ptsCloud=cur;
+          try{localStorage.setItem(LK_KEY,JSON.stringify(d));}catch(_e){}
+        }
+        base=cur;
+        target=Math.min(+d.pts||0,999999);
         if(cur>=target)return;                       /* nothing to do */
-        return Math.min(target,cur+1000);
+        /* remembered so the locker merge knows a drop back from THIS value is
+           our own rejected write being undone, not points spent elsewhere */
+        window.__ptsMine=Math.min(target,cur+1000);
+        return window.__ptsMine;
       }).then(function(res){
+        window.__ptsMine=null;
         fin();
         const now=(res&&res.snapshot&&res.snapshot.val())||0;
         if(now<target&&!__ptsSyncTimer){__ptsSyncTimer=setTimeout(function(){__ptsSyncTimer=null;lkPtsSync();},4000);}
-      }).catch(function(e){fin();try{console.warn('[locker] pts sync failed:',e&&e.message);}catch(_e){}});
+      }).catch(function(e){window.__ptsMine=null;fin();try{console.warn('[locker] pts sync failed:',e&&e.message);}catch(_e){}});
     }catch(_e){}
   }
   /* SPENDING points (card packs). lkPtsSync above only ever moves the cloud
@@ -3698,8 +3713,10 @@ function observeReveals(){
   window.jcwSpendPts=function(n){
     n=Math.floor(+n||0);
     return new Promise(function(done){
-      let fin=false;const end=function(ok,why){if(fin)return;fin=true;window.__spendWhy=ok?'':why;
-        window.__spendBusy=false;if(__ptsSyncAgain){try{lkPtsSync();}catch(_e){}}
+      let fin=false,mine=false;const end=function(ok,why){if(fin)return;fin=true;window.__spendWhy=ok?'':why;
+        /* only the spend that raised the flag lowers it — a second call turned
+           away as busy must not release the first one's hold */
+        if(mine){window.__spendBusy=false;if(__ptsSyncAgain){try{lkPtsSync();}catch(_e){}}}
         done(ok);};
       /* never leave the pack button dead: a write that can't reach the database gives up after 15s */
       setTimeout(function(){end(false,'offline');},15000);
@@ -3708,8 +3725,8 @@ function observeReveals(){
         if(!lkUser||!fbDB){end(false,'signed out');return;}
         if(!lkCloudReady){end(false,'syncing');return;}
         if(window.__spendBusy){end(false,'syncing');return;}
-        window.__spendBusy=true;            /* hold new syncs back until this pack is paid */
-        let ok=false,seen=0,tries=0;
+        window.__spendBusy=true;mine=true;  /* hold new syncs back until this pack is paid */
+        let ok=false,seen=0,tries=0;const pre=+(lkGet().pts)||0;
         const ref=fbDB.ref('lockers/'+lkUser.uid+'/pts');
         const attempt=function(){
           /* read the real total first: a transaction that starts from an empty
@@ -3721,13 +3738,21 @@ function observeReveals(){
             ok=true;return Math.max(0,cur-n);
           });}).then(function(r){
             if(!(r&&r.committed&&ok)){end(false,'short:'+seen+'/'+(+(lkGet().pts)||0));return;}
-            const d=lkGet();d.pts=Math.max(0,(+d.pts||0)-n);lkSet(d);
+            /* the device copy ends at (total before the pack − cost). The cloud
+               listener may already have taken the drop off (see the locker merge:
+               a cloud drop comes off the device too), so never take it twice. */
+            const d=lkGet(),after=r.snapshot&&r.snapshot.val();
+            d.pts=Math.min(+d.pts||0,Math.max(0,pre-n,(typeof after==='number')?after:0));
+            if(typeof after==='number')d.ptsCloud=after;
+            lkSet(d);
             try{lkRender();}catch(_e){}
             end(true);
           }).catch(function(e){
             const c=String((e&&(e.code||e.message))||'error');
             /* a sync that slipped into the same write can still trip the cap once — wait and go again */
             if(/permission/i.test(c)&&tries++<2){setTimeout(go,1500);return;}
+            /* not charged: undo any drop the listener applied from the rejected write */
+            try{const d=lkGet();if((+d.pts||0)<pre){d.pts=pre;lkSet(d);}}catch(_e){}
             end(false,'db:'+c);});
         };
         /* let a points sync that's already on its way finish first (max ~6s) */
@@ -3736,6 +3761,8 @@ function observeReveals(){
       }catch(_e){end(false,'error');}
     });
   };
+  /* locked in place: the pack button always pays through this one function */
+  try{Object.defineProperty(window,'jcwSpendPts',{value:window.jcwSpendPts,writable:false,configurable:false});}catch(_e){}
   /* ===== BUY POINTS ($10 → 10,000) =========================================
      Stripe Payment Link (client_reference_id = the buyer's uid). Stripe sends
      them back to ?pts_session=<checkout session>#locker; the jcw-points
@@ -5650,7 +5677,22 @@ function observeReveals(){
                   .then(function(){return fbDB.ref('lockers/'+me+'/cardRet/ret2-clay').set(1);}).catch(function(){window.__ret2clay=0;});
               }}catch(_e){}
               merged.lunaPay=String(d.lunaPay||'')>String(cloud.lunaPay||'')?String(d.lunaPay||''):String(cloud.lunaPay||'');
-              merged.pts=ptsWait?(d.pts||0):Math.max(d.pts||0,cloud.pts||0);
+              /* SPENT ON ANOTHER DEVICE: the cloud total only goes DOWN when points
+                 are spent (a pack on another tab / phone) or taken away by the
+                 owner. Keeping "the higher of device vs cloud" let a second
+                 device that still held the old total push it straight back up —
+                 packs were free with two devices open. So a drop since this
+                 device last saw the cloud (ptsCloud, kept on the device) comes
+                 off the device copy too, then the higher of the two wins. */
+              (function(){
+                const cpN=Math.max(0,+cloud.pts||0),seen=(typeof d.ptsCloud==='number')?d.ptsCloud:null;
+                let lp=+d.pts||0;
+                const justReset=(Date.now()-(window.__ptsJustReset||0))<120000;
+                const ownUndo=(window.__ptsMine!=null&&seen===window.__ptsMine);   /* our own raise rejected and rolled back */
+                if(!ptsWait&&!justReset&&!ownUndo&&seen!==null&&cpN<seen)lp=Math.max(0,lp-(seen-cpN));
+                merged.pts=ptsWait?(d.pts||0):Math.max(lp,cpN);
+                merged.ptsCloud=cpN;
+              })();
               merged.wins=Math.max(d.wins||0,cloud.wins||0);
               lkCloudReady=true;          /* safe to write from here on */
               lkSet(merged);lkRender();
