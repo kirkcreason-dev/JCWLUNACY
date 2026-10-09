@@ -3661,19 +3661,32 @@ function observeReveals(){
   }catch(e){}};
   setInterval(function(){try{window.jcwLunaMonthly();}catch(_e){}},30000);
   var __ptsSyncTimer=null;
+  /* ONE points write at a time. The Firebase SDK sends every queued
+     transaction on the same path as a single write, so three quick syncs
+     (+1000 each) plus a pack (-150) went up as one +2,850 jump — over the
+     rules' 1,000-per-write cap — and the whole batch, pack included, came
+     back PERMISSION_DENIED. Hit anyone whose device total was far ahead of
+     the cloud (e.g. a big badge back-pay). Now a sync waits its turn, and a
+     pack spend holds the line until it's done. */
+  var __ptsTx=0,__ptsSyncAgain=false;window.__spendBusy=false;
   function lkPtsSync(){
     try{
       if(!lkCloudReady||!fbAuth||!lkUser||!fbDB)return;
       if(jcwPtsPending())return;               /* reset not landed yet: never walk the old total back up */
+      if(__ptsTx||window.__spendBusy){__ptsSyncAgain=true;return;}
       const target=Math.min(lkGet().pts||0,999999);
+      __ptsTx++;__ptsSyncAgain=false;
+      const fin=function(){__ptsTx=Math.max(0,__ptsTx-1);
+        if(__ptsSyncAgain&&!window.__spendBusy&&!__ptsSyncTimer){__ptsSyncTimer=setTimeout(function(){__ptsSyncTimer=null;lkPtsSync();},600);}};
       fbDB.ref('lockers/'+lkUser.uid+'/pts').transaction(function(cur){
         cur=(typeof cur==='number'&&cur>=0)?cur:0;
         if(cur>=target)return;                       /* nothing to do */
         return Math.min(target,cur+1000);
       }).then(function(res){
+        fin();
         const now=(res&&res.snapshot&&res.snapshot.val())||0;
         if(now<target&&!__ptsSyncTimer){__ptsSyncTimer=setTimeout(function(){__ptsSyncTimer=null;lkPtsSync();},4000);}
-      }).catch(function(e){try{console.warn('[locker] pts sync failed:',e&&e.message);}catch(_e){}});
+      }).catch(function(e){fin();try{console.warn('[locker] pts sync failed:',e&&e.message);}catch(_e){}});
     }catch(_e){}
   }
   /* SPENDING points (card packs). lkPtsSync above only ever moves the cloud
@@ -3685,28 +3698,41 @@ function observeReveals(){
   window.jcwSpendPts=function(n){
     n=Math.floor(+n||0);
     return new Promise(function(done){
-      let fin=false;const end=function(ok,why){if(fin)return;fin=true;window.__spendWhy=ok?'':why;done(ok);};
-      /* never leave the pack button dead: a write that can't reach the database gives up after 12s */
-      setTimeout(function(){end(false,'offline');},12000);
+      let fin=false;const end=function(ok,why){if(fin)return;fin=true;window.__spendWhy=ok?'':why;
+        window.__spendBusy=false;if(__ptsSyncAgain){try{lkPtsSync();}catch(_e){}}
+        done(ok);};
+      /* never leave the pack button dead: a write that can't reach the database gives up after 15s */
+      setTimeout(function(){end(false,'offline');},15000);
       try{
         if(!(n>0)||n>500){end(false,'bad amount');return;}
         if(!lkUser||!fbDB){end(false,'signed out');return;}
         if(!lkCloudReady){end(false,'syncing');return;}
-        let ok=false,seen=0;
+        if(window.__spendBusy){end(false,'syncing');return;}
+        window.__spendBusy=true;            /* hold new syncs back until this pack is paid */
+        let ok=false,seen=0,tries=0;
         const ref=fbDB.ref('lockers/'+lkUser.uid+'/pts');
-        /* read the real total first: a transaction that starts from an empty
-           cache and aborts never asks the server */
-        ref.once('value').then(function(){return ref.transaction(function(cur){
-          cur=(typeof cur==='number'&&cur>=0)?cur:0;seen=cur;
-          const local=+(lkGet().pts)||0;
-          if((jcwPtsPending()?local:Math.max(cur,local))<n){ok=false;return;}      /* not enough: abort */
-          ok=true;return Math.max(0,cur-n);
-        });}).then(function(r){
-          if(!(r&&r.committed&&ok)){end(false,'short:'+seen+'/'+(+(lkGet().pts)||0));return;}
-          const d=lkGet();d.pts=Math.max(0,(+d.pts||0)-n);lkSet(d);
-          try{lkRender();}catch(_e){}
-          end(true);
-        }).catch(function(e){end(false,'db:'+((e&&(e.code||e.message))||'error'));});
+        const attempt=function(){
+          /* read the real total first: a transaction that starts from an empty
+             cache and aborts never asks the server */
+          ref.once('value').then(function(){return ref.transaction(function(cur){
+            cur=(typeof cur==='number'&&cur>=0)?cur:0;seen=cur;
+            const local=+(lkGet().pts)||0;
+            if((jcwPtsPending()?local:Math.max(cur,local))<n){ok=false;return;}      /* not enough: abort */
+            ok=true;return Math.max(0,cur-n);
+          });}).then(function(r){
+            if(!(r&&r.committed&&ok)){end(false,'short:'+seen+'/'+(+(lkGet().pts)||0));return;}
+            const d=lkGet();d.pts=Math.max(0,(+d.pts||0)-n);lkSet(d);
+            try{lkRender();}catch(_e){}
+            end(true);
+          }).catch(function(e){
+            const c=String((e&&(e.code||e.message))||'error');
+            /* a sync that slipped into the same write can still trip the cap once — wait and go again */
+            if(/permission/i.test(c)&&tries++<2){setTimeout(go,1500);return;}
+            end(false,'db:'+c);});
+        };
+        /* let a points sync that's already on its way finish first (max ~6s) */
+        let waited=0;const go=function(){if(fin)return;if(__ptsTx&&waited<6000){waited+=150;setTimeout(go,150);return;}attempt();};
+        go();
       }catch(_e){end(false,'error');}
     });
   };
@@ -4862,6 +4888,10 @@ function observeReveals(){
     dmRef.on('value',s=>{const L=[];s.forEach(c=>{const v=c.val();if(v&&v.t)L.push(v);});dmRenderList(L);});
     // clear unread flag on my index
     fbDB.ref('dmIndex/'+lkUser.uid+'/'+otherUid+'/unread').set(false).catch(()=>{});
+    /* reading the DM clears its alert: if every unseen notification is a DM, mark them seen */
+    try{const L=window.__notifList||[],sn=+(localStorage.getItem('jcw_notif_seen_'+lkUser.uid))||0;
+      const un=L.filter(x=>(x.ts||0)>Math.max(sn,window.__notifSeenCloud||0));
+      if(un.length&&un.every(x=>x.ty==='dm')&&window.jcwMarkNotifsSeen)window.jcwMarkNotifsSeen(window.__notifNewest);}catch(_e){}
   };
   function dmSend(){
     const inp=document.getElementById('dm-msg');const t=(inp.value||'').trim();
@@ -5536,8 +5566,11 @@ function observeReveals(){
             }catch(_e){}
             /* toast the newest unseen once — but only a ping that just landed
                (or is minutes old), never a replay of last week's on page load */
+            /* remembered on the device too, so a refresh doesn't pop the same ping again */
+            const TK='jcw_notif_toasted_'+user.uid;
+            if(!window.__notifToastTs){try{window.__notifToastTs=+localStorage.getItem(TK)||0;}catch(_e){}}
             if(unseen.length && newest>(window.__notifToastTs||0) && (Date.now()-newest)<10*60000){
-              window.__notifToastTs=newest;
+              window.__notifToastTs=newest;try{localStorage.setItem(TK,String(newest));}catch(_e){}
               const n0=unseen[0];
               jcwPush((n0.from||'A Juggalo')+' '+(NOTIF_TXT[n0.ty]||'pinged you'), n0.t||'');
             }
