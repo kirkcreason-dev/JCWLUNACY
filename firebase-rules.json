@@ -176,6 +176,15 @@
       "$uid": {
         ".validate": "newData.hasChildren(['by','ts','until']) && newData.child('ts').isNumber() && newData.child('until').isNumber() && (!newData.hasChild('reason') || (newData.child('reason').isString() && newData.child('reason').val().length <= 200))"
       }
+    },
+    "deviceLog": {
+      ".read": "auth != null && auth.uid === 'oYrNiXZywhexmLqRQO7j1iyA1Bh1'",
+      "$dev": {
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "$dev.matches(/^[a-f0-9]{20}$/) && newData.isNumber()"
+        }
+      }
     }
   }
 }

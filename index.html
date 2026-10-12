@@ -1434,6 +1434,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
       <ul>
         <li><span class="t">Account</span>Your email (for sign-in) and your locker name, favorites, theme, pic, badges and points.</li>
         <li><span class="t">Activity</span>Anonymous counts &mdash; visits, episodes played, votes and ticket clicks.</li>
+        <li><span class="t">Fair play</span>A random device code this browser makes for itself, saved with your account when you sign in, so one person can&rsquo;t run a stack of accounts. It isn&rsquo;t your IP address or anything personal, and only the site owner can see it.</li>
         <li><span class="t">Never</span>No ads, no selling your data, no tracking you off this site.</li>
       </ul>
     </div>
@@ -2337,6 +2338,12 @@ function observeReveals(){
   let fbDB=null,fbAuth=null,lkUser=null; /* moved up: avoids TDZ error when lkAward->lkSet->lkCloudPush runs at load */
   /* ================= JUGGALO LOCKER ================= */
   const LK_KEY='jcw_locker';
+  /* one random code per browser, kept across sign-outs (see DUPLICATE-ACCOUNT CHECK) */
+  window.jcwDeviceId=function(){try{
+    let v=localStorage.getItem('jcw_dev')||'';
+    if(!/^[a-f0-9]{20}$/.test(v)){const a=new Uint8Array(10);crypto.getRandomValues(a);
+      v=Array.from(a).map(function(b){return b.toString(16).padStart(2,'0');}).join('');localStorage.setItem('jcw_dev',v);}
+    return v;}catch(e){return '';}};
   function lkGet(){try{return JSON.parse(localStorage.getItem(LK_KEY))||{}}catch(e){return{}}}
   function lkSet(d){if(d&&d.pts>999999)d.pts=999999; /* stay under the Firebase pts cap so writes (theme/fav/pic) never get rejected */
     try{localStorage.setItem(LK_KEY,JSON.stringify(d))}catch(e){} if(typeof lkBackupKeep==='function')try{lkBackupKeep(d)}catch(_e){} if(typeof lkCloudPush==='function')lkCloudPush();}
@@ -3589,6 +3596,7 @@ function observeReveals(){
       await user.reauthenticateWithCredential(cred);
       say('Deleting your data…');
       const paths=['lockers/'+uid,'relations/'+uid,'presenceUsers/'+uid,'trades/'+uid,'gifts/'+uid,'presence/'+uid];
+      try{const dv=window.jcwDeviceId&&window.jcwDeviceId();if(dv)paths.push('deviceLog/'+dv+'/'+uid);}catch(_e){}
       for(const p of paths){try{await fbDB.ref(p).remove();}catch(_e){}}
       /* wall + notifications allow per-child owner deletes */
       for(const node of ['walls','notifications']){
@@ -5522,6 +5530,16 @@ function observeReveals(){
                 jr.once('value').then(sn=>{if(+sn.val()!==ct0)jr.set(ct0).catch(()=>{});}).catch(()=>{});
                 try{const el=document.getElementById('au-joined');if(el)el.textContent=window.jcwJoinedText({joined:ct0});}catch(_e){}
               }
+            }
+          }catch(_e){}
+          /* DUPLICATE-ACCOUNT CHECK (disclosed in About > Privacy): each browser
+             keeps one random device code (not an IP, nothing personal). Signing
+             in records deviceLog/<code>/<uid> = last seen. Only Digital Duke can
+             read it — the admin page lists codes used by more than one account. */
+          try{
+            if(user&&fbDB){
+              const dv=window.jcwDeviceId&&window.jcwDeviceId();
+              if(dv)fbDB.ref('deviceLog/'+dv+'/'+user.uid).set(Date.now()).catch(()=>{});
             }
           }catch(_e){}
           try{

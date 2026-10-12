@@ -69,6 +69,11 @@
     <div id="giftSummary" class="muted" style="margin:6px 0 10px">Sign in to load the history.</div>
     <div id="giftLog" class="muted">&mdash;</div>
   </div>
+
+  <div class="card"><label>&#128269; Shared devices <span class="muted">(browsers that more than one account has signed in from &mdash; Digital Duke login only. Tracked from Oct 12 2026 on, each account&rsquo;s next sign-in.)</span> <button class="ghost sm" id="devReload" style="margin-left:8px">Refresh</button></label>
+    <div id="devSummary" class="muted" style="margin:6px 0 10px">Sign in to load.</div>
+    <div id="devList" class="muted">&mdash;</div>
+  </div>
   <div class="card"><label>&#9851;&#65039; Reset everyone&rsquo;s points to 0 <span class="muted">(skips Digital Duke only. Members whose site already finished the reset are skipped, so running it again only catches stragglers &mdash; e.g. an old open tab or the app pushing an old total back up.)</span></label>
     <div id="rsSummary" class="muted" style="margin:6px 0 10px">Sign in to check.</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="ghost sm" id="rsCheck">Check</button><button class="sm" id="rsGo" style="border-color:var(--hot);color:var(--hot)">Reset now</button></div>
@@ -915,6 +920,34 @@
     }catch(e){sum.textContent='Couldn\u2019t load the history: '+(e.message||e);}
   }
   $('giftReload').onclick=giftLoad;
+  /* ===== Shared devices: deviceLog/<device code>/<uid> = last sign-in (ms) =====
+     The site gives every browser one random code and records it at sign-in.
+     A code with 2+ accounts = one browser running several accounts. */
+  async function devLoad(){
+    const box=$('devList'),sum=$('devSummary');
+    try{
+      const db=await statsInit();
+      const me=statsAuth&&statsAuth.currentUser;
+      if(!me){sum.textContent='Sign in to load.';box.textContent='—';return;}
+      let dl;
+      try{dl=(await db.ref('deviceLog').once('value')).val()||{};}
+      catch(e){sum.innerHTML='<span class="err">Blocked &mdash; publish the deviceLog rule in Firebase (Realtime Database &rarr; Rules), and sign in as Digital Duke.</span>';box.textContent='—';return;}
+      const esc=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      const devs=Object.keys(dl),accts={};
+      devs.forEach(d=>Object.keys(dl[d]||{}).forEach(u=>{accts[u]=1;}));
+      const shared=devs.map(d=>({d,u:Object.entries(dl[d]||{}).map(([uid,ts])=>({uid,ts:+ts||0})).sort((a,b)=>b.ts-a.ts)}))
+        .filter(x=>x.u.length>1).sort((a,b)=>(b.u.length-a.u.length)||(b.u[0].ts-a.u[0].ts));
+      sum.innerHTML='<b style="color:var(--txt)">'+devs.length+'</b> devices &middot; <b style="color:var(--txt)">'+Object.keys(accts).length+'</b> accounts tracked &middot; <b style="color:'+(shared.length?'var(--hot,#ff3fa4)':'var(--txt)')+'">'+shared.length+'</b> devices with more than one account';
+      if(!shared.length){box.textContent='No shared devices so far.';return;}
+      /* names: one read per account involved */
+      const ids=[...new Set(shared.flatMap(x=>x.u.map(y=>y.uid)))],names={};
+      await Promise.all(ids.map(u=>db.ref('lockers/'+u+'/name').once('value').then(s=>{names[u]=s.val()||'';}).catch(()=>{})));
+      box.innerHTML=shared.map(x=>'<div style="padding:8px 0;border-top:1px solid var(--seam)"><div class="muted" style="font-size:11px">Device '+esc(x.d.slice(0,8))+'&hellip; &middot; '+x.u.length+' accounts</div>'
+        +x.u.map(y=>'<div style="display:flex;gap:10px;font-size:13px;padding:2px 0"><span style="flex:1"><b>'+esc(names[y.uid]||'(no name)')+'</b> <span class="muted" style="font-size:11px">'+esc(y.uid)+'</span></span><span class="muted" style="white-space:nowrap">last '+new Date(y.ts).toLocaleString()+'</span></div>').join('')
+        +'</div>').join('');
+    }catch(e){sum.textContent='Couldn’t load: '+(e.message||e);}
+  }
+  $('devReload').onclick=devLoad;
   /* ===== Reset everyone's points (Oct 7 2026) =====
      Must match JCW_PTS_RESET in index.html: the site drops each device's own
      total on first sight of this id and waits until its cloud copy is 0, then
@@ -972,6 +1005,7 @@
   };
   try{statsInit().then(()=>{statsAuth.onAuthStateChanged(u=>{if(u)rsShow();});});}catch(_e){}
   try{statsInit().then(()=>{statsAuth.onAuthStateChanged(u=>{if(u)giftLoad();});});}catch(_e){}
+  try{statsInit().then(()=>{statsAuth.onAuthStateChanged(u=>{if(u)devLoad();});});}catch(_e){}
   $('awardBtn').onclick=()=>pointsOp('add');
   $('setBtn').onclick=()=>pointsOp('set');
   $('zeroBtn').onclick=()=>pointsOp('zero');

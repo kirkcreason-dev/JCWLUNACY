@@ -147,6 +147,15 @@
     "siteEpisodes": {
       ".read": true,
       ".write": "auth != null && (root.child('mods').child(auth.uid).val() === true || auth.uid === 'oYrNiXZywhexmLqRQO7j1iyA1Bh1' || auth.uid === 'zRLXcejE4dWQRL0l07Bo19SO5j52')"
+    },
+    "deviceLog": {
+      ".read": "auth != null && auth.uid === 'oYrNiXZywhexmLqRQO7j1iyA1Bh1'",
+      "$dev": {
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "$dev.matches(/^[a-f0-9]{20}$/) && newData.isNumber()"
+        }
+      }
     }
   }
 }
