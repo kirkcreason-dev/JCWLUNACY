@@ -3070,7 +3070,18 @@ function observeReveals(){
     }).join('')+`<span class="badge2 ${clawGot?'got':''}">Carnival Claw Sets \u00b7 ${clawGot} of ${CLAW_SETS.length} collected</span>`
       +`<span class="badge2 ${rumGot?'got':''}">JCW Rumble Wins \u00b7 won as ${rumGot} of ${RUMBLE_ROSTER.length} wrestlers</span>`
       +`<span class="badge2 ${ladGot?'got':''}">Ladder Wars Champions \u00b7 won as ${ladGot} of ${RUMBLE_ROSTER.length} wrestlers</span>`;
-    document.getElementById('lk-hist').innerHTML=(d.hist&&d.hist.length)?d.hist.map(x=>'&raquo; '+x).join('<br>'):'Nothing yet. Hit the episodes.';
+    (function(){
+      const H=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const E=d.eps||{},keys=Object.keys(E);
+      const watches=Math.max(d.watched||0,(d.hist||[]).filter(x=>String(x).startsWith('Watched')).length);
+      const fmt=v=>{const t=String(v);return new Date(+t.slice(0,4),+t.slice(4,6)-1,+t.slice(6,8)).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});};
+      const recent=keys.filter(k=>+E[k]>19990000).sort((a,b)=>E[b]-E[a]).slice(0,15);
+      let h='';
+      if(keys.length||watches)h+='<div style="margin-bottom:8px;"><b>'+watches.toLocaleString()+'</b> episode watch'+(watches===1?'':'es')+' &middot; <b>'+keys.length+'</b> different episode'+(keys.length===1?'':'s')+'</div><div style="font-size:12.5px;color:var(--steel);margin-bottom:8px;">An episode counts after 10 minutes of watching, once per episode per day.</div>';
+      if(recent.length)h+='<div style="margin-bottom:10px;">'+recent.map(k=>'&#9654; '+H(k)+' <span style="color:var(--steel);">&middot; '+fmt(E[k])+'</span>').join('<br>')+'</div>';
+      if(d.hist&&d.hist.length)h+=(h?'<div style="font-weight:700;margin:6px 0 4px;">Activity</div>':'')+d.hist.map(x=>'&raquo; '+x).join('<br>');
+      document.getElementById('lk-hist').innerHTML=h||'Nothing yet. Hit the episodes.';
+    })();
     const nm=document.getElementById('lk-name');if(nm&&document.activeElement!==nm)nm.value=d.name||'';
     const GIRLS=['Dani Mo','Alice Crowley','Gisele Shaw','Hollyhood Haley J','Hokane','J-Rod','Jasmin St. Claire','Mickie Knuckles','Sonny Kiss','Sophia Rose','The Ring Rat','Veda Scott','Kid Cadet','Freya the Slaya'];
     const fv=document.getElementById('lk-fav'),fvb=document.getElementById('lk-fav-b');
@@ -3511,6 +3522,8 @@ function observeReveals(){
      wrestler names ("Mr. Happy") are used as keys, so every map field is
      encoded on the way up (%2E, %2F …) and decoded on the way down. */
   window.jcwEncKeys=function(o){const r={};for(const k in (o||{}))r[String(k).replace(/[%.#$\/\[\]\u0000-\u001f\u007f]/g,c=>'%'+c.charCodeAt(0).toString(16).toUpperCase().padStart(2,'0'))]=o[k];return r;};
+  /* episodes watched: union of titles, keeping the latest day each one counted */
+  window.jcwEpsMerge=function(a,b){const o={};[a||{},b||{}].forEach(x=>{for(const k in x){const v=+x[k]||1;if(!(o[k]>=v))o[k]=v;}});return o;};
   window.jcwDecKeys=function(o){const r={};for(const k in (o||{}))r[String(k).replace(/%(25|2E|23|24|2F|5B|5D|[01][0-9A-F]|7F)/g,(m,h)=>String.fromCharCode(parseInt(h,16)))]=o[k];return r;};
   window.jcwDecCards=function(o){const r={};for(const k in (o||{}))r[String(k).replace(/~/g,'#')]=o[k];return r;};
   /* one-time heal: merge any '~' ghost keys (from older cached tabs) back into '#' ids */
@@ -3888,7 +3901,7 @@ function observeReveals(){
     const d=lkGet(), r=b.data, m=Object.assign({},r);
     m.pts=(((b.ts||0)<jcwResetAt())||Date.now()<jcwResetAt()+30*864e5)?(d.pts||0):Math.max(d.pts||0,r.pts||0);   /* never restore pre-reset points */ m.wins=Math.max(d.wins||0,r.wins||0); m.watched=Math.max(d.watched||0,r.watched||0);
     m.badges=[...new Set([...(r.badges||[]),...(d.badges||[])])];
-    m.eps=Object.assign({},window.jcwDecKeys(r.eps),d.eps||{});
+    m.eps=window.jcwEpsMerge(window.jcwDecKeys(r.eps),d.eps);
     m.radio=Object.assign({},window.jcwDecKeys(r.radio),d.radio||{});
     m.seen=Object.assign({},window.jcwDecKeys(r.seen),d.seen||{});
     m.tagged=Object.assign({},window.jcwDecKeys(r.tagged),d.tagged||{});
@@ -5338,20 +5351,25 @@ function observeReveals(){
                 window.__epPts[ek]=(window.__epPts[ek]||0)+gain;
                 const d=lkGet();d.pts=(d.pts||0)+gain;lkSet(d);lkRender();
               }
-              /* count it as watched once they've stayed with it 10 minutes */
+              /* count it as watched once they've stayed with it 10 minutes.
+                 Every real watch counts, once per episode per day (Detroit
+                 time): eps[title] holds the day it last counted (old entries
+                 hold 1), so a re-watch on a later day counts again, but a
+                 video left looping can't run the counter up. eps keys stay
+                 the distinct set for The Whole Archive / Second Mile. */
               if(window.__epSecs[ek]>=EP_MIN_SECS){
-                const dt=lkGet();const title=window.__epTitle||'an episode';const line='Watched '+title;
-                /* dedup on a set that is never truncated. The old guard checked
-                   the 40-entry history, so once a heavy viewer's history rolled
-                   over, re-watching an old episode counted as new every time —
-                   which is how a play counter reached the hundreds off ~30 real
-                   episodes. eps[] is the true distinct set. */
-                dt.eps=dt.eps||{};
-                if(!dt.eps[title]){
-                  dt.eps[title]=1;
-                  dt.watched=(dt.watched||0)+1;
-                  dt.hist=dt.hist||[];dt.hist.unshift(line);dt.hist=dt.hist.slice(0,40);
-                  lkSet(dt);lkRender();
+                window.__epCounted=window.__epCounted||{};
+                if(!window.__epCounted[ek]){
+                  window.__epCounted[ek]=1;
+                  const dt=lkGet();const title=window.__epTitle||'an episode';const line='Watched '+title;
+                  const day=+new Date().toLocaleDateString('en-CA',{timeZone:'America/Detroit'}).replace(/-/g,'');
+                  dt.eps=dt.eps||{};
+                  if((+dt.eps[title]||0)<day){
+                    dt.eps[title]=day;
+                    dt.watched=(dt.watched||0)+1;
+                    dt.hist=dt.hist||[];dt.hist.unshift(line);dt.hist=dt.hist.slice(0,40);
+                    lkSet(dt);lkRender();
+                  }
                 }
               }
             }catch(_e){}
@@ -5670,7 +5688,7 @@ function observeReveals(){
               /* a wiped cloud copy carries empty strings — never let them clobber real local values */
               ['name','fav','favB','theme','pic'].forEach(k=>{if(!(cloud[k]&&String(cloud[k]).trim())&&d[k])merged[k]=d[k];});
               merged.badges=[...new Set([...(d.badges||[]),...(cloud.badges||[])])];
-              merged.eps=Object.assign({},window.jcwDecKeys(cloud.eps),d.eps||{});
+              merged.eps=window.jcwEpsMerge(window.jcwDecKeys(cloud.eps),d.eps);
               merged.radio=Object.assign({},window.jcwDecKeys(cloud.radio),d.radio||{});
               merged.seen=Object.assign({},window.jcwDecKeys(cloud.seen),d.seen||{});
               merged.tagged=Object.assign({},window.jcwDecKeys(cloud.tagged),d.tagged||{});
