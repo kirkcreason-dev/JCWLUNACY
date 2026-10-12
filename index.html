@@ -2448,6 +2448,17 @@ function observeReveals(){
     ['tagger','Tagger \u00b7 posted on 10 walls'],
     ['everyday','Every Damn Day \u00b7 7-day check-in streak'],
     ['diehard','Die Hard \u00b7 30-day check-in streak'],
+    /* THE HARD TEN (Oct 2026): long-haul badges, +1,000 points each */
+    ['iron100','Iron Juggalo \u00b7 100-day check-in streak'],
+    ['fullyear','Every Damn Year \u00b7 365-day check-in streak'],
+    ['fullset','The Complete Set \u00b7 own every card that comes in packs'],
+    ['foil100','Foil Fiend \u00b7 100 different foil cards'],
+    ['archive','The Whole Archive \u00b7 watched 110 different episodes'],
+    ['badges250','Badge Baron \u00b7 earned 250 badges'],
+    ['lu_500','Unbreakable \u00b7 500 Lunacy Unlocked wins'],
+    ['arcade500','Midway Immortal \u00b7 500 arcade wins'],
+    ['grandslam','Grand Slam \u00b7 won the JCW Rumble and Ladder Wars with every wrestler'],
+    ['family100','The Whole Damn Family \u00b7 100 allies'],
     ['dayone','Day One \u00b7 here before the badges'],
     ['crossedduke','Crossed the Duke \u00b7 rivaled Digital Duke \u00b7 no takebacks'],
     ['miracles','The Miracle Man \u00b7 Miracles \u00b7 found every hidden secret'],
@@ -2803,6 +2814,23 @@ function observeReveals(){
       if(Object.keys(d.tagged||{}).length>=10)add('tagger');
       if((d.streak||0)>=7||(d.streakBest||0)>=7)add('everyday');
       if((d.streak||0)>=30||(d.streakBest||0)>=30)add('diehard');
+      /* THE HARD TEN */
+      if((d.streak||0)>=100||(d.streakBest||0)>=100)add('iron100');
+      if((d.streak||0)>=365||(d.streakBest||0)>=365)add('fullyear');
+      if((window.__myAllies||0)>=100)add('family100');
+      if(distinctEps>=110)add('archive');
+      if(((d.game||{}).wins||0)>=500)add('lu_500');
+      if(((d.arcade||{}).wins||0)>=500)add('arcade500');
+      (function(){try{
+        const cards=d.cards||{};let foils=0;
+        Object.keys(cards).forEach(function(k){const c=cards[k];if(c&&(+c.n||0)>0&&c.foil)foils++;});
+        if(foils>=100)add('foil100');
+        const cat=window.jcwCardCatalog?window.jcwCardCatalog():null;
+        if(cat&&cat.length){
+          const pool=cat.filter(function(c){return c&&!c.giftOnly&&!c.cap;});
+          if(pool.length&&pool.every(function(c){const o=cards[c.id];return o&&(+o.n||0)>0;}))add('fullset');
+        }
+      }catch(_e){}})();
       if(d.dayone)add('dayone');
       if((window.__myAllies||0)>=10&&!d.badges.includes('familie')){
         d.badges.push('familie');ch=true;
@@ -2866,6 +2894,8 @@ function observeReveals(){
         if(ru.best>=10000)add('ru_score10k');if(ru.best>=20000)add('ru_score20k');if(ru.runs>=25)add('ru_runs25');
         let wonAs=0;RUMBLE_ROSTER.forEach(r=>{if(ww[r[0]]){wonAs++;add('ru_w_'+r[0]);}});
         if(wonAs>=5)add('ru_wonwith5');if(wonAs>=RUMBLE_ROSTER.length)add('ru_wonwithall');
+        /* Grand Slam (HARD TEN): every Rumble AND every Ladder Wars wrestler win */
+        if(RUMBLE_ROSTER.length&&RUMBLE_ROSTER.every(r=>d.badges.includes('ru_w_'+r[0])&&d.badges.includes('lw_w_'+r[0])))add('grandslam');
         /* Carnival Claw (arcade/claw = {rosterId: 5-bit mask}, bit 0 = legendary) */
         const cm=a.claw||{};const bits=v=>{v=+v||0;let c=0;while(v){c+=v&1;v>>=1;}return c;};
         let pieces=0,sets=0,legends=0;const grp=[0,0,0,0],grpAll=[0,0,0,0];
@@ -2949,7 +2979,8 @@ function observeReveals(){
         const OWN={boldizar:1,grandduke:1,wholecarnival:1,mosthated:1,familie:1,secondmile:1,wallofsound:1,lockerlegend:1,miracles:1,
           bigfoot:1,browngold:1,jokerscards:1,whoop:1,riddlebox:1,milenko:1,hatchet:1,neden:1,jwo:1,carnage:1,ringmaster:1,jeckel:1,
           shangrila:1,bizzar:1,bangpow:1,deathpop:1,faygo:1,bloodymania:1};
-        const bpts=b=>OWN[b]?0:((b.indexOf('cl_set_')===0||b.indexOf('ru_w_')===0||b.indexOf('lw_w_')===0)?50:100);
+        const HARD={iron100:1,fullyear:1,fullset:1,foil100:1,archive:1,badges250:1,lu_500:1,arcade500:1,grandslam:1,family100:1};
+        const bpts=b=>OWN[b]?0:HARD[b]?1000:((b.indexOf('cl_set_')===0||b.indexOf('ru_w_')===0||b.indexOf('lw_w_')===0)?50:100);
         d.bpaid=(d.bpaid&&typeof d.bpaid==='object')?d.bpaid:{};
         let bGain=0;const bNew=[];
         d.badges.forEach(function(b){
@@ -2992,6 +3023,7 @@ function observeReveals(){
         d.hist=d.hist||[];d.hist.unshift('Digital Duke \u00b7 '+badgeTally+' badges \u00b7 +750');d.hist=d.hist.slice(0,40);
         try{setTimeout(function(){toast('\ud83c\udccf DIGITAL DUKE \u2014 forty badges. The full deck. +750',5200);},400);}catch(_e){}
       }
+      if(badgeTally>=250)add('badges250');   /* HARD TEN \u2014 its +1,000 pays on the next pass */
       if(ch)lkSet(d);
     })();
     el.textContent=d.pts||0;
