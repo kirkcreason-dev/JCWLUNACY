@@ -1373,9 +1373,10 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <div class="pk-box" style="max-width:620px;">
     <button class="cx" id="trade-close" aria-label="Close">&times;</button>
     <h3 id="trade-title" style="font-size:22px;">Trade</h3>
-    <p class="muted" style="margin:6px 0 4px;">You want this card:</p>
+    <p class="muted" id="trade-lbl1" style="margin:6px 0 4px;">You want this card:</p>
     <div id="trade-want"></div>
-    <p class="muted" style="margin:14px 0 4px;">Pick a duplicate of yours to offer &mdash; it&rsquo;s held until they accept or decline.</p>
+    <div id="trade-giftslot"></div>
+    <p class="muted" id="trade-lbl2" style="margin:14px 0 4px;">Pick a duplicate of yours to offer &mdash; it&rsquo;s held until they accept or decline.</p>
     <div class="cardfilter-wrap"><input type="search" class="cardfilter" data-filters="trade-offer-cards" placeholder="Filter your cards&hellip;" aria-label="Filter cards" autocomplete="off"><span class="cardfilter-n"></span></div>
     <div class="pk-cards" id="trade-offer-cards"></div>
   </div>
@@ -6855,13 +6856,15 @@ route();
       if(!curUser()){toast('Log into your Locker first');location.hash='#locker';return;}
       buildCatalog();const c=coll();
       const dupes=CATALOG.filter(cd=>isHouse()||(c[cd.id]&&c[cd.id].n>=2)); /* the house can send any card */
+      const tIds=(window.__profTheirFor===toUid)?window.__profTheirIds:null;   /* cards they're missing go first */
+      if(tIds)dupes.sort((a,b)=>(!!tIds[a.id])-(!!tIds[b.id]));
       const to=document.getElementById('gift-to'); if(to)to.textContent='Send a card to '+toName;
       const box=document.getElementById('gift-cards'); if(!box)return;
       const m=document.getElementById('gift-modal'); if(m){m.dataset.uid=toUid;m.dataset.name=toName;}
       if(!dupes.length){box.innerHTML='<p class="muted">You need a duplicate (2 or more of a card) to send one &mdash; you always keep your last copy. Open more packs!</p>';}
       else{box.innerHTML=isHouse()?'<label style="grid-column:1/-1;display:flex;align-items:center;gap:8px;color:var(--gold);font-size:14px;cursor:pointer;"><input type="checkbox" id="gift-foil-tgl" style="width:18px;height:18px;accent-color:#ffd028;"> Send as &#10024; foil</label>':'';
         if(isHouse()){const tg=document.getElementById('gift-foil-tgl');if(tg){tg.checked=localStorage.getItem('jcw_duke_foil')!=='0';tg.addEventListener('change',()=>{try{localStorage.setItem('jcw_duke_foil',tg.checked?'1':'0');}catch(_e){}});}}
-        dupes.forEach(cd=>{const oo=c[cd.id]||{n:(isHouse()?Infinity:0),foil:false};const el=cardEl(cd,{owned:true,cnt:oo.n,foil:oo.foil,locked:false});el.style.cursor='pointer';el.title='Send this card';el.addEventListener('click',()=>doSendCard(toUid,toName,cd.id));box.appendChild(el);});}
+        dupes.forEach(cd=>{const oo=c[cd.id]||{n:(isHouse()?Infinity:0),foil:false};const el=cardEl(cd,{owned:true,cnt:oo.n,foil:oo.foil,locked:false});el.style.cursor='pointer';el.title='Send this card';if(tIds&&!tIds[cd.id]){const tg=document.createElement('span');tg.className='cnt';tg.style.cssText='left:6px;right:auto;bottom:6px;top:auto;background:var(--acid,#9dff3a);color:#000;';tg.textContent='They need';el.appendChild(tg);}el.addEventListener('click',()=>doSendCard(toUid,toName,cd.id));box.appendChild(el);});}
       if(m)m.classList.add('on');
     };
     window.jcwCardCap=function(id){try{const c=catById(id);return (c&&c.cap)?c.cap:0;}catch(e){return 0;}};
@@ -6994,7 +6997,7 @@ route();
       let mine={};if(canTrade){try{mine=coll()||{};}catch(_e){}}
       const myN=id=>{const o=mine[id];return o?(+o.n||0):0;};
       const theirIds={};owned.forEach(o=>{theirIds[o.card.id]=1;});
-      window.__profTheirIds=canTrade?theirIds:null;
+      window.__profTheirIds=canTrade?theirIds:null;window.__profTheirFor=canTrade?uid:null;
       const need=owned.filter(o=>myN(o.card.id)<1);
       const missing=CATALOG.filter(c=>!theirIds[c.id]&&!c.giftOnly&&!c.cap)
         .sort((a,b)=>((myN(b.id)>=2)-(myN(a.id)>=2))||byRar(a,b));
@@ -7014,14 +7017,15 @@ route();
         host.querySelectorAll('[data-pt]').forEach(b=>b.classList.toggle('on',b.dataset.pt===tab));
         if(tab==='missing'){
           if(note)note.innerHTML=missing.length
-            ?(spares?'You have spares of <b>'+spares+'</b> card'+(spares===1?'':'s')+' '+safeName+' is missing (shown first). Tap one of their cards under <b>You need</b> or <b>Their cards</b>, then offer a spare.':safeName+' is missing these. You don’t have spares of any of them yet.')
+            ?(spares?'You have spares of <b>'+spares+'</b> card'+(spares===1?'':'s')+' '+safeName+' is missing (shown first). Tap one to <b>gift it</b> or <b>trade it</b> for one of theirs.':safeName+' is missing these. You don’t have spares of any of them yet.')
             :safeName+' has every tradable card.';
           missing.forEach(c=>{
             const n=myN(c.id);
             const el=cardEl(c,{owned:false,locked:false});
             if(n>=2){const t=document.createElement('span');t.className='cnt';t.style.cssText='left:6px;right:auto;bottom:6px;top:auto;background:var(--acid,#9dff3a);color:#000;';t.textContent='You have x'+n;el.appendChild(t);}
             else el.style.opacity='.55';
-            el.title=n>=2?('You have a spare to offer '+safeName):(safeName+' is missing this');
+            el.title=n>=2?('Gift or trade this to '+safeName):(safeName+' is missing this');
+            if(n>=2){el.style.cursor='pointer';el.addEventListener('click',()=>openOfferUI(uid,theirName,c.id,owned));}
             grid.appendChild(el);
           });
           return;
@@ -7045,9 +7049,44 @@ route();
     };
 
     /* ---- propose: pick which of your cards to offer ---- */
+    function tradeLabels(a,b,giftHtml){
+      const l1=document.getElementById('trade-lbl1'),l2=document.getElementById('trade-lbl2'),gs=document.getElementById('trade-giftslot');
+      if(l1)l1.innerHTML=a;if(l2)l2.innerHTML=b;if(gs)gs.innerHTML=giftHtml||'';
+      const f=document.querySelector('#trade-modal .cardfilter');if(f){f.value='';f.placeholder=giftHtml?'Filter their cards\u2026':'Filter your cards\u2026';}
+    }
+    /* ---- reverse: start from MY spare (a card they're missing) — gift it, or pick one of theirs in return ---- */
+    function openOfferUI(toUid,toName,offerId,theirOwned){
+      if(!curUser()){toast('Log into your Locker first');location.hash='#locker';return;}
+      buildCatalog();
+      const offer=catById(offerId);if(!offer)return;
+      const c=coll(),m=document.getElementById('trade-modal'),box=document.getElementById('trade-offer-cards'),hd=document.getElementById('trade-want');
+      if(!m||!box)return;
+      const nm=String(toName||'them').replace(/[<>&"]/g,'');
+      const t=document.getElementById('trade-title');if(t)t.innerHTML='Give '+nm+' a card';
+      tradeLabels('Your spare:','Or trade it &mdash; pick one of '+nm+'&rsquo;s cards to get back. Your spare is held until they accept or decline.',
+        '<div style="text-align:center;margin:10px 0 2px;"><button id="trade-giftbtn" type="button" style="background:var(--acid,#9dff3a);color:#000;border:0;border-radius:10px;padding:12px 22px;font:800 15px system-ui,sans-serif;letter-spacing:.03em;cursor:pointer;">&#127873; Gift it to '+nm+'</button></div>');
+      if(hd){hd.innerHTML='';const o=c[offerId]||{};const wc=cardEl(offer,{owned:true,cnt:o.n===Infinity?Infinity:(+o.n||0),foil:!!o.foil,locked:false});wc.style.maxWidth='120px';wc.style.margin='0 auto';hd.appendChild(wc);}
+      const gb=document.getElementById('trade-giftbtn');
+      if(gb)gb.addEventListener('click',()=>{m.classList.remove('on');doSendCard(toUid,toName,offerId);});
+      const myN=id=>{const o=c[id];return o?(+o.n||0):0;};
+      const list=(theirOwned||[]).map(o=>o.card).filter(cd=>!(cd.cap&&myN(cd.id)>=1))   /* limited: one per person */
+        .sort((a,b)=>((myN(a.id)<1)?0:1)-((myN(b.id)<1)?0:1));
+      box.innerHTML='';
+      if(!list.length)box.innerHTML='<p class="muted">'+nm+' has nothing you could take back right now &mdash; you can still gift it.</p>';
+      list.forEach(cd=>{
+        const el=cardEl(cd,{owned:true,cnt:0,foil:false,locked:false});
+        if(myN(cd.id)<1){const tg=document.createElement('span');tg.className='cnt';tg.style.cssText='left:6px;right:auto;bottom:6px;top:auto;background:var(--acid,#9dff3a);color:#000;';tg.textContent='You need';el.appendChild(tg);}
+        el.style.cursor='pointer';el.title='Ask for this one in return';
+        el.addEventListener('click',()=>sendTrade(toUid,toName,cd.id,offerId));
+        box.appendChild(el);
+      });
+      m.dataset.to=toUid;m.dataset.toname=toName;m.dataset.want='';
+      m.classList.add('on');
+    }
     function openTradeUI(toUid,toName,wantId){
       if(!curUser()){toast('Log into your Locker first');location.hash='#locker';return;}
       buildCatalog();
+      tradeLabels('You want this card:','Pick a duplicate of yours to offer &mdash; it&rsquo;s held until they accept or decline.','');
       const want=catById(wantId);if(!want)return;
       const c=coll();
       const mine=CATALOG.filter(cd=>{if(isHouse())return true;const o=c[cd.id];return o&&o.n>=2;}); /* the house can offer any card */
