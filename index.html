@@ -1522,6 +1522,14 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <p class="lede">Live events across the country &mdash; and every August, the Gathering of the Juggalos.</p>
 
     <div class="events">
+      <div class="ev premier rev" data-until="2026-11-30">
+        <span class="badge">Tickets on sale now</span>
+        <h3>JCW Lunacy Live</h3>
+        <div class="sub">Sunday, November 29, 2026 &middot; Diamondback Music Hall &middot; Belleville, MI</div>
+        <p>JCW is back at <b>Diamondback Music Hall</b> in Belleville. <b>Doors 6:30 PM, bell at 8 PM.</b> All ages &mdash; bring the whole family.</p>
+        <p><b>Free</b> standing-room RSVP &middot; <b>$15</b> general admission &middot; <b>$17</b> ringside &middot; <b>$40</b> cocktail table for 4. Ringside and tables go first.</p>
+        <div style="margin-top:16px;"><a class="btn gold" href="https://www.diamondbackmusichall.com/JCW/" target="_blank" rel="noopener">Get Nov 29 tickets</a></div>
+      </div>
       <div class="ev premier rev">
         <span class="badge">In the books</span>
         <h3>Bloodymania 19</h3>
@@ -1598,6 +1606,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     </div>
     <div class="sched rev" id="bit-sched">
       <div class="row"><div class="d" id="ev-weekly-date">SEP 17<small>Thursday</small></div><div><h4>JCW Lunacy · New Episode</h4><div class="v">7PM Eastern · Psychopathic Records YouTube</div></div><span class="tag2">Weekly</span></div>
+      <a class="row" href="https://www.diamondbackmusichall.com/JCW/" target="_blank" rel="noopener" data-until="2026-11-30" style="text-decoration:none;color:inherit;"><div class="d">NOV 29<small>Sunday</small></div><div><h4>JCW Lunacy Live</h4><div class="v">Diamondback Music Hall &middot; Belleville, MI &middot; Doors 6:30 &middot; Bell 8PM</div></div><span class="tag2">Tickets</span></a>
       <div class="row"><div class="d">AUG 2027<small>Dates TBA</small></div><div><h4>Bloodymania 20</h4><div class="v">The JCW Pavilion · Gathering of the Juggalos</div></div><span class="tag2">Annual</span></div>
     </div>
     <div style="margin-top:24px;display:flex;flex-wrap:wrap;gap:12px;">
@@ -3430,6 +3439,7 @@ function observeReveals(){
       sc.id='bit-script';sc.charset='utf-8';sc.src='https://widget.bandsintown.com/main.min.js';
       document.body.appendChild(sc);
     }
+    try{document.querySelectorAll('[data-until]').forEach(el=>{if(Date.now()>=Date.parse(el.getAttribute('data-until')+'T05:00:00Z'))el.remove();});}catch(_e){}
     function fmtDate(txt){
       const d=new Date(txt);
       if(!isNaN(d)) return {d:MON[d.getMonth()]+' '+d.getDate(), dow:DOW[d.getDay()]};
@@ -3454,8 +3464,11 @@ function observeReveals(){
       });
       return rows;
     }
+    const PINNED=[{d:'NOV 29',dow:'Sunday',venue:'JCW Lunacy Live',loc:'Diamondback Music Hall \u00b7 Belleville, MI \u00b7 Doors 6:30 \u00b7 Bell 8PM',link:'https://www.diamondbackmusichall.com/JCW/',until:'2026-11-30'}];
     function render(rows){
       if(!rows.length) return false;
+      const now=Date.now();
+      PINNED.forEach(p=>{if(now<Date.parse(p.until+'T05:00:00Z')&&!rows.some(r=>r.d===p.d))rows.unshift(p);});
       host.innerHTML=rows.map(r=>{
         const where=[r.venue,r.loc].filter(Boolean).join(' \u00b7 ');
         const inner='<div class="d">'+esc(r.d)+(r.dow?'<small>'+esc(r.dow)+'</small>':'')+'</div>'
@@ -5299,6 +5312,7 @@ function observeReveals(){
           let k=null;
           if(/eventim|psychopathicrecords\.com\/jcwtours|jcwtours/i.test(h))k='eventim';
           else if(/juggalogathering/i.test(h))k='gathering';
+          else if(/diamondbackmusichall/i.test(h))k='diamondback';
           if(!k)return;
           const d2=dayKey();
           bump('stats/tickets/'+k+'/total');
