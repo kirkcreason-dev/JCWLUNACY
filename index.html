@@ -6986,24 +6986,62 @@ route();
                           : 'No cards yet &mdash; they haven&rsquo;t opened a pack.')
         )+'</p>';return;}
       const order={legendary:0,superrare:1,rare:2,common:3};
-      owned.sort((a,b)=>(order[a.card.rar]-order[b.card.rar])||a.card.name.localeCompare(b.card.name));
-      host.innerHTML='<div class="prof-cardgrid"></div>';
-      const grid=host.querySelector('.prof-cardgrid');
+      const byRar=(a,b)=>(order[a.rar]-order[b.rar])||a.name.localeCompare(b.name);
+      owned.sort((a,b)=>byRar(a.card,b.card));
       const canTrade=!!(curUser()&&curUser().uid!==uid&&!window.__profBlockedMe);
-      owned.forEach(o=>{
-        const el=cardEl(o.card,{owned:true,cnt:o.own.n,foil:o.own.foil,locked:false,serial:o.own.serials&&o.own.serials[0]});
-        el.title=canTrade?('Ask '+theirName+' to trade for this'):o.card.name;
-        if(canTrade){
-          el.style.cursor='pointer';
-          el.addEventListener('click',()=>openTradeUI(uid,theirName,o.card.id));
+      /* TRADE HELPER: on someone else's page, compare their binder with mine —
+         what they have that I need, and what they're missing (my spares first) */
+      let mine={};if(canTrade){try{mine=coll()||{};}catch(_e){}}
+      const myN=id=>{const o=mine[id];return o?(+o.n||0):0;};
+      const theirIds={};owned.forEach(o=>{theirIds[o.card.id]=1;});
+      window.__profTheirIds=canTrade?theirIds:null;
+      const need=owned.filter(o=>myN(o.card.id)<1);
+      const missing=CATALOG.filter(c=>!theirIds[c.id]&&!c.giftOnly&&!c.cap)
+        .sort((a,b)=>((myN(b.id)>=2)-(myN(a.id)>=2))||byRar(a,b));
+      const spares=missing.filter(c=>myN(c.id)>=2).length;
+      const safeName=String(theirName||'They').replace(/[<>&"]/g,'');
+      let tab=window.__profTab||'all';if(!canTrade)tab='all';
+      host.innerHTML=(canTrade?'<div class="cards-filters prof-tabs" style="margin-bottom:10px;">'
+          +'<button data-pt="all">Their cards ('+owned.length+')</button>'
+          +'<button data-pt="need">You need ('+need.length+')</button>'
+          +'<button data-pt="missing">They’re missing ('+missing.length+')</button></div>'
+          +'<p class="muted prof-tabnote" style="margin:0 0 10px;font-size:13px;"></p>':'')
+        +'<div class="prof-cardgrid"></div>';
+      const grid=host.querySelector('.prof-cardgrid');
+      const note=host.querySelector('.prof-tabnote');
+      const draw=()=>{
+        grid.innerHTML='';
+        host.querySelectorAll('[data-pt]').forEach(b=>b.classList.toggle('on',b.dataset.pt===tab));
+        if(tab==='missing'){
+          if(note)note.innerHTML=missing.length
+            ?(spares?'You have spares of <b>'+spares+'</b> card'+(spares===1?'':'s')+' '+safeName+' is missing (shown first). Tap one of their cards under <b>You need</b> or <b>Their cards</b>, then offer a spare.':safeName+' is missing these. You don’t have spares of any of them yet.')
+            :safeName+' has every tradable card.';
+          missing.forEach(c=>{
+            const n=myN(c.id);
+            const el=cardEl(c,{owned:false,locked:false});
+            if(n>=2){const t=document.createElement('span');t.className='cnt';t.style.cssText='left:6px;right:auto;bottom:6px;top:auto;background:var(--acid,#9dff3a);color:#000;';t.textContent='You have x'+n;el.appendChild(t);}
+            else el.style.opacity='.55';
+            el.title=n>=2?('You have a spare to offer '+safeName):(safeName+' is missing this');
+            grid.appendChild(el);
+          });
+          return;
         }
-        grid.appendChild(el);
-      });
-      if(canTrade){
-        const tip=document.createElement('p');tip.className='muted';tip.style.marginTop='10px';
-        tip.innerHTML='Tap any card above to <b>propose a trade</b> for it.';
-        host.appendChild(tip);
-      }
+        const list=tab==='need'?need:owned;
+        if(note)note.innerHTML=tab==='need'
+          ?(need.length?'Cards '+safeName+' has that you don’t. Tap one to <b>propose a trade</b>.':'You already have every card '+safeName+' has.')
+          :'Tap any card to <b>propose a trade</b> for it.';
+        list.forEach(o=>{
+          const el=cardEl(o.card,{owned:true,cnt:o.own.n,foil:o.own.foil,locked:false,serial:o.own.serials&&o.own.serials[0]});
+          el.title=canTrade?('Ask '+theirName+' to trade for this'):o.card.name;
+          if(canTrade){
+            el.style.cursor='pointer';
+            el.addEventListener('click',()=>openTradeUI(uid,theirName,o.card.id));
+          }
+          grid.appendChild(el);
+        });
+      };
+      host.querySelectorAll('[data-pt]').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.pt;window.__profTab=tab;draw();}));
+      draw();
     };
 
     /* ---- propose: pick which of your cards to offer ---- */
@@ -7013,6 +7051,8 @@ route();
       const want=catById(wantId);if(!want)return;
       const c=coll();
       const mine=CATALOG.filter(cd=>{if(isHouse())return true;const o=c[cd.id];return o&&o.n>=2;}); /* the house can offer any card */
+      const tIds=window.__profTheirIds;   /* cards they're missing go first */
+      if(tIds)mine.sort((a,b)=>(!!tIds[a.id])-(!!tIds[b.id]));
       const box=document.getElementById('trade-offer-cards');
       const hd=document.getElementById('trade-want');
       const m=document.getElementById('trade-modal');
@@ -7030,6 +7070,7 @@ route();
           const o=c[cd.id]||{n:(isHouse()?Infinity:0),foil:false};
           const el=cardEl(cd,{owned:true,cnt:o.n,foil:o.foil,locked:false});
           el.style.cursor='pointer';el.title='Offer this card';
+          if(tIds&&!tIds[cd.id]){const t=document.createElement('span');t.className='cnt';t.style.cssText='left:6px;right:auto;bottom:6px;top:auto;background:var(--acid,#9dff3a);color:#000;';t.textContent='They need';el.appendChild(t);}
           el.addEventListener('click',()=>sendTrade(toUid,toName,wantId,cd.id));
           box.appendChild(el);
         });
