@@ -5794,6 +5794,7 @@ function observeReveals(){
               merged.wins=Math.max(d.wins||0,cloud.wins||0);
               lkCloudReady=true;          /* safe to write from here on */
               lkSet(merged);lkRender();
+              try{window.jcwCardsRefresh&&window.jcwCardsRefresh();}catch(_e){}   /* cards show up without a refresh */
               try{setTimeout(window.jcwReconcileBadges,1500);setTimeout(window.jcwReconcileBadges,6000);}catch(_e){}
               try{setTimeout(function(){try{window.jcwLunaMonthly();}catch(_e){}},3000);}catch(_e){}
               try{lkBackupKeep(merged);if(!ptsWait&&!(Date.now()-(window.__ptsJustReset||0)<120000))lkWipeCheck(cloud);}catch(_e){}
@@ -5804,6 +5805,7 @@ function observeReveals(){
               try{if(lkUser&&!JCW_PTS_RESET.keep[lkUser.uid]){localStorage.setItem(jcwPtsResetKey(),JCW_PTS_RESET.id);fbDB.ref('lockers/'+lkUser.uid+'/ptsReset').set(JCW_PTS_RESET.id);}}catch(_e){}
               lkCloudReady=true;
               if(firstPull)lkCloudPush();
+              try{window.jcwCardsRefresh&&window.jcwCardsRefresh();}catch(_e){}
               /* …unless this device remembers a real locker for this uid: offer restore */
               try{lkWipeCheck(null);}catch(_e){}
             }
@@ -7237,6 +7239,13 @@ route();
     })();
 
     if((location.hash||'')==='#cards')setTimeout(()=>{try{jcwCardsRender();}catch(e){}},300);
+    /* redraw the Cards page whenever the locker changes underneath it (cloud copy
+       arriving after sign-in, a trade or gift landing, another device) */
+    let __crT=0;
+    window.jcwCardsRefresh=function(){
+      clearTimeout(__crT);
+      __crT=setTimeout(()=>{try{if((location.hash||'')==='#cards')jcwCardsRender();}catch(e){}},250);
+    };
   })();
 })();
 
