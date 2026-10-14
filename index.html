@@ -64,6 +64,14 @@ nav.top{position:fixed;top:0;left:0;right:0;z-index:100;min-height:var(--nav-h);
   flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
 @media (max-width:899px){:root{--nav-h:106px;}body{padding-top:var(--nav-h);}}
 nav.top::-webkit-scrollbar{display:none;}
+.lang-wrap{flex:none;display:inline-flex;align-items:center;gap:4px;margin-right:6px;color:var(--gold);font-size:16px;}
+.lang-pick{background:#0d0d12;color:var(--gold);border:1px solid rgba(255,208,40,.55);border-radius:8px;padding:5px 6px;font:700 12px system-ui,sans-serif;max-width:118px;cursor:pointer;}
+.lang-foot{margin:6px 0 14px;color:var(--gold);}
+/* Google Translate: no banner, no hover pop-ups, no page shift */
+.goog-te-banner-frame,body>.skiptranslate>iframe,iframe.skiptranslate,#goog-gt-tt,.goog-te-balloon-frame,.VIpgJd-ZVi9od-ORHb-OEVmcd,.VIpgJd-ZVi9od-aZ2wEe-wOHMyf,.VIpgJd-yAWNEb-L7lbkb{display:none!important;}
+body{top:0!important;}
+.goog-text-highlight,.VIpgJd-yAWNEb-VIpgJd-fmcmS-sn54Q{background:none!important;box-shadow:none!important;}
+#gt-el{display:none!important;}
 nav.top .brand{font-family:'Rubik Distressed',system-ui,sans-serif;font-size:20px;color:var(--gold);
   letter-spacing:.03em;margin-right:18px;flex:none;text-shadow:2px 2px 0 #000;user-select:none;cursor:pointer;}
 nav.top a{flex:none;padding:0;position:relative;transition:transform .15s,filter .15s;border-radius:8px;}
@@ -974,7 +982,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
 <body>
 
 <nav class="top" id="nav">
-  <span class="brand" id="brand">JCW</span>
+  <span class="brand" id="brand" translate="no">JCW</span>
+  <label class="lang-wrap" translate="no"><span aria-hidden="true">&#127760;</span><select class="lang-pick" translate="no" aria-label="Language" title="Language"><option value="en">English</option><option value="de">Deutsch</option><option value="es">Español</option><option value="fr">Français</option><option value="pt">Português</option><option value="it">Italiano</option><option value="nl">Nederlands</option><option value="pl">Polski</option><option value="sv">Svenska</option><option value="no">Norsk</option><option value="da">Dansk</option><option value="fi">Suomi</option><option value="cs">Čeština</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="tr">Türkçe</option><option value="ja">日本語</option><option value="ko">한국어</option><option value="zh-CN">中文</option><option value="tl">Tagalog</option><option value="ar">العربية</option><option value="hi">हिन्दी</option></select></label>
   <a href="#home" data-r="home"><img src="nav/nav-home.webp" onerror="this.onerror=null;this.src='nav/nav-home.png'" alt="Home"></a>
   <a href="#episodes" data-r="episodes"><img src="nav/nav-episodes.webp" onerror="this.onerror=null;this.src='nav/nav-episodes.png'" alt="Episodes"></a>
   <a href="#clips" data-r="clips"><img src="nav/nav-clips.webp" onerror="this.onerror=null;this.src='nav/nav-clips.png'" alt="Clips"></a>
@@ -1435,6 +1444,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
       <ul>
         <li><span class="t">Account</span>Your email (for sign-in) and your locker name, favorites, theme, pic, badges and points.</li>
         <li><span class="t">Activity</span>Anonymous counts &mdash; visits, episodes played, votes and ticket clicks.</li>
+        <li><span class="t">Language</span>Pick a language other than English and the page text is sent to Google Translate to show it in that language. In English, Google Translate is never loaded.</li>
         <li><span class="t">Fair play</span>A random device code this browser makes for itself, saved with your account when you sign in, so one person can&rsquo;t run a stack of accounts. It isn&rsquo;t your IP address or anything personal, and only the site owner can see it.</li>
         <li><span class="t">Never</span>No ads, no selling your data, no tracking you off this site.</li>
       </ul>
@@ -1963,6 +1973,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <a href="#home">Home</a><a href="#about">About</a><a href="#episodes">Episodes</a><a href="#events">Events</a><a href="https://www.psychopathicrecords.com/jcwtours" target="_blank" rel="noopener">Tickets</a>
     <a href="#crew">Roster</a><a href="#games">Games</a><a href="#merch">Merch</a><a href="#cards">Cards</a><a href="#comics">Comics</a><a href="#vote">Vote</a><a href="#locker">Locker</a><a href="#lunatics">Lunatics Only</a>
   </div>
+  <div class="ss-lbl">Language</div>
+  <div class="lang-foot" translate="no">&#127760; <select class="lang-pick" translate="no" aria-label="Language" title="Language" style="font-size:14px;"><option value="en">English</option><option value="de">Deutsch</option><option value="es">Español</option><option value="fr">Français</option><option value="pt">Português</option><option value="it">Italiano</option><option value="nl">Nederlands</option><option value="pl">Polski</option><option value="sv">Svenska</option><option value="no">Norsk</option><option value="da">Dansk</option><option value="fi">Suomi</option><option value="cs">Čeština</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="tr">Türkçe</option><option value="ja">日本語</option><option value="ko">한국어</option><option value="zh-CN">中文</option><option value="tl">Tagalog</option><option value="ar">العربية</option><option value="hi">हिन्दी</option></select></div>
   <div class="ss-lbl">Sister Sites</div>
   <div class="fnav sister">
     <a href="https://www.psychopathicrecords.com" target="_blank" rel="noopener">Psychopathic Records</a>
@@ -7598,6 +7610,45 @@ import('./jcw-visuals/jcw-visuals.mjs').then(V=>{
   window.JCWV=V;
   if((location.hash||'')==='#cards'&&window.jcwCardsRender)jcwCardsRender();
 }).catch(e=>{try{console.warn('[cards] visuals module unavailable:',e&&e.message);}catch(_e){}});
+</script>
+<script>
+/* ===== LANGUAGE (Google Translate, loaded only when a non-English language is picked) =====
+   The choice lives in the googtrans cookie Google reads ("/en/<code>"), so it sticks
+   across visits. Names, cards and roster data stay English: the card set and its
+   rarities are built from the roster page's text, so those parts are marked translate="no". */
+(function(){
+  var KEEP='#view-crew .wr, #view-crew .era .tag, .tcard, .brand, nav.top, [data-puid], #prof-body h2, .lang-pick, .lang-wrap, .lang-foot, #board-list, .pk-cards, #trade-want';
+  function mark(root){try{
+    if(root.nodeType!==1)return;
+    if(root.matches&&root.matches(KEEP))root.setAttribute('translate','no');
+    root.querySelectorAll&&root.querySelectorAll(KEEP).forEach(function(e){if(e.getAttribute('translate')!=='no')e.setAttribute('translate','no');});
+  }catch(e){}}
+  function cur(){var m=document.cookie.match(/(?:^|;\s*)googtrans=\/en\/([^;]+)/);return m?decodeURIComponent(m[1]):'en';}
+  function domains(){var h=location.hostname,parts=h.split('.'),out=['',h];if(parts.length>=2)out.push('.'+parts.slice(-2).join('.'));return out;}
+  function setLang(code){
+    domains().forEach(function(d){
+      var dd=d?'; domain='+d:'';
+      document.cookie='googtrans=; path=/'+dd+'; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      if(code!=='en')document.cookie='googtrans=/en/'+code+'; path=/'+dd+'; max-age=31536000';
+    });
+    try{localStorage.setItem('jcw_lang',code);}catch(e){}
+    location.reload();
+  }
+  var lang=cur();
+  document.querySelectorAll('.lang-pick').forEach(function(s){
+    s.value=lang;if(s.value!==lang)s.value='en';
+    s.addEventListener('change',function(){setLang(s.value);});
+  });
+  if(lang==='en')return;
+  document.documentElement.setAttribute('lang',lang);
+  mark(document.body);
+  try{new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes&&m.addedNodes.forEach(mark);});}).observe(document.body,{childList:true,subtree:true});}catch(e){}
+  var el=document.createElement('div');el.id='gt-el';document.body.appendChild(el);
+  window.jcwGTInit=function(){try{new google.translate.TranslateElement({pageLanguage:'en',autoDisplay:false},'gt-el');}catch(e){}};
+  var sc=document.createElement('script');sc.src='https://translate.google.com/translate_a/element.js?cb=jcwGTInit';sc.async=true;
+  sc.onerror=function(){try{if(window.toast)toast('Translation couldn’t load — showing English.',3600);}catch(e){}};
+  document.body.appendChild(sc);
+})();
 </script>
 </body>
 </html>
