@@ -922,6 +922,9 @@ body:not(.jcw-member) #chat-fab{display:none!important;}
 .usearch .us-m{background:var(--acid);color:#000;font-size:9px;padding:1px 5px;border-radius:2px;letter-spacing:.08em;}
 .usearch .us-note{padding:11px 13px;color:var(--steel);font-size:12.5px;}
 #ch-board .usearch{margin:0 0 12px;}
+#chat-panel .ch-usearch{margin:8px 12px 4px;flex:none;}
+#chat-panel .ch-usearch .us-q{padding:9px 12px;font-size:16px;-webkit-appearance:none;appearance:none;border-radius:6px;}
+#chat-panel .ch-usearch .us-res{z-index:30;max-height:55vh;}
 
 
 
@@ -1865,16 +1868,14 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
 <button id="chat-fab" aria-label="Open Lunacy Chat" style="position:fixed;"><span class="cf-n" id="cf-count" aria-hidden="true">0</span>CHAT</button>
 <aside id="chat-panel" aria-label="Lunacy Chat">
   <div class="ch-hd"><b>Lunacy Chat</b><span class="np" id="ch-np"></span><button class="ch-x" id="ch-pop" title="Pop out chat" style="background:none;border:none;color:var(--acid);font-size:16px;cursor:pointer;margin-right:2px;">&#8599;</button><button class="ch-x" id="ch-x">&times;</button></div>
+  <div class="usearch ch-usearch" data-usearch><input type="search" class="us-q" placeholder="Search Juggalos by name&hellip;" aria-label="Search Juggalos" autocomplete="off" spellcheck="false"><div class="us-res" hidden></div></div>
   <div class="ch-tabs"><button class="on" data-tab="chat">Chat</button><button data-tab="vote">Vote</button><button data-tab="board">Leaders</button><button data-tab="mods" id="ch-mods-tab" style="display:none;color:var(--acid);">Mods</button><button data-tab="dms" id="ch-dms-tab" style="display:none;color:var(--hot);">DMs</button></div>
   <div id="ch-live" aria-label="Who is on right now"></div>
   <div class="ch-pane on" id="ch-chat"></div>
   <button id="ch-jump" style="display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:118px;z-index:6;background:var(--acid);color:#000;border:none;border-radius:20px;padding:7px 16px;font:700 12px system-ui;letter-spacing:.04em;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.5);">&#8595; New messages</button>
   <div class="ch-pane" id="ch-mods"><div style="font-size:12px;color:var(--acid);margin-bottom:10px;border-bottom:1px dashed rgba(157,255,58,.25);padding-bottom:8px;">&#128274; Mods only &mdash; the backstage room. Nobody else sees this.<div id="mod-idle-note" style="color:var(--steel);margin-top:4px;"></div></div><div id="dm-inbox"></div><div id="ch-reports" style="margin-bottom:12px;"></div><div id="ch-bans" style="margin-bottom:12px;"></div><div id="ch-mods-list"></div></div>
   <div class="ch-pane" id="ch-dms"><div style="font-size:12px;color:var(--hot);margin-bottom:10px;border-bottom:1px dashed rgba(255,63,164,.25);padding-bottom:8px;">&#128065; Owner review &mdash; every backstage DM thread. Mods are told this is visible to you.</div><div id="ch-dms-list"><p style="color:var(--steel);font-size:13px;">Loading&hellip;</p></div></div>
-  <div class="ch-pane" id="ch-board"><div class="usearch" data-usearch>
-  <input type="search" class="us-q" placeholder="Search Juggalos by name&hellip;" aria-label="Search user pages" autocomplete="off" spellcheck="false">
-  <div class="us-res" hidden></div>
-  </div><div id="board-list" style="font-size:13px;color:var(--steel);">Loading the board&hellip;</div></div>
+  <div class="ch-pane" id="ch-board"><div id="board-list" style="font-size:13px;color:var(--steel);">Loading the board&hellip;</div></div>
   <div class="ch-pane" id="ch-vote">
     <div class="ch-poll" data-poll="belt-importance">
       <h5>Which belt matters more &mdash; legacy or the modern era?</h5>
