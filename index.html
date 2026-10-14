@@ -4660,7 +4660,7 @@ function observeReveals(){
     if(!fbDB){host.innerHTML=mine+'Leaderboard goes live when the connection is up. Keep stacking points!';return;}
     try{
       const snap=await fbDB.ref('lockers').once('value');
-      const rows=[];snap.forEach(c=>{const v=c.val();if(v&&(v.pts||v.name)){v.__k=c.key;rows.push(v);}});
+      const rows=[];snap.forEach(c=>{const v=c.val();if(v&&(v.pts||v.name)&&c.key!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'){v.__k=c.key;rows.push(v);}});   /* Digital Duke (the house) stays off the board */
       rows.sort((a,b)=>(b.pts||0)-(a.pts||0));
       if(lkUser){const keep=rows.filter(x=>!(x.__k!==lkUser.uid&&(jcwBlocked(x.__k)||jcwBlockedMeIn(x))));rows.length=0;keep.forEach(x=>rows.push(x));}
       host.innerHTML=mine+(rows.length?rows.slice(0,20).map((x,i)=>
