@@ -7645,9 +7645,18 @@ import('./jcw-visuals/jcw-visuals.mjs').then(V=>{
   try{new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes&&m.addedNodes.forEach(mark);});}).observe(document.body,{childList:true,subtree:true});}catch(e){}
   var el=document.createElement('div');el.id='gt-el';document.body.appendChild(el);
   window.jcwGTInit=function(){try{new google.translate.TranslateElement({pageLanguage:'en',autoDisplay:false},'gt-el');}catch(e){}};
-  var sc=document.createElement('script');sc.src='https://translate.google.com/translate_a/element.js?cb=jcwGTInit';sc.async=true;
-  sc.onerror=function(){try{if(window.toast)toast('Translation couldn’t load — showing English.',3600);}catch(e){}};
-  document.body.appendChild(sc);
+  /* translate.googleapis.com first (translate.google.com hangs on some networks), then the classic host */
+  var HOSTS=['https://translate.googleapis.com','https://translate.google.com'];
+  function load(i){
+    if(i>=HOSTS.length){try{if(window.toast)toast('Translation couldn\u2019t load \u2014 showing English.',3600);}catch(e){}return;}
+    var sc=document.createElement('script');sc.src=HOSTS[i]+'/translate_a/element.js?cb=jcwGTInit';sc.async=true;
+    var t=setTimeout(function(){if(!(window.google&&google.translate))load(i+1);},8000);
+    sc.onerror=function(){clearTimeout(t);load(i+1);};
+    sc.onload=function(){clearTimeout(t);};
+    document.body.appendChild(sc);
+  }
+  var inited=false,init0=window.jcwGTInit;window.jcwGTInit=function(){if(inited)return;inited=true;init0();};
+  load(0);
 })();
 </script>
 </body>
