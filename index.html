@@ -7631,7 +7631,7 @@ import('./jcw-visuals/jcw-visuals.mjs').then(V=>{
    across visits. Names, cards and roster data stay English: the card set and its
    rarities are built from the roster page's text, so those parts are marked translate="no". */
 (function(){
-  var KEEP='.jcw-logo, #view-crew .wr, #view-crew .era .tag, .tcard, .brand, nav.top, [data-puid], #prof-body h2, .lang-pick, .lang-wrap, .lang-foot, #board-list, .pk-cards, #trade-want';
+  var KEEP='#chat-panel, #chat-fab, #dm-modal, .jcw-logo, #view-crew .wr, #view-crew .era .tag, .tcard, .brand, nav.top, [data-puid], #prof-body h2, .lang-pick, .lang-wrap, .lang-foot, #board-list, .pk-cards, #trade-want';
   function mark(root){try{
     if(root.nodeType!==1)return;
     if(root.matches&&root.matches(KEEP))root.setAttribute('translate','no');
