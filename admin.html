@@ -476,7 +476,7 @@
 
       // game wins — every locker with at least one win, sorted by wins
       try{
-        const wrows=Object.entries(lockers||{}).map(([k,x])=>x?{uid:k,name:x.name||'Anonymous Juggalo',wins:+x.wins||0,pts:+x.pts||0}:null)
+        const wrows=Object.entries(lockers||{}).map(([k,x])=>x?{uid:k,name:x.name||('Juggalo'+(function(s){s=String(s||'');var h=0;for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0;}return 1000+(h%9000);})(k)),wins:+x.wins||0,pts:+x.pts||0}:null)
           .filter(x=>x&&x.wins>0).sort((a,b)=>b.wins-a.wins);
         const wtot=wrows.reduce((a,x)=>a+x.wins,0);
         let wh='<div style="border:1px solid var(--seam);border-radius:8px;padding:12px;background:#101015;text-align:center;margin-bottom:12px"><div style="font-size:24px;font-weight:800;color:var(--gold)">'+wtot+'</div><div class="muted" style="font-size:12px">total wins recorded · '+wrows.length+' players</div></div>';
@@ -485,8 +485,8 @@
       }catch(e){}
 
       // top lockers
-      const rows=Object.values(lockers||{}).filter(x=>x&&(x.pts||x.name)).sort((a,b)=>(b.pts||0)-(a.pts||0)).slice(0,15);
-      $('statLockers').innerHTML=rows.length?rows.map((x,i)=>'<div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px dashed var(--seam)"><span class="muted" style="flex:0 0 26px">#'+(i+1)+'</span><span style="flex:1">'+esc(x.name||'Anonymous Juggalo')+'</span><b style="color:var(--gold)">'+(x.pts||0)+' pts</b><span class="muted">'+(x.wins||0)+' wins</span></div>').join(''):'<span class="muted">No lockers synced yet.</span>';
+      const rows=Object.entries(lockers||{}).map(([k,x])=>x?Object.assign({__k:k},x):null).filter(x=>x&&(x.pts||x.name)).sort((a,b)=>(b.pts||0)-(a.pts||0)).slice(0,15);
+      $('statLockers').innerHTML=rows.length?rows.map((x,i)=>'<div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px dashed var(--seam)"><span class="muted" style="flex:0 0 26px">#'+(i+1)+'</span><span style="flex:1">'+esc(x.name||('Juggalo'+(function(s){s=String(s||'');var h=0;for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0;}return 1000+(h%9000);})(x.__k)))+'</span><b style="color:var(--gold)">'+(x.pts||0)+' pts</b><span class="muted">'+(x.wins||0)+' wins</span></div>').join(''):'<span class="muted">No lockers synced yet.</span>';
 
       // episode & clip views on the site (today + lifetime)
       try{

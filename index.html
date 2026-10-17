@@ -2002,6 +2002,12 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
 </footer>
 
 <script>
+/* A Juggalo who never picks a name gets one: "Juggalo" + 4 digits made from
+   their account id, so it's the same everywhere (chat, leaderboard, profile,
+   search) and never changes until they choose their own. */
+window.jcwAutoName=function(uid){var s=String(uid||''),h=0;for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0;}return 'Juggalo'+(1000+(h%9000));};
+</script>
+<script>
 /* ================= ROUTER ================= */
 const ROUTES=['home','episodes','clips','events','crew','games','merch','cards','comics','vote','locker','lunatics','about','profile']; /* 'ppv' removed for now — re-add to restore the PPV tab */
 function route(){
@@ -3917,22 +3923,28 @@ function observeReveals(){
     try{
       if(!lkUser||!lkCloudReady)return;
       const d=lkGet(); if(d.name&&String(d.name).trim())return;
-      try{if(sessionStorage.getItem('jcw_name_later_'+lkUser.uid))return;}catch(_s){}
       if(document.getElementById('name-modal'))return;
       const m=document.createElement('div');m.id='name-modal';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');
       m.style.cssText='display:flex;position:fixed;inset:0;z-index:440;background:rgba(0,0,0,.9);backdrop-filter:blur(5px);align-items:center;justify-content:center;padding:16px;';
       m.innerHTML='<div class="pk-box" style="max-width:440px;text-align:left;">'
         +'<h3 style="font-size:22px;margin:0 0 6px;">Pick your Juggalo name</h3>'
-        +'<p class="muted" style="margin:0 0 12px;line-height:1.5;">Right now you show up as <b>Anonymous Juggalo</b> in chat, on the leaderboard and on your profile. What should the Family call you?</p>'
+        +'<p class="muted" style="margin:0 0 12px;line-height:1.5;">This is how you show up in chat, on the leaderboard and on your profile. What should the Family call you? Skip it and you\u2019ll be <b>'+window.jcwAutoName(lkUser.uid)+'</b>.</p>'
         +'<input id="name-in" maxlength="20" placeholder="Your Juggalo name" autocomplete="nickname" style="width:100%;box-sizing:border-box;font-size:16px;padding:10px 12px;border-radius:8px;border:1px solid var(--gold);background:#0c0c0e;color:var(--bone);">'
         +'<p id="name-msg" style="color:var(--hot,#ff2f6d);font-size:13px;min-height:18px;margin:6px 0 0;"></p>'
-        +'<div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;"><button class="btn gold" id="name-save">Save my name</button><button class="btn line" id="name-later">Later</button></div>'
+        +'<div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;"><button class="btn gold" id="name-save">Save my name</button><button class="btn line" id="name-later">Skip</button></div>'
         +'<p class="muted" style="font-size:12px;margin:10px 0 0;">You can change it any time in your Juggalo Locker.</p></div>';
       document.body.appendChild(m);
       const inp=m.querySelector('#name-in'),msg=m.querySelector('#name-msg');
       setTimeout(function(){try{inp.focus();}catch(_f){}},120);
       const close=function(){try{m.remove();}catch(_r){}};
-      m.querySelector('#name-later').onclick=function(){try{sessionStorage.setItem('jcw_name_later_'+lkUser.uid,'1');}catch(_s){}close();};
+      /* no choice made: give them their Juggalo#### name for real */
+      m.querySelector('#name-later').onclick=function(){
+        const an=window.jcwAutoName(lkUser.uid);const d3=lkGet();
+        if(!(d3.name&&String(d3.name).trim())){d3.name=an;lkSet(d3);}
+        try{window.lkRender&&window.lkRender();}catch(_e){}
+        const f=document.getElementById('lk-name');if(f&&!f.value)f.value=an;
+        close();try{window.toast&&window.toast('You\u2019re '+an+' for now \u2014 change it any time in your Locker',4200);}catch(_t){}
+      };
       const save=function(){
         const v=String(inp.value||'').replace(/\s+/g,' ').trim().slice(0,20);
         if(v.length<2){msg.textContent='Use at least 2 characters.';return;}
@@ -3999,7 +4011,7 @@ function observeReveals(){
     x.onclick=function(){el.remove();};
     el.appendChild(btn); el.appendChild(x); document.body.appendChild(el);
   }catch(e){}}
-  function chName(){const d=lkGet();return (d.name&&d.name.trim())||('Juggalo'+(d.uid||(d.uid=Math.floor(1000+Math.random()*9000),lkSet(d),d.uid)));}
+  function chName(){const d=lkGet();if(d.name&&d.name.trim())return d.name.trim();if(lkUser&&lkUser.uid)return window.jcwAutoName(lkUser.uid);return ('Juggalo'+(d.uid||(d.uid=Math.floor(1000+Math.random()*9000),lkSet(d),d.uid)));}
   /* moderators — can delete chat messages; Digital Duke is admin */
   const JCW_MODS={
     'oYrNiXZywhexmLqRQO7j1iyA1Bh1':1, /* Digital Duke */
@@ -4722,7 +4734,7 @@ function observeReveals(){
       host.innerHTML=mine+(rows.length?rows.slice(0,20).map((x,i)=>
         '<div style="display:flex;gap:10px;padding:7px 2px;border-bottom:1px dashed rgba(240,179,43,.14);align-items:baseline;">'
         +'<span style="flex:0 0 28px;color:'+(i===0?'var(--gold)':i===1?'var(--cyan)':i===2?'var(--acid)':'var(--steel)')+';font-family:\'Rubik Distressed\',system-ui,sans-serif;">#'+(i+1)+'</span>'
-        +'<span data-puid="'+String(x.__k||'').replace(/[^A-Za-z0-9_-]/g,'')+'" style="flex:1;color:var(--bone);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;">'+((window.__lkPremSet&&x.__k&&window.__lkPremSet[x.__k]===true)?'<span class="lun-chip">&#127914;</span>':'')+String(x.name||'Anonymous Juggalo').replace(/&/g,'&amp;').replace(/</g,'&lt;')+(isVerified(x.__k)?' <span style="color:var(--gold);" title="Verified JCW talent">&#10004;</span>':'')+'</span>'
+        +'<span data-puid="'+String(x.__k||'').replace(/[^A-Za-z0-9_-]/g,'')+'" style="flex:1;color:var(--bone);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;">'+((window.__lkPremSet&&x.__k&&window.__lkPremSet[x.__k]===true)?'<span class="lun-chip">&#127914;</span>':'')+String(x.name||window.jcwAutoName(x.__k)).replace(/&/g,'&amp;').replace(/</g,'&lt;')+(isVerified(x.__k)?' <span style="color:var(--gold);" title="Verified JCW talent">&#10004;</span>':'')+'</span>'
         +'<b style="color:var(--gold);">'+(x.pts||0)+'</b><span style="color:var(--steel);font-size:11.5px;">pts</span>'
         +'</div>').join(''):'Nobody on the board yet \u2014 be the first: sign in from your Locker.');
     }catch(e){host.innerHTML=mine+'Couldn\u2019t load the board right now.';}
@@ -4734,7 +4746,7 @@ function observeReveals(){
   function profNames(){
     if(__names&&Date.now()-__namesT<300000)return Promise.resolve(__names);
     if(!fbDB)return Promise.resolve({});
-    return fbDB.ref('lockers').once('value').then(sn=>{const o={};sn.forEach(c=>{o[c.key]=c.val()||{};});__names=o;__namesT=Date.now();return o;});
+    return fbDB.ref('lockers').once('value').then(sn=>{const o={};sn.forEach(c=>{const v=c.val()||{};if(!(v.name&&String(v.name).trim()))v.name=window.jcwAutoName(c.key);o[c.key]=v;});__names=o;__namesT=Date.now();return o;});
   }
   function notifPush(toUid,obj){
     if(!fbDB||!lkUser||!toUid||toUid===lkUser.uid)return;
@@ -5129,7 +5141,7 @@ function observeReveals(){
       const allies=[],rivals=[];
       Object.keys(rel).forEach(k=>{
         if(lkUser&&k!==lkUser.uid&&(jcwHidden(k)||jcwBlockedMeIn(all[k])))return;   /* blocked either way: not listed */
-        const nm=(all[k]&&all[k].name)||'Juggalo';
+        const nm=(all[k]&&all[k].name)||window.jcwAutoName(k);
         const link='<b data-puid="'+pEsc(k)+'" style="cursor:pointer;text-decoration:underline;">'+pEsc(nm)+'</b>';
         if(rel[k]==='ally')allies.push(link);else if(rel[k]==='rival')rivals.push(link);
       });
@@ -5137,7 +5149,7 @@ function observeReveals(){
       if(uid!==DUKE&&rel[DUKE]!=='ally'&&rel[DUKE]!=='rival')
         allies.unshift('<b data-puid="'+DUKE+'" style="cursor:pointer;text-decoration:underline;">Digital Duke</b>');
       const isMe=lkUser&&lkUser.uid===uid;
-      let h=(v.pic?'<img src="roster/'+pEsc(v.pic)+'.jpg" alt="" style="width:84px;height:84px;border-radius:50%;object-fit:cover;border:2px solid rgba(240,179,43,.5);margin-bottom:10px;" onerror="this.remove()">':'')+'<h2><span class="pdot '+(isOnline(uid)?'on':'off')+'"></span>'+pEsc(v.name||'Anonymous Juggalo')+' <span style="font-size:13px;color:'+(isOnline(uid)?'#3ad900':'var(--steel)')+';font-family:system-ui,sans-serif;letter-spacing:normal;text-transform:none;">'+(isOnline(uid)?'online':'offline')+'</span></h2>';
+      let h=(v.pic?'<img src="roster/'+pEsc(v.pic)+'.jpg" alt="" style="width:84px;height:84px;border-radius:50%;object-fit:cover;border:2px solid rgba(240,179,43,.5);margin-bottom:10px;" onerror="this.remove()">':'')+'<h2><span class="pdot '+(isOnline(uid)?'on':'off')+'"></span>'+pEsc(v.name||window.jcwAutoName(uid))+' <span style="font-size:13px;color:'+(isOnline(uid)?'#3ad900':'var(--steel)')+';font-family:system-ui,sans-serif;letter-spacing:normal;text-transform:none;">'+(isOnline(uid)?'online':'offline')+'</span></h2>';
       if(isVerified(uid))h+='<p style="margin-top:8px;"><b style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:20px;color:#000;background:linear-gradient(135deg,var(--gold),var(--tang));padding:5px 15px;border-radius:6px;">&#10004; JCW Roster</b> <span style="color:var(--steel);font-size:12px;">verified talent</span></p>';
       if(uid===DUKE)h+='<p style="margin-top:8px;"><b style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:22px;color:#000;background:var(--gold,#ffd028);padding:6px 16px;border-radius:6px;">&#9819; Administrator</b></p>';
       else if(typeof isModUid==='function'&&isModUid(uid))h+='<p style="margin-top:8px;"><b style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:20px;color:#0a0a0a;background:var(--acid,#9dff3a);padding:5px 15px;border-radius:6px;">&#9733; Moderator</b></p>';
@@ -5211,7 +5223,7 @@ function observeReveals(){
         +'</div>';
       host.innerHTML=h;
       host.dataset.uid=uid;
-      try{if(window.jcwProfileCards)window.jcwProfileCards(uid,(v.cards||{}),(v.name||'this Juggalo'),(v.swapped||{}));}catch(_e){}
+      try{if(window.jcwProfileCards)window.jcwProfileCards(uid,(v.cards||{}),(v.name||window.jcwAutoName(uid)),(v.swapped||{}));}catch(_e){}
       (function(){
         const hx=document.getElementById('cn-hatchet');if(!hx)return;
         try{const fm=document.querySelector('img.hm');if(fm)hx.src=fm.src;}catch(_e){}
