@@ -3909,6 +3909,43 @@ function observeReveals(){
   setInterval(function(){try{jcwRedeemPoints();}catch(_e){}},4000);
 
   function lkCloudPush(){ if(!lkCloudReady) return; if(fbAuth&&lkUser&&fbDB){ try{ const d=lkGet(); lkPtsSync(); fbDB.ref('lockers/'+lkUser.uid).update({wins:d.wins||0,badges:d.badges||[],name:d.name||'',fav:d.fav||'',favB:d.favB||'',theme:d.theme||'',pic:d.pic||'',picks:window.jcwEncKeys(d.picks||{}),hist:(d.hist||[]).slice(0,40),watched:d.watched||0,played:!!d.played,noct:d.noct?1:0,eps:window.jcwEncKeys(d.eps||{}),radio:window.jcwEncKeys(d.radio||{}),seen:window.jcwEncKeys(d.seen||{}),tagged:window.jcwEncKeys(d.tagged||{}),streak:d.streak||0,streakBest:d.streakBest||0,dayone:d.dayone?1:0,lastCheckin:d.lastCheckin||'',cards:window.jcwEncCards(d.cards||{}),swapped:window.jcwEncCards(d.swapped||{}),game:d.game||{},blocked:d.blocked||{},bpaid:d.bpaid||{},gpaid:d.gpaid||null,lunaPay:d.lunaPay||''}).then(()=>{window.__lockerSync='ok';}).catch(err=>{window.__lockerSync='BLOCKED: '+((err&&err.message)||'rules');window.__cardsSync=window.__lockerSync;try{console.warn('[locker] cloud push rejected:',err&&err.message);}catch(__e){}}); }catch(_e){window.__lockerSync='error: '+(_e&&_e.message);try{console.warn('[locker] cloud push failed:',_e.message);}catch(__e){}} } }
+  /* PICK YOUR JUGGALO NAME: signing up only asks for email + password, so
+     members who never typed a name in their Locker show as "Anonymous
+     Juggalo" everywhere. Once their locker is loaded, ask them for one —
+     "Later" hides it for this visit only. */
+  window.jcwNamePrompt=function(){
+    try{
+      if(!lkUser||!lkCloudReady)return;
+      const d=lkGet(); if(d.name&&String(d.name).trim())return;
+      try{if(sessionStorage.getItem('jcw_name_later_'+lkUser.uid))return;}catch(_s){}
+      if(document.getElementById('name-modal'))return;
+      const m=document.createElement('div');m.id='name-modal';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');
+      m.style.cssText='display:flex;position:fixed;inset:0;z-index:440;background:rgba(0,0,0,.9);backdrop-filter:blur(5px);align-items:center;justify-content:center;padding:16px;';
+      m.innerHTML='<div class="pk-box" style="max-width:440px;text-align:left;">'
+        +'<h3 style="font-size:22px;margin:0 0 6px;">Pick your Juggalo name</h3>'
+        +'<p class="muted" style="margin:0 0 12px;line-height:1.5;">Right now you show up as <b>Anonymous Juggalo</b> in chat, on the leaderboard and on your profile. What should the Family call you?</p>'
+        +'<input id="name-in" maxlength="20" placeholder="Your Juggalo name" autocomplete="nickname" style="width:100%;box-sizing:border-box;font-size:16px;padding:10px 12px;border-radius:8px;border:1px solid var(--gold);background:#0c0c0e;color:var(--bone);">'
+        +'<p id="name-msg" style="color:var(--hot,#ff2f6d);font-size:13px;min-height:18px;margin:6px 0 0;"></p>'
+        +'<div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;"><button class="btn gold" id="name-save">Save my name</button><button class="btn line" id="name-later">Later</button></div>'
+        +'<p class="muted" style="font-size:12px;margin:10px 0 0;">You can change it any time in your Juggalo Locker.</p></div>';
+      document.body.appendChild(m);
+      const inp=m.querySelector('#name-in'),msg=m.querySelector('#name-msg');
+      setTimeout(function(){try{inp.focus();}catch(_f){}},120);
+      const close=function(){try{m.remove();}catch(_r){}};
+      m.querySelector('#name-later').onclick=function(){try{sessionStorage.setItem('jcw_name_later_'+lkUser.uid,'1');}catch(_s){}close();};
+      const save=function(){
+        const v=String(inp.value||'').replace(/\s+/g,' ').trim().slice(0,20);
+        if(v.length<2){msg.textContent='Use at least 2 characters.';return;}
+        if(/^anonymous juggalo$/i.test(v)){msg.textContent='Pick a name that’s yours.';return;}
+        const d2=lkGet();d2.name=v;lkSet(d2);
+        try{window.lkRender&&window.lkRender();}catch(_e){}
+        const f=document.getElementById('lk-name');if(f)f.value=v;
+        close();try{window.toast&&window.toast('Welcome to the Family, '+v+'!',3600);}catch(_t){}
+      };
+      m.querySelector('#name-save').onclick=save;
+      inp.addEventListener('keydown',function(e){if(e.key==='Enter')save();});
+    }catch(_e){}
+  };
   /* ===== WIPE RECOVERY =====
      Snapshot the best locker this device has ever seen for the signed-in account
      (jcw_locker_best_<uid>). If a later login pulls a cloud copy whose points have
@@ -5799,6 +5836,7 @@ function observeReveals(){
               merged.wins=Math.max(d.wins||0,cloud.wins||0);
               lkCloudReady=true;          /* safe to write from here on */
               lkSet(merged);lkRender();
+              try{setTimeout(function(){window.jcwNamePrompt&&window.jcwNamePrompt();},2500);}catch(_e){}   /* no name yet: ask for one */
               try{window.jcwCardsRefresh&&window.jcwCardsRefresh();}catch(_e){}   /* cards show up without a refresh */
               try{setTimeout(window.jcwReconcileBadges,1500);setTimeout(window.jcwReconcileBadges,6000);}catch(_e){}
               try{setTimeout(function(){try{window.jcwLunaMonthly();}catch(_e){}},3000);}catch(_e){}
@@ -5810,6 +5848,7 @@ function observeReveals(){
               try{if(lkUser&&!JCW_PTS_RESET.keep[lkUser.uid]){localStorage.setItem(jcwPtsResetKey(),JCW_PTS_RESET.id);fbDB.ref('lockers/'+lkUser.uid+'/ptsReset').set(JCW_PTS_RESET.id);}}catch(_e){}
               lkCloudReady=true;
               if(firstPull)lkCloudPush();
+              try{setTimeout(function(){window.jcwNamePrompt&&window.jcwNamePrompt();},2500);}catch(_e){}   /* brand-new account: pick a name */
               try{window.jcwCardsRefresh&&window.jcwCardsRefresh();}catch(_e){}
               /* …unless this device remembers a real locker for this uid: offer restore */
               try{lkWipeCheck(null);}catch(_e){}
