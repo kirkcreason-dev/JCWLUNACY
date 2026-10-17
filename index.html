@@ -4704,6 +4704,7 @@ function observeReveals(){
     obj.fu=lkUser.uid;obj.from=(lkGet().name||'A Juggalo');obj.ts=Date.now();
     try{fbDB.ref('notifications/'+toUid).push(obj);}catch(_e){}
   }
+  window.notifPush=notifPush;   /* card gifts + trades ping through this — it was never exposed, so they never notified anyone */
   function scMention(text){
     if(!fbDB||!lkUser)return;
     profNames().then(all=>{
@@ -4715,7 +4716,7 @@ function observeReveals(){
       });
     });
   }
-  const NOTIF_TXT={mention:'gave you a shout-out in Lunacy Chat',post:'posted on your page',ally:'marked you as an ALLY',rival:'marked you as a RIVAL',dm:'sent you a message'};
+  const NOTIF_TXT={mention:'gave you a shout-out in Lunacy Chat',post:'posted on your page',ally:'marked you as an ALLY',rival:'marked you as a RIVAL',dm:'sent you a message',gift:'sent you a card',trade:'sent you a trade offer',tradeok:'answered your trade',tradeno:'answered your trade'};
   /* ask for browser-notification permission once (quietly) */
   function jcwAskNotify(){try{if(window.Notification&&Notification.permission==='default')Notification.requestPermission().catch(()=>{});}catch(_e){}}
   function jcwPush(title,body){
@@ -7471,14 +7472,16 @@ route();
   function lkSet(d){try{localStorage.setItem('jcw_locker',JSON.stringify(d));}catch(e){}}
   function say(m){try{if(window.toast)window.toast(m,4000);}catch(e){}}
 
+  var AGAIN=false;
   function claim(){
     var db=D(), u=U();
-    if(BUSY||!db||!u)return;
-    BUSY=true;
+    if(!db||!u)return;
+    if(BUSY){AGAIN=true;return;}   /* a gift arrived mid-claim: run once more after */
+    BUSY=true;AGAIN=false;
     db.ref('gifts/'+u.uid).once('value').then(function(snap){
       var gifts=[];
       snap.forEach(function(c){var v=c.val()||{};if(v&&v.id)gifts.push({key:c.key,id:String(v.id),from:v.fromName||'',foil:v.foil===true,serial:(+v.serial||0)});});
-      if(!gifts.length){BUSY=false;return;}
+      if(!gifts.length){BUSY=false;if(AGAIN)setTimeout(claim,300);return;}
       /* merge against the CLOUD copy, not localStorage, so nothing gets clobbered */
       return db.ref('lockers/'+u.uid+'/cards').once('value').then(function(cs){
         var cards=(window.jcwDecCards?window.jcwDecCards(cs.val()||{}):(cs.val()||{}));
@@ -7499,16 +7502,25 @@ route();
             try{if(window.jcwCardsRender)window.jcwCardsRender();}catch(e){}
             try{if(window.jcwLoadGifts)window.jcwLoadGifts();}catch(e){}
             window.__giftsClaimed=(window.__giftsClaimed||0)+gifts.length;
-            BUSY=false;
+            BUSY=false;if(AGAIN)setTimeout(claim,300);
           });
         });
       });
     }).catch(function(err){
       window.__giftClaimError=(err&&err.message)||'unknown';
-      BUSY=false;
+      BUSY=false;if(AGAIN)setTimeout(claim,1500);
     });
   }
   window.jcwClaimGifts=claim;
+  /* LIVE: a gift sent while you're on the site lands in seconds, not on the
+     next 45-second sweep or the next page load */
+  var watchRef=null;
+  function watch(u){
+    try{if(watchRef){watchRef.off();watchRef=null;}}catch(e){}
+    var db=D(); if(!db||!u)return;
+    try{watchRef=db.ref('gifts/'+u.uid);
+      watchRef.on('value',function(s){if(s&&s.exists())setTimeout(claim,400);},function(){});}catch(e){}
+  }
 
   /* wait for firebase + a signed-in user, then claim; re-check periodically */
   var tries=0, hooked=false;
@@ -7516,7 +7528,7 @@ route();
     tries++;
     /* claim on any later sign-in too — before this, the loop gave up after ~2 min,
        so a slow login meant gifts stayed in the inbox until the next page load */
-    if(D()&&!hooked){hooked=true;try{firebase.auth().onAuthStateChanged(function(u){if(u)setTimeout(claim,900);});}catch(e){}}
+    if(D()&&!hooked){hooked=true;try{firebase.auth().onAuthStateChanged(function(u){if(u)setTimeout(claim,900);watch(u);});}catch(e){}}
     if(D()&&U()){clearInterval(boot);claim();setInterval(claim,45000);}
     else if(tries>80)clearInterval(boot);   /* stop polling; the auth hook keeps watch */
   },1500);
