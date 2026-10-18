@@ -1280,7 +1280,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <section class="blk">
     <div class="kick">Juggalo Locker</div>
     <h2 class="head">Your <em>locker</em></h2>
-    <p class="lede">Earn points for watching episodes, playing the game and calling your shots. Episodes count after ten minutes &mdash; watch the show. Sign up to sync your points across devices and climb the leaderboard in <b>Lunacy Chat</b>.</p>
+    <p class="lede">Earn points for checking in, playing the games and calling your shots. Episodes you watch for ten minutes count toward your Watch History and badges. Sign up to sync your points across devices and climb the leaderboard in <b>Lunacy Chat</b>.</p>
     <p class="join-lo-cta" style="margin:4px 0 14px;"><a class="btn line" href="#lunatics">&#127914; Join The Lunatics Only &mdash; the arcade, the games, Lunacy Radio, exclusive cards &amp; more</a></p>
     <div class="usearch" data-usearch>
       <input type="search" class="us-q" placeholder="Search Juggalos by name&hellip;" aria-label="Search user pages" autocomplete="off" spellcheck="false">
@@ -5428,13 +5428,9 @@ function observeReveals(){
                  walking away — real plays with dead retention on the
                  channel's videos. Now: at 10 minutes the episode counts and
                  pays +30; from there +5 per 15s up to 60 for a real watch. */
-              const EP_MIN_SECS=600, EP_PTS_CAP=200;
-              if(window.__epSecs[ek]>=EP_MIN_SECS&&(window.__epPts[ek]||0)<EP_PTS_CAP){
-                const first=!(window.__epPts[ek]);
-                const gain=first?100:10;
-                window.__epPts[ek]=(window.__epPts[ek]||0)+gain;
-                const d=lkGet();d.pts=(d.pts||0)+gain;lkSet(d);lkRender();
-              }
+              const EP_MIN_SECS=600;
+              /* 2026-10-18: watching episodes no longer pays points (Kirk's call).
+                 A 10-minute watch still counts toward Watch History + badges. */
               /* count it as watched once they've stayed with it 10 minutes.
                  Every real watch counts, once per episode per day (Detroit
                  time): eps[title] holds the day it last counted (old entries
