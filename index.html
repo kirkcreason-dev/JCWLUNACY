@@ -615,11 +615,11 @@ body.game-lock{overflow:hidden;}
 #dm-modal .dm-in input:focus{border-color:var(--acid);}
 #dm-modal .dm-in button{background:var(--acid);color:#000;padding:0 16px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;border:none;cursor:pointer;}
 /* ===== "Any problems?" support button + box (messages go to Digital Duke) ===== */
-#sup-fab{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:350;display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:10px 16px 10px 14px;border-radius:16px;background:var(--hot);color:#fff;border:2px solid #fff;font-family:inherit;text-align:left;cursor:pointer;box-shadow:0 8px 26px rgba(0,0,0,.6);max-width:calc(100vw - 110px);}
-#sup-fab small{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.92;}
-#sup-fab b{font-size:14px;font-weight:900;line-height:1.15;}
-#sup-fab:hover{transform:translateY(-2px);}
-#sup-fab .sf-n{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--acid);color:#000;font-size:11px;font-weight:900;line-height:20px;text-align:center;display:none;}
+#sup-fab{position:relative;display:flex;flex-direction:column;align-items:center;gap:0;margin-top:1px;padding:2px 5px 2px;border-radius:5px;background:var(--hot);color:#fff;border:1px solid rgba(255,255,255,.7);font-family:system-ui,sans-serif;line-height:1.05;text-align:center;cursor:pointer;white-space:nowrap;}
+#sup-fab small{font-size:7px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;opacity:.9;}
+#sup-fab b{font-size:7.5px;font-weight:800;}
+#sup-fab:hover{filter:brightness(1.12);}
+#sup-fab .sf-n{position:absolute;top:-5px;right:-6px;min-width:13px;height:13px;padding:0 3px;border-radius:7px;background:var(--acid);color:#000;font-size:8px;font-weight:900;line-height:13px;text-align:center;display:none;}
 #sup-fab.unread .sf-n{display:block;}
 .chatpop #sup-fab{display:none!important;}
 #sup-modal{display:none;position:fixed;inset:0;z-index:412;background:rgba(0,0,0,.82);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;}
@@ -1013,7 +1013,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
 
 <nav class="top" id="nav">
   <div class="brand-col"><span class="brand" id="brand" translate="no">JCW</span>
-  <label class="lang-wrap" translate="no"><span aria-hidden="true">&#127760;</span><select class="lang-pick" translate="no" aria-label="Language" title="Language"><option value="en">English</option><option value="de">Deutsch</option><option value="es">Español</option><option value="fr">Français</option><option value="pt">Português</option><option value="it">Italiano</option><option value="nl">Nederlands</option><option value="pl">Polski</option><option value="sv">Svenska</option><option value="no">Norsk</option><option value="da">Dansk</option><option value="fi">Suomi</option><option value="cs">Čeština</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="tr">Türkçe</option><option value="ja">日本語</option><option value="ko">한국어</option><option value="zh-CN">中文</option><option value="tl">Tagalog</option><option value="ar">العربية</option><option value="hi">हिन्दी</option></select></label></div>
+  <label class="lang-wrap" translate="no"><span aria-hidden="true">&#127760;</span><select class="lang-pick" translate="no" aria-label="Language" title="Language"><option value="en">English</option><option value="de">Deutsch</option><option value="es">Español</option><option value="fr">Français</option><option value="pt">Português</option><option value="it">Italiano</option><option value="nl">Nederlands</option><option value="pl">Polski</option><option value="sv">Svenska</option><option value="no">Norsk</option><option value="da">Dansk</option><option value="fi">Suomi</option><option value="cs">Čeština</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="tr">Türkçe</option><option value="ja">日本語</option><option value="ko">한국어</option><option value="zh-CN">中文</option><option value="tl">Tagalog</option><option value="ar">العربية</option><option value="hi">हिन्दी</option></select></label><button id="sup-fab" type="button" aria-label="Any problems? Message Creaso Norse Tech"><span class="sf-n" id="sup-count" aria-hidden="true">1</span><small>Any problems?</small><b>Message Creaso Norse Tech</b></button></div>
   <a href="#home" data-r="home"><img src="nav/nav-home.webp" onerror="this.onerror=null;this.src='nav/nav-home.png'" alt="Home"></a>
   <a href="#episodes" data-r="episodes"><img src="nav/nav-episodes.webp" onerror="this.onerror=null;this.src='nav/nav-episodes.png'" alt="Episodes"></a>
   <a href="#clips" data-r="clips"><img src="nav/nav-clips.webp" onerror="this.onerror=null;this.src='nav/nav-clips.png'" alt="Clips"></a>
@@ -1992,7 +1992,6 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   </div>
 </div>
 
-<button id="sup-fab" aria-label="Any problems? Message Creaso Norse Tech"><span class="sf-n" id="sup-count" aria-hidden="true">1</span><small>Any problems?</small><b>Message Creaso Norse Tech</b></button>
 <div id="sup-modal" aria-modal="true" role="dialog">
   <div class="dm-box">
     <div class="dm-hd"><button class="sup-back" id="sup-back">&larr; All</button><b id="sup-with">Creaso Norse Tech</b><button class="cx" id="sup-close" aria-label="Close">&times;</button></div>
