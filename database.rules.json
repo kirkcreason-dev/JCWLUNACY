@@ -156,6 +156,21 @@
           ".validate": "$dev.matches(/^[a-f0-9]{20}$/) && newData.isNumber()"
         }
       }
+    },
+    "support": {
+      ".read": "auth != null && auth.uid === 'oYrNiXZywhexmLqRQO7j1iyA1Bh1'",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.uid === 'oYrNiXZywhexmLqRQO7j1iyA1Bh1')",
+        "m": {
+          "$msg": {
+            ".write": "auth != null && !data.exists() && newData.exists() && (auth.uid === $uid || auth.uid === 'oYrNiXZywhexmLqRQO7j1iyA1Bh1')",
+            ".validate": "newData.hasChildren(['u', 't', 'ts']) && newData.child('u').val() === auth.uid && newData.child('t').isString() && newData.child('t').val().length > 0 && newData.child('t').val().length <= 1000 && newData.child('ts').isNumber()"
+          }
+        },
+        "meta": {
+          ".write": "auth != null && (auth.uid === $uid || auth.uid === 'oYrNiXZywhexmLqRQO7j1iyA1Bh1')"
+        }
+      }
     }
   }
 }
