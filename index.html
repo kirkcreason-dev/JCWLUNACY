@@ -1305,7 +1305,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
           <div id="lk-blocked" style="margin-top:10px;font-size:13px;"></div>
           <button id="au-del-open" style="background:none;border:none;color:var(--hot,#ff3fa4);font-size:12px;text-decoration:underline;cursor:pointer;padding:0;margin-top:10px;">Delete my account</button>
           <div id="au-del-box" style="display:none;margin-top:12px;padding:12px;border:1px solid rgba(255,63,164,.5);border-radius:10px;background:rgba(255,63,164,.07);">
-            <p style="color:#ffd1e8;font-size:13px;line-height:1.6;margin:0 0 10px;"><b>This is forever.</b> Your points, badges, cards, allies and wall get wiped and your login is destroyed. If you&rsquo;re a Lunatic, cancel your subscription too or Stripe keeps billing you.</p>
+            <p style="color:#ffd1e8;font-size:13px;line-height:1.6;margin:0 0 10px;"><b>This is forever.</b> Your points, badges, cards, allies and wall get wiped and your login is destroyed. If you&rsquo;re a Lunatic, cancel your membership first (Lunatics Only &rarr; <b>Manage or cancel my membership</b>) or Stripe keeps billing you.</p>
             <input type="password" id="au-del-pass" placeholder="Enter your password to confirm" autocomplete="current-password" style="width:100%;background:#000;border:1px solid rgba(255,63,164,.5);color:#fff;border-radius:8px;padding:9px 10px;font:inherit;">
             <div style="display:flex;gap:8px;margin-top:10px;">
               <button class="btn line" id="au-del-cancel" style="flex:1;">Keep my account</button>
@@ -3199,6 +3199,33 @@ function observeReveals(){
   }
   /* ==== JCW PREMIUM ==== paste your Stripe Payment Link between the quotes below */
   const JCW_STRIPE_LINK='https://buy.stripe.com/9B67sNajKfzd2H89Pz4c800';
+  /* Stripe's self-service billing page (Settings → Billing → Customer portal →
+     "Login link"). Members cancel or update their card there. Empty = button hidden. */
+  const JCW_STRIPE_PORTAL='https://billing.stripe.com/p/login/9B67sNajKfzd2H89Pz4c800';
+  /* Lunatics access follows Stripe billing: the jcw-points worker checks this
+     account's subscription and turns premiumMembers on/off (also every 30 min). */
+  const JCW_LUN_API='https://jcw-points.kirkcreason-e83.workers.dev/lunatic';
+  let __lunBusy=false;
+  window.jcwLunCheck=async function(quiet){
+    const say=(m,t)=>{if(!quiet)try{window.toast(m,t||4200);}catch(_e){}};
+    if(__lunBusy)return;
+    if(!lkUser||!fbAuth||!fbAuth.currentUser){say('Log into your Locker first.');return;}
+    __lunBusy=true;
+    try{
+      const idToken=await fbAuth.currentUser.getIdToken();
+      const r=await fetch(JCW_LUN_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken:idToken})});
+      let j={};try{j=await r.json();}catch(_e){}
+      if(r.ok&&j.lunatic)say('★ You’re a Lunatic — welcome to the inner circle!');
+      else if(r.ok)say('No active Lunatics membership on this account yet. If you just paid, give it a minute and check again.',5200);
+      else if(r.status===503||r.status===404)say('Membership check isn’t switched on yet — your access will be turned on by hand for now.',5200);
+      else say('Couldn’t check your membership right now — try again in a minute.');
+    }catch(_e){say('Couldn’t check your membership right now — try again in a minute.');}
+    finally{__lunBusy=false;}
+  };
+  document.addEventListener('click',function(e){
+    const b=e.target.closest&&e.target.closest('[data-lun-check]');if(!b)return;
+    e.preventDefault();window.jcwLunCheck(false);
+  });
   let lkPremIsOn=false;
   function lkPremRender(){
     document.querySelectorAll('.lk-prem-body').forEach(box=>lkPremFill(box));
@@ -3222,6 +3249,7 @@ function observeReveals(){
       const btn=JCW_STRIPE_LINK
         ?'<a class="btn gold" style="margin-top:16px;width:100%;justify-content:center;font-size:1rem;" href="'+JCW_STRIPE_LINK+(JCW_STRIPE_LINK.indexOf('?')>-1?'&':'?')+'client_reference_id='+encodeURIComponent(lkUser.uid)+'" target="_blank" rel="noopener">Join The Lunatics Only</a>'
         :'<button class="btn line" style="margin-top:16px;width:100%;justify-content:center;" disabled>Coming soon</button>';
+      const chk=JCW_STRIPE_LINK?'<button class="btn line" data-lun-check style="margin-top:10px;width:100%;justify-content:center;font-size:.9rem;">Already paid? Unlock my membership</button>':'';
       box.innerHTML='<div style="text-align:center;margin-bottom:16px;"><span style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:#ff3fa4;border:1px solid rgba(255,63,164,.5);border-radius:999px;padding:5px 16px;font-size:.82rem;">Members Only</span><p style="margin:12px 0 4px;color:#fff;font-weight:800;font-size:1.1rem;">You&rsquo;re not a Lunatic&hellip; yet.</p><p style="margin:0;color:var(--steel,#9aa0aa);line-height:1.55;">Join the inner circle &mdash; the arcade, the games, Lunacy Radio and exclusive cards now, plus backstage content and PPV as they drop.</p></div>'
         +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;opacity:.85;">'
         +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('arcade','Psychopathic Arcade')+'<p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">15 games with online VS. <b style="color:#7CFF4F;">Live now.</b></p></div>'
@@ -3230,7 +3258,7 @@ function observeReveals(){
         +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('cards','Exclusive Cards')+'<p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">Members-only trading cards. <b style="color:#7CFF4F;">Live now.</b></p></div>'
         +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('comic','JCW Comic Book')+'<p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">An all-original JCW comic. <b>Coming soon.</b></p></div>'
         +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('backstage','Backstage &amp; Bloopers')+'<p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">The stuff that never airs. <b>Coming soon.</b></p></div>'
-        +'</div>'+btn;
+        +'</div>'+btn+chk;
       return;
     }
     box.innerHTML='<div style="text-align:center;margin-bottom:16px;"><span style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:#ffd028;border:1px solid rgba(255,208,40,.5);border-radius:999px;padding:5px 16px;font-size:.82rem;">&#9733; Lunatic Confirmed</span><p style="margin:10px 0 0;color:var(--steel,#9aa0aa);line-height:1.5;">You&rsquo;re in the inner circle. Here&rsquo;s what&rsquo;s yours.</p></div>'
@@ -3243,7 +3271,9 @@ function observeReveals(){
       +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('backstage','Backstage Pass')+'<p style="margin:6px 0 0;">Behind the curtain &mdash; locker room, promos, the stuff that never airs. <b>Coming soon.</b></p></div>'
       +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('bloopers','Bloopers')+'<p style="margin:6px 0 0;">Botches, breaks and bleeps &mdash; the outtakes reel. <b>Coming soon.</b></p></div>'
       +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('ppv','PPV')+'<p style="margin:6px 0 0;">Members-only live streams &mdash; Bloodymania and beyond. <b>Coming soon.</b></p></div>'
-      +'</div><div class="lk-prem-list" style="display:grid;gap:12px;margin-top:12px;"></div>';
+      +'</div><div class="lk-prem-list" style="display:grid;gap:12px;margin-top:12px;"></div>'
+      +(JCW_STRIPE_PORTAL?'<div style="text-align:center;margin-top:18px;"><a class="btn line" style="justify-content:center;font-size:.9rem;" href="'+JCW_STRIPE_PORTAL+'" target="_blank" rel="noopener">Manage or cancel my membership</a>'
+        +'<p style="margin:8px 0 0;font-size:12px;color:var(--steel,#9aa0aa);">Opens Stripe\u2019s secure billing page &mdash; sign in with the email you paid with. Cancel any time; you keep access until the end of the month you paid for.</p></div>':'');
     if(!fbDB)return;
     fbDB.ref('premiumContent').once('value').then(snap=>{
       const list=box.querySelector('.lk-prem-list'); if(!list)return;
@@ -3276,7 +3306,8 @@ function observeReveals(){
         let h=(lkUser?'<p><b style="color:#ff3fa4;">&#10060; YOU ARE NOT A LUNATIC&hellip; yet.</b></p>':'')+'<p><b>Live now:</b> Lunacy Unlocked &middot; the 15-game Psychopathic Arcade &middot; Big Money Rustlas &middot; Dark Chaos Carnival &middot; Lunacy Radio &middot; exclusive members-only cards &middot; members-only drops.</p><p style="color:#9aa0aa;"><b>Coming soon:</b> Backstage Pass &middot; Bloopers &middot; PPV streams &middot; the JCW comic book.</p>';
         if(!JCW_STRIPE_LINK){h+='<p><b>Coming soon. Keep your eyes on the carnival.</b></p>';}
         else if(!lkUser){h+='<p><b>Log in from your Juggalo Locker, then come knock again.</b></p>';}
-        else{h+='<a class="btn" style="margin-top:14px;display:inline-flex;justify-content:center;" href="'+JCW_STRIPE_LINK+(JCW_STRIPE_LINK.indexOf('?')>-1?'&':'?')+'client_reference_id='+encodeURIComponent(lkUser.uid)+'" target="_blank" rel="noopener">Join The Lunatics Only</a>';}
+        else{h+='<a class="btn" style="margin-top:14px;display:inline-flex;justify-content:center;" href="'+JCW_STRIPE_LINK+(JCW_STRIPE_LINK.indexOf('?')>-1?'&':'?')+'client_reference_id='+encodeURIComponent(lkUser.uid)+'" target="_blank" rel="noopener">Join The Lunatics Only</a>'
+          +'<p style="margin:10px 0 0;"><button class="btn line" data-lun-check style="font-size:.85rem;">Already paid? Unlock my membership</button></p>';}
         body.innerHTML=h;
       }
       const m=document.getElementById('lo-modal');if(m)m.classList.add('on');
@@ -5845,6 +5876,9 @@ function observeReveals(){
               lkCloudReady=true;          /* safe to write from here on */
               lkSet(merged);lkRender();
               try{setTimeout(function(){window.jcwNamePrompt&&window.jcwNamePrompt();},2500);}catch(_e){}   /* no name yet: ask for one */
+              /* back from the Lunatics checkout (?lun=1): unlock right away */
+              try{if(!window.__lunRet&&/[?&]lun=1/.test(location.search)){window.__lunRet=1;setTimeout(function(){window.jcwLunCheck&&window.jcwLunCheck(false);},2500);
+                const q=new URLSearchParams(location.search);q.delete('lun');history.replaceState(null,'',location.pathname+(q.toString()?'?'+q.toString():'')+(location.hash||''));}}catch(_e){}
               try{window.jcwCardsRefresh&&window.jcwCardsRefresh();}catch(_e){}   /* cards show up without a refresh */
               try{setTimeout(window.jcwReconcileBadges,1500);setTimeout(window.jcwReconcileBadges,6000);}catch(_e){}
               try{setTimeout(function(){try{window.jcwLunaMonthly();}catch(_e){}},3000);}catch(_e){}
