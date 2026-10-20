@@ -5038,6 +5038,18 @@ function observeReveals(){
       try{fbDB.ref('lockers/'+actUid+'/act').onDisconnect().remove();}catch(_e){}
       actWrite(true);
     });}catch(_e){}
+    /* Phones: when a sleeping phone's old connection finally times out on the
+       server, its onDisconnect deletes the act the NEW connection just wrote,
+       while the 30s presence beat keeps the dot lit, so the member showed as
+       "On the JCW Lunacy app" on the website. Watch our own act and put it
+       back whenever it disappears while this tab is open (max once / 8s). */
+    try{let actFix=0,actSeen=false;fbDB.ref('lockers/'+actUid+'/act').on('value',sn=>{
+      if(sn.val()!=null){actSeen=true;return;}
+      if(!lkUser||lkUser.uid!==actUid||document.hidden)return;
+      const now=Date.now();if(!actSeen&&now-actFix<8000)return;   /* a write that keeps failing retries at most every 8s */
+      actFix=now;actSeen=false;
+      actLast='';setTimeout(()=>actWrite(true),600);
+    },()=>{});}catch(_e){}
     if(!window.__actTick){
       window.__actTick=setInterval(()=>actWrite(false),4000);
       let deb=0;const soon=()=>{clearTimeout(deb);deb=setTimeout(()=>actWrite(false),350);};
