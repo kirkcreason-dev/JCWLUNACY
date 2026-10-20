@@ -7912,5 +7912,50 @@ import('./jcw-visuals/jcw-visuals.mjs').then(V=>{
   load(0);
 })();
 </script>
+<script>
+/* ===== AUTO-UPDATE: open tabs pick up new site versions =====
+   Tabs left open for days kept running old code (e.g. an old tab made a
+   member look "On the JCW Lunacy app" after a fix had shipped). Every 5 min,
+   and whenever the tab comes back into view, ask the server whether
+   index.html changed. If it did, reload, but only when it can't interrupt
+   anything: the tab was just out of view, or nobody has touched it for 3 min,
+   and no game, episode, radio or half-typed message is open. At most one
+   automatic reload per 20 min per tab, so a flaky CDN can't cause a loop. */
+(function(){
+  var base=null,pending=false,lastAct=Date.now(),wasHidden=false;
+  function tag(){return fetch('/index.html',{method:'HEAD',cache:'no-store'}).then(function(r){return r.ok?(r.headers.get('etag')||r.headers.get('last-modified')||''):'';}).catch(function(){return '';});}
+  function busy(){
+    try{
+      var g=document.getElementById('game-overlay');if(g&&g.classList.contains('on'))return true;
+      var e=document.getElementById('ep-player');if(e&&e.classList.contains('on'))return true;
+      if(window.jcwRadioNow&&window.jcwRadioNow())return true;
+      var typed=[].some.call(document.querySelectorAll('input[type=text],input:not([type]),textarea'),function(x){return x.offsetParent!==null&&String(x.value||'').trim().length>0&&x.id!=='lang';});
+      if(typed)return true;
+    }catch(_e){}
+    return false;
+  }
+  function maybeReload(why){
+    if(!pending||busy())return;
+    var last=0;try{last=+sessionStorage.getItem('jcw_auto_upd')||0;}catch(_e){}
+    if(Date.now()-last<20*60000)return;
+    try{sessionStorage.setItem('jcw_auto_upd',String(Date.now()));}catch(_e){}
+    location.reload();
+  }
+  function check(){
+    if(document.hidden)return;
+    tag().then(function(t){
+      if(!t)return;
+      if(base===null){base=t;return;}
+      if(t!==base)pending=true;
+      if(pending&&(wasHidden||Date.now()-lastAct>180000))maybeReload();
+      wasHidden=false;
+    });
+  }
+  ['click','keydown','touchstart','scroll'].forEach(function(ev){document.addEventListener(ev,function(){lastAct=Date.now();},{passive:true,capture:true});});
+  document.addEventListener('visibilitychange',function(){if(document.hidden){wasHidden=true;}else{setTimeout(check,400);}});
+  setTimeout(check,2500);
+  setInterval(check,5*60000);
+})();
+</script>
 </body>
 </html>
