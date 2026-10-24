@@ -546,6 +546,11 @@ body.game-lock{overflow:hidden;}
 #trade-modal.on{display:flex;}
 .prof-cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:9px;}
 .trade-inbox{border:1px solid var(--tang);border-radius:10px;padding:12px 14px;margin-bottom:16px;}
+.trade-pts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 4px;padding:10px 12px;border:1px solid rgba(255,208,40,.35);border-radius:10px;background:rgba(255,208,40,.06);}
+.trade-pts label{font-weight:800;color:var(--gold);font-size:14px;}
+.trade-pts input{width:110px;background:#000;border:1px solid var(--seam);color:var(--bone);font:700 16px system-ui,sans-serif;padding:7px 9px;border-radius:7px;}
+.trade-pts small{color:var(--steel);font-size:12px;}
+.trade-pts button{margin-left:auto;background:var(--gold);color:#000;border:0;border-radius:8px;padding:8px 12px;font:800 13px system-ui,sans-serif;cursor:pointer;}
 .trade-inbox>b{color:var(--tang);}
 .trade-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed rgba(240,179,43,.15);}
 .trade-side{flex:1;min-width:130px;}
@@ -1432,6 +1437,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <p class="muted" id="trade-lbl1" style="margin:6px 0 4px;">You want this card:</p>
     <div id="trade-want"></div>
     <div id="trade-giftslot"></div>
+    <div class="trade-pts" id="trade-ptsrow"><label for="trade-pts">+ Points</label><input type="number" id="trade-pts" min="0" max="10000" step="50" inputmode="numeric" placeholder="0" aria-label="Points to add to your offer"><small id="trade-ptshave"></small><button type="button" id="trade-ptsonly">Offer points only</button></div>
     <p class="muted" id="trade-lbl2" style="margin:14px 0 4px;">Pick a duplicate of yours to offer &mdash; it&rsquo;s held until they accept or decline.</p>
     <div class="cardfilter-wrap"><input type="search" class="cardfilter" data-filters="trade-offer-cards" placeholder="Filter your cards&hellip;" aria-label="Filter cards" autocomplete="off"><span class="cardfilter-n"></span></div>
     <div class="pk-cards" id="trade-offer-cards"></div>
@@ -7260,7 +7266,7 @@ route();
       const host=document.getElementById('cards-gifts');
       if(!host){return;} if(!db()||!curUser()){host.innerHTML='';return;}
       db().ref('gifts/'+curUser().uid).once('value').then(s=>{
-        const gifts=[];s.forEach(ch=>{const v=ch.val()||{};v.__k=ch.key;gifts.push(v);});
+        const gifts=[];s.forEach(ch=>{const v=ch.val()||{};v.__k=ch.key;if(v.id)gifts.push(v);});   /* points coming back from a trade bank themselves */
         if(!gifts.length){host.innerHTML='';return;}
         host.innerHTML='<div style="border:1px solid var(--acid);border-radius:10px;padding:12px 14px;margin-bottom:16px;"><b style="color:var(--acid);">&#127873; Cards sent to you ('+gifts.length+')</b><div id="gift-list" style="margin-top:8px;"></div></div>';
         const gl=document.getElementById('gift-list');
@@ -7376,6 +7382,15 @@ route();
       if(l1)l1.innerHTML=a;if(l2)l2.innerHTML=b;if(gs)gs.innerHTML=giftHtml||'';
       const f=document.querySelector('#trade-modal .cardfilter');if(f){f.value='';f.placeholder=giftHtml?'Filter their cards\u2026':'Filter your cards\u2026';}
     }
+    /* ---- points in a trade: optional extra on any offer, or points on their own ---- */
+    function tradePtsPrep(toUid,toName,wantId,showOnly){
+      const inp=document.getElementById('trade-pts'),have=document.getElementById('trade-ptshave'),only=document.getElementById('trade-ptsonly');
+      if(inp)inp.value='';
+      const bal=Math.floor(+(lkGet().pts)||0);
+      if(have)have.textContent=isHouse()?'':('You have '+bal.toLocaleString());
+      if(only){only.style.display=showOnly?'':'none';only.onclick=function(){sendTrade(toUid,toName,wantId,null);};}
+    }
+    function tradePtsVal(){const i=document.getElementById('trade-pts');return Math.max(0,Math.floor(+(i&&i.value)||0));}
     /* ---- reverse: start from MY spare (a card they're missing) — gift it, or pick one of theirs in return ---- */
     function openOfferUI(toUid,toName,offerId,theirOwned){
       if(!curUser()){toast('Log into your Locker first');location.hash='#locker';return;}
@@ -7403,12 +7418,13 @@ route();
         box.appendChild(el);
       });
       m.dataset.to=toUid;m.dataset.toname=toName;m.dataset.want='';
+      tradePtsPrep(toUid,toName,'',false);
       m.classList.add('on');
     }
     function openTradeUI(toUid,toName,wantId){
       if(!curUser()){toast('Log into your Locker first');location.hash='#locker';return;}
       buildCatalog();
-      tradeLabels('You want this card:','Pick a duplicate of yours to offer &mdash; it&rsquo;s held until they accept or decline.','');
+      tradeLabels('You want this card:','Pick a duplicate of yours to offer (add points if you like), or offer points only &mdash; whatever you offer is held until they accept or decline.','');
       const want=catById(wantId);if(!want)return;
       const c=coll();
       const mine=CATALOG.filter(cd=>{if(isHouse())return true;const o=c[cd.id];return o&&o.n>=2;}); /* the house can offer any card */
@@ -7423,7 +7439,7 @@ route();
       const t=document.getElementById('trade-title');
       if(t)t.innerHTML='Trade with '+String(toName).replace(/</g,'')+'';
       if(!mine.length){
-        box.innerHTML='<p class="muted">You need a <b>duplicate</b> card to offer (2 or more of one card) so you keep your own copy. Open more packs first!</p>';
+        box.innerHTML='<p class="muted">You don&rsquo;t have a <b>duplicate</b> card to offer (2 or more of one card) &mdash; but you can offer <b>points only</b> above.</p>';
       }else{
         box.innerHTML=isHouse()?'<label style="grid-column:1/-1;display:flex;align-items:center;gap:8px;color:var(--gold);font-size:14px;cursor:pointer;"><input type="checkbox" id="trade-foil-tgl" style="width:18px;height:18px;accent-color:#ffd028;"> Offer as &#10024; foil</label>':'';
         if(isHouse()){const tg2=document.getElementById('trade-foil-tgl');if(tg2){tg2.checked=localStorage.getItem('jcw_duke_foil')!=='0';tg2.addEventListener('change',()=>{try{localStorage.setItem('jcw_duke_foil',tg2.checked?'1':'0');}catch(_e){}});}}
@@ -7436,13 +7452,20 @@ route();
           box.appendChild(el);
         });
       }
+      tradePtsPrep(toUid,toName,wantId,true);
       m.classList.add('on');
     }
 
     /* ---- send: escrow my offered card, write the offer to their inbox ---- */
-    function sendTrade(toUid,toName,wantId,offerId){
+    let __tradeSending=false;
+    async function sendTrade(toUid,toName,wantId,offerId){
       const D=db(),u=curUser();
       if(!D||!u){toast('Sign in first');return;}
+      if(__tradeSending)return;
+      const pts=tradePtsVal();
+      if(pts>10000){toast('Max 10,000 points in one trade',3600);return;}
+      if(!offerId&&!(pts>0)){toast('Type how many points to offer',3200);return;}
+      if(!wantId){toast('Pick the card you want back',3200);return;}
       /* limited cards are one per person */
       if(window.jcwCardCap&&window.jcwCardCap(wantId)&&((((lkGet().cards||{})[wantId])||{}).n||0)>=1){toast('You already have that one \u2014 limited cards are one per person',4200);return;}
       if(window.jcwCardCap&&window.jcwCardCap(offerId)){toast('Limited cards can\u2019t go in trades \u2014 one per person',4200);return;}
@@ -7451,14 +7474,45 @@ route();
         if(isHouse()){const tg=document.getElementById('trade-foil-tgl');offerFoil=!!(tg&&tg.checked);} /* the house picks */
         else{const cc=(lkGet().cards||{})[offerId];offerFoil=!!(cc&&cc.foil);}
       }catch(e){}
-      if(!isHouse()){
-        const d=lkGet();d.cards=d.cards||{};const cur=d.cards[offerId];
+      if(offerId&&!isHouse()){
+        const cur=((lkGet().cards||{})[offerId]);
         if(!cur||cur.n<2){toast('You need to keep at least one copy');return;}
-        cur.n-=1;d.cards[offerId]=cur;lkSet(d);   /* escrow */
+      }
+      /* hold the points first (the database lets a total drop 500 at a time), then the card */
+      if(pts>0&&!isHouse()){
+        if(Math.floor(+(lkGet().pts)||0)<pts){toast('You only have '+Math.floor(+(lkGet().pts)||0).toLocaleString()+' points',3600);return;}
+        __tradeSending=true;
+        let held=0;
+        try{toast('Holding '+pts.toLocaleString()+' points for this offer\u2026',3000);}catch(_e){}
+        while(held<pts){
+          const step=Math.min(500,pts-held);
+          const ok=await window.jcwSpendPts(step);
+          if(!ok)break;
+          held+=step;
+        }
+        if(held<pts){
+          if(held>0)window.lkAward(held,null,'Points returned (trade not sent)');
+          __tradeSending=false;
+          toast('Couldn\u2019t hold your points right now \u2014 nothing was sent. Try again in a moment.',4200);return;
+        }
+      }
+      if(offerId&&!isHouse()){
+        const d=lkGet();d.cards=d.cards||{};const cur=d.cards[offerId];
+        if(cur&&cur.n>=2){cur.n-=1;d.cards[offerId]=cur;lkSet(d);}   /* escrow */
       }
       const me=(lkGet().name||'A Juggalo');
-      D.ref('trades/'+toUid).push({fromUid:u.uid,fromName:me,offerId:offerId,wantId:wantId,ts:Date.now(),offerFoil:offerFoil});
-      try{if(window.notifPush)window.notifPush(toUid,{ty:'trade',t:'wants to trade cards'});}catch(e){}
+      const rec={fromUid:u.uid,fromName:me,offerId:offerId||'',wantId:wantId,ts:Date.now(),offerFoil:offerId?offerFoil:false};
+      if(pts>0)rec.pts=pts;
+      try{await D.ref('trades/'+toUid).push(rec);}
+      catch(e){
+        /* not sent: give everything back */
+        if(pts>0&&!isHouse())window.lkAward(pts,null,'Points returned (trade not sent)');
+        if(offerId&&!isHouse()){const d=lkGet();d.cards=d.cards||{};const cur=d.cards[offerId]||{n:0,foil:false};cur.n=(cur.n||0)+1;d.cards[offerId]=cur;lkSet(d);}
+        __tradeSending=false;toast('Trade didn\u2019t send \u2014 everything was put back.',4200);jcwCardsRender();return;
+      }
+      if(pts>0&&!isHouse()){try{window.lkAward(0,null,'Offered '+pts.toLocaleString()+' points to '+String(toName||'a Juggalo').slice(0,30)+' (held until they answer)');}catch(_e){}}
+      __tradeSending=false;
+      try{if(window.notifPush)window.notifPush(toUid,{ty:'trade',t:pts>0?(offerId?('wants to trade a card + '+pts.toLocaleString()+' points'):('offered '+pts.toLocaleString()+' points for a card')):'wants to trade cards'});}catch(e){}
       const m=document.getElementById('trade-modal');if(m)m.classList.remove('on');
       toast('Trade offer sent to '+toName+'!',3200);
       jcwCardsRender();
@@ -7480,7 +7534,9 @@ route();
           const off=catById(t.offerId),want=catById(t.wantId);
           const haveWant=!!(c[t.wantId]&&c[t.wantId].n>0);
           const row=document.createElement('div');row.className='trade-row';
-          row.innerHTML='<div class="trade-side"><span class="tl">They give</span><b>'+(off?off.name+' · '+off.kind:'a card')+(t.offerFoil===true?' \u2728':'')+'</b></div>'
+          const tp=Math.max(0,Math.min(10000,Math.floor(+t.pts||0)));
+          const giveTxt=(t.offerId?((off?off.name+' · '+off.kind:'a card')+(t.offerFoil===true?' \u2728':'')):'')+(tp?((t.offerId?' + ':'')+'<span style="color:var(--gold);">'+tp.toLocaleString()+' points</span>'):'');
+          row.innerHTML='<div class="trade-side"><span class="tl">They give</span><b>'+(giveTxt||'a card')+'</b></div>'
             +'<span class="trade-arrow">&#8646;</span>'
             +'<div class="trade-side"><span class="tl">You give</span><b>'+(want?want.name+' · '+want.kind:'a card')+'</b></div>'
             +'<div class="trade-from">from '+String(t.fromName||'?').replace(/</g,'')+'</div>';
@@ -7501,11 +7557,14 @@ route();
       const d=lkGet();d.cards=d.cards||{};
       const mineWant=d.cards[t.wantId];
       if(!mineWant||mineWant.n<1){toast('You don’t have that card');return;}
-      if(window.jcwCardCap&&window.jcwCardCap(t.offerId)&&(((d.cards[t.offerId]||{}).n)||0)>=1){toast('You already have that one \u2014 limited cards are one per person',4200);return;}
+      if(t.offerId&&window.jcwCardCap&&window.jcwCardCap(t.offerId)&&(((d.cards[t.offerId]||{}).n)||0)>=1){toast('You already have that one \u2014 limited cards are one per person',4200);return;}
+      const tp=Math.max(0,Math.min(10000,Math.floor(+t.pts||0)));
       const wantFoil=!!(mineWant&&mineWant.foil);
       if(!isHouse()){ mineWant.n-=1; if(mineWant.n<=0)delete d.cards[t.wantId]; else d.cards[t.wantId]=mineWant; }
-      const got=d.cards[t.offerId]||{n:0,foil:false};got.n=(got.n||0)+1;if(t.offerFoil===true)got.foil=true;d.cards[t.offerId]=got;
+      if(t.offerId){const got=d.cards[t.offerId]||{n:0,foil:false};got.n=(got.n||0)+1;if(t.offerFoil===true)got.foil=true;d.cards[t.offerId]=got;}
       lkSet(d);
+      /* points go through the main Locker so the cloud total syncs up */
+      if(tp){try{window.lkAward(tp,null,'+'+tp.toLocaleString()+' points from a trade with '+String(t.fromName||'a Juggalo').slice(0,30));}catch(_e){}}
       /* send their side to the proposer's inbox */
       D.ref('gifts/'+t.fromUid).push({id:t.wantId,from:u.uid,fromName:(lkGet().name||'A Juggalo'),ts:Date.now(),trade:true,foil:wantFoil});
       D.ref('trades/'+u.uid+'/'+t.__k).remove();
@@ -7516,10 +7575,12 @@ route();
     function declineTrade(t){
       const D=db(),u=curUser();if(!D||!u)return;
       /* return their escrowed card */
-      D.ref('gifts/'+t.fromUid).push({id:t.offerId,from:u.uid,fromName:(lkGet().name||'A Juggalo'),ts:Date.now(),returned:true,foil:t.offerFoil===true});
+      if(t.offerId)D.ref('gifts/'+t.fromUid).push({id:t.offerId,from:u.uid,fromName:(lkGet().name||'A Juggalo'),ts:Date.now(),returned:true,foil:t.offerFoil===true});
+      const tp=Math.max(0,Math.min(10000,Math.floor(+t.pts||0)));
+      if(tp)D.ref('gifts/'+t.fromUid).push({pts:tp,from:u.uid,fromName:(lkGet().name||'A Juggalo'),ts:Date.now(),returned:true});
       D.ref('trades/'+u.uid+'/'+t.__k).remove();
-      try{if(window.notifPush)window.notifPush(t.fromUid,{ty:'tradeno',t:'declined the trade — your card was returned'});}catch(e){}
-      toast('Trade declined — card returned to them');
+      try{if(window.notifPush)window.notifPush(t.fromUid,{ty:'tradeno',t:'declined the trade — '+(t.offerId&&tp?'your card and points were':(tp?'your points were':'your card was'))+' returned'});}catch(e){}
+      toast('Trade declined — '+(t.offerId&&tp?'card and points':(tp?'points':'card'))+' returned to them');
       jcwLoadTrades();
     }
     (function(){
@@ -7765,6 +7826,16 @@ route();
     if(BUSY){AGAIN=true;return;}   /* a gift arrived mid-claim: run once more after */
     BUSY=true;AGAIN=false;
     db.ref('gifts/'+u.uid).once('value').then(function(snap){
+      /* points returned from a declined trade: take the inbox entry first (so it
+         can only ever count once), then add the points to the Locker */
+      snap.forEach(function(c){var v=c.val()||{};
+        var n=Math.max(0,Math.min(10000,Math.floor(+v.pts||0)));
+        if(v.id||!n||DONE['p'+c.key])return;DONE['p'+c.key]=1;
+        db.ref('gifts/'+u.uid+'/'+c.key).remove().then(function(){
+          try{if(window.lkAward)window.lkAward(n,null,'+'+n.toLocaleString()+' points back from a trade'+(v.fromName?(' with '+String(v.fromName).slice(0,30)):''));}catch(e){}
+          say('\u{1F4B0} '+n.toLocaleString()+' points came back from your trade offer');
+        }).catch(function(){delete DONE['p'+c.key];});
+      });
       var gifts=[];
       snap.forEach(function(c){var v=c.val()||{};if(v&&v.id)gifts.push({key:c.key,id:String(v.id),from:v.fromName||'',foil:v.foil===true,serial:(+v.serial||0)});});
       if(!gifts.length){BUSY=false;if(AGAIN)setTimeout(claim,300);return;}
