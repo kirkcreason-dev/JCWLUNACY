@@ -546,6 +546,21 @@ body.game-lock{overflow:hidden;}
 #trade-modal.on{display:flex;}
 .prof-cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:9px;}
 .trade-inbox{border:1px solid var(--tang);border-radius:10px;padding:12px 14px;margin-bottom:16px;}
+/* ===== Lunatics live preshow ===== */
+.ps-box{margin:0 0 18px;padding:16px;border:1px solid rgba(255,63,164,.55);border-radius:14px;background:linear-gradient(180deg,rgba(255,63,164,.10),rgba(255,255,255,0));}
+.ps-box .ps-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+.ps-box .ps-h b{font-family:'Rubik Distressed',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:1.15rem;color:#fff;}
+.ps-live{display:inline-flex;align-items:center;gap:6px;background:#ff2d2d;color:#fff;font:800 11px system-ui,sans-serif;letter-spacing:.12em;padding:3px 8px;border-radius:999px;}
+.ps-live:before{content:"";width:8px;height:8px;border-radius:50%;background:#fff;animation:psPulse 1.2s infinite;}
+@keyframes psPulse{50%{opacity:.25;}}
+.ps-player{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden;}
+.ps-player iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+.ps-ctl{margin-top:12px;padding:12px;border:1px dashed rgba(255,208,40,.45);border-radius:10px;display:grid;gap:8px;}
+.ps-ctl input{width:100%;background:#000;border:1px solid var(--seam);color:var(--bone);font:600 14px system-ui,sans-serif;padding:9px 10px;border-radius:7px;}
+.ps-ctl .row{display:flex;gap:8px;flex-wrap:wrap;}
+#ps-pill{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:350;display:none;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:#ff2d2d;color:#fff;font:800 13px system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.55);}
+#ps-pill.on{display:inline-flex;}
+.chatpop #ps-pill{display:none!important;}
 .trade-pts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 4px;padding:10px 12px;border:1px solid rgba(255,208,40,.35);border-radius:10px;background:rgba(255,208,40,.06);}
 .trade-pts label{font-weight:800;color:var(--gold);font-size:14px;}
 .trade-pts input{width:110px;background:#000;border:1px solid var(--seam);color:var(--bone);font:700 16px system-ui,sans-serif;padding:7px 9px;border-radius:7px;}
@@ -2032,6 +2047,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   </div>
 </div>
 
+<a id="ps-pill" href="#lunatics"><span class="ps-live">LIVE</span> Lunatics Preshow</a>
 <div id="sup-modal" aria-modal="true" role="dialog">
   <div class="dm-box">
     <div class="dm-hd"><button class="sup-back" id="sup-back">&larr; All</button><b id="sup-with">Creaso Norse Tech</b><button class="cx" id="sup-close" aria-label="Close">&times;</button></div>
@@ -3323,6 +3339,7 @@ function observeReveals(){
       const chk=JCW_STRIPE_LINK?'<button class="btn line" data-lun-check style="margin-top:10px;width:100%;justify-content:center;font-size:.9rem;">Already paid? Unlock my membership</button>':'';
       box.innerHTML='<div style="text-align:center;margin-bottom:16px;"><span style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:#ff3fa4;border:1px solid rgba(255,63,164,.5);border-radius:999px;padding:5px 16px;font-size:.82rem;">Members Only</span><p style="margin:12px 0 4px;color:#fff;font-weight:800;font-size:1.1rem;">You&rsquo;re not a Lunatic&hellip; yet.</p><p style="margin:0;color:var(--steel,#9aa0aa);line-height:1.55;">Join the inner circle &mdash; the arcade, the games, Lunacy Radio and exclusive cards now, plus backstage content and PPV as they drop.</p></div>'
         +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;opacity:.85;">'
+        +'<div style="padding:16px;border:1px solid rgba(255,63,164,.45);border-radius:14px;background:linear-gradient(180deg,rgba(255,63,164,.08),rgba(255,255,255,0));"><div style="display:flex;align-items:center;gap:8px;"><span class="ps-live">LIVE</span><b>Lunatics Preshow</b></div><p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">A live preshow streamed right here on the site &mdash; members only.</p></div>'
         +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('arcade','Psychopathic Arcade')+'<p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">15 games with online VS. <b style="color:#7CFF4F;">Live now.</b></p></div>'
         +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('lunacy-game','Lunacy &mdash; The Game')+'<p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">The official JCW fighting game &mdash; 39 fighters, online play. <b style="color:#7CFF4F;">Live now.</b></p></div>'
         +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('arcade','Big Money Rustlas &amp; Dark Chaos Carnival')+'<p style="margin:6px 0 0;color:var(--steel,#9aa0aa);">Two more full games &mdash; a 12-chapter Western and a Joker&rsquo;s Cards party game. <b style="color:#7CFF4F;">Live now.</b></p></div>'
@@ -3331,7 +3348,7 @@ function observeReveals(){
         +'</div>'+btn+chk;
       return;
     }
-    box.innerHTML='<div style="text-align:center;margin-bottom:16px;"><span style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:#ffd028;border:1px solid rgba(255,208,40,.5);border-radius:999px;padding:5px 16px;font-size:.82rem;">&#9733; Lunatic Confirmed</span><p style="margin:10px 0 0;color:var(--steel,#9aa0aa);line-height:1.5;">You&rsquo;re in the inner circle. Here&rsquo;s what&rsquo;s yours.</p></div>'
+    box.innerHTML='<div id="lun-preshow"></div>'+'<div style="text-align:center;margin-bottom:16px;"><span style="display:inline-block;font-family:\'Rubik Distressed\',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:#ffd028;border:1px solid rgba(255,208,40,.5);border-radius:999px;padding:5px 16px;font-size:.82rem;">&#9733; Lunatic Confirmed</span><p style="margin:10px 0 0;color:var(--steel,#9aa0aa);line-height:1.5;">You&rsquo;re in the inner circle. Here&rsquo;s what&rsquo;s yours.</p></div>'
       +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;">'
       +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('lunacy-game','Lunacy &mdash; The Game')+'<p style="margin:6px 0 0;">The official JCW fighting game &mdash; 39 fighters, playable right on this page.</p><a class="btn" href="#games" style="margin-top:8px;width:100%;justify-content:center;">Play now</a></div>'
       +'<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">'+loHead('arcade','Big Money Rustlas &amp; Dark Chaos Carnival')+'<p style="margin:6px 0 0;">Two more full games &mdash; ride through 12 chapters of Big Money Rustlas, or run the midway in Dark Chaos Carnival.</p><a class="btn" href="#games" style="margin-top:8px;width:100%;justify-content:center;">Play now</a></div>'
@@ -3343,6 +3360,7 @@ function observeReveals(){
       +'</div><div class="lk-prem-list" style="display:grid;gap:12px;margin-top:12px;"></div>'
       +(JCW_STRIPE_PORTAL?'<div style="text-align:center;margin-top:18px;"><a class="btn line" style="justify-content:center;font-size:.9rem;" href="'+JCW_STRIPE_PORTAL+'" target="_blank" rel="noopener">Manage or cancel my membership</a>'
         +'<p style="margin:8px 0 0;font-size:12px;color:var(--steel,#9aa0aa);">Opens Stripe\u2019s secure billing page &mdash; sign in with the email you paid with. Cancel any time; you keep access until the end of the month you paid for.</p></div>':'');
+    try{if(window.jcwPreshowPaint)window.jcwPreshowPaint();}catch(_e){}
     if(!fbDB)return;
     fbDB.ref('premiumContent').once('value').then(snap=>{
       const list=box.querySelector('.lk-prem-list'); if(!list)return;
@@ -3350,6 +3368,7 @@ function observeReveals(){
       const esc=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
       let h='';
       if(v)Object.keys(v).forEach(k=>{
+        if(k==='preshow')return;   /* the live preshow has its own player at the top */
         const it=v[k]||{};
         h+='<div style="padding:16px;border:1px solid rgba(255,208,40,.28);border-radius:14px;background:linear-gradient(180deg,rgba(255,208,40,.06),rgba(255,255,255,0));">';
         if(it.t)h+='<b>'+esc(it.t)+'</b>';
@@ -3364,6 +3383,79 @@ function observeReveals(){
       const list=box.querySelector('.lk-prem-list'); if(list)list.innerHTML='<p>Couldn\u2019t open the vault \u2014 refresh and try again.</p>';
     });
   }
+  /* ===== LUNATICS LIVE PRESHOW =====
+     Lives at premiumContent/preshow {live, title, src, when, ts}. That node is
+     only readable by Lunatics (database rule), so the stream link never reaches
+     non-members. Owner, Creaso Norse Tech and mods get on-page controls: paste
+     the stream link, Go live / End. Members see the player at the top of the
+     Lunatics page and a red LIVE pill on every page while it's on. */
+  (function(){
+    const CAN=()=>!!(lkUser&&(lkUser.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1'||lkUser.uid==='zRLXcejE4dWQRL0l07Bo19SO5j52'||(typeof isMod==='function'&&isMod())));
+    let ps=null,ref=null,refUid=null;
+    const esc=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+    /* turn whatever link was pasted into an embeddable player URL */
+    function embed(u){
+      u=String(u||'').trim();if(!/^https:\/\//i.test(u))return '';
+      let m;
+      if((m=u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|live\/|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,20})/)))return 'https://www.youtube.com/embed/'+m[1]+'?autoplay=1&rel=0';
+      if((m=u.match(/youtube\.com\/(?:@|channel\/)([A-Za-z0-9_.-]+)/))&&/channel\//.test(u))return 'https://www.youtube.com/embed/live_stream?channel='+m[1]+'&autoplay=1';
+      if((m=u.match(/twitch\.tv\/(?:videos\/(\d+)|([A-Za-z0-9_]{3,30}))/i))){const par='&parent=jcwlunacy.net&parent=www.jcwlunacy.net';return m[1]?('https://player.twitch.tv/?video='+m[1]+par):('https://player.twitch.tv/?channel='+m[2]+par);}
+      if(/cloudflarestream\.com|videodelivery\.net/i.test(u)){return u.replace(/\/watch(\?.*)?$/,'/iframe').replace(/\/manifest\/.*$/,'/iframe');}
+      if(/facebook\.com\/.+\/videos\//i.test(u)||/fb\.watch\//i.test(u))return 'https://www.facebook.com/plugins/video.php?href='+encodeURIComponent(u)+'&show_text=false&autoplay=true';
+      if(/kick\.com\/([A-Za-z0-9_-]+)/i.test(u))return 'https://player.kick.com/'+u.match(/kick\.com\/([A-Za-z0-9_-]+)/i)[1];
+      return u;
+    }
+    function paint(){
+      const live=!!(ps&&ps.live&&ps.src);
+      const pill=document.getElementById('ps-pill');
+      if(pill)pill.classList.toggle('on',live&&!!window.__lkPremOn&&(location.hash||'')!=='#lunatics');
+      const host=document.getElementById('lun-preshow');if(!host)return;
+      if(!window.__lkPremOn){host.innerHTML='';host.__psH='';return;}
+      let h='';
+      if(live){
+        const src=embed(ps.src);
+        h+='<div class="ps-box"><div class="ps-h"><span class="ps-live">LIVE</span><b>'+esc(ps.title||'Lunatics Preshow')+'</b></div>'
+          +(src?'<div class="ps-player"><iframe src="'+esc(src)+'" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen title="Lunatics Preshow"></iframe></div>':'<p>The stream link isn’t playable here — <a href="'+esc(ps.src)+'" target="_blank" rel="noopener" style="color:var(--gold);">open it</a>.</p>')
+          +'<p style="margin:8px 0 0;font-size:13px;color:var(--steel);">Members only. Chat along in <a href="#" onclick="document.getElementById(\'chat-fab\')&&document.getElementById(\'chat-fab\').click();return false;" style="color:var(--acid);">Lunacy Chat</a>.</p></div>';
+      }else if(ps&&ps.when){
+        h+='<div class="ps-box"><div class="ps-h"><b>'+esc(ps.title||'Lunatics Preshow')+'</b></div><p style="margin:0;">Next preshow: <b>'+esc(ps.when)+'</b> &mdash; streaming live right here for Lunatics.</p></div>';
+      }
+      if(CAN()){
+        h+='<div class="ps-ctl"><b style="color:var(--gold);font-size:13px;letter-spacing:.06em;text-transform:uppercase;">Preshow controls (staff only)</b>'
+          +'<input id="ps-title" placeholder="Title (e.g. Lunacy Preshow)" value="'+esc(ps&&ps.title||'')+'">'
+          +'<input id="ps-src" placeholder="Stream link (YouTube, Twitch, Kick, Facebook, Cloudflare Stream…)" value="'+esc(ps&&ps.src||'')+'">'
+          +'<input id="ps-when" placeholder="When, shown before it starts (e.g. Thu 6:30PM Eastern)" value="'+esc(ps&&ps.when||'')+'">'
+          +'<div class="row"><button class="btn" id="ps-go" type="button">'+(live?'Update stream':'🔴 Go live')+'</button>'
+          +(live?'<button class="btn line" id="ps-end" type="button">End preshow</button>':'<button class="btn line" id="ps-save" type="button">Save (not live)</button>')+'</div></div>';
+      }
+      /* only rebuild when something changed — keeps the player playing and
+         whatever staff are typing in the boxes */
+      if(host.__psH===h)return;
+      host.__psH=h;host.innerHTML=h;
+      const val=id=>{const e=document.getElementById(id);return e?String(e.value||'').trim().slice(0,400):'';};
+      const write=liveNow=>{
+        const src=val('ps-src');
+        if(liveNow&&!embed(src)){try{toast('Paste the stream link first (https://…)',3600);}catch(_e){}return;}
+        fbDB.ref('premiumContent/preshow').set({live:!!liveNow,title:val('ps-title')||'Lunatics Preshow',src:src,when:val('ps-when'),ts:Date.now()})
+          .then(()=>{try{toast(liveNow?'Preshow is LIVE for Lunatics':'Preshow saved',3200);}catch(_e){}})
+          .catch(e=>{try{toast('Couldn’t save: '+((e&&e.message)||'error'),4200);}catch(_e){}});
+      };
+      const g=document.getElementById('ps-go');if(g)g.onclick=()=>write(true);
+      const sv=document.getElementById('ps-save');if(sv)sv.onclick=()=>write(false);
+      const en=document.getElementById('ps-end');if(en)en.onclick=()=>write(false);
+    }
+    window.jcwPreshowPaint=function(){
+      /* (re)attach the live listener for this member */
+      const uid=(window.__lkPremOn&&lkUser&&fbDB)?lkUser.uid:null;
+      if(uid!==refUid){
+        try{if(ref)ref.off();}catch(_e){}ref=null;ps=null;refUid=uid;
+        if(uid){ref=fbDB.ref('premiumContent/preshow');ref.on('value',s=>{ps=s.val();paint();},()=>{ps=null;paint();});}
+      }
+      paint();
+    };
+    window.addEventListener('hashchange',()=>{try{paint();}catch(_e){}});
+    setInterval(()=>{try{window.jcwPreshowPaint();}catch(_e){}},5000);
+  })();
   /* Lunatics Only gate: non-members get the popup instead of the page */
   document.querySelectorAll('a[href="#lunatics"]').forEach(a=>{
     a.addEventListener('click',e=>{
