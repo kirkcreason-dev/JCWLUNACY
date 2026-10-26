@@ -3390,7 +3390,9 @@ function observeReveals(){
      the stream link, Go live / End. Members see the player at the top of the
      Lunatics page and a red LIVE pill on every page while it's on. */
   (function(){
-    const CAN=()=>!!(lkUser&&(lkUser.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1'||lkUser.uid==='zRLXcejE4dWQRL0l07Bo19SO5j52'||(typeof isMod==='function'&&isMod())));
+    /* streamers who run the preshow: both Parkystreams accounts (Mark, Parky) */
+    const STREAMERS={'WjTQUTKNKeb5AEIsjPx3HGigPWm1':1,'qO8JRJ74bjQmw7hZfG8Nn9QFYSG3':1};
+    const CAN=()=>!!(lkUser&&(lkUser.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1'||lkUser.uid==='zRLXcejE4dWQRL0l07Bo19SO5j52'||STREAMERS[lkUser.uid]||(typeof isMod==='function'&&isMod())));
     let ps=null,ref=null,refUid=null;
     const esc=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
     /* turn whatever link was pasted into an embeddable player URL */

@@ -156,7 +156,10 @@
     },
     "premiumContent": {
       ".read": "auth != null && root.child('premiumMembers').child(auth.uid).val() === true",
-      ".write": "auth != null && (root.child('mods').child(auth.uid).val() === true || auth.uid === 'oYrNiXZywhexmLqRQO7j1iyA1Bh1' || auth.uid === 'zRLXcejE4dWQRL0l07Bo19SO5j52')"
+      ".write": "auth != null && (root.child('mods').child(auth.uid).val() === true || auth.uid === 'oYrNiXZywhexmLqRQO7j1iyA1Bh1' || auth.uid === 'zRLXcejE4dWQRL0l07Bo19SO5j52')",
+      "preshow": {
+        ".write": "auth != null && (auth.uid === 'WjTQUTKNKeb5AEIsjPx3HGigPWm1' || auth.uid === 'qO8JRJ74bjQmw7hZfG8Nn9QFYSG3')"
+      }
     },
     "siteEpisodes": {
       ".read": true,
