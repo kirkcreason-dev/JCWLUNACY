@@ -4418,6 +4418,9 @@ function observeReveals(){
   const JCW_HOUSE={'oYrNiXZywhexmLqRQO7j1iyA1Bh1':1,'TwkyqKXbJ6NV8VNewfofluB1sji2':1,'LmjvpMlKlVNpyoXajb74P5guaqu2':1};
   function isHouseUid(uid){return !!(uid&&JCW_HOUSE[uid]);}
   window.jcwIsHouseUid=isHouseUid;
+  /* owner 10/26: only Digital Duke adds or removes mods. Nocturnal (both his
+     accounts) keeps the house card powers but no longer manages mods. */
+  function canManageMods(uid){return uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1';}
   /* Anywhere we asked "is this OTHER person a mod" we were reading only the
      hardcoded map, so anyone promoted through the mods node got the mod tab
      but no mod DM, no MOD tag, and no Message button on their profile —
@@ -4453,7 +4456,7 @@ function observeReveals(){
   window.jcwModUsed=jcwModUsed;
   function jcwModSweep(){
     try{
-      if(!lkUser||!fbDB||!isHouseUid(lkUser.uid)||window.__modSwept||!window.jcwSetMod)return;
+      if(!lkUser||!fbDB||!canManageMods(lkUser.uid)||window.__modSwept||!window.jcwSetMod)return;
       window.__modSwept=true;
       const ids={};Object.keys(JCW_MODS).forEach(k=>{ids[k]=1;});
       Object.keys(JCW_MODS_LIVE||{}).forEach(k=>{if(JCW_MODS_LIVE[k]===true)ids[k]=1;});
@@ -4840,7 +4843,7 @@ function observeReveals(){
       });
       const reviews=Object.keys(byTarget).filter(t=>Object.keys(byTarget[t].by).length>=REVIEW_AT);
       let reviewHtml='';
-      if(reviews.length&&lkUser&&isHouseUid(lkUser.uid)){
+      if(reviews.length&&lkUser&&canManageMods(lkUser.uid)){
         reviewHtml=reviews.map(t=>{const g=byTarget[t];const names=Object.keys(g.by).map(k=>esc(g.by[k]));
           const self=(t===lkUser.uid);
           return '<div style="border:2px solid var(--gold);border-radius:8px;padding:10px 12px;margin-bottom:9px;background:rgba(255,208,40,.08);">'
@@ -4943,7 +4946,7 @@ function observeReveals(){
         return;
       }
       const rv=e.target.closest('[data-revrm]');
-      if(rv&&fbDB&&lkUser&&isHouseUid(lkUser.uid)){
+      if(rv&&fbDB&&lkUser&&canManageMods(lkUser.uid)){
         const who=rv.dataset.revn||'this mod';
         if(!confirm('Remove '+who+' as a mod? Five mods reported them.'))return;
         window.jcwSetMod(rv.dataset.revrm,false,true).then(ok=>{
@@ -4953,7 +4956,7 @@ function observeReveals(){
         return;
       }
       const rk=e.target.closest('[data-revok]');
-      if(rk&&fbDB&&lkUser&&isHouseUid(lkUser.uid)){repClose(rk.dataset.revok);jcwModUsed();return;}
+      if(rk&&fbDB&&lkUser&&canManageMods(lkUser.uid)){repClose(rk.dataset.revok);jcwModUsed();return;}
       const k=e.target.closest('[data-repok]');
       if(k&&fbDB&&isMod()){repClose(k.dataset.repok);jcwModUsed();}
     }catch(_e){}
@@ -5662,7 +5665,7 @@ function observeReveals(){
           +(isMod()&&isModUid(uid)&&!blockedMe&&!iBlocked?'<button class="btn" id="prof-dm" style="margin-left:8px;background:var(--acid);color:#000;">&#128172; Message</button>':'')
           +(lkUser&&!blockedMe?'<button class="btn line" id="prof-gift" style="margin-left:8px;">&#127183; Send a card</button>':'')
           +(uid!==DUKE?'<button class="btn line" id="prof-block" data-on="'+(iBlocked?'0':'1')+'" style="margin-left:8px;border-color:var(--steel);color:var(--steel);">'+(iBlocked?'Unblock':'&#128683; Block')+'</button>':'')
-          +(isHouseUid(lkUser.uid)&&uid!==DUKE&&(!isModUid(uid)||lkUser.uid===DUKE)?('<button class="btn line" id="prof-modtoggle" data-on="'+(isModUid(uid)?'0':'1')+'" style="margin-left:8px;'+(isModUid(uid)?'border-color:var(--hot);color:var(--hot);':'border-color:var(--gold);color:var(--gold);')+'">'+(isModUid(uid)?'&#10006; Remove mod':'&#9733; Make mod')+'</button>'):'')
+          +(canManageMods(lkUser.uid)&&uid!==DUKE?('<button class="btn line" id="prof-modtoggle" data-on="'+(isModUid(uid)?'0':'1')+'" style="margin-left:8px;'+(isModUid(uid)?'border-color:var(--hot);color:var(--hot);':'border-color:var(--gold);color:var(--gold);')+'">'+(isModUid(uid)?'&#10006; Remove mod':'&#9733; Make mod')+'</button>'):'')
           +'</p>';
       }
       if(lkUser&&!isMe&&iBlocked)h+='<p style="margin-top:8px;color:var(--steel);font-size:13px;">You blocked this Juggalo. Their chat, wall posts and pings are hidden from you, and they can&rsquo;t post on your wall or send you cards.</p>';
@@ -6046,11 +6049,9 @@ function observeReveals(){
       },()=>{});
       /* the house adds / removes mods from a profile page */
       window.jcwSetMod=function(uid,on,viaReview){
-        if(!lkUser||!isHouseUid(lkUser.uid)||!uid)return Promise.resolve(false);
+        /* owner 10/26: only Digital Duke adds or removes mods (Nocturnal no longer can) */
+        if(!lkUser||!canManageMods(lkUser.uid)||!uid)return Promise.resolve(false);
         if(uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1')return Promise.resolve(false);   /* the Duke stays */
-        /* owner's rule 9/30: only Digital Duke removes a mod directly. Nocturnal
-           can still make mods, but removes one only through a 5-mod review. */
-        if(!on&&lkUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'&&!viaReview)return Promise.resolve(false);
         const builtin=!!JCW_MODS[uid];
         const w=on
           ? Promise.all([fbDB.ref('modsRemoved/'+uid).remove(), builtin?Promise.resolve():fbDB.ref('mods/'+uid).set(true)])
