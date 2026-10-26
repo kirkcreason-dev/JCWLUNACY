@@ -561,6 +561,10 @@ body.game-lock{overflow:hidden;}
 #ps-pill{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:350;display:none;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:#ff2d2d;color:#fff;font:800 13px system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.55);}
 #ps-pill.on{display:inline-flex;}
 .chatpop #ps-pill{display:none!important;}
+#nav-studio .st-tile{height:108px;width:84px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;border-radius:8px;background:linear-gradient(180deg,#2a0008,#100005);border:2px solid #ff2d2d;color:#fff;font:900 12px/1.15 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;box-shadow:0 0 14px rgba(255,45,45,.35);}
+#nav-studio .st-tile i{font-style:normal;font-size:22px;}
+@media (max-width:899px){#nav-studio .st-tile{height:84px;width:66px;font-size:10px;}#nav-studio .st-tile i{font-size:18px;}}
+.st-stat{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 6px;}
 .trade-pts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 4px;padding:10px 12px;border:1px solid rgba(255,208,40,.35);border-radius:10px;background:rgba(255,208,40,.06);}
 .trade-pts label{font-weight:800;color:var(--gold);font-size:14px;}
 .trade-pts input{width:110px;background:#000;border:1px solid var(--seam);color:var(--bone);font:700 16px system-ui,sans-serif;padding:7px 9px;border-radius:7px;}
@@ -1065,6 +1069,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <a href="#vote" data-r="vote"><img src="nav/nav-vote.webp" onerror="this.onerror=null;this.src='nav/nav-vote.png'" alt="Vote"></a>
   <a href="#locker" data-r="locker"><img src="nav/nav-locker.webp" onerror="this.onerror=null;this.src='nav/nav-locker.png'" alt="Locker"></a>
   <a href="#lunatics" data-r="lunatics"><img src="nav/nav-lunatics.webp" onerror="this.onerror=null;this.src='nav/nav-lunatics.png'" alt="Lunatics Only"></a>
+  <!-- staff-only: shown by the preshow script for owner / Creaso Norse Tech / mods / Parkystreams -->
+  <a href="#studio" data-r="studio" id="nav-studio" style="display:none" aria-label="Preshow Studio (staff only)"><span class="st-tile"><i>&#128308;</i>Preshow<br>Studio</span></a>
   <!-- About and Tickets sit last: unlabelled art, so they read as secondary -->
   <a href="#about" data-r="about"><img src="nav/nav-about.webp" onerror="this.onerror=null;this.src='nav/nav-about.png'" alt="About"></a>
   <a href="https://www.psychopathicrecords.com/jcwtours" target="_blank" rel="noopener"><img src="nav/nav-tickets.webp" onerror="this.onerror=null;this.src='nav/nav-tickets.png'" alt="Tickets"></a>
@@ -1538,6 +1544,13 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <h2>The <em>Lunatics</em> Only</h2>
     <p style="margin-top:10px;">The inner circle of the carnival. Members only.</p>
     <div class="lk" style="margin-top:22px;padding:22px;"><div class="lk-prem-body"><p>Loading&hellip;</p></div></div>
+  </section>
+</main>
+<main id="view-studio" class="view">
+  <section style="max-width:760px;margin:0 auto;padding:90px 20px;">
+    <h2>Preshow <em>Studio</em></h2>
+    <p style="margin-top:10px;">Staff only &mdash; members never see this tab. Lunatics watch on the Lunatics Only page.</p>
+    <div class="lk" style="margin-top:22px;padding:22px;"><div id="studio-ctl"><p>Loading&hellip;</p></div></div>
   </section>
 </main>
 
@@ -2096,7 +2109,7 @@ window.jcwAutoName=function(uid){var s=String(uid||''),h=0;for(var i=0;i<s.lengt
 </script>
 <script>
 /* ================= ROUTER ================= */
-const ROUTES=['home','episodes','clips','events','crew','games','merch','cards','vote','locker','lunatics','about','profile']; /* 'ppv' removed for now — re-add to restore the PPV tab */
+const ROUTES=['home','episodes','clips','events','crew','games','merch','cards','vote','locker','lunatics','studio','about','profile']; /* 'ppv' removed for now — re-add to restore the PPV tab */
 function route(){
   let r=(location.hash||'#home').slice(1);
   if(r.indexOf('u-')===0){window.__profUid=r.slice(2);r='profile';}
@@ -3409,31 +3422,45 @@ function observeReveals(){
     }
     function paint(){
       const live=!!(ps&&ps.live&&ps.src);
+      const can=CAN();
       const pill=document.getElementById('ps-pill');
       if(pill)pill.classList.toggle('on',live&&!!window.__lkPremOn&&(location.hash||'')!=='#lunatics');
-      const host=document.getElementById('lun-preshow');if(!host)return;
-      if(!window.__lkPremOn){host.innerHTML='';host.__psH='';return;}
-      let h='';
-      if(live){
-        const src=embed(ps.src);
-        h+='<div class="ps-box"><div class="ps-h"><span class="ps-live">LIVE</span><b>'+esc(ps.title||'Lunatics Preshow')+'</b></div>'
-          +(src?'<div class="ps-player"><iframe src="'+esc(src)+'" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen title="Lunatics Preshow"></iframe></div>':'<p>The stream link isn’t playable here — <a href="'+esc(ps.src)+'" target="_blank" rel="noopener" style="color:var(--gold);">open it</a>.</p>')
-          +'<p style="margin:8px 0 0;font-size:13px;color:var(--steel);">Members only. Chat along in <a href="#" onclick="document.getElementById(\'chat-fab\')&&document.getElementById(\'chat-fab\').click();return false;" style="color:var(--acid);">Lunacy Chat</a>.</p></div>';
-      }else if(ps&&ps.when){
-        h+='<div class="ps-box"><div class="ps-h"><b>'+esc(ps.title||'Lunatics Preshow')+'</b></div><p style="margin:0;">Next preshow: <b>'+esc(ps.when)+'</b> &mdash; streaming live right here for Lunatics.</p></div>';
+      const nav=document.getElementById('nav-studio');if(nav)nav.style.display=can?'':'none';
+      /* members: the player (or "next preshow") at the top of the Lunatics page */
+      const host=document.getElementById('lun-preshow');
+      if(host){
+        let h='';
+        if(window.__lkPremOn){
+          if(live){
+            const src=embed(ps.src);
+            h='<div class="ps-box"><div class="ps-h"><span class="ps-live">LIVE</span><b>'+esc(ps.title||'Lunatics Preshow')+'</b></div>'
+              +(src?'<div class="ps-player"><iframe src="'+esc(src)+'" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen title="Lunatics Preshow"></iframe></div>':'<p>The stream link isn’t playable here — <a href="'+esc(ps.src)+'" target="_blank" rel="noopener" style="color:var(--gold);">open it</a>.</p>')
+              +'<p style="margin:8px 0 0;font-size:13px;color:var(--steel);">Members only. Chat along in <a href="#" onclick="document.getElementById(\'chat-fab\')&&document.getElementById(\'chat-fab\').click();return false;" style="color:var(--acid);">Lunacy Chat</a>.</p></div>';
+          }else if(ps&&ps.when){
+            h='<div class="ps-box"><div class="ps-h"><b>'+esc(ps.title||'Lunatics Preshow')+'</b></div><p style="margin:0;">Next preshow: <b>'+esc(ps.when)+'</b> &mdash; streaming live right here for Lunatics.</p></div>';
+          }
+        }
+        /* only rebuild when something changed — keeps the player playing */
+        if(host.__psH!==h){host.__psH=h;host.innerHTML=h;}
       }
-      if(CAN()){
-        h+='<div class="ps-ctl"><b style="color:var(--gold);font-size:13px;letter-spacing:.06em;text-transform:uppercase;">Preshow controls (staff only)</b>'
+      /* staff: the controls live on their own Studio tab */
+      const st=document.getElementById('studio-ctl');if(!st)return;
+      let h;
+      if(!can){h='<p>Staff only. Sign in with a staff account to run the preshow.</p>';}
+      else{
+        h='<div class="st-stat">'+(live?'<span class="ps-live">LIVE</span><b>On air for Lunatics</b>':'<b style="color:var(--steel);">Off air</b>')
+          +(ps&&ps.title?' &middot; '+esc(ps.title):'')+(!live&&ps&&ps.when?' &middot; next: '+esc(ps.when):'')
+          +(live?' &middot; <a href="#lunatics" style="color:var(--gold);">see what members see</a>':'')+'</div>'
+          +'<div class="ps-ctl" style="margin-top:8px;">'
           +'<input id="ps-title" placeholder="Title (e.g. Lunacy Preshow)" value="'+esc(ps&&ps.title||'')+'">'
           +'<input id="ps-src" placeholder="Stream link (YouTube, Twitch, Kick, Facebook, Cloudflare Stream…)" value="'+esc(ps&&ps.src||'')+'">'
           +'<input id="ps-when" placeholder="When, shown before it starts (e.g. Thu 6:30PM Eastern)" value="'+esc(ps&&ps.when||'')+'">'
           +'<div class="row"><button class="btn" id="ps-go" type="button">'+(live?'Update stream':'🔴 Go live')+'</button>'
           +(live?'<button class="btn line" id="ps-end" type="button">End preshow</button>':'<button class="btn line" id="ps-save" type="button">Save (not live)</button>')+'</div></div>';
       }
-      /* only rebuild when something changed — keeps the player playing and
-         whatever staff are typing in the boxes */
-      if(host.__psH===h)return;
-      host.__psH=h;host.innerHTML=h;
+      /* only rebuild when something changed — keeps whatever staff are typing */
+      if(st.__psH===h)return;
+      st.__psH=h;st.innerHTML=h;
       const val=id=>{const e=document.getElementById(id);return e?String(e.value||'').trim().slice(0,400):'';};
       const write=liveNow=>{
         const src=val('ps-src');
@@ -3448,7 +3475,7 @@ function observeReveals(){
     }
     window.jcwPreshowPaint=function(){
       /* (re)attach the live listener for this member */
-      const uid=(window.__lkPremOn&&lkUser&&fbDB)?lkUser.uid:null;
+      const uid=((window.__lkPremOn||CAN())&&lkUser&&fbDB)?lkUser.uid:null;
       if(uid!==refUid){
         try{if(ref)ref.off();}catch(_e){}ref=null;ps=null;refUid=uid;
         if(uid){ref=fbDB.ref('premiumContent/preshow');ref.on('value',s=>{ps=s.val();paint();},()=>{ps=null;paint();});}
