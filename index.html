@@ -636,7 +636,7 @@ body.game-lock{overflow:hidden;}
 .lo-join-r .btn.line{font-size:12px;padding:10px 14px;}
 .lo-fine{margin-top:22px;text-align:center;font:400 12.5px/1.5 Inter,system-ui,sans-serif;color:#8f87a0;}
 .lo-fine a{color:#cfc7dc;}
-@media (max-width:720px){.lo-join{grid-template-columns:1fr;}.lo-tv{padding:8px;border-radius:16px;}.lo-tv-brand{display:none;}}
+@media (max-width:720px){.lo-join{grid-template-columns:1fr;}.lo-tv{margin:0 calc(-1 * var(--pad));padding:8px 0;border-radius:0;border-left:0;border-right:0;}.lo-tv-top,.lo-tv-foot{padding-left:var(--pad);padding-right:var(--pad);}.lo-screen{border-radius:0;}.lo-tv-brand{display:none;}}
 @media (prefers-reduced-motion:reduce){.lo-scan{animation:none;display:none;}.lo-card{transition:none;}}
 #ps-pill{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:350;display:none;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:#ff2d2d;color:#fff;font:800 13px system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.55);}
 #ps-pill.on{display:inline-flex;}
@@ -1624,7 +1624,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <div class="lo-hero">
       <span class="lo-kick">&#9733; JCW &middot; Members only</span>
       <h2>The <em>Lunatics</em> Only</h2>
-      <p>The inner circle of the carnival &mdash; the live preshow and post show, the games, the radio and the cards nobody else gets.</p>
+      <p>The inner circle of the carnival &mdash; the games, the arcade, the radio and the cards nobody else gets &mdash; and you can watch the live preshow and post show right here.</p>
     </div>
     <div class="lk-prem-body"><p style="text-align:center;color:#9d94ad;">Loading&hellip;</p></div>
   </section>
@@ -3452,18 +3452,18 @@ function observeReveals(){
   /* the screen as non-members see it: locked */
   function loLockedTv(){
     return '<div class="lo-tv"><div class="lo-tv-top"><span class="lo-onair"><i></i>Live</span><span class="lo-tv-title">Lunatics Live &mdash; Preshow &amp; Post Show</span><span class="lo-tv-brand">JCW Lunacy</span></div>'
-      +'<div class="lo-screen"><div class="lo-static"></div><div class="lo-scan"></div><div class="lo-scr-in"><div class="lo-lock">&#128274;</div>'
-      +'<div class="lo-scr-k">Members only</div><div class="lo-scr-t">Preshow &amp; Post Show</div>'
-      +'<div class="lo-scr-s">Streamed live on this screen before and after the show. Join to unlock it.</div></div></div></div>';
+      +'<div class="lo-screen"><div class="lo-static"></div><div class="lo-scan"></div><div class="lo-scr-in"><div class="lo-lock">&#9733;</div>'
+      +'<div class="lo-scr-k">The Lunatics screen</div><div class="lo-scr-t">Preshow &amp; Post Show</div>'
+      +'<div class="lo-scr-s">Lunatics watch the preshow and post show together right here, along with everything else in the membership.</div></div></div></div>';
   }
   function loJoin(btnHtml,chk){
     return '<div class="lo-join"><div class="lo-join-l"><h3>What you get</h3><ul>'
-      +'<li><span>The live preshow and post show on the screen above <small>&mdash; members only</small></span></li>'
       +'<li><span>Lunacy &mdash; The Game, plus Big Money Rustlas &amp; Dark Chaos Carnival</span></li>'
       +'<li><span>The Psychopathic Arcade &mdash; 15 games with online VS</span></li>'
       +'<li><span>Lunacy Radio &mdash; every roster entrance theme</span></li>'
       +'<li><span>Exclusive members-only trading cards</span></li>'
       +'<li><span>Backstage, bloopers and PPV <small>&mdash; as they drop</small></span></li>'
+      +'<li><span>Plus: watch the preshow and post show here with the other Lunatics</span></li>'
       +'</ul></div><div class="lo-join-r"><div class="lo-price">$10<small> / month</small></div>'
       +'<p>Cancel any time. You keep access through the month you paid for.</p>'+btnHtml+chk
       +'<p style="font-size:11.5px;color:#8f87a0;">Secure checkout by Stripe</p></div></div>';
@@ -3537,8 +3537,13 @@ function observeReveals(){
       const sh=x=>({title:String((x&&x.title)||''),src:String((x&&x.src)||''),when:String((x&&x.when)||'')});
       return {live:!!v.live,kind:v.kind==='post'?'post':'pre',pre:sh(v.pre||v),post:sh(v.post)};
     }
+    /* YouTube's developer policy bans charging users to watch in its embedded player,
+       and this screen sits inside a paid membership — so no YouTube here. Twitch allows
+       a paid service that includes its player (not a fee just to watch). */
+    const isYT=u=>/(^|\/\/|\.)(youtube\.com|youtu\.be|youtube-nocookie\.com)\//i.test(String(u||''));
     function embed(u){
       u=String(u||'').trim();if(!/^https:\/\//i.test(u))return '';
+      if(isYT(u))return '';
       let m;
       if((m=u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|live\/|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,20})/)))return 'https://www.youtube.com/embed/'+m[1]+'?autoplay=1&rel=0';
       if((m=u.match(/youtube\.com\/(?:@|channel\/)([A-Za-z0-9_.-]+)/))&&/channel\//.test(u))return 'https://www.youtube.com/embed/live_stream?channel='+m[1]+'&autoplay=1';
@@ -3569,13 +3574,13 @@ function observeReveals(){
           }else{
             h+='<div class="lo-static"></div><div class="lo-scan"></div><div class="lo-scr-in">';
             const ups=['pre','post'].filter(k=>n[k].when);
-            if(live)h+='<div class="lo-scr-k">'+NAME[n.kind]+' &middot; live now</div><div class="lo-scr-t">'+title+'</div><a class="btn gold" href="'+esc(cur.src)+'" target="_blank" rel="noopener">Watch the stream</a>';
-            else if(ups.length===1){const k=ups[0];h+='<div class="lo-scr-k">Next '+NAME[k].toLowerCase()+'</div><div class="lo-scr-t">'+esc(n[k].title||DEF[k])+'</div><div class="lo-scr-w">'+esc(n[k].when)+'</div><div class="lo-scr-s">Goes live right here on this screen. Members only.</div>';}
+            if(live)h+='<div class="lo-scr-k">'+NAME[n.kind]+' &middot; live now</div><div class="lo-scr-t">'+title+'</div>'+(isYT(cur.src)?'<div class="lo-scr-s">This stream can&rsquo;t play on the Lunatics screen.</div>':'<a class="btn gold" href="'+esc(cur.src)+'" target="_blank" rel="noopener">Watch the stream</a>');
+            else if(ups.length===1){const k=ups[0];h+='<div class="lo-scr-k">Next '+NAME[k].toLowerCase()+'</div><div class="lo-scr-t">'+esc(n[k].title||DEF[k])+'</div><div class="lo-scr-w">'+esc(n[k].when)+'</div><div class="lo-scr-s">Goes live right here on this screen.</div>';}
             else if(ups.length)h+='<div class="lo-scr-k">Coming up on this screen</div><div class="lo-ups">'+ups.map(k=>'<div class="lo-up"><span>'+NAME[k]+'</span><b>'+esc(n[k].title||DEF[k])+'</b><em>'+esc(n[k].when)+'</em></div>').join('')+'</div>';
             else h+='<div class="lo-scr-k">Off air</div><div class="lo-scr-t">Lunatics Live</div><div class="lo-scr-s">The preshow and the post show play right here on this screen when they go live.</div>';
             h+='</div>';
           }
-          h+='</div><div class="lo-tv-foot"><span>'+(live?'You&rsquo;re watching the members-only feed.':'Members-only live screen')+'</span><a href="#" onclick="document.getElementById(\'chat-fab\')&&document.getElementById(\'chat-fab\').click();return false;">Chat along in Lunacy Chat &rarr;</a></div></div>';
+          h+='</div><div class="lo-tv-foot"><span>'+(live?'Watching with the Lunatics.':'The Lunatics screen')+'</span><a href="#" onclick="document.getElementById(\'chat-fab\')&&document.getElementById(\'chat-fab\').click();return false;">Chat along in Lunacy Chat &rarr;</a></div></div>';
         }
         /* only rebuild when something changed — keeps the player playing */
         if(host.__psH!==h){host.__psH=h;host.innerHTML=h;}
@@ -3591,7 +3596,7 @@ function observeReveals(){
           +'<div class="ps-ctl" style="margin-top:8px;">'
           +'<div class="st-pick"><button type="button" data-k="pre" class="'+(sel==='pre'?'on':'')+'">Preshow</button><button type="button" data-k="post" class="'+(sel==='post'?'on':'')+'">Post Show</button></div>'
           +'<input id="ps-title" placeholder="Title (e.g. '+DEF[sel]+')" value="'+esc(me.title)+'">'
-          +'<input id="ps-src" placeholder="Stream link (YouTube, Twitch, Kick, Facebook, Cloudflare Stream…)" value="'+esc(me.src)+'">'
+          +'<input id="ps-src" placeholder="Stream link (Twitch, Kick or Cloudflare Stream — not YouTube)" value="'+esc(me.src)+'">'
           +'<input id="ps-when" placeholder="When, shown before it starts (e.g. Thu 6:30PM Eastern)" value="'+esc(me.when)+'">'
           +'<div class="row"><button class="btn" id="ps-go" type="button">'+(meLive?'Update stream':otherLive?'🔴 Switch screen to the '+NAME[sel]:'🔴 Go live with the '+NAME[sel])+'</button>'
           +(meLive?'<button class="btn line" id="ps-end" type="button">End '+NAME[sel].toLowerCase()+'</button>':'<button class="btn line" id="ps-save" type="button">Save (not live)</button>')+'</div>'
@@ -3606,6 +3611,7 @@ function observeReveals(){
       const write=(mode)=>{ /* mode: 'live' | 'save' | 'end' */
         const n2=norm(ps);
         n2[sel]={title:val('ps-title'),src:val('ps-src'),when:val('ps-when')};
+        if(isYT(n2[sel].src)){try{toast('YouTube doesn\u2019t allow its streams inside a paid membership. Stream on Twitch instead and paste the Twitch link.',6000);}catch(_e){}return;}
         if(mode==='live'&&!embed(n2[sel].src)){try{toast('Paste the stream link first (https://…)',3600);}catch(_e){}return;}
         if(mode==='live'){n2.live=true;n2.kind=sel;}
         else if(mode==='end'){n2.live=false;}
