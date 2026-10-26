@@ -7650,6 +7650,7 @@ route();
     /* ---- points in a trade: optional extra on any offer, or points on their own ---- */
     function tradePtsPrep(toUid,toName,wantId,showOnly){
       const inp=document.getElementById('trade-pts'),have=document.getElementById('trade-ptshave'),only=document.getElementById('trade-ptsonly');
+      const pr=document.getElementById('trade-ptsrow');if(pr&&!__stash)pr.style.display='';
       if(inp)inp.value='';
       const bal=Math.floor(+(lkGet().pts)||0);
       if(have)have.textContent=isHouse()?'':('You have '+bal.toLocaleString());
@@ -7664,6 +7665,7 @@ route();
       const c=coll(),m=document.getElementById('trade-modal'),box=document.getElementById('trade-offer-cards'),hd=document.getElementById('trade-want');
       if(!m||!box)return;
       const nm=String(toName||'them').replace(/[<>&"]/g,'');
+      __stash=false;
       const t=document.getElementById('trade-title');if(t)t.innerHTML='Give '+nm+' a card';
       tradeLabels('Your spare:','Or trade it &mdash; pick one of '+nm+'&rsquo;s cards to get back. Your spare is held until they accept or decline.',
         '<div style="text-align:center;margin:10px 0 2px;"><button id="trade-giftbtn" type="button" style="background:var(--acid,#9dff3a);color:#000;border:0;border-radius:10px;padding:12px 22px;font:800 15px system-ui,sans-serif;letter-spacing:.03em;cursor:pointer;">&#127873; Gift it to '+nm+'</button></div>');
@@ -7686,13 +7688,33 @@ route();
       tradePtsPrep(toUid,toName,'',false);
       m.classList.add('on');
     }
+    /* ---- trading from the owner's stash: 3-ZEE can send offers out of Digital Duke's
+       card stash. The offer goes out under the owner's account (fromUid), so the card
+       that comes back lands in the owner's gifts, not the helper's. Cards only — no
+       points from the stash. ---- */
+    const STASH_OWNER='oYrNiXZywhexmLqRQO7j1iyA1Bh1';
+    const STASH_HELPERS={'itHFBTk2VoNLKk2ZYQbLDZJU6iU2':1};   /* 3-ZEE */
+    let __stash=false,__stashName='Digital Duke';
+    function canStash(toUid){const u=curUser();return !!(u&&STASH_HELPERS[u.uid]&&toUid!==STASH_OWNER);}
+    function stashName(){
+      const D=db();if(!D)return;
+      D.ref('lockers/'+STASH_OWNER+'/name').once('value').then(s=>{const n=String(s.val()||'').trim();if(n)__stashName=n.slice(0,40);}).catch(()=>{});
+    }
     function openTradeUI(toUid,toName,wantId){
       if(!curUser()){toast('Log into your Locker first');location.hash='#locker';return;}
       buildCatalog();
+      __stash=false;
+      const stashOk=canStash(toUid);
+      if(stashOk)stashName();
       tradeLabels('You want this card:','Pick a duplicate of yours to offer (add points if you like), or offer points only &mdash; whatever you offer is held until they accept or decline.','');
       const want=catById(wantId);if(!want)return;
       const c=coll();
-      const mine=CATALOG.filter(cd=>{if(isHouse())return true;const o=c[cd.id];return o&&o.n>=2;}); /* the house can offer any card */
+      const drawOffer=()=>{
+      const house=isHouse()||__stash;
+      const pr=document.getElementById('trade-ptsrow');if(pr)pr.style.display=__stash?'none':'';
+      const l2=document.getElementById('trade-lbl2');
+      if(l2)l2.innerHTML=__stash?('Pick any card from <b style="color:var(--gold);">'+String(__stashName).replace(/[<>&"]/g,'')+'&rsquo;s stash</b> to offer. It goes out under '+String(__stashName).replace(/[<>&"]/g,'')+'&rsquo;s name, and the card you get back goes to them.'):'Pick a duplicate of yours to offer (add points if you like), or offer points only &mdash; whatever you offer is held until they accept or decline.';
+      const mine=CATALOG.filter(cd=>{if(house)return true;const o=c[cd.id];return o&&o.n>=2;}); /* the house (or the owner's stash) can offer any card */
       const tIds=window.__profTheirIds;   /* cards they're missing go first */
       if(tIds)mine.sort((a,b)=>(!!tIds[a.id])-(!!tIds[b.id]));
       const box=document.getElementById('trade-offer-cards');
@@ -7706,10 +7728,10 @@ route();
       if(!mine.length){
         box.innerHTML='<p class="muted">You don&rsquo;t have a <b>duplicate</b> card to offer (2 or more of one card) &mdash; but you can offer <b>points only</b> above.</p>';
       }else{
-        box.innerHTML=isHouse()?'<label style="grid-column:1/-1;display:flex;align-items:center;gap:8px;color:var(--gold);font-size:14px;cursor:pointer;"><input type="checkbox" id="trade-foil-tgl" style="width:18px;height:18px;accent-color:#ffd028;"> Offer as &#10024; foil</label>':'';
-        if(isHouse()){const tg2=document.getElementById('trade-foil-tgl');if(tg2){tg2.checked=localStorage.getItem('jcw_duke_foil')!=='0';tg2.addEventListener('change',()=>{try{localStorage.setItem('jcw_duke_foil',tg2.checked?'1':'0');}catch(_e){}});}}
+        box.innerHTML=house?'<label style="grid-column:1/-1;display:flex;align-items:center;gap:8px;color:var(--gold);font-size:14px;cursor:pointer;"><input type="checkbox" id="trade-foil-tgl" style="width:18px;height:18px;accent-color:#ffd028;"> Offer as &#10024; foil</label>':'';
+        if(house){const tg2=document.getElementById('trade-foil-tgl');if(tg2){tg2.checked=localStorage.getItem('jcw_duke_foil')!=='0';tg2.addEventListener('change',()=>{try{localStorage.setItem('jcw_duke_foil',tg2.checked?'1':'0');}catch(_e){}});}}
         mine.forEach(cd=>{
-          const o=c[cd.id]||{n:(isHouse()?Infinity:0),foil:false};
+          const o=__stash?{n:Infinity,foil:false}:(c[cd.id]||{n:(house?Infinity:0),foil:false});
           const el=cardEl(cd,{owned:true,cnt:o.n,foil:o.foil,locked:false});
           el.style.cursor='pointer';el.title='Offer this card';
           if(tIds&&!tIds[cd.id]){const t=document.createElement('span');t.className='cnt';t.style.cssText='left:6px;right:auto;bottom:6px;top:auto;background:var(--acid,#9dff3a);color:#000;';t.textContent='They need';el.appendChild(t);}
@@ -7717,8 +7739,19 @@ route();
           box.appendChild(el);
         });
       }
+      try{const f=document.querySelector('#trade-modal .cardfilter');if(f){f.value='';f.placeholder=__stash?'Filter the stash\u2026':'Filter your cards\u2026';f.dispatchEvent(new Event('input'));}}catch(_e){}
+      };
+      drawOffer();
+      /* 3-ZEE: choose where the offer comes from */
+      const gs=document.getElementById('trade-giftslot');
+      if(gs){
+        gs.innerHTML=stashOk?'<div class="trade-src" style="display:flex;gap:6px;margin:10px 0 2px;"><span style="align-self:center;font:700 12px system-ui,sans-serif;color:var(--steel);letter-spacing:.08em;text-transform:uppercase;margin-right:4px;">Offer from</span><button type="button" data-src="me" class="btn line" style="flex:1;justify-content:center;padding:9px 10px;font-size:12px;">My cards</button><button type="button" data-src="stash" class="btn line" style="flex:1;justify-content:center;padding:9px 10px;font-size:12px;">Duke&rsquo;s stash</button></div>':'';
+        const paintSrc=()=>gs.querySelectorAll('[data-src]').forEach(b=>{const on=(b.dataset.src==='stash')===__stash;b.style.background=on?'var(--gold)':'';b.style.color=on?'#1a1005':'';b.style.borderColor=on?'var(--gold)':'';});
+        gs.querySelectorAll('[data-src]').forEach(b=>b.addEventListener('click',()=>{__stash=b.dataset.src==='stash';paintSrc();drawOffer();}));
+        paintSrc();
+      }
       tradePtsPrep(toUid,toName,wantId,true);
-      m.classList.add('on');
+      const mo=document.getElementById('trade-modal');if(mo)mo.classList.add('on');
     }
 
     /* ---- send: escrow my offered card, write the offer to their inbox ---- */
@@ -7727,6 +7760,7 @@ route();
       const D=db(),u=curUser();
       if(!D||!u){toast('Sign in first');return;}
       if(__tradeSending)return;
+      if(__stash&&canStash(toUid))return sendStashTrade(toUid,toName,wantId,offerId);
       const pts=tradePtsVal();
       if(pts>10000){toast('Max 10,000 points in one trade',3600);return;}
       if(!offerId&&!(pts>0)){toast('Type how many points to offer',3200);return;}
@@ -7783,6 +7817,26 @@ route();
       jcwCardsRender();
     }
 
+    /* 3-ZEE sending an offer out of the owner's stash: nothing is held from anyone,
+       the record carries the owner as the sender and the helper as "via" */
+    async function sendStashTrade(toUid,toName,wantId,offerId){
+      const D=db(),u=curUser();
+      if(!offerId){toast('Pick a card from the stash to offer',3200);return;}
+      if(!wantId){toast('Pick the card you want back',3200);return;}
+      if(window.jcwCardCap&&window.jcwCardCap(offerId)){toast('Limited cards can\u2019t go in trades \u2014 one per person',4200);return;}
+      let offerFoil=false;try{const tg=document.getElementById('trade-foil-tgl');offerFoil=!!(tg&&tg.checked);}catch(_e){}
+      const me=(lkGet().name||'A Juggalo');
+      const rec={fromUid:STASH_OWNER,fromName:__stashName,via:u.uid,viaName:String(me).slice(0,40),offerId:offerId,wantId:wantId,ts:Date.now(),offerFoil:offerFoil};
+      __tradeSending=true;
+      try{await D.ref('trades/'+toUid).push(rec);}
+      catch(e){__tradeSending=false;toast('Trade didn\u2019t send \u2014 try again.',4200);return;}
+      __tradeSending=false;__stash=false;
+      try{if(window.notifPush)window.notifPush(toUid,{ty:'trade',t:'wants to trade cards from '+__stashName+'\u2019s stash'});}catch(e){}
+      const m=document.getElementById('trade-modal');if(m)m.classList.remove('on');
+      toast('Offer sent to '+toName+' from '+__stashName+'\u2019s stash',3600);
+      jcwCardsRender();
+    }
+
     /* ---- inbox: pending trade offers on the Cards page ---- */
     window.jcwLoadTrades=function(){
       const host=document.getElementById('cards-trades');
@@ -7804,7 +7858,7 @@ route();
           row.innerHTML='<div class="trade-side"><span class="tl">They give</span><b>'+(giveTxt||'a card')+'</b></div>'
             +'<span class="trade-arrow">&#8646;</span>'
             +'<div class="trade-side"><span class="tl">You give</span><b>'+(want?want.name+' · '+want.kind:'a card')+'</b></div>'
-            +'<div class="trade-from">from '+String(t.fromName||'?').replace(/</g,'')+'</div>';
+            +'<div class="trade-from">from '+String(t.fromName||'?').replace(/</g,'')+(t.viaName?' <span style="opacity:.7;">(sent by '+String(t.viaName).replace(/</g,'')+')</span>':'')+'</div>';
           const acts=document.createElement('div');acts.className='trade-acts';
           const ok=document.createElement('button');ok.className='btn';ok.textContent=haveWant?'Accept':'You don’t have it';
           ok.disabled=!haveWant;if(!haveWant)ok.style.opacity='.5';
