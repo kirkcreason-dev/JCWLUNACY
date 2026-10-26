@@ -144,7 +144,7 @@
       ".read": "auth != null && root.child('premiumMembers').child(auth.uid).val() === true",
       ".write": false,
       "preshow": {
-        ".write": "auth != null && (auth.uid === 'WjTQUTKNKeb5AEIsjPx3HGigPWm1' || auth.uid === 'qO8JRJ74bjQmw7hZfG8Nn9QFYSG3')"
+        ".write": "auth != null && (auth.uid === 'WjTQUTKNKeb5AEIsjPx3HGigPWm1' || auth.uid === 'qO8JRJ74bjQmw7hZfG8Nn9QFYSG3' || auth.uid === 'xw5SFdkGBePhbzpf0ihVfRgt1Qw2' || auth.uid === 'LmjvpMlKlVNpyoXajb74P5guaqu2' || auth.uid === 'itHFBTk2VoNLKk2ZYQbLDZJU6iU2')"
       }
     },
     "siteEpisodes": {

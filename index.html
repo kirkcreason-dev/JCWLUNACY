@@ -588,6 +588,14 @@ body.game-lock{overflow:hidden;}
 .lo-scr-w{font:700 clamp(14px,2.2vw,19px) Inter,system-ui,sans-serif;color:var(--gold);}
 .lo-scr-s{font:500 13.5px/1.45 Inter,system-ui,sans-serif;color:#b9b0c9;max-width:440px;}
 .lo-lock{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:24px;background:rgba(255,63,164,.14);border:1px solid rgba(255,63,164,.5);box-shadow:0 0 30px rgba(255,63,164,.3);}
+.lo-ups{display:flex;gap:10px 26px;flex-wrap:wrap;justify-content:center;margin-top:4px;}
+.lo-up{display:flex;flex-direction:column;align-items:center;gap:3px;max-width:300px;}
+.lo-up span{font:800 10.5px Inter,system-ui,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:var(--hot);}
+.lo-up b{font-family:'Rubik Distressed',system-ui,sans-serif;font-weight:400;text-transform:uppercase;color:#fff;font-size:clamp(14px,2.4vw,22px);line-height:1.05;}
+.lo-up em{font:700 clamp(12px,1.8vw,15px) Inter,system-ui,sans-serif;font-style:normal;color:var(--gold);}
+.st-pick{display:flex;gap:6px;margin:4px 0 2px;}
+.st-pick button{flex:1;padding:9px 10px;border-radius:8px;border:1px solid var(--seam);background:#000;color:#cfc7dc;font:800 12px Inter,system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;}
+.st-pick button.on{background:var(--hot);border-color:var(--hot);color:#fff;}
 .lo-tv-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 6px 2px;font:500 13px Inter,system-ui,sans-serif;color:#9d94ad;}
 .lo-tv-foot a{color:var(--acid);text-decoration:none;font-weight:700;}
 /* membership pass bar */
@@ -1141,8 +1149,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <a href="#vote" data-r="vote"><img src="nav/nav-vote.webp" onerror="this.onerror=null;this.src='nav/nav-vote.png'" alt="Vote"></a>
   <a href="#locker" data-r="locker"><img src="nav/nav-locker.webp" onerror="this.onerror=null;this.src='nav/nav-locker.png'" alt="Locker"></a>
   <a href="#lunatics" data-r="lunatics"><img src="nav/nav-lunatics.webp" onerror="this.onerror=null;this.src='nav/nav-lunatics.png'" alt="Lunatics Only"></a>
-  <!-- staff-only: shown by the preshow script for owner / Creaso Norse Tech / mods / Parkystreams -->
-  <a href="#studio" data-r="studio" id="nav-studio" style="display:none" aria-label="Preshow Studio (staff only)"><span class="st-tile"><i>&#128308;</i>Preshow<br>Studio</span></a>
+  <!-- staff-only: shown by the live-show script for the named Studio accounts only -->
+  <a href="#studio" data-r="studio" id="nav-studio" style="display:none" aria-label="Studio (staff only)"><span class="st-tile"><i>&#128308;</i>Studio</span></a>
   <!-- About and Tickets sit last: unlabelled art, so they read as secondary -->
   <a href="#about" data-r="about"><img src="nav/nav-about.webp" onerror="this.onerror=null;this.src='nav/nav-about.png'" alt="About"></a>
   <a href="https://www.psychopathicrecords.com/jcwtours" target="_blank" rel="noopener"><img src="nav/nav-tickets.webp" onerror="this.onerror=null;this.src='nav/nav-tickets.png'" alt="Tickets"></a>
@@ -1616,14 +1624,14 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <div class="lo-hero">
       <span class="lo-kick">&#9733; JCW &middot; Members only</span>
       <h2>The <em>Lunatics</em> Only</h2>
-      <p>The inner circle of the carnival &mdash; the live preshow, the games, the radio and the cards nobody else gets.</p>
+      <p>The inner circle of the carnival &mdash; the live preshow and post show, the games, the radio and the cards nobody else gets.</p>
     </div>
     <div class="lk-prem-body"><p style="text-align:center;color:#9d94ad;">Loading&hellip;</p></div>
   </section>
 </main>
 <main id="view-studio" class="view">
   <section style="max-width:760px;margin:0 auto;padding:90px 20px;">
-    <h2>Preshow <em>Studio</em></h2>
+    <h2><em>Studio</em></h2>
     <p style="margin-top:10px;">Staff only &mdash; members never see this tab. Lunatics watch on the Lunatics Only page.</p>
     <div class="lk" style="margin-top:22px;padding:22px;"><div id="studio-ctl"><p>Loading&hellip;</p></div></div>
   </section>
@@ -2135,7 +2143,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   </div>
 </div>
 
-<a id="ps-pill" href="#lunatics"><span class="ps-live">LIVE</span> Lunatics Preshow</a>
+<a id="ps-pill" href="#lunatics"><span class="ps-live">LIVE</span> <span id="ps-pill-t">Lunatics Preshow</span></a>
 <div id="sup-modal" aria-modal="true" role="dialog">
   <div class="dm-box">
     <div class="dm-hd"><button class="sup-back" id="sup-back">&larr; All</button><b id="sup-with">Creaso Norse Tech</b><button class="cx" id="sup-close" aria-label="Close">&times;</button></div>
@@ -3443,14 +3451,14 @@ function observeReveals(){
   }
   /* the screen as non-members see it: locked */
   function loLockedTv(){
-    return '<div class="lo-tv"><div class="lo-tv-top"><span class="lo-onair"><i></i>Preshow</span><span class="lo-tv-title">Lunatics Live Preshow</span><span class="lo-tv-brand">JCW Lunacy</span></div>'
+    return '<div class="lo-tv"><div class="lo-tv-top"><span class="lo-onair"><i></i>Live</span><span class="lo-tv-title">Lunatics Live &mdash; Preshow &amp; Post Show</span><span class="lo-tv-brand">JCW Lunacy</span></div>'
       +'<div class="lo-screen"><div class="lo-static"></div><div class="lo-scan"></div><div class="lo-scr-in"><div class="lo-lock">&#128274;</div>'
-      +'<div class="lo-scr-k">Members only</div><div class="lo-scr-t">The live preshow</div>'
-      +'<div class="lo-scr-s">Streamed live on this screen before the show. Join to unlock it.</div></div></div></div>';
+      +'<div class="lo-scr-k">Members only</div><div class="lo-scr-t">Preshow &amp; Post Show</div>'
+      +'<div class="lo-scr-s">Streamed live on this screen before and after the show. Join to unlock it.</div></div></div></div>';
   }
   function loJoin(btnHtml,chk){
     return '<div class="lo-join"><div class="lo-join-l"><h3>What you get</h3><ul>'
-      +'<li><span>The live preshow on the screen above <small>&mdash; members only</small></span></li>'
+      +'<li><span>The live preshow and post show on the screen above <small>&mdash; members only</small></span></li>'
       +'<li><span>Lunacy &mdash; The Game, plus Big Money Rustlas &amp; Dark Chaos Carnival</span></li>'
       +'<li><span>The Psychopathic Arcade &mdash; 15 games with online VS</span></li>'
       +'<li><span>Lunacy Radio &mdash; every roster entrance theme</span></li>'
@@ -3488,7 +3496,7 @@ function observeReveals(){
       const esc=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
       let h='';
       if(v)Object.keys(v).forEach(k=>{
-        if(k==='preshow')return;   /* the live preshow has its own player at the top */
+        if(k==='preshow')return;   /* the live shows have their own screen at the top */
         const it=v[k]||{};
         h+='<div class="lo-card">';
         if(it.t)h+='<h3>'+esc(it.t)+'</h3>';
@@ -3504,19 +3512,31 @@ function observeReveals(){
       const list=box.querySelector('.lk-prem-list'); if(list){list.innerHTML='<p class="lo-fine">Couldn\u2019t open the vault \u2014 refresh and try again.</p>';const vw=box.querySelector('.lo-vault-wrap');if(vw)vw.style.display='';}
     });
   }
-  /* ===== LUNATICS LIVE PRESHOW =====
-     Lives at premiumContent/preshow {live, title, src, when, ts}. That node is
-     only readable by Lunatics (database rule), so the stream link never reaches
-     non-members. Owner, Creaso Norse Tech and mods get on-page controls: paste
-     the stream link, Go live / End. Members see the player at the top of the
-     Lunatics page and a red LIVE pill on every page while it's on. */
+  /* ===== LUNATICS LIVE SHOWS (preshow + post show) =====
+     One screen, one studio. Lives at premiumContent/preshow:
+       {live, kind:'pre'|'post', pre:{title,src,when}, post:{title,src,when}, ts}
+     (older saves were flat {live,title,src,when} = the preshow; read as such).
+     Only Lunatics can read it (database rule), so stream links never reach
+     non-members. Only the named accounts below get the
+     Studio tab (not every mod). Members see the screen at the top of the Lunatics page and
+     a red LIVE pill on every page while a show is on. */
   (function(){
-    /* streamers who run the preshow: both Parkystreams accounts (Mark, Parky) */
-    const STREAMERS={'WjTQUTKNKeb5AEIsjPx3HGigPWm1':1,'qO8JRJ74bjQmw7hZfG8Nn9QFYSG3':1};
-    const CAN=()=>!!(lkUser&&(lkUser.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1'||lkUser.uid==='zRLXcejE4dWQRL0l07Bo19SO5j52'||STREAMERS[lkUser.uid]||(typeof isMod==='function'&&isMod())));
-    let ps=null,ref=null,refUid=null;
+    /* Studio is by name only — NOT every mod. Owner, Creaso Norse Tech,
+       Parkystreams (Mark, Parky) = preshow, Brendan Zaleschuk = post show,
+       Nocturnal Deadhead, 3-ZEE. */
+    const STREAMERS={'oYrNiXZywhexmLqRQO7j1iyA1Bh1':1,'zRLXcejE4dWQRL0l07Bo19SO5j52':1,
+      'WjTQUTKNKeb5AEIsjPx3HGigPWm1':1,'qO8JRJ74bjQmw7hZfG8Nn9QFYSG3':1,'xw5SFdkGBePhbzpf0ihVfRgt1Qw2':1,
+      'LmjvpMlKlVNpyoXajb74P5guaqu2':1,'itHFBTk2VoNLKk2ZYQbLDZJU6iU2':1};
+    const CAN=()=>!!(lkUser&&STREAMERS[lkUser.uid]);
+    let ps=null,ref=null,refUid=null,sel=null;
     const esc=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
-    /* turn whatever link was pasted into an embeddable player URL */
+    const NAME={pre:'Preshow',post:'Post Show'};
+    const DEF={pre:'Lunatics Live Preshow',post:'Lunatics Post Show'};
+    function norm(v){
+      v=v||{};
+      const sh=x=>({title:String((x&&x.title)||''),src:String((x&&x.src)||''),when:String((x&&x.when)||'')});
+      return {live:!!v.live,kind:v.kind==='post'?'post':'pre',pre:sh(v.pre||v),post:sh(v.post)};
+    }
     function embed(u){
       u=String(u||'').trim();if(!/^https:\/\//i.test(u))return '';
       let m;
@@ -3529,26 +3549,30 @@ function observeReveals(){
       return u;
     }
     function paint(){
-      const live=!!(ps&&ps.live&&ps.src);
+      const n=norm(ps);const cur=n[n.kind];
+      const live=!!(n.live&&cur.src);
       const can=CAN();
       const pill=document.getElementById('ps-pill');
       if(pill)pill.classList.toggle('on',live&&!!window.__lkPremOn&&(location.hash||'')!=='#lunatics');
+      const pt=document.getElementById('ps-pill-t');if(pt){const t='Lunatics '+NAME[n.kind];if(pt.textContent!==t)pt.textContent=t;}
       const nav=document.getElementById('nav-studio');if(nav)nav.style.display=can?'':'none';
-      /* members: the player (or "next preshow") at the top of the Lunatics page */
+      /* members: the screen at the top of the Lunatics page */
       const host=document.getElementById('lun-preshow');
       if(host){
         let h='';
         if(window.__lkPremOn){
-          const title=esc((ps&&ps.title)||'Lunatics Live Preshow');
-          const src=live?embed(ps.src):'';
-          h='<div class="lo-tv'+(live?' live':'')+'"><div class="lo-tv-top"><span class="lo-onair"><i></i>'+(live?'Live':'Off air')+'</span><span class="lo-tv-title">'+title+'</span><span class="lo-tv-brand">JCW Lunacy</span></div><div class="lo-screen">';
+          const title=esc(cur.title||DEF[n.kind]);
+          const src=live?embed(cur.src):'';
+          h='<div class="lo-tv'+(live?' live':'')+'"><div class="lo-tv-top"><span class="lo-onair"><i></i>'+(live?'Live':'Off air')+'</span><span class="lo-tv-title">'+(live?title:'Lunatics Live &mdash; Preshow &amp; Post Show')+'</span><span class="lo-tv-brand">JCW Lunacy</span></div><div class="lo-screen">';
           if(live&&src){
-            h+='<iframe src="'+esc(src)+'" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen title="Lunatics Preshow"></iframe>';
+            h+='<iframe src="'+esc(src)+'" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen title="'+title+'"></iframe>';
           }else{
             h+='<div class="lo-static"></div><div class="lo-scan"></div><div class="lo-scr-in">';
-            if(live)h+='<div class="lo-scr-k">Live now</div><div class="lo-scr-t">'+title+'</div><a class="btn gold" href="'+esc(ps.src)+'" target="_blank" rel="noopener">Watch the stream</a>';
-            else if(ps&&ps.when)h+='<div class="lo-scr-k">Next preshow</div><div class="lo-scr-t">'+title+'</div><div class="lo-scr-w">'+esc(ps.when)+'</div><div class="lo-scr-s">Goes live right here on this screen. Members only.</div>';
-            else h+='<div class="lo-scr-k">Off air</div><div class="lo-scr-t">Lunatics Live Preshow</div><div class="lo-scr-s">When the next preshow goes live, it plays right here on this screen.</div>';
+            const ups=['pre','post'].filter(k=>n[k].when);
+            if(live)h+='<div class="lo-scr-k">'+NAME[n.kind]+' &middot; live now</div><div class="lo-scr-t">'+title+'</div><a class="btn gold" href="'+esc(cur.src)+'" target="_blank" rel="noopener">Watch the stream</a>';
+            else if(ups.length===1){const k=ups[0];h+='<div class="lo-scr-k">Next '+NAME[k].toLowerCase()+'</div><div class="lo-scr-t">'+esc(n[k].title||DEF[k])+'</div><div class="lo-scr-w">'+esc(n[k].when)+'</div><div class="lo-scr-s">Goes live right here on this screen. Members only.</div>';}
+            else if(ups.length)h+='<div class="lo-scr-k">Coming up on this screen</div><div class="lo-ups">'+ups.map(k=>'<div class="lo-up"><span>'+NAME[k]+'</span><b>'+esc(n[k].title||DEF[k])+'</b><em>'+esc(n[k].when)+'</em></div>').join('')+'</div>';
+            else h+='<div class="lo-scr-k">Off air</div><div class="lo-scr-t">Lunatics Live</div><div class="lo-scr-s">The preshow and the post show play right here on this screen when they go live.</div>';
             h+='</div>';
           }
           h+='</div><div class="lo-tv-foot"><span>'+(live?'You&rsquo;re watching the members-only feed.':'Members-only live screen')+'</span><a href="#" onclick="document.getElementById(\'chat-fab\')&&document.getElementById(\'chat-fab\').click();return false;">Chat along in Lunacy Chat &rarr;</a></div></div>';
@@ -3556,42 +3580,49 @@ function observeReveals(){
         /* only rebuild when something changed — keeps the player playing */
         if(host.__psH!==h){host.__psH=h;host.innerHTML=h;}
       }
-      /* staff: the controls live on their own Studio tab */
+      /* staff: the controls live on the Studio tab */
       const st=document.getElementById('studio-ctl');if(!st)return;
+      if(!sel)sel=n.live?n.kind:'pre';
+      const me=n[sel];const meLive=live&&n.kind===sel;const otherLive=live&&n.kind!==sel;
       let h;
-      if(!can){h='<p>Staff only. Sign in with a staff account to run the preshow.</p>';}
+      if(!can){h='<p>Staff only. Sign in with a staff account to run the live shows.</p>';}
       else{
-        h='<div class="st-stat">'+(live?'<span class="ps-live">LIVE</span><b>On air for Lunatics</b>':'<b style="color:var(--steel);">Off air</b>')
-          +(ps&&ps.title?' &middot; '+esc(ps.title):'')+(!live&&ps&&ps.when?' &middot; next: '+esc(ps.when):'')
-          +(live?' &middot; <a href="#lunatics" style="color:var(--gold);">see what members see</a>':'')+'</div>'
+        h='<div class="st-stat">'+(live?'<span class="ps-live">LIVE</span><b>'+NAME[n.kind]+' on air</b> &middot; '+esc(cur.title||DEF[n.kind])+' &middot; <a href="#lunatics" style="color:var(--gold);">see what members see</a>':'<b style="color:var(--steel);">Off air</b>')+'</div>'
           +'<div class="ps-ctl" style="margin-top:8px;">'
-          +'<input id="ps-title" placeholder="Title (e.g. Lunacy Preshow)" value="'+esc(ps&&ps.title||'')+'">'
-          +'<input id="ps-src" placeholder="Stream link (YouTube, Twitch, Kick, Facebook, Cloudflare Stream…)" value="'+esc(ps&&ps.src||'')+'">'
-          +'<input id="ps-when" placeholder="When, shown before it starts (e.g. Thu 6:30PM Eastern)" value="'+esc(ps&&ps.when||'')+'">'
-          +'<div class="row"><button class="btn" id="ps-go" type="button">'+(live?'Update stream':'🔴 Go live')+'</button>'
-          +(live?'<button class="btn line" id="ps-end" type="button">End preshow</button>':'<button class="btn line" id="ps-save" type="button">Save (not live)</button>')+'</div></div>';
+          +'<div class="st-pick"><button type="button" data-k="pre" class="'+(sel==='pre'?'on':'')+'">Preshow</button><button type="button" data-k="post" class="'+(sel==='post'?'on':'')+'">Post Show</button></div>'
+          +'<input id="ps-title" placeholder="Title (e.g. '+DEF[sel]+')" value="'+esc(me.title)+'">'
+          +'<input id="ps-src" placeholder="Stream link (YouTube, Twitch, Kick, Facebook, Cloudflare Stream…)" value="'+esc(me.src)+'">'
+          +'<input id="ps-when" placeholder="When, shown before it starts (e.g. Thu 6:30PM Eastern)" value="'+esc(me.when)+'">'
+          +'<div class="row"><button class="btn" id="ps-go" type="button">'+(meLive?'Update stream':otherLive?'🔴 Switch screen to the '+NAME[sel]:'🔴 Go live with the '+NAME[sel])+'</button>'
+          +(meLive?'<button class="btn line" id="ps-end" type="button">End '+NAME[sel].toLowerCase()+'</button>':'<button class="btn line" id="ps-save" type="button">Save (not live)</button>')+'</div>'
+          +(otherLive?'<p style="margin:0;font-size:12.5px;color:var(--steel);">The '+NAME[n.kind].toLowerCase()+' is on the screen right now. Going live here replaces it.</p>':'')
+          +'</div>';
       }
       /* only rebuild when something changed — keeps whatever staff are typing */
       if(st.__psH===h)return;
       st.__psH=h;st.innerHTML=h;
       const val=id=>{const e=document.getElementById(id);return e?String(e.value||'').trim().slice(0,400):'';};
-      const write=liveNow=>{
-        const src=val('ps-src');
-        if(liveNow&&!embed(src)){try{toast('Paste the stream link first (https://…)',3600);}catch(_e){}return;}
-        fbDB.ref('premiumContent/preshow').set({live:!!liveNow,title:val('ps-title')||'Lunatics Preshow',src:src,when:val('ps-when'),ts:Date.now()})
-          .then(()=>{try{toast(liveNow?'Preshow is LIVE for Lunatics':'Preshow saved',3200);}catch(_e){}})
+      st.querySelectorAll('.st-pick button').forEach(b=>b.onclick=()=>{sel=b.dataset.k;paint();});
+      const write=(mode)=>{ /* mode: 'live' | 'save' | 'end' */
+        const n2=norm(ps);
+        n2[sel]={title:val('ps-title'),src:val('ps-src'),when:val('ps-when')};
+        if(mode==='live'&&!embed(n2[sel].src)){try{toast('Paste the stream link first (https://…)',3600);}catch(_e){}return;}
+        if(mode==='live'){n2.live=true;n2.kind=sel;}
+        else if(mode==='end'){n2.live=false;}
+        fbDB.ref('premiumContent/preshow').set({live:n2.live,kind:n2.kind,pre:n2.pre,post:n2.post,ts:Date.now()})
+          .then(()=>{try{toast(mode==='live'?NAME[sel]+' is LIVE for Lunatics':mode==='end'?NAME[sel]+' ended':NAME[sel]+' saved',3200);}catch(_e){}})
           .catch(e=>{try{toast('Couldn’t save: '+((e&&e.message)||'error'),4200);}catch(_e){}});
       };
-      const g=document.getElementById('ps-go');if(g)g.onclick=()=>write(true);
-      const sv=document.getElementById('ps-save');if(sv)sv.onclick=()=>write(false);
-      const en=document.getElementById('ps-end');if(en)en.onclick=()=>write(false);
+      const g=document.getElementById('ps-go');if(g)g.onclick=()=>write('live');
+      const sv=document.getElementById('ps-save');if(sv)sv.onclick=()=>write('save');
+      const en=document.getElementById('ps-end');if(en)en.onclick=()=>write('end');
     }
     window.jcwPreshowPaint=function(){
       /* (re)attach the live listener for this member */
       const uid=((window.__lkPremOn||CAN())&&lkUser&&fbDB)?lkUser.uid:null;
       if(uid!==refUid){
         try{if(ref)ref.off();}catch(_e){}ref=null;ps=null;refUid=uid;
-        if(uid){ref=fbDB.ref('premiumContent/preshow');ref.on('value',s=>{ps=s.val();paint();},()=>{ps=null;paint();});}
+        if(uid){let first=true;ref=fbDB.ref('premiumContent/preshow');ref.on('value',s=>{ps=s.val();if(first){first=false;sel=null;}paint();},()=>{ps=null;paint();});}
       }
       paint();
     };
