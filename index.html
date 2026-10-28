@@ -732,6 +732,8 @@ body.game-lock{overflow:hidden;}
 #dm-modal .dm-b{max-width:80%;padding:7px 11px;border-radius:12px;font-size:13.5px;line-height:1.45;word-wrap:break-word;}
 #dm-modal .dm-b.me{align-self:flex-end;background:var(--acid);color:#000;}
 #dm-modal .dm-b.them{align-self:flex-start;background:#1a1a1a;color:var(--bone);border:1px solid var(--seam);}
+#dm-modal .dm-rr{align-self:flex-end;margin-top:-4px;font:600 11px system-ui,sans-serif;color:var(--steel);letter-spacing:.02em;}
+#dm-modal .dm-rr.seen{color:var(--acid);}
 #dm-modal .dm-in{display:flex;gap:8px;padding:12px 14px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--seam);}
 #dm-modal .dm-in input{flex:1;background:#000;border:1px solid var(--seam);color:var(--bone);font:inherit;font-size:14px;padding:11px 12px;outline:none;}
 #dm-modal .dm-in input:focus{border-color:var(--acid);}
@@ -5409,15 +5411,37 @@ function observeReveals(){
   /* ===== MOD DIRECT MESSAGES (1:1) ===== */
   function dmPair(a,b){return [a,b].sort().join('__');}
   let dmOther=null,dmOtherName='',dmRef=null;
+  /* read receipts: each side stamps dm/<pair>/_r/<uid> with when they last read
+     the thread (only while the DM window is open and the tab is in front). The
+     sender sees "Seen <time>" under their latest message once the other side's
+     stamp passes it. */
+  let dmList=[],dmReads={},dmMyRead=0;
   function dmScrollBottom(){const l=document.getElementById('dm-list');if(l)l.scrollTop=l.scrollHeight;}
   function dmRenderList(list){
     const el=document.getElementById('dm-list');if(!el)return;
-    el.innerHTML=list.map(m=>{
-      const mine=lkUser&&m.u===lkUser.uid;
-      return '<div class="dm-b '+(mine?'me':'them')+'">'+pEsc(m.t||'')+'</div>';
+    const me=lkUser&&lkUser.uid;
+    let lastMine=-1;list.forEach((m,i)=>{if(m.u===me)lastMine=i;});
+    const theirRead=+(dmReads[dmOther]||0);
+    const tm=t=>{try{return new Date(t).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});}catch(e){return '';}};
+    el.innerHTML=list.map((m,i)=>{
+      const mine=me&&m.u===me;
+      let rr='';
+      if(i===lastMine&&i===list.length-1){
+        rr=theirRead>=(m.ts||0)?'<div class="dm-rr seen">Seen '+pEsc(tm(theirRead))+'</div>':'<div class="dm-rr">Sent</div>';
+      }
+      return '<div class="dm-b '+(mine?'me':'them')+'">'+pEsc(m.t||'')+'</div>'+rr;
     }).join('')||'<p style="color:var(--steel);font-size:13px;text-align:center;">Say something to '+pEsc(dmOtherName)+'.</p>';
     dmScrollBottom();
   }
+  function dmMarkRead(){
+    if(!dmOther||!lkUser||!fbDB||document.hidden)return;
+    const md=document.getElementById('dm-modal');if(!md||!md.classList.contains('on'))return;
+    let newest=0;dmList.forEach(m=>{if(m.u!==lkUser.uid&&(m.ts||0)>newest)newest=m.ts||0;});
+    if(!newest||newest<=dmMyRead)return;
+    dmMyRead=Math.max(Date.now(),newest);   /* never behind the message, even with a slow clock */
+    fbDB.ref('dm/'+dmPair(lkUser.uid,dmOther)+'/_r/'+lkUser.uid).set(dmMyRead).catch(()=>{});
+  }
+  document.addEventListener('visibilitychange',()=>{try{dmMarkRead();}catch(_e){}});
   window.dmOpen=function(otherUid,otherName){
     if(!fbDB||!lkUser||!isMod()||!isModUid(otherUid)||otherUid===lkUser.uid)return;
     if(jcwBlocked(otherUid)){try{toast('You blocked '+(otherName||'them')+' \u2014 unblock them to message.',3600);}catch(_x){}return;}
@@ -5434,8 +5458,15 @@ function observeReveals(){
     document.getElementById('dm-list').innerHTML='<p style="color:var(--steel);font-size:13px;">Loading\u2026</p>';
     document.getElementById('dm-modal').classList.add('on');
     if(dmRef)dmRef.off();
+    dmList=[];dmReads={};dmMyRead=0;
     dmRef=fbDB.ref('dm/'+dmPair(lkUser.uid,otherUid)).limitToLast(200);
-    dmRef.on('value',s=>{const L=[];s.forEach(c=>{const v=c.val();if(v&&v.t)L.push(v);});dmRenderList(L);});
+    dmRef.on('value',s=>{
+      if(dmOther!==otherUid)return;
+      const L=[];s.forEach(c=>{if(c.key==='_r')return;const v=c.val();if(v&&v.t)L.push(v);});
+      dmReads=(s.child('_r').val())||{};
+      dmMyRead=Math.max(dmMyRead,+(dmReads[lkUser.uid]||0));
+      dmList=L;dmRenderList(L);dmMarkRead();
+    });
     // clear unread flag on my index
     fbDB.ref('dmIndex/'+lkUser.uid+'/'+otherUid+'/unread').set(false).catch(()=>{});
     /* reading the DM clears its alert: if every unseen notification is a DM, mark them seen */
