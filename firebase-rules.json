@@ -80,6 +80,10 @@
         },
         "cards": {
           ".write": "auth != null && auth.uid === $uid && (newData.exists() || !data.exists())"
+        },
+        "modLast": {
+          ".write": "auth != null && (auth.uid === $uid || auth.uid === 'oYrNiXZywhexmLqRQO7j1iyA1Bh1')",
+          ".validate": "newData.isNumber()"
         }
       }
     },

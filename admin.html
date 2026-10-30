@@ -861,6 +861,7 @@
       if(!uid){modSay('No locker with that name. They need to sign in on the site and set their name first.','err');return;}
       if(statsAuth.currentUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'){modSay('Only Digital Duke can add mods.','err');return;}
       await db.ref('lockers/oYrNiXZywhexmLqRQO7j1iyA1Bh1/modGrants/'+uid).set(Date.now());   /* fresh 30 days */
+      try{await db.ref('lockers/'+uid+'/modLast').set(Date.now());}catch(_m){}   /* the apps' 30-day check reads modLast */
       if(MOD_BUILTIN[uid]){await db.ref('modsRemoved/'+uid).remove();modSay((found.name||'They')+' is a day-one mod — switched back on.','ok');modLoad();return;}
       await db.ref('mods/'+uid).set(true);
       $('modName').value='';
@@ -895,6 +896,7 @@
       if(!statsAuth||!statsAuth.currentUser){modSay('Sign in above first.','err');return;}
       if(statsAuth.currentUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'){modSay('Only Digital Duke can restore a mod.','err');return;}
       await db.ref('lockers/oYrNiXZywhexmLqRQO7j1iyA1Bh1/modGrants/'+uid).set(Date.now());   /* fresh 30 days */
+      try{await db.ref('lockers/'+uid+'/modLast').set(Date.now());}catch(_m){}   /* the apps' 30-day check reads modLast */
       await db.ref('modsRemoved/'+uid).remove();
       modSay('Restored '+(MOD_NAMES[uid]||uid)+'.','ok');
       modLoad();

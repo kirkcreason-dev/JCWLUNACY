@@ -6094,7 +6094,10 @@ function observeReveals(){
         const builtin=!!JCW_MODS[uid];
         const w=on
           ? Promise.all([fbDB.ref('modsRemoved/'+uid).remove(), builtin?Promise.resolve():fbDB.ref('mods/'+uid).set(true),
-              fbDB.ref('lockers/'+lkUser.uid+'/modGrants/'+uid).set(Date.now())])   /* fresh 30 days */
+              fbDB.ref('lockers/'+lkUser.uid+'/modGrants/'+uid).set(Date.now()),
+              /* the JCW apps run their own 30-day check off modLast only, so stamp it too
+                 (rule lockers/$uid/modLast lets Digital Duke write it); never blocks the add */
+              fbDB.ref('lockers/'+uid+'/modLast').set(firebase.database.ServerValue.TIMESTAMP).catch(()=>{})])   /* fresh 30 days */
           : Promise.all([fbDB.ref('mods/'+uid).remove(), builtin?fbDB.ref('modsRemoved/'+uid).set(true):Promise.resolve()]);
         return w.then(()=>true).catch(()=>false);
       };
