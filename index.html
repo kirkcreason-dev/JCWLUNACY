@@ -4469,12 +4469,19 @@ function observeReveals(){
       Object.keys(JCW_MODS_LIVE||{}).forEach(k=>{if(JCW_MODS_LIVE[k]===true)ids[k]=1;});
       fbDB.ref('lockers/'+MOD_OWNER+'/modGrants').once('value').then(gs=>{
       const grants=gs.val()||{};
+      Object.keys(grants).forEach(uid=>{
+        if(uid===MOD_OWNER||isModUid(uid))return;
+        if(Date.now()-(+grants[uid]||0)>MOD_IDLE_DAYS*86400000)return;
+        const builtin=!!JCW_MODS[uid];
+        Promise.all([fbDB.ref('modsRemoved/'+uid).remove(),builtin?Promise.resolve():fbDB.ref('mods/'+uid).set(true)])
+          .then(()=>{try{console.info('[mods] restored re-added mod',uid);}catch(_x){}}).catch(()=>{});
+      });
       Object.keys(ids).forEach(uid=>{
         if(uid===MOD_OWNER||!isModUid(uid))return;
         Promise.all([fbDB.ref('lockers/'+uid+'/modLast').once('value'),fbDB.ref('lockers/'+uid+'/name').once('value')]).then(([s,n])=>{
           const last=Math.max(+s.val()||0,MOD_IDLE_START,+grants[uid]||0);
           if(Date.now()-last<=MOD_IDLE_DAYS*86400000)return;
-          window.jcwSetMod(uid,false,true).then(ok=>{
+          window.jcwSetMod(uid,false,'sweep').then(ok=>{
             if(!ok)return;
             try{toast((n.val()||'A mod')+' lost mod powers \u2014 unused for '+MOD_IDLE_DAYS+' days.',5200);}catch(_x){}
           });
@@ -6094,11 +6101,11 @@ function observeReveals(){
         const builtin=!!JCW_MODS[uid];
         const w=on
           ? Promise.all([fbDB.ref('modsRemoved/'+uid).remove(), builtin?Promise.resolve():fbDB.ref('mods/'+uid).set(true),
-              fbDB.ref('lockers/'+lkUser.uid+'/modGrants/'+uid).set(Date.now()),
-              /* the JCW apps run their own 30-day check off modLast only, so stamp it too
-                 (rule lockers/$uid/modLast lets Digital Duke write it); never blocks the add */
-              fbDB.ref('lockers/'+uid+'/modLast').set(firebase.database.ServerValue.TIMESTAMP).catch(()=>{})])   /* fresh 30 days */
-          : Promise.all([fbDB.ref('mods/'+uid).remove(), builtin?fbDB.ref('modsRemoved/'+uid).set(true):Promise.resolve()]);
+              fbDB.ref('lockers/'+lkUser.uid+'/modGrants/'+uid).set(Date.now())])   /* fresh 30 days, even for a returning mod */
+          : Promise.all([fbDB.ref('mods/'+uid).remove(), builtin?fbDB.ref('modsRemoved/'+uid).set(true):Promise.resolve(),
+              /* a deliberate removal cancels the fresh-start, so the restore below won't bring them back;
+                 the idle sweep's own removals keep it (it's stale by then anyway) */
+              viaReview==='sweep'?Promise.resolve():fbDB.ref('lockers/'+lkUser.uid+'/modGrants/'+uid).remove()]);
         return w.then(()=>true).catch(()=>false);
       };
       /* who's a Lunatic — powers the LUNATIC chips in chat, profiles and search */
@@ -6207,6 +6214,9 @@ function observeReveals(){
             document.addEventListener('visibilitychange',()=>{if(!document.hidden)beat();});
           }catch(_e){}
           try{if(window.jcwActStart)window.jcwActStart(user);}catch(_e){}
+          try{Promise.all([fbDB.ref('lockers/'+MOD_OWNER+'/modGrants/'+user.uid).once('value'),fbDB.ref('lockers/'+user.uid+'/modLast').once('value')]).then(([g,m])=>{
+            const gv=+g.val()||0;if(gv>(+m.val()||0))fbDB.ref('lockers/'+user.uid+'/modLast').set(gv).catch(()=>{});
+          }).catch(()=>{});}catch(_e){}
           if(isMod()&&user.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'){
             try{
               const seen=localStorage.getItem('jcw_mod_greet_'+user.uid);
