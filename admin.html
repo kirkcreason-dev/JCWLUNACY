@@ -814,6 +814,8 @@
       MOD_NAMES={};
       const MOD_LAST={};
       lockers.forEach(c=>{const v=c.val();if(v&&v.name)MOD_NAMES[c.key]=String(v.name);if(v&&v.modLast)MOD_LAST[c.key]=+v.modLast;});
+      /* a re-add starts a fresh 30 days (stamped in Digital Duke's locker) */
+      lockers.forEach(c=>{if(c.key!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1')return;const g=(c.val()||{}).modGrants||{};Object.keys(g).forEach(u=>{MOD_LAST[u]=Math.max(MOD_LAST[u]||0,+g[u]||0);});});
       const row=(uid,label,builtin)=>{
         const nm=MOD_NAMES[uid];
         const dead=!nm;
@@ -857,13 +859,15 @@
       let uid=null,found=null;
       snap.forEach(c=>{const v=c.val();if(v&&String(v.name||'').trim().toLowerCase()===nm){uid=c.key;found=v;}});
       if(!uid){modSay('No locker with that name. They need to sign in on the site and set their name first.','err');return;}
+      if(statsAuth.currentUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'){modSay('Only Digital Duke can add mods.','err');return;}
+      await db.ref('lockers/oYrNiXZywhexmLqRQO7j1iyA1Bh1/modGrants/'+uid).set(Date.now());   /* fresh 30 days */
       if(MOD_BUILTIN[uid]){await db.ref('modsRemoved/'+uid).remove();modSay((found.name||'They')+' is a day-one mod — switched back on.','ok');modLoad();return;}
       await db.ref('mods/'+uid).set(true);
       $('modName').value='';
       modSay((found.name||'They')+' is a mod now — it takes effect for them straight away.','ok');
       modLoad();
     }catch(e){
-      modSay('Blocked — only the house (Digital Duke or Nocturnal Deadhead) can change the mod list. Sign in as one of those above.','err');
+      modSay('Blocked — only Digital Duke can change the mod list. Sign in as Digital Duke above.','err');
     }
   };
   document.addEventListener('click',async e=>{
@@ -871,9 +875,8 @@
     const uid=b.getAttribute('data-modrevoke');
     const who=MOD_NAMES[uid]||uid;
     if(statsAuth&&statsAuth.currentUser&&statsAuth.currentUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'){
-      /* owner's rule 9/30: only Digital Duke removes a mod directly; Nocturnal
-         removes one only through a 5-mod review on the site */
-      modSay('Only Digital Duke can remove a mod directly. A mod reported by 5 mods shows up for review on the site.','err');return;}
+      /* owner 10/26: only Digital Duke adds or removes mods */
+      modSay('Only Digital Duke can remove a mod.','err');return;}
     if(!confirm('Remove mod powers from '+who+'?'))return;
     try{
       const db=await statsInit();
@@ -882,7 +885,7 @@
       if(b.getAttribute('data-builtin')==='1')await db.ref('modsRemoved/'+uid).set(true);
       modSay('Removed '+who+'.','ok');
       modLoad();
-    }catch(_e){modSay('Blocked — sign in as the house (Digital Duke or Nocturnal Deadhead) to change the mod list.','err');}
+    }catch(_e){modSay('Blocked — sign in as Digital Duke to change the mod list.','err');}
   });
   document.addEventListener('click',async e=>{
     const b=e.target.closest('[data-modrestore]');if(!b)return;
@@ -890,10 +893,12 @@
     try{
       const db=await statsInit();
       if(!statsAuth||!statsAuth.currentUser){modSay('Sign in above first.','err');return;}
+      if(statsAuth.currentUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'){modSay('Only Digital Duke can restore a mod.','err');return;}
+      await db.ref('lockers/oYrNiXZywhexmLqRQO7j1iyA1Bh1/modGrants/'+uid).set(Date.now());   /* fresh 30 days */
       await db.ref('modsRemoved/'+uid).remove();
       modSay('Restored '+(MOD_NAMES[uid]||uid)+'.','ok');
       modLoad();
-    }catch(_e){modSay('Blocked — sign in as the house to change the mod list.','err');}
+    }catch(_e){modSay('Blocked — sign in as Digital Duke to change the mod list.','err');}
   });
   /* ===== Points gift history ===== */
   async function giftLoad(){

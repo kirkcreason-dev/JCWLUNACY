@@ -4445,8 +4445,12 @@ function observeReveals(){
      without using a mod power loses it. Every power use stamps
      lockers/<uid>/modLast (their own locker, so no rules change); when the
      house signs in, a sweep removes anyone past the limit. Mods with no stamp
-     yet count from the day the rule started. Digital Duke is exempt. */
-  const MOD_IDLE_DAYS=30, MOD_IDLE_START=Date.UTC(2026,8,30);
+     yet count from the day the rule started. Digital Duke is exempt.
+     Re-adding a mod starts a fresh 30 days: the add stamps
+     lockers/<Duke>/modGrants/<uid> (Duke's own locker — no rules change) and
+     the clock counts from whichever is newest. Without that, a re-added mod
+     still looked idle and the next sweep removed them again. */
+  const MOD_IDLE_DAYS=30, MOD_IDLE_START=Date.UTC(2026,8,30), MOD_OWNER='oYrNiXZywhexmLqRQO7j1iyA1Bh1';
   function jcwModUsed(){
     try{
       if(!lkUser||!fbDB||!isMod())return;
@@ -4463,10 +4467,12 @@ function observeReveals(){
       window.__modSwept=true;
       const ids={};Object.keys(JCW_MODS).forEach(k=>{ids[k]=1;});
       Object.keys(JCW_MODS_LIVE||{}).forEach(k=>{if(JCW_MODS_LIVE[k]===true)ids[k]=1;});
+      fbDB.ref('lockers/'+MOD_OWNER+'/modGrants').once('value').then(gs=>{
+      const grants=gs.val()||{};
       Object.keys(ids).forEach(uid=>{
-        if(uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1'||!isModUid(uid))return;
+        if(uid===MOD_OWNER||!isModUid(uid))return;
         Promise.all([fbDB.ref('lockers/'+uid+'/modLast').once('value'),fbDB.ref('lockers/'+uid+'/name').once('value')]).then(([s,n])=>{
-          const last=Math.max(+s.val()||0,MOD_IDLE_START);
+          const last=Math.max(+s.val()||0,MOD_IDLE_START,+grants[uid]||0);
           if(Date.now()-last<=MOD_IDLE_DAYS*86400000)return;
           window.jcwSetMod(uid,false,true).then(ok=>{
             if(!ok)return;
@@ -4474,6 +4480,7 @@ function observeReveals(){
           });
         }).catch(()=>{});
       });
+      }).catch(()=>{window.__modSwept=false;});   /* couldn't read the grants: skip this sweep rather than guess */
     }catch(_e){}
   }
   window.jcwModSweep=jcwModSweep;
@@ -4984,8 +4991,8 @@ function observeReveals(){
       const note=document.getElementById('mod-idle-note');
       if(note&&isMod()&&fbDB&&lkUser&&lkUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'&&!note.dataset.done){
         note.dataset.done='1';
-        fbDB.ref('lockers/'+lkUser.uid+'/modLast').once('value').then(s=>{
-          const last=Math.max(+s.val()||0,MOD_IDLE_START);
+        Promise.all([fbDB.ref('lockers/'+lkUser.uid+'/modLast').once('value'),fbDB.ref('lockers/'+MOD_OWNER+'/modGrants/'+lkUser.uid).once('value')]).then(([s,g])=>{
+          const last=Math.max(+s.val()||0,MOD_IDLE_START,+g.val()||0);
           const left=Math.max(0,Math.ceil((last+MOD_IDLE_DAYS*86400000-Date.now())/86400000));
           note.textContent='Use a mod power (delete, ban, handle a report) at least once every '+MOD_IDLE_DAYS+' days or it lapses \u00b7 '+left+' day'+(left===1?'':'s')+' left.';
         }).catch(()=>{});
@@ -6086,7 +6093,8 @@ function observeReveals(){
         if(uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1')return Promise.resolve(false);   /* the Duke stays */
         const builtin=!!JCW_MODS[uid];
         const w=on
-          ? Promise.all([fbDB.ref('modsRemoved/'+uid).remove(), builtin?Promise.resolve():fbDB.ref('mods/'+uid).set(true)])
+          ? Promise.all([fbDB.ref('modsRemoved/'+uid).remove(), builtin?Promise.resolve():fbDB.ref('mods/'+uid).set(true),
+              fbDB.ref('lockers/'+lkUser.uid+'/modGrants/'+uid).set(Date.now())])   /* fresh 30 days */
           : Promise.all([fbDB.ref('mods/'+uid).remove(), builtin?fbDB.ref('modsRemoved/'+uid).set(true):Promise.resolve()]);
         return w.then(()=>true).catch(()=>false);
       };
