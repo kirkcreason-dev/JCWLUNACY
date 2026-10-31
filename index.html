@@ -7780,7 +7780,7 @@ route();
       const theirIds={};owned.forEach(o=>{theirIds[o.card.id]=1;});
       window.__profTheirIds=canTrade?theirIds:null;window.__profTheirFor=canTrade?uid:null;
       const need=owned.filter(o=>myN(o.card.id)<1);
-      const missing=CATALOG.filter(c=>!theirIds[c.id]&&!c.giftOnly&&!c.cap)
+      const missing=CATALOG.filter(c=>!theirIds[c.id]&&((!c.giftOnly&&!c.cap)||(isHouse()&&c.cap&&editionsLeft(c)>0)))   /* the house also sees limited / 1 of 1 cards that are still unclaimed */
         .sort((a,b)=>((myN(b.id)>=2)-(myN(a.id)>=2))||byRar(a,b));
       const spares=missing.filter(c=>myN(c.id)>=2).length;
       const safeName=String(theirName||'They').replace(/[<>&"]/g,'');
@@ -7803,7 +7803,7 @@ route();
           missing.forEach(c=>{
             const n=myN(c.id);
             const el=cardEl(c,{owned:false,locked:false});
-            if(n>=2){const t=document.createElement('span');t.className='cnt';t.style.cssText='left:6px;right:auto;bottom:6px;top:auto;background:var(--acid,#9dff3a);color:#000;';t.textContent='You have x'+n;el.appendChild(t);}
+            if(n>=2){const t=document.createElement('span');t.className='cnt';t.style.cssText='left:6px;right:auto;bottom:6px;top:auto;background:var(--acid,#9dff3a);color:#000;';t.textContent=(n===Infinity?'You have \u221e':'You have x'+n);el.appendChild(t);}
             else el.style.opacity='.55';
             el.title=n>=2?('Gift or trade this to '+safeName):(safeName+' is missing this');
             if(n>=2){el.style.cursor='pointer';el.addEventListener('click',()=>openOfferUI(uid,theirName,c.id,owned));}
@@ -7861,10 +7861,10 @@ route();
       const gb=document.getElementById('trade-giftbtn');
       if(gb)gb.addEventListener('click',()=>{m.classList.remove('on');doSendCard(toUid,toName,offerId);});
       const myN=id=>{const o=c[id];return o?(+o.n||0):0;};
-      const list=(theirOwned||[]).map(o=>o.card).filter(cd=>!(cd.cap&&myN(cd.id)>=1))   /* limited: one per person */
+      const list=offer.cap?[]:(theirOwned||[]).map(o=>o.card).filter(cd=>!(cd.cap&&myN(cd.id)>=1))   /* a limited / 1 of 1 card is gifted, never traded */   /* limited: one per person */
         .sort((a,b)=>((myN(a.id)<1)?0:1)-((myN(b.id)<1)?0:1));
       box.innerHTML='';
-      if(!list.length)box.innerHTML='<p class="muted">'+nm+' has nothing you could take back right now &mdash; you can still gift it.</p>';
+      if(!list.length)box.innerHTML='<p class="muted">'+(offer.cap?('Limited and 1 of 1 cards are gift only &mdash; tap Gift it to '+nm+'.'):(nm+' has nothing you could take back right now &mdash; you can still gift it.'))+'</p>';
       list.forEach(cd=>{
         const el=cardEl(cd,{owned:true,cnt:0,foil:false,locked:false});
         if(myN(cd.id)<1){const tg=document.createElement('span');tg.className='cnt';tg.style.cssText='left:6px;right:auto;bottom:6px;top:auto;background:var(--acid,#9dff3a);color:#000;';tg.textContent='You need';el.appendChild(tg);}
