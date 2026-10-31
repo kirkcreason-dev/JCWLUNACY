@@ -3019,6 +3019,17 @@ function observeReveals(){
       /* only ever added, never removed — so strip 'nocturnal' from anyone
          holding it without the receipt d.noct that says they earned it */
       if(!d.noct&&d.badges.includes('nocturnal')){d.badges=d.badges.filter(function(x){return x!=='nocturnal';});ch=true;}
+      /* badges never leave: every badge the site has paid out is recorded in
+         d.bpaid (cloud-synced, union-merged). If something wipes the list —
+         an app writing an older copy over the cloud locker did this to The
+         Miracle Man on 10/30, 111 → 89 — put them back. No second payout:
+         bpaid already has them. Identity-locked badges stay with their owner. */
+      if(lkUser&&lkCloudReady&&d.bpaid&&typeof d.bpaid==='object'){
+        try{const known={};LK_BADGES.forEach(function(b){known[b[0]]=1;});
+          const LOCKED={nocturnal:1,securitysucker:1,violentjeff:1,verified:1};
+          Object.keys(d.bpaid).forEach(function(b){if(known[b]&&!(LOCKED[b]&&!(b==='nocturnal'&&d.noct)))add(b);});
+        }catch(_e){}
+      }
       if(d.fav||d.favB)add('fan');
       if(d.picks&&Object.keys(d.picks).length)add('prophet');
       if(d.played||(d.wins||0)>0)add('gamer');
