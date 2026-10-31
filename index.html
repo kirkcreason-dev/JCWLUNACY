@@ -6438,7 +6438,7 @@ function observeReveals(){
               const merged=Object.assign({},d,cloud);
               /* a wiped cloud copy carries empty strings — never let them clobber real local values */
               ['name','fav','favB','theme','pic'].forEach(k=>{if(!(cloud[k]&&String(cloud[k]).trim())&&d[k])merged[k]=d[k];});
-              merged.badges=[...new Set([...(d.badges||[]),...(cloud.badges||[])])];
+              merged.badges=[...new Set([...(cloud.badges||[]),...(d.badges||[])])];   /* cloud order first: two devices with the same badges in a different order kept rewriting each other (Cards page blinking) */
               merged.eps=window.jcwEpsMerge(window.jcwDecKeys(cloud.eps),d.eps);
               merged.radio=Object.assign({},window.jcwDecKeys(cloud.radio),d.radio||{});
               merged.seen=Object.assign({},window.jcwDecKeys(cloud.seen),d.seen||{});
@@ -6446,7 +6446,7 @@ function observeReveals(){
               merged.picks=Object.assign({},window.jcwDecKeys(cloud.picks),d.picks||{});
               merged.streakBest=Math.max(d.streakBest||0,cloud.streakBest||0);merged.streak=Math.max(d.streak||0,cloud.streak||0);
               merged.dayone=(d.dayone||cloud.dayone)?1:0;
-              merged.hist=((d.hist||[]).length>=(cloud.hist||[]).length)?(d.hist||[]):(cloud.hist||[]);
+              merged.hist=((d.hist||[]).length>(cloud.hist||[]).length)?(d.hist||[]):(cloud.hist||[]);   /* a tie goes to the cloud so two devices settle */
               merged.watched=Math.max(d.watched||0,cloud.watched||0);
               merged.played=!!(d.played||cloud.played);
               merged.lastCheckin=(d.lastCheckin||'')>(cloud.lastCheckin||'')?(d.lastCheckin||''):(cloud.lastCheckin||'');
