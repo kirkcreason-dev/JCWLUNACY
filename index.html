@@ -732,6 +732,18 @@ body.game-lock{overflow:hidden;}
 #dm-modal .dm-b{max-width:80%;padding:7px 11px;border-radius:12px;font-size:13.5px;line-height:1.45;word-wrap:break-word;}
 #dm-modal .dm-b.me{align-self:flex-end;background:var(--acid);color:#000;}
 #dm-modal .dm-b.them{align-self:flex-start;background:#1a1a1a;color:var(--bone);border:1px solid var(--seam);}
+#dm-modal .dm-in input{min-width:0;}
+#dm-modal .dm-in button{flex:none;}
+#dm-modal .dm-in .dm-pic{background:none;color:var(--bone);border:1px solid var(--seam);padding:0 10px;font-size:18px;letter-spacing:0;}
+#dm-modal .dm-in .dm-pic:disabled{opacity:.4;cursor:default;}
+#dm-modal .dm-typing{min-height:18px;padding:0 14px 2px;font:600 12px system-ui,sans-serif;color:var(--steel);font-style:italic;}
+#dm-modal .dm-b.img{padding:4px;background:none;border:1px solid var(--seam);}
+#dm-modal .dm-b.img.me{border-color:var(--acid);}
+#dm-modal .dm-b img{display:block;max-width:100%;max-height:260px;border-radius:9px;cursor:zoom-in;}
+#dm-modal .dm-b .dm-ph{width:180px;height:120px;border-radius:9px;background:#141414;display:grid;place-items:center;color:var(--steel);font-size:12px;}
+#dm-lightbox{position:fixed;inset:0;z-index:420;background:rgba(0,0,0,.94);display:none;align-items:center;justify-content:center;padding:16px;cursor:zoom-out;}
+#dm-lightbox.on{display:flex;}
+#dm-lightbox img{max-width:100%;max-height:100%;border-radius:8px;}
 #dm-modal .dm-rr{align-self:flex-end;margin-top:-4px;font:600 11px system-ui,sans-serif;color:var(--steel);letter-spacing:.02em;}
 #dm-modal .dm-rr.seen{color:var(--acid);}
 #dm-modal .dm-in{display:flex;gap:8px;padding:12px 14px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--seam);}
@@ -2142,7 +2154,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   <div class="dm-box">
     <div class="dm-hd"><b id="dm-with">Direct Message</b><button class="cx" id="dm-close" aria-label="Close">&times;</button></div>
     <div class="dm-list" id="dm-list"></div>
-    <div class="dm-in"><input id="dm-msg" maxlength="300" placeholder="Message…"><button id="dm-send">Send</button></div>
+    <div class="dm-typing" id="dm-typing"></div>
+    <div class="dm-in"><button id="dm-pic" class="dm-pic" type="button" aria-label="Send a photo" title="Send a photo">&#128247;</button><input id="dm-file" type="file" accept="image/*" hidden><input id="dm-msg" maxlength="300" placeholder="Message…"><button id="dm-send">Send</button></div>
   </div>
 </div>
 
@@ -5425,12 +5438,19 @@ function observeReveals(){
   };
   /* ===== MOD DIRECT MESSAGES (1:1) ===== */
   function dmPair(a,b){return [a,b].sort().join('__');}
-  let dmOther=null,dmOtherName='',dmRef=null;
+  let dmOther=null,dmOtherName='',dmRef=null,dmSide=[];
   /* read receipts: each side stamps dm/<pair>/_r/<uid> with when they last read
      the thread (only while the DM window is open and the tab is in front). The
      sender sees "Seen <time>" under their latest message once the other side's
-     stamp passes it. */
-  let dmList=[],dmReads={},dmMyRead=0;
+     stamp passes it.
+     typing: dm/<pair>/_t/<uid> = time of the last keystroke (at most every 3s,
+     cleared on send/close); "<name> is typing…" shows while it's under 6s old.
+     photos: the picture is shrunk on the device and kept at dm/<pair>/_img/<id>;
+     the message is {u,t:'📷 Photo',ts,img:<id>} so every older reader (inbox,
+     owner review, the apps) still shows "📷 Photo". Messages are read with
+     orderByKey().endAt('_') so _img/_r/_t never ride along with the thread. */
+  let dmList=[],dmReads={},dmMyRead=0,dmTyping={},dmTypeSent=0;
+  const dmImgCache={};
   function dmScrollBottom(){const l=document.getElementById('dm-list');if(l)l.scrollTop=l.scrollHeight;}
   function dmRenderList(list){
     const el=document.getElementById('dm-list');if(!el)return;
@@ -5444,9 +5464,45 @@ function observeReveals(){
       if(i===lastMine&&i===list.length-1){
         rr=theirRead>=(m.ts||0)?'<div class="dm-rr seen">Seen '+pEsc(tm(theirRead))+'</div>':'<div class="dm-rr">Sent</div>';
       }
+      if(m.img&&/^[A-Za-z0-9_-]{1,40}$/.test(String(m.img))){
+        const src=dmImgCache[m.img];
+        return '<div class="dm-b img '+(mine?'me':'them')+'" data-dmimg="'+pEsc(m.img)+'">'+(src?'<img alt="Photo" src="'+src+'">':'<div class="dm-ph">Loading photo&hellip;</div>')+'</div>'+rr;
+      }
       return '<div class="dm-b '+(mine?'me':'them')+'">'+pEsc(m.t||'')+'</div>'+rr;
     }).join('')||'<p style="color:var(--steel);font-size:13px;text-align:center;">Say something to '+pEsc(dmOtherName)+'.</p>';
+    /* fetch any photos we don't have yet, once each */
+    const pair=dmOther&&me?dmPair(me,dmOther):null;
+    list.forEach(m=>{
+      if(!pair||!m.img||dmImgCache[m.img]!==undefined||!/^[A-Za-z0-9_-]{1,40}$/.test(String(m.img)))return;
+      dmImgCache[m.img]=null;
+      fbDB.ref('dm/'+pair+'/_img/'+m.img).once('value').then(s=>{
+        const v=String(s.val()||'');
+        if(!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(v)){delete dmImgCache[m.img];return;}
+        dmImgCache[m.img]=v;
+        document.querySelectorAll('#dm-list [data-dmimg="'+m.img+'"]').forEach(b=>{b.innerHTML='<img alt="Photo" src="'+v+'">';});
+        dmScrollBottom();
+      }).catch(()=>{delete dmImgCache[m.img];});
+    });
     dmScrollBottom();
+  }
+  function dmRenderTyping(){
+    const el=document.getElementById('dm-typing');if(!el)return;
+    const t=+(dmTyping[dmOther]||0);
+    const on=t&&Date.now()-t<6000;
+    const txt=on?(dmOtherName+' is typing…'):'';
+    if(el.textContent!==txt)el.textContent=txt;
+  }
+  setInterval(()=>{try{if(dmOther)dmRenderTyping();}catch(_e){}},1000);
+  function dmTypingPing(){
+    if(!dmOther||!lkUser||!fbDB)return;
+    const now=Date.now();if(now-dmTypeSent<3000)return;dmTypeSent=now;
+    const r=fbDB.ref('dm/'+dmPair(lkUser.uid,dmOther)+'/_t/'+lkUser.uid);
+    r.set(now).catch(()=>{});try{r.onDisconnect().remove();}catch(_e){}
+  }
+  function dmTypingClear(other){
+    other=other||dmOther;if(!other||!lkUser||!fbDB)return;
+    if(!dmTypeSent)return;dmTypeSent=0;
+    fbDB.ref('dm/'+dmPair(lkUser.uid,other)+'/_t/'+lkUser.uid).remove().catch(()=>{});
   }
   function dmMarkRead(){
     if(!dmOther||!lkUser||!fbDB||document.hidden)return;
@@ -5457,31 +5513,44 @@ function observeReveals(){
     fbDB.ref('dm/'+dmPair(lkUser.uid,dmOther)+'/_r/'+lkUser.uid).set(dmMyRead).catch(()=>{});
   }
   document.addEventListener('visibilitychange',()=>{try{dmMarkRead();}catch(_e){}});
+  function dmDetach(){
+    if(dmRef){dmRef.off();dmRef=null;}
+    dmSide.forEach(r=>{try{r.off();}catch(_e){}});dmSide=[];
+    dmTypingClear();
+    const ty=document.getElementById('dm-typing');if(ty)ty.textContent='';
+  }
   window.dmOpen=function(otherUid,otherName){
     if(!fbDB||!lkUser||!isMod()||!isModUid(otherUid)||otherUid===lkUser.uid)return;
-    if(jcwBlocked(otherUid)){try{toast('You blocked '+(otherName||'them')+' \u2014 unblock them to message.',3600);}catch(_x){}return;}
+    if(jcwBlocked(otherUid)){try{toast('You blocked '+(otherName||'them')+' — unblock them to message.',3600);}catch(_x){}return;}
+    dmDetach();
     dmOther=otherUid;dmOtherName=otherName||'Mod';
     /* blocks cover DMs too: if they blocked me, the thread is read-only */
     window.__dmBlockedMe=false;
-    const dmInp=document.getElementById('dm-msg');if(dmInp){dmInp.disabled=false;dmInp.placeholder='Message\u2026';}
+    const dmInp=document.getElementById('dm-msg');if(dmInp){dmInp.disabled=false;dmInp.placeholder='Message…';}
+    const dmPicB=document.getElementById('dm-pic');if(dmPicB)dmPicB.disabled=false;
     if(lkUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1')fbDB.ref('lockers/'+otherUid+'/blocked/'+lkUser.uid).once('value').then(s=>{
       if(dmOther!==otherUid)return;
       window.__dmBlockedMe=(+s.val()||0)>0;
-      if(window.__dmBlockedMe&&dmInp){dmInp.disabled=true;dmInp.value='';dmInp.placeholder='You can\u2019t message '+dmOtherName+'.';}
+      if(window.__dmBlockedMe&&dmInp){dmInp.disabled=true;dmInp.value='';dmInp.placeholder='You can’t message '+dmOtherName+'.';if(dmPicB)dmPicB.disabled=true;}
     }).catch(()=>{});
-    document.getElementById('dm-with').textContent='DM \u00b7 '+dmOtherName;
-    document.getElementById('dm-list').innerHTML='<p style="color:var(--steel);font-size:13px;">Loading\u2026</p>';
+    document.getElementById('dm-with').textContent='DM · '+dmOtherName;
+    document.getElementById('dm-list').innerHTML='<p style="color:var(--steel);font-size:13px;">Loading…</p>';
     document.getElementById('dm-modal').classList.add('on');
-    if(dmRef)dmRef.off();
-    dmList=[];dmReads={};dmMyRead=0;
-    dmRef=fbDB.ref('dm/'+dmPair(lkUser.uid,otherUid)).limitToLast(200);
+    dmList=[];dmReads={};dmMyRead=0;dmTyping={};dmTypeSent=0;
+    const base=fbDB.ref('dm/'+dmPair(lkUser.uid,otherUid));
+    dmRef=base.orderByKey().endAt('_').limitToLast(200);
     dmRef.on('value',s=>{
       if(dmOther!==otherUid)return;
-      const L=[];s.forEach(c=>{if(c.key==='_r')return;const v=c.val();if(v&&v.t)L.push(v);});
-      dmReads=(s.child('_r').val())||{};
-      dmMyRead=Math.max(dmMyRead,+(dmReads[lkUser.uid]||0));
+      const L=[];s.forEach(c=>{if(String(c.key).charAt(0)==='_')return;const v=c.val();if(v&&(v.t||v.img))L.push(v);});
       dmList=L;dmRenderList(L);dmMarkRead();
     });
+    const rr=base.child('_r');rr.on('value',s=>{
+      if(dmOther!==otherUid)return;
+      dmReads=s.val()||{};dmMyRead=Math.max(dmMyRead,+(dmReads[lkUser.uid]||0));
+      dmRenderList(dmList);dmMarkRead();
+    });
+    const tt=base.child('_t');tt.on('value',s=>{if(dmOther!==otherUid)return;dmTyping=s.val()||{};dmRenderTyping();});
+    dmSide=[rr,tt];
     // clear unread flag on my index
     fbDB.ref('dmIndex/'+lkUser.uid+'/'+otherUid+'/unread').set(false).catch(()=>{});
     /* reading the DM clears its alert: if every unseen notification is a DM, mark them seen */
@@ -5489,34 +5558,82 @@ function observeReveals(){
       const un=L.filter(x=>(x.ts||0)>Math.max(sn,window.__notifSeenCloud||0));
       if(un.length&&un.every(x=>x.ty==='dm')&&window.jcwMarkNotifsSeen)window.jcwMarkNotifsSeen(window.__notifNewest);}catch(_e){}
   };
+  function dmCanSend(target){
+    if(window.__dmBlockedMe||jcwBlocked(target)){try{toast('You can’t message '+dmOtherName+'.',3200);}catch(_x){}return Promise.resolve(false);}
+    if(lkUser.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1')return Promise.resolve(true);
+    return fbDB.ref('lockers/'+target+'/blocked/'+lkUser.uid).once('value').then(s=>{
+      if((+s.val()||0)>0){window.__dmBlockedMe=true;try{toast('You can’t message '+dmOtherName+'.',3200);}catch(_x){}return false;}
+      return true;
+    }).catch(()=>true);
+  }
   function dmSend(){
     const inp=document.getElementById('dm-msg');const t=(inp.value||'').trim();
     if(!t||!fbDB||!lkUser||!dmOther)return;
-    if(window.__dmBlockedMe||jcwBlocked(dmOther)){try{toast('You can\u2019t message '+dmOtherName+'.',3200);}catch(_x){}return;}
     const target=dmOther;
-    if(lkUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'){
-      fbDB.ref('lockers/'+target+'/blocked/'+lkUser.uid).once('value').then(s=>{
-        if((+s.val()||0)>0){window.__dmBlockedMe=true;try{toast('You can\u2019t message '+dmOtherName+'.',3200);}catch(_x){}return;}
-        dmDeliver(target,t,inp);
-      }).catch(()=>dmDeliver(target,t,inp));
-      return;
-    }
-    dmDeliver(target,t,inp);
+    dmCanSend(target).then(ok=>{if(ok)dmDeliver(target,t,inp);});
   }
-  function dmDeliver(dmOther,t,inp){
+  function dmDeliver(dmOther,t,inp,img){
     if(inp)inp.value='';
-    const msg={u:lkUser.uid,t:t,ts:Date.now()};
+    dmTypingClear(dmOther);
+    const msg={u:lkUser.uid,t:t,ts:Date.now()};if(img)msg.img=img;
     fbDB.ref('dm/'+dmPair(lkUser.uid,dmOther)).push(msg);
     const myName=lkGet().name||'A Mod';
     fbDB.ref('dmIndex/'+lkUser.uid+'/'+dmOther).set({n:dmOtherName,t:t.slice(0,60),ts:Date.now(),unread:false});
     fbDB.ref('dmIndex/'+dmOther+'/'+lkUser.uid).set({n:myName,t:t.slice(0,60),ts:Date.now(),unread:true});
     notifPush(dmOther,{ty:'dm',t:t.slice(0,80)});
   }
+  /* shrink a picked photo on the device: longest side 1280px, JPEG, kept under ~350KB */
+  function dmShrink(file){
+    return new Promise((res,rej)=>{
+      if(!file||!/^image\//.test(file.type||'')){rej(new Error('Pick a photo'));return;}
+      const url=URL.createObjectURL(file);const im=new Image();
+      im.onload=()=>{
+        try{
+          let w=im.naturalWidth,h=im.naturalHeight;const max=1280;
+          if(Math.max(w,h)>max){const k=max/Math.max(w,h);w=Math.round(w*k);h=Math.round(h*k);}
+          const c=document.createElement('canvas');c.width=w;c.height=h;
+          const x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);
+          let q=.8,out=c.toDataURL('image/jpeg',q);
+          while(out.length>470000&&q>.35){q-=.1;out=c.toDataURL('image/jpeg',q);}
+          if(out.length>470000){const c2=document.createElement('canvas');c2.width=Math.round(w*.6);c2.height=Math.round(h*.6);c2.getContext('2d').drawImage(c,0,0,c2.width,c2.height);out=c2.toDataURL('image/jpeg',.6);}
+          URL.revokeObjectURL(url);res(out);
+        }catch(e){URL.revokeObjectURL(url);rej(e);}
+      };
+      im.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('That photo couldn’t be opened'));};
+      im.src=url;
+    });
+  }
+  function dmSendPhoto(file){
+    if(!fbDB||!lkUser||!dmOther)return;
+    const target=dmOther,pb=document.getElementById('dm-pic');
+    if(pb){pb.disabled=true;pb.textContent='⏳';}
+    const done=()=>{if(pb){pb.disabled=!!window.__dmBlockedMe;pb.innerHTML='&#128247;';}};
+    dmCanSend(target).then(ok=>{
+      if(!ok){done();return;}
+      return dmShrink(file).then(data=>{
+        const pair=dmPair(lkUser.uid,target);
+        const ref=fbDB.ref('dm/'+pair+'/_img').push();
+        dmImgCache[ref.key]=data;
+        return ref.set(data).then(()=>{dmDeliver(target,'📷 Photo',null,ref.key);done();});
+      });
+    }).catch(e=>{done();try{toast('Photo didn’t send: '+((e&&e.message)||'error'),4200);}catch(_x){}});
+  }
   (function(){
-    const c=document.getElementById('dm-close');if(c)c.addEventListener('click',()=>{document.getElementById('dm-modal').classList.remove('on');if(dmRef){dmRef.off();dmRef=null;}});
-    const m=document.getElementById('dm-modal');if(m)m.addEventListener('click',e=>{if(e.target.id==='dm-modal'){m.classList.remove('on');if(dmRef){dmRef.off();dmRef=null;}}});
+    const close=()=>{document.getElementById('dm-modal').classList.remove('on');dmDetach();dmOther=null;};
+    const c=document.getElementById('dm-close');if(c)c.addEventListener('click',close);
+    const m=document.getElementById('dm-modal');if(m)m.addEventListener('click',e=>{if(e.target.id==='dm-modal')close();});
     const sb=document.getElementById('dm-send');if(sb)sb.addEventListener('click',dmSend);
-    const mi=document.getElementById('dm-msg');if(mi)mi.addEventListener('keydown',e=>{if(e.key==='Enter')dmSend();});
+    const mi=document.getElementById('dm-msg');
+    if(mi){mi.addEventListener('keydown',e=>{if(e.key==='Enter')dmSend();});
+      mi.addEventListener('input',()=>{if((mi.value||'').trim())dmTypingPing();else dmTypingClear();});
+      mi.addEventListener('blur',()=>dmTypingClear());}
+    const pb=document.getElementById('dm-pic'),fi=document.getElementById('dm-file');
+    if(pb&&fi){pb.addEventListener('click',()=>{if(!pb.disabled)fi.click();});
+      fi.addEventListener('change',()=>{const f=fi.files&&fi.files[0];fi.value='';if(f)dmSendPhoto(f);});}
+    /* tap a photo to see it big */
+    const lb=document.createElement('div');lb.id='dm-lightbox';lb.innerHTML='<img alt="Photo">';document.body.appendChild(lb);
+    lb.addEventListener('click',()=>lb.classList.remove('on'));
+    document.addEventListener('click',e=>{const im=e.target.closest&&e.target.closest('#dm-list .dm-b img');if(!im)return;lb.querySelector('img').src=im.src;lb.classList.add('on');});
   })();
   /* ===== SUPPORT: "Any problems? Message Creaso Norse Tech" =====
      Every signed-in member gets one private thread at support/<uid>/m (only
