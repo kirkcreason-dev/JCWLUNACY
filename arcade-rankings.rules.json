@@ -1,0 +1,32 @@
+{
+  "rules": {
+    "arcadeRankings": {
+      "$game": {
+        ".indexOn": [
+          "v"
+        ],
+        ".read": "auth != null && $game.matches(/^(poker|racing|pool|ladder|rumble|chicken|claw|shooter|ttt|chess|checkers|pinball|faygo|bj|memory|camper|solitaire|j31|hockey)$/) && query.orderByChild === 'v' && query.startAt === null && query.endAt === null && query.equalTo === null && (($game === 'chess' || $game === 'checkers') ? (query.limitToFirst === 10 && query.limitToLast === null) : (query.limitToLast === 10 && query.limitToFirst === null))",
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid && $game.matches(/^(poker|racing|pool|ladder|rumble|chicken|claw|shooter|ttt|chess|checkers|pinball|faygo|bj|memory|camper|solitaire|j31|hockey)$/)",
+          ".write": "auth != null && auth.uid === $uid && $game.matches(/^(poker|racing|pool|ladder|rumble|chicken|claw|shooter|ttt|chess|checkers|pinball|faygo|bj|memory|camper|solitaire|j31|hockey)$/) && newData.exists() && (!data.exists() || (($game === 'chess' || $game === 'checkers') ? newData.child('v').val() < data.child('v').val() : newData.child('v').val() > data.child('v').val()))",
+          ".validate": "newData.hasChildren(['v', 'name', 'tag', 't']) && newData.getPriority() === null",
+          "v": {
+            ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= 1000000000 && newData.val() % 1 === 0 && newData.getPriority() === null"
+          },
+          "name": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40 && newData.getPriority() === null"
+          },
+          "tag": {
+            ".validate": "newData.isString() && newData.val().length <= 120 && newData.getPriority() === null"
+          },
+          "t": {
+            ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() % 1 === 0 && newData.val() <= now && newData.val() >= now - 60000 && newData.getPriority() === null"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    }
+  }
+}

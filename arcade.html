@@ -188,6 +188,11 @@
   });
 })();
 </script>
+<script src="arcade-rankings.js?v=1"></script>
+<script>
+/* Shared scoreboards have their own protocol and database namespace. */
+JCW_ARCADE_RANKINGS.install({frame:document.getElementById('arcade'),firebaseReady:window.__arcFirebase});
+</script>
 <script>
 /* LIVE ACTIVITY — while this tab is in front, the member shows as
    "Playing Carnival Claw · Psychopathic Arcade" (or just "Playing Psychopathic
