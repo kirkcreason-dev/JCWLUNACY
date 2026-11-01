@@ -1040,6 +1040,19 @@ body:not(.jcw-member) #chat-fab{display:none!important;}
 .ch-pane{flex:1;overflow-y:auto;padding:12px 14px;display:none;}
 .ch-pane.on{display:block;}
 .ch-msg{margin-bottom:10px;font-size:13.5px;line-height:1.5;color:var(--bone);word-wrap:break-word;}
+.rx{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px;align-items:center;}
+.rx .rx-chip{display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.06);border:1px solid var(--seam);border-radius:999px;padding:1px 7px;font:12px/1.5 system-ui,sans-serif;color:var(--bone);cursor:pointer;}
+.rx .rx-chip span{font-weight:700;font-size:11px;}
+.rx .rx-chip.on{border-color:var(--gold);background:rgba(255,208,40,.16);}
+.rx .rx-add{background:none;border:1px solid transparent;color:var(--steel);font:11px/1.5 system-ui,sans-serif;padding:1px 6px;border-radius:999px;cursor:pointer;opacity:.55;}
+.rx .rx-add:hover,.rx .rx-add:focus-visible{opacity:1;border-color:var(--seam);}
+#dm-modal .dm-rx{margin-top:-4px;max-width:80%;}
+#dm-modal .dm-rx.me{align-self:flex-end;justify-content:flex-end;}
+#dm-modal .dm-rx.them{align-self:flex-start;}
+#rx-pick{position:fixed;z-index:900;display:flex;gap:2px;background:#0e0d11;border:1px solid var(--seam);border-radius:999px;padding:4px 6px;box-shadow:0 8px 28px rgba(0,0,0,.65);}
+#rx-pick button{font-size:23px;line-height:1;background:none;border:0;padding:5px 6px;border-radius:10px;cursor:pointer;transition:transform .12s;}
+#rx-pick button:hover{transform:scale(1.22);}
+#rx-pick button.on{background:rgba(255,208,40,.18);}
 .ch-msg b{margin-right:6px;}
 .pdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle;flex:0 0 auto;}
 .pdot.on{background:#3ad900;box-shadow:0 0 6px rgba(58,217,0,.8);}
@@ -4648,6 +4661,79 @@ function observeReveals(){
     if(m&&typeof m.img==='string'&&m.img.length<300000&&CH_IMG_OK.test(m.img))return '<img class="ch-pic" alt="Photo" loading="lazy" src="'+m.img+'">';
     return chClean((m.t||'')).replace(/</g,'&lt;');
   }
+
+  /* ===== REACTIONS: like, heart, dislike, laugh, cry =====================
+     One reaction per person per item; tap it again to take it back.
+     Lunacy Chat, mod chat and wall posts keep them at stats/react/<where>/<item>/<uid>
+     (stats is the open counter node, so no new rules were needed); DMs keep
+     them inside the private thread at dm/<pair>/_x/<msg>/<uid>. Values are a
+     one-letter code; anything else found there is ignored. */
+  window.jcwRx=(function(){
+    const RX=[['l','👍','Like'],['h','❤️','Love'],['d','👎','Dislike'],['x','😂','Laugh'],['c','😢','Cry']];
+    const OK={};RX.forEach(r=>{OK[r[0]]=r;});
+    const LIMIT={'stats/react/chat':400,'stats/react/mod':300};
+    const data={},watching={};
+    const db=()=>{try{return (window.firebase&&firebase.apps&&firebase.apps.length)?firebase.database():null;}catch(e){return null;}};
+    const me=()=>{try{const u=firebase.auth().currentUser;return u?u.uid:null;}catch(e){return null;}};
+    const okKey=k=>/^[A-Za-z0-9_-]{1,64}$/.test(String(k||''));
+    const okPath=p=>/^(stats\/react\/(chat|mod|wall\/[A-Za-z0-9]{6,40})|dm\/[A-Za-z0-9_]{10,90}\/_x)$/.test(String(p||''));
+    function tally(path,key){
+      const o=((data[path]||{})[key])||{};const c={};let mine=null;const m=me();
+      Object.keys(o).forEach(u=>{const v=o[u];if(!OK[v]||!/^[A-Za-z0-9]{6,40}$/.test(u))return;c[v]=(c[v]||0)+1;if(u===m)mine=v;});
+      return {c,mine};
+    }
+    function inner(path,key){
+      const t=tally(path,key);
+      return RX.filter(r=>t.c[r[0]]).map(r=>'<button type="button" class="rx-chip'+(t.mine===r[0]?' on':'')+'" data-rxc="'+r[0]+'" title="'+r[2]+'">'+r[1]+'<span>'+t.c[r[0]]+'</span></button>').join('')
+        +'<button type="button" class="rx-add" title="React" aria-label="React">+'+'🙂</button>';
+    }
+    function refresh(path){document.querySelectorAll('.rx').forEach(el=>{if(el.dataset.rxp===path)el.innerHTML=inner(path,el.dataset.rxk);});}
+    function watch(path){
+      if(watching[path]||!okPath(path))return;const D=db();if(!D)return;watching[path]=1;
+      const ref=D.ref(path);const q=LIMIT[path]?ref.orderByKey().limitToLast(LIMIT[path]):ref;
+      q.on('value',s=>{data[path]=s.val()||{};refresh(path);},()=>{delete watching[path];});
+    }
+    function bar(path,key,cls){
+      if(!okPath(path)||!okKey(key))return '';
+      watch(path);
+      return '<div class="rx'+(cls?' '+cls:'')+'" data-rxp="'+path+'" data-rxk="'+key+'">'+inner(path,key)+'</div>';
+    }
+    function toggle(path,key,c){
+      const uid=me();
+      if(!uid){try{toast('Log into your Locker to react.',3000);}catch(_e){}return;}
+      if(!OK[c]||!okPath(path)||!okKey(key))return;
+      const D=db();if(!D)return;
+      const cur=tally(path,key).mine,next=cur===c?null:c;
+      data[path]=data[path]||{};data[path][key]=Object.assign({},data[path][key]||{});
+      if(next)data[path][key][uid]=next;else delete data[path][key][uid];
+      refresh(path);
+      D.ref(path+'/'+key+'/'+uid).set(next).catch(()=>{try{toast('That reaction didn’t save — try again.',3000);}catch(_e){}});
+    }
+    function closePick(){const p=document.getElementById('rx-pick');if(p)p.remove();}
+    function openPick(btn){
+      closePick();
+      const box=btn.closest('.rx');if(!box)return;
+      const p=document.createElement('div');p.id='rx-pick';p.setAttribute('role','menu');
+      const mine=tally(box.dataset.rxp,box.dataset.rxk).mine;
+      p.innerHTML=RX.map(r=>'<button type="button" data-rxpick="'+r[0]+'" title="'+r[2]+'" aria-label="'+r[2]+'"'+(mine===r[0]?' class="on"':'')+'>'+r[1]+'</button>').join('');
+      p.dataset.rxp=box.dataset.rxp;p.dataset.rxk=box.dataset.rxk;
+      document.body.appendChild(p);
+      const b=btn.getBoundingClientRect(),w=p.offsetWidth,hh=p.offsetHeight;
+      let x=Math.min(Math.max(8,b.left+b.width/2-w/2),innerWidth-w-8),y=b.top-hh-6;if(y<8)y=b.bottom+6;
+      p.style.left=x+'px';p.style.top=y+'px';
+    }
+    document.addEventListener('click',e=>{
+      const pk=e.target.closest&&e.target.closest('#rx-pick [data-rxpick]');
+      if(pk){const p=document.getElementById('rx-pick');toggle(p.dataset.rxp,p.dataset.rxk,pk.dataset.rxpick);closePick();e.stopPropagation();return;}
+      const add=e.target.closest&&e.target.closest('.rx .rx-add');
+      if(add){openPick(add);e.stopPropagation();return;}
+      const chip=e.target.closest&&e.target.closest('.rx .rx-chip');
+      if(chip){const box=chip.closest('.rx');toggle(box.dataset.rxp,box.dataset.rxk,chip.dataset.rxc);e.stopPropagation();return;}
+      if(!(e.target.closest&&e.target.closest('#rx-pick')))closePick();
+    },true);
+    addEventListener('scroll',closePick,true);
+    return {bar,watch,toggle};
+  })();
   window.jcwShrinkPhoto=function(file,max,limit){
     return new Promise((res,rej)=>{
       if(!file||!/^image\//.test(file.type||'')){rej(new Error('Pick a photo'));return;}
@@ -4687,7 +4773,7 @@ function observeReveals(){
     const ADMIN=isMod();
     const nearBottom=(chChat.scrollHeight-chChat.scrollTop-chChat.clientHeight)<90;
     const prevCount=chChat.__count||0;
-    chChat.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${(m.__k&&lkUser&&m.u!==lkUser.uid)?`<span data-chrep="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-repn="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--steel);opacity:.5;margin-right:6px;font-size:12px;" title="Report this message">&#9873;</span>`:''}${ADMIN&&m.__k&&canDelPost(m.u)?`<span data-chdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-chu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete message">&times;</span>`:''}${ADMIN&&m.u&&m.u!==lkUser.uid&&!isModUid(m.u)?`<span data-chban="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}" data-bann="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--hot);opacity:.7;margin-right:6px;font-size:11px;" title="Ban from chat">&#9940;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String(((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'')+((window.jcwActText&&window.jcwActText(m.u))?(' \u00b7 '+window.jcwActText(m.u)):'')).replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:`data-pname="${String(m.n||'').replace(/"/g,'').replace(/</g,'')}"`} style="cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${m.u&&isVerified(m.u)?'<span title="Verified JCW talent" style="color:var(--gold);margin-right:5px;">&#10004;</span>':''}${m.u&&window.__lkPremSet&&window.__lkPremSet[m.u]===true?'<span class="lun-chip" title="Lunatics Only member">&#127914; Lunatic</span>':''}${chBody(m)}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;padding:10px;">No messages yet \u2014 say something to the family.</p>';
+    chChat.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${(m.__k&&lkUser&&m.u!==lkUser.uid)?`<span data-chrep="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-repn="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--steel);opacity:.5;margin-right:6px;font-size:12px;" title="Report this message">&#9873;</span>`:''}${ADMIN&&m.__k&&canDelPost(m.u)?`<span data-chdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-chu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete message">&times;</span>`:''}${ADMIN&&m.u&&m.u!==lkUser.uid&&!isModUid(m.u)?`<span data-chban="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}" data-bann="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--hot);opacity:.7;margin-right:6px;font-size:11px;" title="Ban from chat">&#9940;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String(((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'')+((window.jcwActText&&window.jcwActText(m.u))?(' \u00b7 '+window.jcwActText(m.u)):'')).replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:`data-pname="${String(m.n||'').replace(/"/g,'').replace(/</g,'')}"`} style="cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${m.u&&isVerified(m.u)?'<span title="Verified JCW talent" style="color:var(--gold);margin-right:5px;">&#10004;</span>':''}${m.u&&window.__lkPremSet&&window.__lkPremSet[m.u]===true?'<span class="lun-chip" title="Lunatics Only member">&#127914; Lunatic</span>':''}${chBody(m)}${m.__k?window.jcwRx.bar('stats/react/chat',m.__k):''}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;padding:10px;">No messages yet \u2014 say something to the family.</p>';
     chChat.__count=list.length;
     if(nearBottom){chChat.scrollTop=chChat.scrollHeight;jcwHideJump();}
     else if(list.length>prevCount){jcwShowJump();}
@@ -4865,7 +4951,7 @@ function observeReveals(){
     const el=document.getElementById('ch-mods-list');if(!el)return;
     window.__modLive=list||[];
     list=(list||[]).filter(m=>!(m&&m.u&&jcwHidden(m.u)));
-    el.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${m.__k&&canDelPost(m.u)?`<span data-mdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-mu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete">&times;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String(((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'')+((window.jcwActText&&window.jcwActText(m.u))?(' \u00b7 '+window.jcwActText(m.u)):'')).replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:''} style="color:var(--acid);cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${chBody(m)}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;">Quiet backstage. Say something to the crew.</p>';
+    el.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${m.__k&&canDelPost(m.u)?`<span data-mdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-mu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete">&times;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String(((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'')+((window.jcwActText&&window.jcwActText(m.u))?(' \u00b7 '+window.jcwActText(m.u)):'')).replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:''} style="color:var(--acid);cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${chBody(m)}${m.__k?window.jcwRx.bar('stats/react/mod',m.__k):''}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;">Quiet backstage. Say something to the crew.</p>';
     el.scrollTop=el.scrollHeight;
     }catch(e){}
   }
@@ -5568,6 +5654,8 @@ function observeReveals(){
     let lastMine=-1;list.forEach((m,i)=>{if(m.u===me)lastMine=i;});
     const theirRead=+(dmReads[dmOther]||0);
     const tm=t=>{try{return new Date(t).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});}catch(e){return '';}};
+    const rxPath=(dmOther&&me)?('dm/'+dmPair(me,dmOther)+'/_x'):null;
+    const rx=(m,mine)=>(rxPath&&m.__k)?window.jcwRx.bar(rxPath,m.__k,'dm-rx '+(mine?'me':'them')):'';
     el.innerHTML=list.map((m,i)=>{
       const mine=me&&m.u===me;
       let rr='';
@@ -5576,9 +5664,9 @@ function observeReveals(){
       }
       if(m.img&&/^[A-Za-z0-9_-]{1,40}$/.test(String(m.img))){
         const src=dmImgCache[m.img];
-        return '<div class="dm-b img '+(mine?'me':'them')+'" data-dmimg="'+pEsc(m.img)+'">'+(src?'<img alt="Photo" src="'+src+'">':'<div class="dm-ph">Loading photo&hellip;</div>')+'</div>'+rr;
+        return '<div class="dm-b img '+(mine?'me':'them')+'" data-dmimg="'+pEsc(m.img)+'">'+(src?'<img alt="Photo" src="'+src+'">':'<div class="dm-ph">Loading photo&hellip;</div>')+'</div>'+rx(m,mine)+rr;
       }
-      return '<div class="dm-b '+(mine?'me':'them')+'">'+pEsc(m.t||'')+'</div>'+rr;
+      return '<div class="dm-b '+(mine?'me':'them')+'">'+pEsc(m.t||'')+'</div>'+rx(m,mine)+rr;
     }).join('')||'<p style="color:var(--steel);font-size:13px;text-align:center;">Say something to '+pEsc(dmOtherName)+'.</p>';
     /* fetch any photos we don't have yet, once each */
     const pair=dmOther&&me?dmPair(me,dmOther):null;
@@ -5651,7 +5739,7 @@ function observeReveals(){
     dmRef=base.orderByKey().endAt('_').limitToLast(200);
     dmRef.on('value',s=>{
       if(dmOther!==otherUid)return;
-      const L=[];s.forEach(c=>{if(String(c.key).charAt(0)==='_')return;const v=c.val();if(v&&(v.t||v.img))L.push(v);});
+      const L=[];s.forEach(c=>{if(String(c.key).charAt(0)==='_')return;const v=c.val();if(v&&(v.t||v.img)){v.__k=c.key;L.push(v);}});
       dmList=L;dmRenderList(L);dmMarkRead();
     });
     const rr=base.child('_r');rr.on('value',s=>{
@@ -5980,7 +6068,7 @@ function observeReveals(){
       h+='<div class="lk" style="margin-top:14px;"><h3>&#127183; Card Collection</h3><div id="prof-cards"><p class="muted">Loading&hellip;</p></div></div>';
       h+='<div class="lk" style="margin-top:14px;"><h3>The Wall</h3><div id="prof-wall">'
         +(posts.map(p=>'<div style="padding:8px 2px;border-bottom:1px dashed rgba(240,179,43,.14);">'+(p.__k&&canDelPost(p.u)?'<span data-wdel="'+pEsc(p.__k)+'" data-wu="'+pEsc(p.u||'')+'" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete post">&times;</span>':'')
-          +(p.__k&&isMod()&&!canDelPost(p.u)?'<span data-wrep="'+pEsc(p.__k)+'" data-wu="'+pEsc(p.u||'')+'" data-wn="'+pEsc(p.n||'')+'" data-wt="'+pEsc(String(p.t||'').slice(0,300))+'" style="cursor:pointer;color:var(--steel);opacity:.6;margin-right:6px;font-size:12px;" title="Report this post to Digital Duke">&#9873;</span>':'')+'<b data-puid="'+pEsc(p.u||'')+'" style="cursor:pointer;text-decoration:underline;">'+pEsc(p.n||'?')+'</b><br>'+pEsc(p.t||'')+'</div>').join('')||'<p>Nothing on the wall. Break the silence.</p>')
+          +(p.__k&&isMod()&&!canDelPost(p.u)?'<span data-wrep="'+pEsc(p.__k)+'" data-wu="'+pEsc(p.u||'')+'" data-wn="'+pEsc(p.n||'')+'" data-wt="'+pEsc(String(p.t||'').slice(0,300))+'" style="cursor:pointer;color:var(--steel);opacity:.6;margin-right:6px;font-size:12px;" title="Report this post to Digital Duke">&#9873;</span>':'')+'<b data-puid="'+pEsc(p.u||'')+'" style="cursor:pointer;text-decoration:underline;">'+pEsc(p.n||'?')+'</b><br>'+pEsc(p.t||'')+(p.__k?window.jcwRx.bar('stats/react/wall/'+uid,p.__k):'')+'</div>').join('')||'<p>Nothing on the wall. Break the silence.</p>')
         +'</div>'
         +(lkUser&&blockedMe?'<p style="margin-top:10px;color:var(--steel);">You can&rsquo;t post on this wall.</p>':lkUser?'<div style="display:flex;gap:8px;margin-top:12px;"><input id="prof-post" maxlength="200" placeholder="Leave something on the wall&hellip;" style="flex:1;background:#000;border:1px solid rgba(240,179,43,.35);color:var(--bone);padding:9px 10px;border-radius:6px;font:inherit;"><button class="btn" id="prof-post-btn">Post</button></div>':'<p style="margin-top:10px;">Log in from your Locker to post.</p>')
         +'</div>';
