@@ -684,9 +684,9 @@ body.game-lock{overflow:hidden;}
 .cards-filters button{background:transparent;border:1px solid var(--seam);color:var(--steel);padding:5px 12px;border-radius:20px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;}
 .cards-filters button.on{border-color:var(--gold);color:var(--gold);}
 .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;}
-.ptabs{display:flex;gap:0;margin:18px 0 12px;border-bottom:1px solid var(--seam);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.ptabs{display:flex;flex-wrap:wrap;gap:0;margin:18px 0 12px;border-bottom:1px solid var(--seam);}
 .ptabs::-webkit-scrollbar{display:none;}
-.ptabs button{flex:0 0 auto;background:none;border:none;border-bottom:3px solid transparent;color:var(--steel);padding:9px 13px;font-family:'Rubik Distressed',system-ui,sans-serif;font-size:16px;text-transform:uppercase;letter-spacing:.03em;cursor:pointer;margin-bottom:-1px;white-space:nowrap;}
+.ptabs button{flex:0 0 auto;background:none;border:none;border-bottom:3px solid transparent;color:var(--steel);padding:9px 7px;font-family:'Rubik Distressed',system-ui,sans-serif;font-size:13.5px;text-transform:uppercase;letter-spacing:.03em;cursor:pointer;margin-bottom:-1px;white-space:nowrap;}
 .ptabs button i{font-style:normal;font-family:system-ui,sans-serif;font-size:11px;font-weight:800;background:rgba(255,255,255,.08);border-radius:9px;padding:1px 6px;margin-left:3px;vertical-align:2px;}
 .ptabs button.on{color:var(--gold);border-bottom-color:var(--gold);}.ptabs button.on i{background:var(--gold);color:#000;}
 @media (max-width:560px){.ptabs{flex-wrap:wrap;}.ptabs button{font-size:13px;padding:8px 7px;}.ptabs button i{font-size:10px;padding:1px 5px;}}
@@ -698,7 +698,7 @@ body.game-lock{overflow:hidden;}
 .col-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-bottom:12px;}
 .col-top h3{margin:0;font-family:'Rubik Distressed',system-ui,sans-serif;color:var(--gold);font-size:21px;text-transform:uppercase;line-height:1.1;}
 .col-ct{color:var(--steel);font-size:13px;}
-.col-acts{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;}.col-acts .btn{padding:5px 11px;font-size:12px;}
+.col-acts{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;}.col-acts .col-pub.on{border-color:var(--acid);color:var(--acid);}.col-acts .btn{padding:5px 11px;font-size:12px;}
 .col-modal{display:none;position:fixed;inset:0;z-index:445;background:rgba(0,0,0,.9);backdrop-filter:blur(5px);align-items:center;justify-content:center;padding:16px;}
 .col-modal.on{display:flex;}
 .col-pick-box{max-width:900px;width:100%;max-height:92vh;overflow:auto;text-align:left;}
@@ -6160,10 +6160,13 @@ function observeReveals(){
         : '<p>None yet.</p>';
       /* the page is split into tabs so it isn't one long scroll */
       const cardN=(function(){let n=0;const cs=v.cards||{};Object.keys(cs).forEach(k=>{if(cs[k]&&(+cs[k].n||0)>0)n++;});return n;})();
-      const PT=[['cards','&#127183; Cards',cardN],['badges','&#127941; Badges',earned.length],['allies','&#129309; Allies',uid===DUKE?'All':allies.length],['rivals','&#9876; Rivals',rivals.length],['wall','&#128221; Wall',posts.length]];
+      const pubCols=(function(){const o={};const cs=(v.cols&&typeof v.cols==='object')?v.cols:{};Object.keys(cs).forEach(k=>{if(cs[k]&&cs[k].pub&&cs[k].n)o[k]=cs[k];});return o;})();
+      const pubN=Object.keys(pubCols).length;
+      const PT=[['cards','&#127183; Cards',cardN]].concat(pubN?[['cols','&#11088; Collections',pubN]]:[]).concat([['badges','&#127941; Badges',earned.length],['allies','&#129309; Allies',uid===DUKE?'All':allies.length],['rivals','&#9876; Rivals',rivals.length],['wall','&#128221; Wall',posts.length]]);
       let ptab=window.__profMainTab||'cards';if(!PT.some(t=>t[0]===ptab))ptab='cards';
       h+='<div class="ptabs" role="tablist">'+PT.map(t=>'<button type="button" role="tab" data-ptab="'+t[0]+'"'+(t[0]===ptab?' class="on" aria-selected="true"':'')+'>'+t[1]+' <i>'+t[2]+'</i></button>').join('')+'</div>';
       const pane=(k,inner)=>'<div class="ptab-pane" data-pane="'+k+'"'+(k===ptab?'':' hidden')+'>'+inner+'</div>';
+      if(pubN)h+=pane('cols','<div class="lk"><h3>&#11088; Collections</h3><div id="prof-cols"><p class="muted">Loading&hellip;</p></div></div>');
       h+=pane('badges','<div class="lk"><h3>Badges &middot; '+earned.length+'</h3>'+badgeChips+'</div>');
       h+=pane('allies','<div class="lk"><h3>Allies</h3><p>'+(uid===DUKE?'Every Juggalo in the carnival. Whoop whoop.':(allies.join(' &middot; ')||'Riding solo.'))+'</p></div>');
       h+=pane('rivals','<div class="lk"><h3>Rivals</h3><p>'+(rivals.join(' &middot; ')||'No beef&hellip; yet.')+'</p></div>');
@@ -6180,6 +6183,7 @@ function observeReveals(){
         host.querySelectorAll('[data-ptab]').forEach(x=>{const on=x===b;x.classList.toggle('on',on);x.setAttribute('aria-selected',on?'true':'false');});
         host.querySelectorAll('.ptab-pane').forEach(pn=>{pn.hidden=pn.dataset.pane!==k;});}));
       try{if(window.jcwProfileCards)window.jcwProfileCards(uid,(v.cards||{}),(v.name||window.jcwAutoName(uid)),(v.swapped||{}));}catch(_e){}
+      try{if(pubN&&window.jcwProfileCols)window.jcwProfileCols(document.getElementById('prof-cols'),pubCols,(window.jcwDecCards?window.jcwDecCards(v.cards||{}):(v.cards||{})));}catch(_e){}
       (function(){
         const hx=document.getElementById('cn-hatchet');if(!hx)return;
         try{const fm=document.querySelector('img.hm');if(fm)hx.src=fm.src;}catch(_e){}
@@ -7927,9 +7931,10 @@ route();
         let ownedN=0;ids.forEach(id=>{if(ownInfo(byId[id]).owned)ownedN++;});
         const sec=document.createElement('section');sec.className='col-blk';
         sec.innerHTML='<div class="col-top"><h3>&#11088; '+esc(col.n)+'</h3><span class="col-ct">'+ids.length+' card'+(ids.length===1?'':'s')+(ids.length?(' &middot; '+ownedN+' owned'):'')+'</span>'
-          +'<div class="col-acts"><button class="btn line" data-add type="button">+ Add cards</button><button class="btn line" data-ren type="button">Rename</button><button class="btn line" data-del type="button">Delete</button></div></div>'
+          +'<div class="col-acts"><button class="btn line col-pub'+(col.pub?' on':'')+'" data-pub type="button" title="Show this collection on your Juggalo page">'+(col.pub?'&#128065; On my page':'Show on my page')+'</button><button class="btn line" data-add type="button">+ Add cards</button><button class="btn line" data-ren type="button">Rename</button><button class="btn line" data-del type="button">Delete</button></div></div>'
           +'<div class="cards-grid col-grid"></div>';
         sec.querySelector('[data-add]').onclick=()=>openPicker(col.id);
+        sec.querySelector('[data-pub]').onclick=()=>{const c=COLS.data[col.id];if(!c)return;const on=!c.pub;colSave(col.id,Object.assign({},c,{pub:on}));toast(on?'\u2b50 '+c.n+' now shows on your Juggalo page':'Hidden from your Juggalo page');};
         sec.querySelector('[data-ren]').onclick=()=>askName('Rename collection',col.n,n=>{const c=COLS.data[col.id];if(c)colSave(col.id,Object.assign({},c,{n:n.slice(0,40)}));});
         sec.querySelector('[data-del]').onclick=function(){
           if(this.dataset.sure){colSave(col.id,null);toast('Collection deleted — your cards are still in your set');return;}
@@ -7992,6 +7997,25 @@ route();
       };
       draw();meta.appendChild(wrap);
     }
+    /* someone's Juggalo page: their collections marked "Show on my page" */
+    window.jcwProfileCols=function(host,cols,theirCards){
+      if(!host)return;buildCatalog();
+      const byId={};(CATALOG||[]).forEach(c=>{byId[c.id]=c;});
+      const list=Object.keys(cols||{}).map(k=>Object.assign({id:k},cols[k])).filter(c=>c&&c.n&&c.pub).sort((a,b)=>(a.ts||0)-(b.ts||0));
+      host.innerHTML='';
+      if(!list.length){host.innerHTML='<p class="muted">No collections on show.</p>';return;}
+      list.forEach(col=>{
+        const ids=colIds(col).filter(id=>byId[id]);
+        const sec=document.createElement('section');sec.className='col-blk';
+        sec.innerHTML='<div class="col-top"><h3>&#11088; '+esc(col.n)+'</h3><span class="col-ct">'+ids.length+' card'+(ids.length===1?'':'s')+'</span></div><div class="cards-grid col-grid"></div>';
+        const g=sec.querySelector('.col-grid');
+        if(!ids.length)g.outerHTML='<p class="muted" style="margin:4px 0;">Nothing in it yet.</p>';
+        else ids.forEach(id=>{const card=byId[id],o=(theirCards||{})[id],owned=!!(o&&(+o.n||0)>0);
+          const el=cardEl(card,{owned:true,cnt:owned?o.n:0,foil:owned&&o.foil,locked:false,serial:owned&&o.serials&&o.serials[0]});
+          el.addEventListener('click',()=>{const mine=coll()[id];showCard(card,!!(mine&&mine.n>0),mine);});g.appendChild(el);});
+        host.appendChild(sec);
+      });
+    };
     (function(){
       const tabs=document.getElementById('cards-tabs');
       if(tabs)tabs.addEventListener('click',e=>{const b=e.target.closest('button[data-ct]');if(!b)return;
