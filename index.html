@@ -2017,8 +2017,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
       <div class="game playable rev">
         <span class="badge">Lunatics Only</span>
         <h3>Psychopathic Arcade</h3>
-        <div class="sub">15 arcade games &middot; Online VS &middot; No download &middot; Lunatics Only</div>
-        <p>The midway, in your browser &mdash; <b>JCW Rumble</b> (an over-the-top-rope battle royal with the Lunacy Unlocked roster), <b>Carnival Claw</b> (collect all 530 roster pieces), <b>Carnival Crossfire</b>, <b>Chicken Huntin&rsquo;</b>, <b>Tic Tac Slam</b>, <b>Juggalo Chess</b>, <b>Juggalo Checkers</b>, <b>Dark Carnival Pinball</b>, <b>Joker Card Four</b>, <b>Blackjack 21</b>, <b>Joker Card Memory</b>, <b>Gathering Camper</b>, <b>Dark Carnival Solitaire</b>, <b>Juggalo 31</b> and <b>Juggalo Air Hockey</b>. Head-to-head <b>online play</b> with speakable room codes, and arcade-style top-10 records in every game.</p>
+        <div class="sub">17 arcade games &middot; Online VS &middot; No download &middot; Lunatics Only</div>
+        <p>The midway, in your browser &mdash; <b>JCW Rumble</b> (an over-the-top-rope battle royal with the Lunacy Unlocked roster), <b>JCW Ladder Wars</b>, <b>Juggalo Pool</b>, <b>Carnival Claw</b> (collect all 530 roster pieces), <b>Carnival Crossfire</b>, <b>Chicken Huntin&rsquo;</b>, <b>Tic Tac Slam</b>, <b>Juggalo Chess</b>, <b>Juggalo Checkers</b>, <b>Dark Carnival Pinball</b>, <b>Joker Card Four</b>, <b>Blackjack 21</b>, <b>Joker Card Memory</b>, <b>Gathering Camper</b>, <b>Dark Carnival Solitaire</b>, <b>Juggalo 31</b> and <b>Juggalo Air Hockey</b>. Head-to-head <b>online play</b> with speakable room codes, and arcade-style top-10 records in every game.</p>
         <a class="btn gold" id="arcade-enter" href="arcade.html" target="_blank" rel="noopener" onclick="if(!window.__lkPremOn){event.preventDefault();location.hash='#lunatics';return false;}">&#127918; Enter the Arcade</a>
       </div>
       <div class="game playable rev">
@@ -2730,10 +2730,23 @@ function observeReveals(){
     ['lu_beatall','Nobody Left \u00b7 beaten every fighter on the roster'],
     ['lu_pole','Pole Position \u00b7 won a weapon-on-a-pole match'],
     ['lu_online','Online Lunatic \u00b7 won an online match'],
+    /* Lunacy Unlocked v0.24\u2013v0.25 match types */
+    ['lu_tag','Tag Team Champs \u00b7 won a Tag Team match'],
+    ['lu_tag10','Tag Specialists \u00b7 10 Tag Team wins'],
+    ['lu_tornado','Tornado Warning \u00b7 won a Tornado Tag match'],
+    ['lu_tornado10','Twister \u00b7 10 Tornado Tag wins'],
+    ['lu_elim','Sole Survivor \u00b7 won a 4 on 4 Elimination'],
+    ['lu_elim10','Survivor Series \u00b7 10 Elimination wins'],
+    ['lu_elimhard','Last Team Standing \u00b7 won a 4 on 4 Elimination on hard'],
+    ['lu_elimlocal','Pass the Controller \u00b7 played a 2-player 4 on 4 Elimination'],
+    ['lu_squadplay','Full House \u00b7 played an online 4-player match'],
+    ['lu_squad','Four Corners \u00b7 won an online 4-player match'],
+    ['lu_squad10','Room Runner \u00b7 10 online 4-player wins'],
+    ['lu_allmodes','Full Match Card \u00b7 won Singles, Pole, Tag, Tornado and Elimination'],
     /* ---- Psychopathic Arcade ---- */
     ['pa_first','Midway \u00b7 won an arcade game'],
     ['pa_five','Midway Rat \u00b7 won in 5 different arcade games'],
-    ['pa_all','Full Midway \u00b7 won in all 15 arcade games'],
+    ['pa_all','Full Midway \u00b7 won in 15 different arcade games'],
     ['pa_50','Carnival Regular \u00b7 50 arcade wins'],
     ['pa_record','Carved Your Mark \u00b7 a top-10 arcade record'],
     ['pa_ttt5','Slam Streak \u00b7 5 straight Tic Tac Slam wins'],
@@ -2741,6 +2754,19 @@ function observeReveals(){
     ['pa_hockey5','Ice Cold \u00b7 5 straight Air Hockey wins'],
     ['pa_chess','Checkmate \u00b7 mated the CPU in Juggalo Chess'],
     ['pa_memory','Total Recall \u00b7 cleared the Joker Card Memory deck'],
+    ['pa_all17','The Whole Midway \u00b7 a result in all 17 arcade games'],
+    ['pa_pool','Call Your Eight \u00b7 beat the CPU at Juggalo Pool'],
+    ['pa_pool10','Pool Shark \u00b7 10 Juggalo Pool wins vs the CPU'],
+    ['pa_checkers','King Me \u00b7 swept the CPU in Juggalo Checkers'],
+    ['pa_checkers10','Board Boss \u00b7 10 Checkers wins vs the CPU'],
+    ['pa_solitaire','Stacked \u00b7 won Dark Carnival Solitaire'],
+    ['pa_solitaire10','Solitaire Fiend \u00b7 10 Solitaire wins'],
+    ['pa_j31','Knock or Rock \u00b7 swept a Juggalo 31 table'],
+    ['pa_j31_5','Table Runner \u00b7 5 Juggalo 31 tables in a row'],
+    ['pa_bj2k','Up Big \u00b7 2,000 points in Blackjack 21'],
+    ['pa_bj5k','High Roller \u00b7 5,000 points in Blackjack 21'],
+    ['pa_pinball10','Flipper Freak \u00b7 10 games of Dark Carnival Pinball'],
+    ['pa_camper10','Happy Camper \u00b7 10 Gathering Camper runs'],
     /* ---- Big Money Rustlas (reported by the game while it runs on this site) ---- */
     ['bmr_ride','Saddle Up \u00b7 played Big Money Rustlas'],
     ['bmr_ch1','Back to Mud Bug \u00b7 cleared your first chapter'],
@@ -2914,16 +2940,20 @@ function observeReveals(){
     const inc=(k,n)=>{g[k]=(g[k]||0)+(n||0);};
     const t=r.tally||{};
     inc('played',1);
+    if(r.mode==='squad')inc('squadPlayed',1);if(r.mode==='elimination-local')inc('elimLocal',1);
     inc('specials',t.specials);inc('reversals',t.reversals);inc('kickouts',t.kickouts);inc('secondWinds',t.secondWinds);inc('weapons',t.weapons);
     if(r.rosterSize>0)g.rosterSize=Math.max(g.rosterSize||0,r.rosterSize);
     const counted=!!r.won&&!r.local&&r.mode!=='practice';   /* local versus and practice never score a "win" */
     if(counted){
       inc('wins',1);d.wins=(d.wins||0)+1;g.streak=(g.streak||0)+1;g.bestStreak=Math.max(g.bestStreak||0,g.streak);
       inc('pins',t.pins);inc('taps',t.taps);inc('timeouts',t.timeouts);
-      const w=r.wins||[];if(w.length===2&&Math.min(w[0],w[1])===0)inc('flawless',1);
+      const w=r.wins||[];if(w.length===2&&Math.max(w[0],w[1])>=2&&Math.min(w[0],w[1])===0)inc('flawless',1);   /* a real 2\u20130, not a one-fall tag win */
       if(t.secondWinds>0)inc('comebacks',1);
       if(r.pole)inc('poleWins',1);
-      if(r.mode==='online')inc('onlineWins',1);
+      if(r.mode==='online'||r.mode==='squad')inc('onlineWins',1);
+      if(r.mode==='tag')inc('tagWins',1);if(r.mode==='tornado')inc('tornadoWins',1);if(r.mode==='squad')inc('squadWins',1);
+      if(r.mode==='elimination'){inc('elimWins',1);if(r.difficulty==='hard')inc('elimHard',1);}
+      if(/^(cpu|pole|tag|tornado|elimination)$/.test(r.mode||'')){g.modeWins=g.modeWins||{};g.modeWins[r.mode]=1;}
       if(r.difficulty==='hard')inc('hardWins',1);
       g.wonWith=g.wonWith||{};if(r.fighter)g.wonWith[String(r.fighter).replace(/[.#$\/\[\]]/g,'_')]=1;
       g.beaten=g.beaten||{};if(r.opponent)g.beaten[String(r.opponent).replace(/[.#$\/\[\]]/g,'_')]=1;
@@ -3116,6 +3146,10 @@ function observeReveals(){
         if(n(g.wonWith)>=10)add('lu_roster10');if(g.rosterSize>0&&n(g.wonWith)>=g.rosterSize)add('lu_rosterall');
         if(g.rosterSize>1&&n(g.beaten)>=g.rosterSize-1)add('lu_beatall');
         if(g.poleWins>=1)add('lu_pole');if(g.onlineWins>=1)add('lu_online');
+        if(g.tagWins>=1)add('lu_tag');if(g.tagWins>=10)add('lu_tag10');if(g.tornadoWins>=1)add('lu_tornado');if(g.tornadoWins>=10)add('lu_tornado10');
+        if(g.elimWins>=1)add('lu_elim');if(g.elimWins>=10)add('lu_elim10');if(g.elimHard>=1)add('lu_elimhard');if(g.elimLocal>=1)add('lu_elimlocal');
+        if(g.squadPlayed>=1)add('lu_squadplay');if(g.squadWins>=1)add('lu_squad');if(g.squadWins>=10)add('lu_squad10');
+        if(['cpu','pole','tag','tornado','elimination'].every(function(m){return g.modeWins&&g.modeWins[m];}))add('lu_allmodes');
       })();
       /* Psychopathic Arcade — written straight to the cloud locker by arcade.html */
       (function(){const a=d.arcade||{};const games=a.games||{},best=a.best||{};const n=Object.keys(games).length;
@@ -3123,6 +3157,14 @@ function observeReveals(){
         if(a.records>=1)add('pa_record');
         if(best.ttt>=5)add('pa_ttt5');if(best.faygo>=5)add('pa_faygo5');if(best.hockey>=5)add('pa_hockey5');
         if(games.chess>=1)add('pa_chess');if(games.memory>=1)add('pa_memory');
+        /* the rest of the midway: every result the arcade reports counts in games/<g>, the best value in best/<g> */
+        if(n>=17)add('pa_all17');
+        if(games.pool>=1)add('pa_pool');if(games.pool>=10)add('pa_pool10');
+        if(games.checkers>=1)add('pa_checkers');if(games.checkers>=10)add('pa_checkers10');
+        if(games.solitaire>=1)add('pa_solitaire');if(games.solitaire>=10)add('pa_solitaire10');
+        if(games.j31>=1)add('pa_j31');if(best.j31>=5)add('pa_j31_5');
+        if(best.bj>=2000)add('pa_bj2k');if(best.bj>=5000)add('pa_bj5k');
+        if(games.pinball>=10)add('pa_pinball10');if(games.camper>=10)add('pa_camper10');
         /* Carnival Crossfire (arcade/shooter) */
         const sh=a.shooter||{};
         if(sh.runs>=1)add('sh_first');if(sh.best>=1000)add('sh_trick');if(sh.best>=3000)add('sh_sharp');if(sh.best>=6000)add('sh_ace');if(sh.best>=10000)add('sh_legend');
