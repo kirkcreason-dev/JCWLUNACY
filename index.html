@@ -4765,6 +4765,35 @@ function observeReveals(){
         .replace(CUSS_RX,function(w){return w.charAt(0)+'*'.repeat(Math.max(2,w.length-1));});
     }catch(e){return t;}
   }
+  /* Chat lists are patched, not wiped: each message keeps its element (keyed by
+     its database key) unless its own content changed, so photos don't reload,
+     and the message you're reading stays put when new ones arrive or old ones
+     scroll off the top of the 120. Online dots update in place (chDots). */
+  function chDots(root){
+    try{(root||document).querySelectorAll('.pdot[data-pu]').forEach(d=>{const u=d.dataset.pu;
+      const on=isOnline(u);d.classList.toggle('on',on);d.classList.toggle('off',!on);
+      d.title=String(((window.jcwLastSeen&&window.jcwLastSeen(u))||'')+((window.jcwActText&&window.jcwActText(u))?(' \u00b7 '+window.jcwActText(u)):''));});}catch(_e){}
+  }
+  window.jcwChatDots=function(){chDots(document.getElementById('ch-chat'));chDots(document.getElementById('ch-mods-list'));};
+  function chPatch(box,list,fn,emptyHtml,mode){
+    box.__stick=(box.scrollHeight-box.scrollTop-box.clientHeight)<90||!box.children.length;
+    const items=[];list.forEach((m,i)=>{const hh=fn(m);if(hh)items.push({k:String(m.__k||('local'+i)),h:hh});});
+    if(!items.length){box.innerHTML=emptyHtml;return;}
+    /* anchor: the first message still on screen, and where it sits */
+    let anchor=null,off=0;
+    for(const el of box.children){if(el.offsetTop+el.offsetHeight>box.scrollTop){anchor=el;off=el.offsetTop-box.scrollTop;break;}}
+    const old={};[...box.children].forEach(el=>{if(el.__k)old[el.__k]=el;});
+    const els=items.map(it=>{let el=old[it.k];if(el&&el.__h===it.h){delete old[it.k];return el;}
+      const t=document.createElement('template');t.innerHTML=it.h.trim();el=t.content.firstElementChild||document.createElement('div');
+      el.__k=it.k;el.__h=it.h;
+      el.querySelectorAll('img').forEach(im=>im.addEventListener('load',()=>{if(box.__stick)box.scrollTop=box.scrollHeight;},{once:true}));
+      return el;});
+    els.forEach((el,i)=>{if(box.children[i]!==el)box.insertBefore(el,box.children[i]||null);});
+    while(box.children.length>els.length)box.removeChild(box.lastElementChild);
+    chDots(box);
+    if(anchor&&anchor.isConnected)box.scrollTop=anchor.offsetTop-off;
+    else if(anchor&&old[anchor.__k]===anchor){/* the anchored message left (deleted / aged out): keep the next one in view */}
+  }
   function chRender(list){
     try{
     if(!chChat)return;
@@ -4773,10 +4802,11 @@ function observeReveals(){
     const ADMIN=isMod();
     const nearBottom=(chChat.scrollHeight-chChat.scrollTop-chChat.clientHeight)<90;
     const prevCount=chChat.__count||0;
-    chChat.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${(m.__k&&lkUser&&m.u!==lkUser.uid)?`<span data-chrep="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-repn="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--steel);opacity:.5;margin-right:6px;font-size:12px;" title="Report this message">&#9873;</span>`:''}${ADMIN&&m.__k&&canDelPost(m.u)?`<span data-chdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-chu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete message">&times;</span>`:''}${ADMIN&&m.u&&m.u!==lkUser.uid&&!isModUid(m.u)?`<span data-chban="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}" data-bann="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--hot);opacity:.7;margin-right:6px;font-size:11px;" title="Ban from chat">&#9940;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String(((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'')+((window.jcwActText&&window.jcwActText(m.u))?(' \u00b7 '+window.jcwActText(m.u)):'')).replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:`data-pname="${String(m.n||'').replace(/"/g,'').replace(/</g,'')}"`} style="cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${m.u&&isVerified(m.u)?'<span title="Verified JCW talent" style="color:var(--gold);margin-right:5px;">&#10004;</span>':''}${m.u&&window.__lkPremSet&&window.__lkPremSet[m.u]===true?'<span class="lun-chip" title="Lunatics Only member">&#127914; Lunatic</span>':''}${chBody(m)}${m.__k?window.jcwRx.bar('stats/react/chat',m.__k):''}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;padding:10px;">No messages yet \u2014 say something to the family.</p>';
+    chPatch(chChat,list,m=>{try{return `<div class="ch-msg">${(m.__k&&lkUser&&m.u!==lkUser.uid)?`<span data-chrep="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-repn="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--steel);opacity:.5;margin-right:6px;font-size:12px;" title="Report this message">&#9873;</span>`:''}${ADMIN&&m.__k&&canDelPost(m.u)?`<span data-chdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-chu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete message">&times;</span>`:''}${ADMIN&&m.u&&m.u!==lkUser.uid&&!isModUid(m.u)?`<span data-chban="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}" data-bann="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--hot);opacity:.7;margin-right:6px;font-size:11px;" title="Ban from chat">&#9940;</span>`:''}${m.u?`<span class="pdot" data-pu="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:`data-pname="${String(m.n||'').replace(/"/g,'').replace(/</g,'')}"`} style="cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${m.u&&isVerified(m.u)?'<span title="Verified JCW talent" style="color:var(--gold);margin-right:5px;">&#10004;</span>':''}${m.u&&window.__lkPremSet&&window.__lkPremSet[m.u]===true?'<span class="lun-chip" title="Lunatics Only member">&#127914; Lunatic</span>':''}${chBody(m)}${m.__k?window.jcwRx.bar('stats/react/chat',m.__k):''}</div>`;}catch(_e){return '';}},'<p style="color:var(--steel);font-size:13px;padding:10px;">No messages yet \u2014 say something to the family.</p>','chat');
     chChat.__count=list.length;
     if(nearBottom){chChat.scrollTop=chChat.scrollHeight;jcwHideJump();}
-    else if(list.length>prevCount){jcwShowJump();}
+    else if(prevCount&&chChat.__lastKey&&chChat.__lastKey!==((list[list.length-1]||{}).__k)){jcwShowJump();}
+    chChat.__lastKey=(list[list.length-1]||{}).__k;
     }catch(e){try{if(chChat&&!String(chChat.innerHTML||'').trim())chChat.innerHTML='<p style="color:var(--steel);font-size:13px;padding:10px;">Chat hiccup \u2014 <a href="#" onclick="location.reload();return false;" style="color:var(--gold);">tap to reload</a>.</p>';}catch(_x){}}
   }
   function jcwShowJump(){const b=document.getElementById('ch-jump');if(b)b.style.display='block';}
@@ -4951,8 +4981,9 @@ function observeReveals(){
     const el=document.getElementById('ch-mods-list');if(!el)return;
     window.__modLive=list||[];
     list=(list||[]).filter(m=>!(m&&m.u&&jcwHidden(m.u)));
-    el.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${m.__k&&canDelPost(m.u)?`<span data-mdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-mu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete">&times;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String(((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'')+((window.jcwActText&&window.jcwActText(m.u))?(' \u00b7 '+window.jcwActText(m.u)):'')).replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:''} style="color:var(--acid);cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${chBody(m)}${m.__k?window.jcwRx.bar('stats/react/mod',m.__k):''}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;">Quiet backstage. Say something to the crew.</p>';
-    el.scrollTop=el.scrollHeight;
+    const modNear=(el.scrollHeight-el.scrollTop-el.clientHeight)<90||!el.__seen;el.__seen=1;
+    chPatch(el,list,m=>{try{return `<div class="ch-msg">${m.__k&&canDelPost(m.u)?`<span data-mdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-mu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete">&times;</span>`:''}${m.u?`<span class="pdot" data-pu="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:''} style="color:var(--acid);cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${chBody(m)}${m.__k?window.jcwRx.bar('stats/react/mod',m.__k):''}</div>`;}catch(_e){return '';}},'<p style="color:var(--steel);font-size:13px;">Quiet backstage. Say something to the crew.</p>','mods');
+    if(modNear)el.scrollTop=el.scrollHeight;
     }catch(e){}
   }
   /* ---- chat bans (mods only) --------------------------------------------
@@ -5454,14 +5485,12 @@ function observeReveals(){
     fbDB.ref('presenceUsers').on('value',s=>{
       window.__presence=s.val()||{};
       try{if(window.jcwActSync)window.jcwActSync();}catch(_e){}
-      try{if(window.__chatLive&&document.getElementById('ch-chat').classList.contains('on'))chRender(window.__chatLive);}catch(_e){}
-      try{if(window.__modLive&&document.getElementById('ch-mods').classList.contains('on'))modRender(window.__modLive);}catch(_e){}
+      try{window.jcwChatDots&&window.jcwChatDots();}catch(_e){}   /* dots only — a full redraw here moved the chat under people's eyes */
     });
     // re-tick dots every 30s so they flip to offline as heartbeats age out
     setInterval(()=>{try{
       if(window.jcwActSync)window.jcwActSync();
-      if(window.__chatLive&&document.getElementById('ch-chat').classList.contains('on'))chRender(window.__chatLive);
-      if(window.__modLive&&document.getElementById('ch-mods').classList.contains('on'))modRender(window.__modLive);
+      if(window.jcwChatDots)window.jcwChatDots();
     }catch(_e){}},30000);
   };
   // also refresh mods dots the instant presence changes
