@@ -2784,6 +2784,14 @@ function observeReveals(){
     ['pa_bj5k','High Roller \u00b7 5,000 points in Blackjack 21'],
     ['pa_pinball10','Flipper Freak \u00b7 10 games of Dark Carnival Pinball'],
     ['pa_camper10','Happy Camper \u00b7 10 Gathering Camper runs'],
+    /* Big Money Rustlas Poker + Road to the Show (arcade games 18 and 19) */
+    ['pa_poker','Pot of Gold \u00b7 beat the CPU at Big Money Rustlas Poker'],
+    ['pa_poker10','Card Shark \u00b7 10 Rustlas Poker wins vs the CPU'],
+    ['pa_poker20','Quick Draw \u00b7 won a Rustlas Poker match in 20 hands or fewer'],
+    ['pa_racing','Road to the Show \u00b7 finished a solo race'],
+    ['pa_racing10','Road Warrior \u00b7 10 solo races finished'],
+    ['pa_racing50','Long Haul \u00b7 50 solo races finished'],
+    ['pa_all19','Every Booth on the Midway \u00b7 a result in all 19 arcade games'],
     /* ---- Big Money Rustlas (reported by the game while it runs on this site) ---- */
     ['bmr_ride','Saddle Up \u00b7 played Big Money Rustlas'],
     ['bmr_ch1','Back to Mud Bug \u00b7 cleared your first chapter'],
@@ -3182,6 +3190,10 @@ function observeReveals(){
         if(games.j31>=1)add('pa_j31');if(best.j31>=5)add('pa_j31_5');
         if(best.bj>=2000)add('pa_bj2k');if(best.bj>=5000)add('pa_bj5k');
         if(games.pinball>=10)add('pa_pinball10');if(games.camper>=10)add('pa_camper10');
+        /* poker reports 1000 + 10 per hand under 60 on a CPU match win, so 1400+ = won within 20 hands */
+        if(games.poker>=1)add('pa_poker');if(games.poker>=10)add('pa_poker10');if(best.poker>=1400)add('pa_poker20');
+        if(games.racing>=1)add('pa_racing');if(games.racing>=10)add('pa_racing10');if(games.racing>=50)add('pa_racing50');
+        if(n>=19)add('pa_all19');
         /* Carnival Crossfire (arcade/shooter) */
         const sh=a.shooter||{};
         if(sh.runs>=1)add('sh_first');if(sh.best>=1000)add('sh_trick');if(sh.best>=3000)add('sh_sharp');if(sh.best>=6000)add('sh_ace');if(sh.best>=10000)add('sh_legend');
