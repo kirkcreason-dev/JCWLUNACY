@@ -5969,15 +5969,20 @@ function observeReveals(){
   let dmInboxWired=false;
   function dmInboxWire(){
     if(dmInboxWired||!fbDB||!lkUser||!isMod())return;dmInboxWired=true;
-    fbDB.ref('dmIndex/'+lkUser.uid).on('value',s=>{
+    let dmInboxSnap=null;
+    /* threads with someone who is no longer a mod drop out of this list; the
+       messages themselves stay in the database (and in Owner review) */
+    window.jcwDmInboxRender=function(){if(dmInboxSnap)dmInboxPaint(dmInboxSnap);};
+    fbDB.ref('dmIndex/'+lkUser.uid).on('value',s=>{dmInboxSnap=s;dmInboxPaint(s);});
+    function dmInboxPaint(s){
       const box=document.getElementById('dm-inbox');if(!box)return;
-      const rows=[];s.forEach(c=>{const v=c.val()||{};v.__k=c.key;if(jcwBlocked(c.key))return;rows.push(v);});
+      const rows=[];s.forEach(c=>{const v=c.val()||{};v.__k=c.key;if(jcwBlocked(c.key))return;if(!isModUid(c.key))return;rows.push(v);});
       rows.sort((a,b)=>(b.ts||0)-(a.ts||0));
       box.innerHTML=rows.length?('<div style="font-size:11px;color:var(--steel);text-transform:uppercase;letter-spacing:.08em;margin:2px 0 6px;">Direct messages</div>'+rows.map(r=>
         '<div data-dm="'+pEsc(r.__k)+'" data-dmn="'+pEsc(r.n||'Mod')+'" style="cursor:pointer;padding:7px 2px;border-bottom:1px dashed rgba(157,255,58,.15);">'
         +'<b style="color:var(--acid);">'+pEsc(r.n||'Mod')+'</b>'+(r.unread?' <span style="color:var(--hot);">&#9679;</span>':'')
         +'<br><span style="color:var(--steel);font-size:12px;">'+pEsc(r.t||'')+'</span></div>').join('')+'<div style="border-bottom:1px solid var(--seam);margin:10px 0;"></div>'):'';
-    });
+    }
   }
   document.addEventListener('click',e=>{
     const row=e.target.closest('[data-dm]');
@@ -6428,11 +6433,13 @@ function observeReveals(){
       fbDB.ref('mods').on('value',snap=>{
         JCW_MODS_LIVE=snap.val()||{};
         try{if(window.jcwUpdateModUI)window.jcwUpdateModUI();}catch(_e){}
+        try{window.jcwDmInboxRender&&window.jcwDmInboxRender();}catch(_e){}
         try{if(window.lkRender)window.lkRender();}catch(_e){}
       },()=>{});
       fbDB.ref('modsRemoved').on('value',snap=>{
         JCW_MODS_REMOVED=snap.val()||{};
         try{if(window.jcwUpdateModUI)window.jcwUpdateModUI();}catch(_e){}
+        try{window.jcwDmInboxRender&&window.jcwDmInboxRender();}catch(_e){}
         try{setTimeout(jcwModSweep,15000);}catch(_e){}
         try{if(window.lkRender)window.lkRender();}catch(_e){}
         try{if((location.hash||'').indexOf('#u-')===0&&window.profRender)window.profRender((location.hash||'').slice(3));}catch(_e){}
