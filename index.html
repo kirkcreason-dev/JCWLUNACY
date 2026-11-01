@@ -1054,6 +1054,10 @@ body:not(.jcw-member) #chat-fab{display:none!important;}
   font-size:14px;padding:11px 12px;outline:none;}
 .ch-in input:focus{border-color:var(--acid);}
 .ch-in button{background:var(--acid);color:#000;padding:0 16px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;}
+.ch-in input{min-width:0;}.ch-in button{flex:none;}
+#ch-pic{background:#1a1622;color:var(--bone);border:1px solid var(--seam);padding:0 12px;font-size:17px;}
+#ch-pic:disabled{opacity:.6;}
+img.ch-pic{display:block;max-width:min(240px,100%);max-height:280px;border-radius:8px;margin:5px 0 2px;cursor:zoom-in;border:1px solid var(--seam);}
 .ch-note{font-size:11.5px;color:var(--steel);padding:8px 14px;border-top:1px dashed var(--seam);}
 .ch-poll{border:1px solid var(--seam);background:var(--plate);padding:14px;margin-bottom:12px;}
 .ch-poll h5{font-size:14px;color:var(--bone);text-transform:uppercase;letter-spacing:.05em;}
@@ -2096,7 +2100,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
       <button class="po" data-i="1"><u></u><span>Mr. Happy</span></button>
     </div>
   </div>
-  <div class="ch-in"><input id="ch-msg" maxlength="200" placeholder="Say something&hellip;"><button id="ch-send">Send</button></div>
+  <div class="ch-in"><input id="ch-msg" maxlength="200" placeholder="Say something&hellip;"><button id="ch-pic" type="button" title="Send a photo" aria-label="Send a photo">&#128247;</button><input type="file" id="ch-file" accept="image/*" hidden><button id="ch-send">Send</button></div>
   <div class="ch-note" id="ch-note">Device mode &mdash; goes live for everybody when the backend connects.</div>
 </aside>
 
@@ -4636,6 +4640,36 @@ function observeReveals(){
       'damn\\w*','goddamn\\w*','dick\\w*','cock\\w*','cunt\\w*','pussy','pussies','piss\\w*','bastard\\w*','whore\\w*','slut\\w*','twat\\w*','prick\\w*','wank\\w*','cum','cums','cumming'];
     return new RegExp('\\b('+words.map(w=>{const m=w.match(/^([a-z]+)(.*)$/);return lt(m[1])+m[2];}).join('|')+')\\b','gi');
   })();
+  /* photos in Lunacy Chat / mod chat: the message carries a small JPEG
+     (shrunk on the device, ~150KB at most) in img; t stays '📷 Photo' so the
+     apps and older pages still show something sensible. */
+  const CH_IMG_OK=/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/;
+  function chBody(m){
+    if(m&&typeof m.img==='string'&&m.img.length<300000&&CH_IMG_OK.test(m.img))return '<img class="ch-pic" alt="Photo" loading="lazy" src="'+m.img+'">';
+    return chClean((m.t||'')).replace(/</g,'&lt;');
+  }
+  window.jcwShrinkPhoto=function(file,max,limit){
+    return new Promise((res,rej)=>{
+      if(!file||!/^image\//.test(file.type||'')){rej(new Error('Pick a photo'));return;}
+      const url=URL.createObjectURL(file);const im=new Image();
+      im.onload=()=>{
+        try{
+          let w=im.naturalWidth,h=im.naturalHeight;
+          if(Math.max(w,h)>max){const k=max/Math.max(w,h);w=Math.round(w*k);h=Math.round(h*k);}
+          const c=document.createElement('canvas');c.width=w;c.height=h;
+          const x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);
+          let q=.78,out=c.toDataURL('image/jpeg',q);
+          while(out.length>limit&&q>.35){q-=.08;out=c.toDataURL('image/jpeg',q);}
+          let s=.75;
+          while(out.length>limit&&s>.2){const c2=document.createElement('canvas');c2.width=Math.round(w*s);c2.height=Math.round(h*s);
+            const x2=c2.getContext('2d');x2.fillStyle='#000';x2.fillRect(0,0,c2.width,c2.height);x2.drawImage(c,0,0,c2.width,c2.height);out=c2.toDataURL('image/jpeg',.6);s-=.15;}
+          URL.revokeObjectURL(url);res(out);
+        }catch(e){URL.revokeObjectURL(url);rej(e);}
+      };
+      im.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('That photo couldn\u2019t be opened'));};
+      im.src=url;
+    });
+  };
   function chClean(t){
     try{
       return String(t||'')
@@ -4653,7 +4687,7 @@ function observeReveals(){
     const ADMIN=isMod();
     const nearBottom=(chChat.scrollHeight-chChat.scrollTop-chChat.clientHeight)<90;
     const prevCount=chChat.__count||0;
-    chChat.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${(m.__k&&lkUser&&m.u!==lkUser.uid)?`<span data-chrep="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-repn="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--steel);opacity:.5;margin-right:6px;font-size:12px;" title="Report this message">&#9873;</span>`:''}${ADMIN&&m.__k&&canDelPost(m.u)?`<span data-chdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-chu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete message">&times;</span>`:''}${ADMIN&&m.u&&m.u!==lkUser.uid&&!isModUid(m.u)?`<span data-chban="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}" data-bann="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--hot);opacity:.7;margin-right:6px;font-size:11px;" title="Ban from chat">&#9940;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String(((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'')+((window.jcwActText&&window.jcwActText(m.u))?(' \u00b7 '+window.jcwActText(m.u)):'')).replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:`data-pname="${String(m.n||'').replace(/"/g,'').replace(/</g,'')}"`} style="cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${m.u&&isVerified(m.u)?'<span title="Verified JCW talent" style="color:var(--gold);margin-right:5px;">&#10004;</span>':''}${m.u&&window.__lkPremSet&&window.__lkPremSet[m.u]===true?'<span class="lun-chip" title="Lunatics Only member">&#127914; Lunatic</span>':''}${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;padding:10px;">No messages yet \u2014 say something to the family.</p>';
+    chChat.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${(m.__k&&lkUser&&m.u!==lkUser.uid)?`<span data-chrep="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-repn="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--steel);opacity:.5;margin-right:6px;font-size:12px;" title="Report this message">&#9873;</span>`:''}${ADMIN&&m.__k&&canDelPost(m.u)?`<span data-chdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-chu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete message">&times;</span>`:''}${ADMIN&&m.u&&m.u!==lkUser.uid&&!isModUid(m.u)?`<span data-chban="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}" data-bann="${String(m.n||'').replace(/[^A-Za-z0-9 _.'-]/g,'').slice(0,40)}" style="cursor:pointer;color:var(--hot);opacity:.7;margin-right:6px;font-size:11px;" title="Ban from chat">&#9940;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String(((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'')+((window.jcwActText&&window.jcwActText(m.u))?(' \u00b7 '+window.jcwActText(m.u)):'')).replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:`data-pname="${String(m.n||'').replace(/"/g,'').replace(/</g,'')}"`} style="cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${m.u&&isVerified(m.u)?'<span title="Verified JCW talent" style="color:var(--gold);margin-right:5px;">&#10004;</span>':''}${m.u&&window.__lkPremSet&&window.__lkPremSet[m.u]===true?'<span class="lun-chip" title="Lunatics Only member">&#127914; Lunatic</span>':''}${chBody(m)}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;padding:10px;">No messages yet \u2014 say something to the family.</p>';
     chChat.__count=list.length;
     if(nearBottom){chChat.scrollTop=chChat.scrollHeight;jcwHideJump();}
     else if(list.length>prevCount){jcwShowJump();}
@@ -4775,6 +4809,26 @@ function observeReveals(){
     return err?((err.code||err.message)+''):'backend not reachable';}
   function chGoLocal(reason){fbDB=null;try{document.getElementById('ch-note').textContent='Device mode'+(reason?(' \u2014 '+reason):'')+'.';}catch(e){}try{if(reason)console.warn('[JCW chat] live disabled:',reason);}catch(e){}chRender(chLocal());}
   let chTab='chat';
+  function chSendPhoto(file){
+    if(!lkUser){try{toast('Log into your Locker to chat.',3200);}catch(_e){}return;}
+    if(banActive(lkUser.uid)){try{banLockout();toast('You are banned from chat.',3200);}catch(_e){}return;}
+    if(!fbDB){try{toast('Photos need a live connection.',3200);}catch(_e){}return;}
+    const where=chTab==='mods'?'modchat':'chat';
+    if(where==='modchat'&&!isMod())return;
+    const pb=document.getElementById('ch-pic');if(pb){pb.disabled=true;pb.textContent='\u23f3';}
+    const done=()=>{if(pb){pb.disabled=false;pb.innerHTML='&#128247;';}};
+    window.jcwShrinkPhoto(file,960,150000).then(data=>{
+      return fbDB.ref(where).push({n:chName(),t:'\ud83d\udcf7 Photo',ts:Date.now(),u:lkUser.uid,img:data});
+    }).then(done).catch(e=>{done();try{toast('Photo didn\u2019t send: '+((e&&e.message)||'error'),4200);}catch(_x){}});
+  }
+  (function(){
+    const pb=document.getElementById('ch-pic'),fi=document.getElementById('ch-file');
+    if(pb&&fi){pb.addEventListener('click',()=>{if(!pb.disabled)fi.click();});
+      fi.addEventListener('change',()=>{const f=fi.files&&fi.files[0];fi.value='';if(f)chSendPhoto(f);});}
+    /* tap a chat photo to see it big (shares the DM lightbox) */
+    document.addEventListener('click',e=>{const im=e.target.closest&&e.target.closest('img.ch-pic');if(!im)return;
+      const lb=document.getElementById('dm-lightbox');if(!lb)return;lb.querySelector('img').src=im.src;lb.classList.add('on');});
+  })();
   function chSend(){
     if(!lkUser){try{toast('Log into your Locker to chat.',3200);}catch(_e){}return;}
     if(banActive(lkUser.uid)){try{banLockout();toast('You are banned from chat.',3200);}catch(_e){}return;}
@@ -4811,7 +4865,7 @@ function observeReveals(){
     const el=document.getElementById('ch-mods-list');if(!el)return;
     window.__modLive=list||[];
     list=(list||[]).filter(m=>!(m&&m.u&&jcwHidden(m.u)));
-    el.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${m.__k&&canDelPost(m.u)?`<span data-mdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-mu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete">&times;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String(((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'')+((window.jcwActText&&window.jcwActText(m.u))?(' \u00b7 '+window.jcwActText(m.u)):'')).replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:''} style="color:var(--acid);cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${chClean((m.t||'')).replace(/</g,'&lt;')}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;">Quiet backstage. Say something to the crew.</p>';
+    el.innerHTML=list.map(m=>{try{return `<div class="ch-msg">${m.__k&&canDelPost(m.u)?`<span data-mdel="${String(m.__k).replace(/[^A-Za-z0-9_-]/g,'')}" data-mu="${String(m.u||'').replace(/[^A-Za-z0-9_-]/g,'')}" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete">&times;</span>`:''}${m.u?`<span class="pdot ${isOnline(m.u)?'on':'off'}" title="${String(((window.jcwLastSeen&&window.jcwLastSeen(m.u))||'')+((window.jcwActText&&window.jcwActText(m.u))?(' \u00b7 '+window.jcwActText(m.u)):'')).replace(/"/g,'')}"></span>`:''}<b ${m.u?`data-puid="${String(m.u).replace(/[^A-Za-z0-9_-]/g,'')}"`:''} style="color:var(--acid);cursor:pointer;text-decoration:underline;">${(m.n||'?').replace(/</g,'&lt;')}</b>${chBody(m)}</div>`;}catch(_e){return '';}}).join('')||'<p style="color:var(--steel);font-size:13px;">Quiet backstage. Say something to the crew.</p>';
     el.scrollTop=el.scrollHeight;
     }catch(e){}
   }
@@ -5479,14 +5533,17 @@ function observeReveals(){
     const threads=Object.keys(all).map(pair=>{
       const msgs=Object.keys(all[pair]||{}).map(k=>all[pair][k]).filter(m=>m&&m.t).sort((a,b)=>(a.ts||0)-(b.ts||0));
       const [a,b]=pair.split('__');
-      return {pair,a,b,msgs,last:msgs.length?msgs[msgs.length-1].ts||0:0};
+      return {pair,a,b,msgs,imgs:(all[pair]&&all[pair]._img)||{},last:msgs.length?msgs[msgs.length-1].ts||0:0};
     }).filter(t=>t.msgs.length).sort((x,y)=>y.last-x.last);
     if(!threads.length){host.innerHTML='<p style="color:var(--steel);font-size:13px;">No backstage DMs yet.</p>';return;}
     const when=t=>{try{return new Date(t).toLocaleString();}catch(e){return '';}};
     host.innerHTML=threads.map((t,i)=>'<details style="border:1px solid rgba(255,63,164,.3);border-radius:8px;padding:7px 10px;margin-bottom:7px;"'+(i===0?' open':'')+'>'
       +'<summary style="cursor:pointer;font-size:12.5px;color:var(--bone);"><b>'+esc(nm(t.a))+'</b> &harr; <b>'+esc(nm(t.b))+'</b> <span style="color:var(--steel);">&middot; '+t.msgs.length+' msgs &middot; '+esc(when(t.last))+'</span></summary>'
       +'<div style="margin-top:8px;max-height:260px;overflow:auto;">'
-      +t.msgs.map(m=>'<div style="font-size:12.5px;margin:4px 0;line-height:1.45;"><b style="color:'+(m.u===t.a?'var(--acid)':'var(--cyan)')+';">'+esc(nm(m.u))+'</b> <span style="color:var(--steel);font-size:11px;">'+esc(when(m.ts))+'</span><br>'+esc(m.t)+'</div>').join('')
+      +t.msgs.map(m=>{
+        /* DM photos live at dm/<pair>/_img/<id> \u2014 already in this read, so show them */
+        const pic=m.img&&t.imgs&&typeof t.imgs[m.img]==='string'&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(t.imgs[m.img])?t.imgs[m.img]:'';
+        return '<div style="font-size:12.5px;margin:4px 0;line-height:1.45;"><b style="color:'+(m.u===t.a?'var(--acid)':'var(--cyan)')+';">'+esc(nm(m.u))+'</b> <span style="color:var(--steel);font-size:11px;">'+esc(when(m.ts))+'</span><br>'+(pic?'<img class="ch-pic" alt="Photo" loading="lazy" src="'+pic+'">':esc(m.t))+'</div>';}).join('')
       +'</div></details>').join('');
   };
   /* ===== MOD DIRECT MESSAGES (1:1) ===== */
