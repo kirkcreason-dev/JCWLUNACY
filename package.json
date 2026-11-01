@@ -1,0 +1,13 @@
+{
+  "name": "jcw-arcade-rankings-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:rankings-rules": "firebase emulators:exec --project demo-jcw-arcade-rankings --config firebase.rankings-test.json --only database \"node --test --test-concurrency=1 tests/arcade-rankings-*.test.mjs\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "6.0.0",
+    "firebase": "13.1.0",
+    "firebase-tools": "15.32.0"
+  }
+}
