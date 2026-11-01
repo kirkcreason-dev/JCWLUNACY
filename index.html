@@ -7518,10 +7518,14 @@ route();
        Returns {cards, changed, swapped}. */
     function normCards(src,uid,swappedSoFar){
       buildCatalog();const A=window.__cardAlias||{};const out={};let changed=false;
-      const known={};CATALOG.forEach(c=>{known[c.id]=1;});
+      const known={};let maxLU=0;CATALOG.forEach(c=>{known[c.id]=1;const m=/^LU-(\d+)$/.exec(c.id);if(m)maxLU=Math.max(maxLU,+m[1]);});
+      /* a card newer than this copy of the page (a tab opened before it shipped)
+         is not "retired" — keep it as-is so it shows once the page updates */
+      const newer=id=>{const m=/^LU-(\d+)$/.exec(id);return !!(m&&+m[1]>maxLU);};
       const swapped=Object.assign({},swappedSoFar||{});
       Object.keys(src||{}).forEach(k=>{
         const v=src[k];if(!v)return;const t=A[k]||k;if(t!==k)changed=true;
+        if(!known[t]&&newer(t)){const keep=Object.assign({},v);out[t]=keep;return;}
         if(!known[t]){                       /* retired: exchange each copy */
           const n=v.n||0,done=swapped[t]||0;
           for(let i=done;i<n;i++){const c=swapPick(uid,t,i);if(!c)break;   /* copies < done were exchanged on an earlier pass */
@@ -7540,6 +7544,17 @@ route();
         cur.n=(cur.n||0)+(v.n||0);if(v.foil)cur.foil=true;
         if(v.serials&&v.serials.length)cur.serials=(cur.serials||[]).concat(v.serials);
         out[t]=cur;
+      });
+      /* undo mistaken swaps: an old tab once treated brand-new cards (e.g. a
+         gifted J-Rod 1/1, 11/01) as retired and exchanged them. If a swapped id
+         is a real card now, give the copies back (the exchange cards stay). */
+      Object.keys(swapped).forEach(s=>{
+        if(!known[s]||A[s]||!(swapped[s]>0))return;
+        const cur=out[s]||{n:0,foil:false};cur.n=Math.max(cur.n||0,swapped[s]);   /* max, not add: the cloud copy can hand the old swap record back once before it syncs */
+        const cd=CATALOG.find(c=>c.id===s);
+        if(cd&&cd.cap===1&&!(cur.serials&&cur.serials.length))cur.serials=[1];
+        if(cd&&cd.finish)cur.foil=true;
+        out[s]=cur;delete swapped[s];changed=true;
       });
       return {cards:out,changed:changed,swapped:swapped};
     }
