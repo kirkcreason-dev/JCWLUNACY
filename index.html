@@ -6162,8 +6162,10 @@ function observeReveals(){
       const cardN=(function(){let n=0;const cs=v.cards||{};Object.keys(cs).forEach(k=>{if(cs[k]&&(+cs[k].n||0)>0)n++;});return n;})();
       const pubCols=(function(){const o={};const cs=(v.cols&&typeof v.cols==='object')?v.cols:{};Object.keys(cs).forEach(k=>{if(cs[k]&&cs[k].pub&&cs[k].n)o[k]=cs[k];});return o;})();
       const pubN=Object.keys(pubCols).length;
-      const PT=[['cards','&#127183; Cards',cardN]].concat(pubN?[['cols','&#11088; Collections',pubN]]:[]).concat([['badges','&#127941; Badges',earned.length],['allies','&#129309; Allies',uid===DUKE?'All':allies.length],['rivals','&#9876; Rivals',rivals.length],['wall','&#128221; Wall',posts.length]]);
-      let ptab=window.__profMainTab||'cards';if(!PT.some(t=>t[0]===ptab))ptab='cards';
+      const PT=(pubN?[['cols','&#11088; Collections',pubN]]:[]).concat([['cards','&#127183; Cards',cardN],['badges','&#127941; Badges',earned.length],['allies','&#129309; Allies',uid===DUKE?'All':allies.length],['rivals','&#9876; Rivals',rivals.length],['wall','&#128221; Wall',posts.length]]);
+      /* a new page opens on its first tab (Collections when they show any); re-draws of the same page keep the tab you're on */
+      let ptab=(window.__profMainTabFor===uid&&window.__profMainTab)||PT[0][0];if(!PT.some(t=>t[0]===ptab))ptab=PT[0][0];
+      window.__profMainTabFor=uid;window.__profMainTab=ptab;
       h+='<div class="ptabs" role="tablist">'+PT.map(t=>'<button type="button" role="tab" data-ptab="'+t[0]+'"'+(t[0]===ptab?' class="on" aria-selected="true"':'')+'>'+t[1]+' <i>'+t[2]+'</i></button>').join('')+'</div>';
       const pane=(k,inner)=>'<div class="ptab-pane" data-pane="'+k+'"'+(k===ptab?'':' hidden')+'>'+inner+'</div>';
       if(pubN)h+=pane('cols','<div class="lk"><h3>&#11088; Collections</h3><div id="prof-cols"><p class="muted">Loading&hellip;</p></div></div>');
