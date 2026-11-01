@@ -684,6 +684,12 @@ body.game-lock{overflow:hidden;}
 .cards-filters button{background:transparent;border:1px solid var(--seam);color:var(--steel);padding:5px 12px;border-radius:20px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;}
 .cards-filters button.on{border-color:var(--gold);color:var(--gold);}
 .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;}
+.ptabs{display:flex;gap:0;margin:18px 0 12px;border-bottom:1px solid var(--seam);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.ptabs::-webkit-scrollbar{display:none;}
+.ptabs button{flex:0 0 auto;background:none;border:none;border-bottom:3px solid transparent;color:var(--steel);padding:9px 13px;font-family:'Rubik Distressed',system-ui,sans-serif;font-size:16px;text-transform:uppercase;letter-spacing:.03em;cursor:pointer;margin-bottom:-1px;white-space:nowrap;}
+.ptabs button i{font-style:normal;font-family:system-ui,sans-serif;font-size:11px;font-weight:800;background:rgba(255,255,255,.08);border-radius:9px;padding:1px 6px;margin-left:3px;vertical-align:2px;}
+.ptabs button.on{color:var(--gold);border-bottom-color:var(--gold);}.ptabs button.on i{background:var(--gold);color:#000;}
+@media (max-width:560px){.ptabs{flex-wrap:wrap;}.ptabs button{font-size:13px;padding:8px 7px;}.ptabs button i{font-size:10px;padding:1px 5px;}}
 .cards-tabs{display:flex;gap:0;margin:4px 0 14px;border-bottom:1px solid var(--seam);}
 .cards-tabs button{background:none;border:none;border-bottom:3px solid transparent;color:var(--steel);padding:9px 16px;font-family:'Rubik Distressed',system-ui,sans-serif;font-size:17px;text-transform:uppercase;letter-spacing:.03em;cursor:pointer;margin-bottom:-1px;}
 .cards-tabs button.on{color:var(--gold);border-bottom-color:var(--gold);}
@@ -6152,18 +6158,27 @@ function observeReveals(){
       const badgeChips=earned.length
         ? '<div style="display:flex;flex-wrap:wrap;gap:8px;">'+earned.map(b=>'<span class="badge2 got'+(b==='verified'?' verified-chip':'')+'">'+pEsc(badgeMap[b])+'</span>').join('')+'</div>'
         : '<p>None yet.</p>';
-      h+='<div class="lk" style="margin-top:18px;"><h3>Badges &middot; '+earned.length+'</h3>'+badgeChips+'</div>';
-      h+='<div class="lk" style="margin-top:14px;"><h3>Allies</h3><p>'+(uid===DUKE?'Every Juggalo in the carnival. Whoop whoop.':(allies.join(' &middot; ')||'Riding solo.'))+'</p></div>';
-      h+='<div class="lk" style="margin-top:14px;"><h3>Rivals</h3><p>'+(rivals.join(' &middot; ')||'No beef&hellip; yet.')+'</p></div>';
-      h+='<div class="lk" style="margin-top:14px;"><h3>&#127183; Card Collection</h3><div id="prof-cards"><p class="muted">Loading&hellip;</p></div></div>';
-      h+='<div class="lk" style="margin-top:14px;"><h3>The Wall</h3><div id="prof-wall">'
+      /* the page is split into tabs so it isn't one long scroll */
+      const cardN=(function(){let n=0;const cs=v.cards||{};Object.keys(cs).forEach(k=>{if(cs[k]&&(+cs[k].n||0)>0)n++;});return n;})();
+      const PT=[['cards','&#127183; Cards',cardN],['badges','&#127941; Badges',earned.length],['allies','&#129309; Allies',uid===DUKE?'All':allies.length],['rivals','&#9876; Rivals',rivals.length],['wall','&#128221; Wall',posts.length]];
+      let ptab=window.__profMainTab||'cards';if(!PT.some(t=>t[0]===ptab))ptab='cards';
+      h+='<div class="ptabs" role="tablist">'+PT.map(t=>'<button type="button" role="tab" data-ptab="'+t[0]+'"'+(t[0]===ptab?' class="on" aria-selected="true"':'')+'>'+t[1]+' <i>'+t[2]+'</i></button>').join('')+'</div>';
+      const pane=(k,inner)=>'<div class="ptab-pane" data-pane="'+k+'"'+(k===ptab?'':' hidden')+'>'+inner+'</div>';
+      h+=pane('badges','<div class="lk"><h3>Badges &middot; '+earned.length+'</h3>'+badgeChips+'</div>');
+      h+=pane('allies','<div class="lk"><h3>Allies</h3><p>'+(uid===DUKE?'Every Juggalo in the carnival. Whoop whoop.':(allies.join(' &middot; ')||'Riding solo.'))+'</p></div>');
+      h+=pane('rivals','<div class="lk"><h3>Rivals</h3><p>'+(rivals.join(' &middot; ')||'No beef&hellip; yet.')+'</p></div>');
+      h+=pane('cards','<div class="lk"><h3>&#127183; Card Collection</h3><div id="prof-cards"><p class="muted">Loading&hellip;</p></div></div>');
+      h+='<div class="ptab-pane" data-pane="wall"'+(ptab==='wall'?'':' hidden')+'><div class="lk"><h3>The Wall</h3><div id="prof-wall">'
         +(posts.map(p=>'<div style="padding:8px 2px;border-bottom:1px dashed rgba(240,179,43,.14);">'+(p.__k&&canDelPost(p.u)?'<span data-wdel="'+pEsc(p.__k)+'" data-wu="'+pEsc(p.u||'')+'" style="cursor:pointer;color:var(--hot);font-weight:700;margin-right:6px;" title="Delete post">&times;</span>':'')
           +(p.__k&&isMod()&&!canDelPost(p.u)?'<span data-wrep="'+pEsc(p.__k)+'" data-wu="'+pEsc(p.u||'')+'" data-wn="'+pEsc(p.n||'')+'" data-wt="'+pEsc(String(p.t||'').slice(0,300))+'" style="cursor:pointer;color:var(--steel);opacity:.6;margin-right:6px;font-size:12px;" title="Report this post to Digital Duke">&#9873;</span>':'')+'<b data-puid="'+pEsc(p.u||'')+'" style="cursor:pointer;text-decoration:underline;">'+pEsc(p.n||'?')+'</b><br>'+pEsc(p.t||'')+(p.__k?window.jcwRx.bar('stats/react/wall/'+uid,p.__k):'')+'</div>').join('')||'<p>Nothing on the wall. Break the silence.</p>')
         +'</div>'
         +(lkUser&&blockedMe?'<p style="margin-top:10px;color:var(--steel);">You can&rsquo;t post on this wall.</p>':lkUser?'<div style="display:flex;gap:8px;margin-top:12px;"><input id="prof-post" maxlength="200" placeholder="Leave something on the wall&hellip;" style="flex:1;background:#000;border:1px solid rgba(240,179,43,.35);color:var(--bone);padding:9px 10px;border-radius:6px;font:inherit;"><button class="btn" id="prof-post-btn">Post</button></div>':'<p style="margin-top:10px;">Log in from your Locker to post.</p>')
-        +'</div>';
+        +'</div></div>';
       host.innerHTML=h;
       host.dataset.uid=uid;
+      host.querySelectorAll('[data-ptab]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.ptab;window.__profMainTab=k;
+        host.querySelectorAll('[data-ptab]').forEach(x=>{const on=x===b;x.classList.toggle('on',on);x.setAttribute('aria-selected',on?'true':'false');});
+        host.querySelectorAll('.ptab-pane').forEach(pn=>{pn.hidden=pn.dataset.pane!==k;});}));
       try{if(window.jcwProfileCards)window.jcwProfileCards(uid,(v.cards||{}),(v.name||window.jcwAutoName(uid)),(v.swapped||{}));}catch(_e){}
       (function(){
         const hx=document.getElementById('cn-hatchet');if(!hx)return;
