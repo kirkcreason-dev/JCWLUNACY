@@ -547,6 +547,9 @@ body.game-lock{overflow:hidden;}
 .prof-cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:9px;}
 .trade-inbox{border:1px solid var(--tang);border-radius:10px;padding:12px 14px;margin-bottom:16px;}
 /* ===== Lunatics live preshow ===== */
+.lo-tv-help{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 12px;font-size:12.5px;color:var(--steel);border-top:1px solid rgba(255,255,255,.08);}
+.lo-tv-help button{background:none;border:1px solid var(--seam);color:var(--bone);border-radius:14px;padding:4px 10px;font-size:12px;cursor:pointer;}
+.lo-tv-help a{color:var(--gold);}
 .ps-box{margin:0 0 18px;padding:16px;border:1px solid rgba(255,63,164,.55);border-radius:14px;background:linear-gradient(180deg,rgba(255,63,164,.10),rgba(255,255,255,0));}
 .ps-box .ps-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
 .ps-box .ps-h b{font-family:'Rubik Distressed',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:1.15rem;color:#fff;}
@@ -3728,10 +3731,12 @@ function observeReveals(){
             else h+='<div class="lo-scr-k">Off air</div><div class="lo-scr-t">Lunatics Live</div><div class="lo-scr-s">The preshow and the post show play right here on this screen when they go live.</div>';
             h+='</div>';
           }
-          h+='</div><div class="lo-tv-foot"><span>'+(live?'Watching with the Lunatics.':'The Lunatics screen')+'</span><a href="#" onclick="document.getElementById(\'chat-fab\')&&document.getElementById(\'chat-fab\').click();return false;">Chat along in Lunacy Chat &rarr;</a></div></div>';
+          h+='</div>'+(live&&src?'<div class="lo-tv-help">Stream stuck or showing an error? <button type="button" data-ps-reload>&#8635; Reload player</button> <a href="'+esc(cur.src)+'" target="_blank" rel="noopener">Watch on '+(/twitch\.tv/i.test(cur.src)?'Twitch':/kick\.com/i.test(cur.src)?'Kick':'the stream page')+' &#8599;</a></div>':'')
+            +'<div class="lo-tv-foot"><span>'+(live?'Watching with the Lunatics.':'The Lunatics screen')+'</span><a href="#" onclick="document.getElementById(\'chat-fab\')&&document.getElementById(\'chat-fab\').click();return false;">Chat along in Lunacy Chat &rarr;</a></div></div>';
         }
         /* only rebuild when something changed — keeps the player playing */
-        if(host.__psH!==h){host.__psH=h;host.innerHTML=h;}
+        if(host.__psH!==h){host.__psH=h;host.innerHTML=h;
+          const rb=host.querySelector('[data-ps-reload]');if(rb)rb.onclick=()=>{const f=host.querySelector('iframe');if(f){const u=f.src;f.src='about:blank';setTimeout(()=>{f.src=u;},150);}};}
       }
       /* staff: the controls live on the Studio tab */
       const st=document.getElementById('studio-ctl');if(!st)return;
@@ -9171,6 +9176,8 @@ import('./jcw-visuals/jcw-visuals.mjs').then(V=>{
     try{
       var g=document.getElementById('game-overlay');if(g&&g.classList.contains('on'))return true;
       var e=document.getElementById('ep-player');if(e&&e.classList.contains('on'))return true;
+      /* a live show is playing on the Lunatics screen: a reload cuts the stream (Twitch error #1000) */
+      if(document.querySelector('#lun-preshow iframe'))return true;
       if(window.jcwRadioNow&&window.jcwRadioNow())return true;
       var typed=[].some.call(document.querySelectorAll('input[type=text],input:not([type]),textarea'),function(x){return x.offsetParent!==null&&String(x.value||'').trim().length>0&&x.id!=='lang';});
       if(typed)return true;
