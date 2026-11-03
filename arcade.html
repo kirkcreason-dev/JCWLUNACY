@@ -83,11 +83,35 @@
     if(i>=SOURCES.length){msg.textContent='Could not reach the arcade right now. Check your connection and refresh.';return;}
     fetchWithProgress(SOURCES[i]).then(function(html){
       pct.style.width='100%';
+      /* Rustlas Poker and Road to the Show are flagged localOnly in the arcade
+         (device-only scoreboards), which also stopped their wins from reaching
+         the site, so nobody could earn their badges. Let those two report. */
+      var NOREPORT="if(!known(g) || CFG[g].localOnly || window.parent === window) return;";
+      if(html.indexOf(NOREPORT)>-1)html=html.replace(NOREPORT,"if(!known(g) || (CFG[g].localOnly && g!=='poker' && g!=='racing') || window.parent === window) return;");
       frame.src=URL.createObjectURL(new Blob([html],{type:'text/html'}));
       frame.onload=function(){frame.hidden=false;load.style.display='none';try{frame.focus();}catch(e){}};
     }).catch(function(){start(i+1);});
   }
   start(0);
+
+  /* Wins played before reports reached the site: the arcade keeps a device
+     top 10 per game (localStorage pa_lb, this origin). Count those Poker and
+     Racing entries once into the locker (max, so nothing is counted twice). */
+  window.__arcFirebase(function(ok){
+    if(!ok)return;
+    try{firebase.auth().onAuthStateChanged(function(u){
+      if(!u)return;
+      var lb={};try{lb=JSON.parse(localStorage.getItem('pa_lb')||'{}')||{};}catch(e){}
+      var ref=firebase.database().ref('lockers/'+u.uid+'/arcade');
+      ['poker','racing'].forEach(function(g){
+        var L=Array.isArray(lb[g])?lb[g].filter(function(e){return e&&+e.v>0;}):[];
+        if(!L.length)return;
+        var n=Math.min(L.length,10),best=0;L.forEach(function(e){best=Math.max(best,Math.floor(+e.v)||0);});
+        ref.child('games/'+g).transaction(function(x){return Math.max(+x||0,n);});
+        if(best>0)ref.child('best/'+g).transaction(function(x){return Math.max(+x||0,best);});
+      });
+    });}catch(e){}
+  });
 
   /* ---------- messages from the arcade ---------- */
   window.addEventListener('message',function(e){
@@ -203,8 +227,8 @@ JCW_ARCADE_RANKINGS.install({frame:document.getElementById('arcade'),firebaseRea
    "show what I'm doing" switch (jcw_act_off). */
 (function(){
   if(!/(^|\.)jcwlunacy\.net$/i.test(location.hostname))return;
-  var NAMES={ladder:'Ladder Wars',rumble:'JCW Rumble',claw:'Carnival Claw',chicken:'Chicken Huntin’',shooter:'Carnival Crossfire',ttt:'Tic Tac Slam',chess:'Juggalo Chess',checkers:'Juggalo Checkers',faygo:'Joker Card Four',pinball:'Dark Carnival Pinball',bj:'Blackjack 21',memory:'Joker Card Memory',camper:'Gathering Camper',solitaire:'Dark Carnival Solitaire',j31:'Juggalo 31',hockey:'Juggalo Air Hockey'};
-  var SCR={lwScreen:'ladder',ruScreen:'rumble',clScreen:'claw',khScreen:'chicken',shScreen:'shooter',tttScreen:'ttt',chessScreen:'chess',checkersScreen:'checkers',faygoScreen:'faygo',pinballScreen:'pinball',bjScreen:'bj',mmScreen:'memory',gcScreen:'camper',soScreen:'solitaire',j31Screen:'j31',ahScreen:'hockey'};
+  var NAMES={poker:'Big Money Rustlas Poker',racing:'Road to the Show',ladder:'Ladder Wars',rumble:'JCW Rumble',claw:'Carnival Claw',chicken:'Chicken Huntin’',shooter:'Carnival Crossfire',ttt:'Tic Tac Slam',chess:'Juggalo Chess',checkers:'Juggalo Checkers',faygo:'Joker Card Four',pinball:'Dark Carnival Pinball',bj:'Blackjack 21',memory:'Joker Card Memory',camper:'Gathering Camper',solitaire:'Dark Carnival Solitaire',j31:'Juggalo 31',hockey:'Juggalo Air Hockey'};
+  var SCR={pkScreen:'poker',rcScreen:'racing',lwScreen:'ladder',ruScreen:'rumble',clScreen:'claw',khScreen:'chicken',shScreen:'shooter',tttScreen:'ttt',chessScreen:'chess',checkersScreen:'checkers',faygoScreen:'faygo',pinballScreen:'pinball',bjScreen:'bj',mmScreen:'memory',gcScreen:'camper',soScreen:'solitaire',j31Screen:'j31',ahScreen:'hockey'};
   var frame=document.getElementById('arcade');
   function current(){
     try{var d=frame&&frame.contentDocument;if(!d)return '';
