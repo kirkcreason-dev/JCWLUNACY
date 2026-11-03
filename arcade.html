@@ -83,11 +83,21 @@
     if(i>=SOURCES.length){msg.textContent='Could not reach the arcade right now. Check your connection and refresh.';return;}
     fetchWithProgress(SOURCES[i]).then(function(html){
       pct.style.width='100%';
-      /* Rustlas Poker and Road to the Show are flagged localOnly in the arcade
-         (device-only scoreboards), which also stopped their wins from reaching
-         the site, so nobody could earn their badges. Let those two report. */
-      var NOREPORT="if(!known(g) || CFG[g].localOnly || window.parent === window) return;";
-      if(html.indexOf(NOREPORT)>-1)html=html.replace(NOREPORT,"if(!known(g) || (CFG[g].localOnly && g!=='poker' && g!=='racing') || window.parent === window) return;");
+      /* Rustlas Poker and Road to the Show only reported a win when the player
+         tapped SAVE YOUR RECORD, and even then the arcade kept it device-only,
+         so their badges never came in. Count the win the moment the match /
+         solo race ends instead (once per finish), straight to the site. */
+      var WINHOOK='<script>(function(){var seen=new WeakSet(),last={};window.__jcwWin=function(g,o,v){try{if(window.parent===window)return;'
+        +'if(o&&typeof o==="object"){if(seen.has(o))return;seen.add(o);}v=Math.floor(+v)||0;var now=Date.now(),k=g+"|"+v;'
+        +'if(last[g]&&last[g].k===k&&now-last[g].t<120000)return;last[g]={k:k,t:now};'
+        +'window.parent.postMessage({type:"jcw-arcade",ev:"win",g:g,v:v},"*");}catch(e){}};})();<\/script>';
+      var PK="const record=m==='over'&&U.playMode==='cpu'&&s.matchWinner===0;$('SaveBtn').hidden=!record;";
+      var RC="hide('SaveBtn',m!=='finished'||!!N||ended||daily);";
+      if(html.indexOf(PK)>-1&&html.indexOf(RC)>-1&&html.indexOf('<head>')>-1){
+        html=html.replace('<head>','<head>'+WINHOOK)
+          .replace(PK,"const record=m==='over'&&U.playMode==='cpu'&&s.matchWinner===0;if(record&&window.__jcwWin)window.__jcwWin('poker',s,1000+Math.max(0,60-s.handNo)*10);$('SaveBtn').hidden=!record;")
+          .replace(RC,"if(m==='finished'&&!N&&!ended&&!daily&&window.__jcwWin)window.__jcwWin('racing',state,R.score(state,0));"+RC);
+      }
       frame.src=URL.createObjectURL(new Blob([html],{type:'text/html'}));
       frame.onload=function(){frame.hidden=false;load.style.display='none';try{frame.focus();}catch(e){}};
     }).catch(function(){start(i+1);});
