@@ -4578,7 +4578,9 @@ function observeReveals(){
      hardcoded map, so anyone promoted through the mods node got the mod tab
      but no mod DM, no MOD tag, and no Message button on their profile —
      invisible to the very feature they had just been given. */
-  function isModUid(uid){return !!(uid&&(JCW_MODS[uid]||JCW_MODS_LIVE[uid]===true)&&!(JCW_MODS_REMOVED[uid]===true&&uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'));}
+  /* the owner's two accounts: always mods, never swept, full delete rights in chat and mod chat */
+  const JCW_OWNER_ACCTS={'oYrNiXZywhexmLqRQO7j1iyA1Bh1':1,'zRLXcejE4dWQRL0l07Bo19SO5j52':1};
+  function isModUid(uid){return !!(uid&&(JCW_OWNER_ACCTS[uid]||((JCW_MODS[uid]||JCW_MODS_LIVE[uid]===true)&&JCW_MODS_REMOVED[uid]!==true)));}
   window.jcwIsModUid=isModUid;
   function isMod(){return !!(lkUser&&isModUid(lkUser.uid));}
   /* Mods may delete general posts and their own, but never another mod's.
@@ -4586,7 +4588,7 @@ function observeReveals(){
      objects to one reports it instead (owner's rule, 9/30). */
   function modOverPost(author){
     if(!lkUser||!isMod())return false;
-    if(lkUser.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1')return true;   /* Digital Duke */
+    if(JCW_OWNER_ACCTS[lkUser.uid])return true;   /* Digital Duke + Creaso Norse Tech */
     if(!author||author===lkUser.uid)return true;
     return !isModUid(author);
   }
@@ -4655,7 +4657,7 @@ function observeReveals(){
           .then(()=>{try{console.info('[mods] restored re-added mod',uid);}catch(_x){}}).catch(()=>{});
       });
       Object.keys(ids).forEach(uid=>{
-        if(uid===MOD_OWNER||!isModUid(uid))return;
+        if(uid===MOD_OWNER||JCW_OWNER_ACCTS[uid]||!isModUid(uid))return;
         Promise.all([fbDB.ref('lockers/'+uid+'/modLast').once('value'),fbDB.ref('lockers/'+uid+'/name').once('value')]).then(([s,n])=>{
           const last=Math.max(+s.val()||0,MOD_IDLE_START,+grants[uid]||0);
           if(Date.now()-last<=MOD_IDLE_DAYS*86400000)return;
@@ -5329,7 +5331,7 @@ function observeReveals(){
     if(isMod()){modWire();dmInboxWire();}
     try{
       const note=document.getElementById('mod-idle-note');
-      if(note&&isMod()&&fbDB&&lkUser&&lkUser.uid!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'&&!note.dataset.done){
+      if(note&&isMod()&&fbDB&&lkUser&&!JCW_OWNER_ACCTS[lkUser.uid]&&!note.dataset.done){
         note.dataset.done='1';
         Promise.all([fbDB.ref('lockers/'+lkUser.uid+'/modLast').once('value'),fbDB.ref('lockers/'+MOD_OWNER+'/modGrants/'+lkUser.uid).once('value')]).then(([s,g])=>{
           const last=Math.max(+s.val()||0,MOD_IDLE_START,+g.val()||0);
@@ -5436,6 +5438,8 @@ function observeReveals(){
     document.getElementById('ch-vote').classList.toggle('on',chTab==='vote');
     document.getElementById('ch-board').classList.toggle('on',chTab==='board');
     document.getElementById('ch-mods').classList.toggle('on',chTab==='mods');
+    /* mod chat has no character limit; regular chat keeps 200 */
+    try{const mi=document.getElementById('ch-msg');if(mi){if(chTab==='mods')mi.removeAttribute('maxlength');else mi.setAttribute('maxlength','200');}}catch(_e){}
     const dmsPane=document.getElementById('ch-dms');if(dmsPane)dmsPane.classList.toggle('on',chTab==='dms');
     if(chTab==='dms'&&window.jcwDmsRender)window.jcwDmsRender();
     const inp=document.getElementById('ch-msg');
