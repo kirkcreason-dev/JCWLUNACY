@@ -5992,7 +5992,7 @@ function observeReveals(){
   })();
   /* ===== SUPPORT: "Any problems? Message Creaso Norse Tech" =====
      Every signed-in member gets one private thread at support/<uid>/m (only
-     they and Digital Duke can read it). Duke sees every thread as an inbox
+     they, Digital Duke and Creaso Norse Tech can read it). Both see every thread as an inbox
      in the same box and answers as "Creaso Norse Tech". Notifications carry
      no message text (the notifications node is public). */
   (function(){
@@ -6002,7 +6002,8 @@ function observeReveals(){
     const listEl=document.getElementById('sup-list'),inp=document.getElementById('sup-msg'),inBox=document.getElementById('sup-in');
     const back=document.getElementById('sup-back'),title=document.getElementById('sup-with');
     let thread=null,threadRef=null,metaRef=null,allRef=null,wiredFor=null,allData={},myMeta=null;
-    const isDuke=()=>!!(lkUser&&lkUser.uid===DUKE);
+    const STAFF={[DUKE]:1,[CNT]:1};
+    const isDuke=()=>!!(lkUser&&STAFF[lkUser.uid]);
     const when=t=>{try{return new Date(t).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});}catch(e){return '';}};
     const say=(m,t)=>{try{toast(m,t||3200);}catch(_e){}};
     function setUnread(n){fab.classList.toggle('unread',n>0);const c=document.getElementById('sup-count');if(c)c.textContent=n>9?'9+':String(n||1);}
@@ -6011,7 +6012,7 @@ function observeReveals(){
       const uid=lkUser&&fbDB?lkUser.uid:null;
       if(uid===wiredFor)return;
       unwire();wiredFor=uid;if(!uid)return;
-      if(uid===DUKE){
+      if(STAFF[uid]){
         allRef=fbDB.ref('support');
         allRef.on('value',s=>{allData=s.val()||{};let n=0;Object.keys(allData).forEach(k=>{const m=allData[k]&&allData[k].meta;if(m&&m.dukeUnread)n++;});setUnread(n);if(modal.classList.contains('on'))render();},()=>{});
       }else{
@@ -6079,7 +6080,7 @@ function observeReveals(){
         fbDB.ref('support/'+owner+'/meta').update(metaUp).catch(()=>{});
         try{
           if(isDuke())fbDB.ref('notifications/'+owner).push({ty:'supportre',fu:CNT,from:'Creaso Norse Tech',ts:ts});
-          else notifPush(DUKE,{ty:'support'});
+          else{notifPush(DUKE,{ty:'support'});notifPush(CNT,{ty:'support'});}
         }catch(_e){}
         if(!isDuke())say('Sent — Creaso Norse Tech will answer right here.',3600);
       }).catch(()=>say('Couldn’t send that right now — try again in a minute.',3600))
