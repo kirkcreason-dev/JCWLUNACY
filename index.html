@@ -4620,6 +4620,25 @@ function observeReveals(){
     }catch(_e){}
   }
   window.jcwModUsed=jcwModUsed;
+  /* DELETION LOG (owner's call, 11/4): every post a mod deletes is copied into
+     the reports node first as a closed record {del:1, where, who, whoUid, t,
+     by, byUid, ts} — readable by staff only, never shown in the mods' report
+     queue, listed for Digital Duke on the admin page. The delete still goes
+     through if the copy can't be written. */
+  function jcwDelThenRemove(path){
+    path=String(path||'');
+    if(!fbDB||!lkUser||!/^(chat\/[A-Za-z0-9_-]+|modchat\/[A-Za-z0-9_-]+|walls\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+)$/.test(path))return Promise.reject(new Error('bad path'));
+    const ref=fbDB.ref(path);
+    return ref.once('value').then(function(snap){
+      const m=snap.val()||{};
+      const txt=String(m.t||'')+(m.img?' [photo]':'');
+      const rec={k:('del~'+path.replace(/\//g,'~')).slice(0,64),del:1,open:false,where:path,
+        t:txt.slice(0,1000),who:String(m.n||'').slice(0,80),whoUid:String(m.u||'').slice(0,64),postTs:+m.ts||0,
+        by:String(chName()||'A mod').slice(0,80),byUid:lkUser.uid,ts:Date.now()};
+      return fbDB.ref('reports').push(rec).catch(function(er){try{console.warn('[deletion log] not saved',er&&er.message);}catch(_x){}});
+    },function(){}).then(function(){return ref.remove();});
+  }
+  window.jcwDelThenRemove=jcwDelThenRemove;
   function jcwModSweep(){
     try{
       if(!lkUser||!fbDB||!canManageMods(lkUser.uid)||window.__modSwept||!window.jcwSetMod)return;
@@ -4980,7 +4999,7 @@ function observeReveals(){
     const del=e.target.closest('[data-chdel]');
     if(del){
       if(fbDB&&canDelPost(del.dataset.chu||'')&&confirm('Delete this message?'))
-        {fbDB.ref('chat/'+del.dataset.chdel).remove();jcwModUsed();}
+        {jcwDelThenRemove('chat/'+del.dataset.chdel).catch(()=>{});jcwModUsed();}
       return;
     }
     const b=e.target.closest('[data-puid],[data-pname]');if(!b)return;
@@ -5271,7 +5290,7 @@ function observeReveals(){
       if(d&&fbDB&&isMod()&&!JCW_NO_DELETE[lkUser.uid]){
         if(!confirm('Delete the reported message and close these reports?'))return;
         const path=d.dataset.repwhere?d.dataset.repwhere:(d.dataset.repdel?'chat/'+d.dataset.repdel:'');
-        if(path&&/^(chat\/[A-Za-z0-9_-]+|walls\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+)$/.test(path))fbDB.ref(path).remove()
+        if(path&&/^(chat\/[A-Za-z0-9_-]+|walls\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+)$/.test(path))jcwDelThenRemove(path)
           .catch(er=>{try{toast('Could not delete the message: '+(er&&er.message||er),4200);}catch(_x){}});
         repClose(d.dataset.repid);jcwModUsed();
         return;
@@ -5296,11 +5315,11 @@ function observeReveals(){
   function modWire(){
     if(modWired||!fbDB||!isMod())return;modWired=true;
     fbDB.ref('modchat').limitToLast(80).on('value',s=>{const L=[];s.forEach(c=>{const v=c.val();if(v&&v.t){v.__k=c.key;L.push(v);}});modRender(L);});
-    fbDB.ref('reports').limitToLast(250).on('value',s=>{const L=[];s.forEach(c=>{const v=c.val();if(v){v.__k=c.key;L.push(v);}});repRender(L);},()=>{});
+    fbDB.ref('reports').limitToLast(400).on('value',s=>{const L=[];s.forEach(c=>{const v=c.val();if(v&&!v.del){v.__k=c.key;L.push(v);}});repRender(L);},()=>{});
   }
   document.addEventListener('click',e=>{
     const d=e.target.closest('[data-mdel]');
-    if(d&&fbDB&&canDelPost(d.dataset.mu||'')&&confirm('Delete this mod message?')){fbDB.ref('modchat/'+d.dataset.mdel).remove();jcwModUsed();}
+    if(d&&fbDB&&canDelPost(d.dataset.mu||'')&&confirm('Delete this mod message?')){jcwDelThenRemove('modchat/'+d.dataset.mdel).catch(()=>{});jcwModUsed();}
   });
   function updateModUI(){
     const tab=document.getElementById('ch-mods-tab');
@@ -6259,7 +6278,7 @@ function observeReveals(){
     }
     if(e.target.dataset&&e.target.dataset.wdel){
       if(fbDB&&canDelPost(e.target.dataset.wu||'')&&confirm('Delete this wall post?'))
-        {fbDB.ref('walls/'+uid+'/'+e.target.dataset.wdel).remove().then(()=>window.profRender(uid));jcwModUsed();}
+        {jcwDelThenRemove('walls/'+uid+'/'+e.target.dataset.wdel).then(()=>window.profRender(uid)).catch(()=>{});jcwModUsed();}
       return;
     }
     if(e.target.id==='prof-modtoggle'){

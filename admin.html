@@ -143,6 +143,14 @@
     <div id="artList" class="muted" style="margin-top:12px">&mdash;</div>
   </div>
 
+  <div class="card"><label>&#128465; Deletion log <span class="muted">(every chat message, mod chat message and wall post a mod deletes &mdash; logged from Nov 4, 2026)</span></label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+      <select id="delWho" style="background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:8px 10px;font:inherit"><option value="">All mods</option></select>
+      <span class="muted" id="delCount"></span>
+    </div>
+    <div id="delList" class="muted">Sign in above to see the log.</div>
+  </div>
+
   <div class="card"><label>&#127914; Lunatics Only members</label>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
       <input id="lunName" placeholder="Locker name" style="flex:2;min-width:200px;background:#000;border:1px solid var(--seam);color:var(--txt);border-radius:6px;padding:9px 10px;font:inherit">
@@ -1081,6 +1089,37 @@
   artLoad();
   lunLoad();
   vtLoad();
+  /* ===== Deletion log: reports records with del:1 (written by the site before a mod's delete) ===== */
+  (async function delLoad(){
+    const list=$('delList'),who=$('delWho'),cnt=$('delCount');if(!list)return;
+    const db=await statsInit();let rows=[],hooked=false;
+    const where=w=>{w=String(w||'');if(/^chat\//.test(w))return 'chat message';if(/^modchat\//.test(w))return 'mod chat message';return /^walls\//.test(w)?'wall post':'post';};
+    let names={};
+    function draw(){
+      const f=who.value;const L=rows.filter(r=>!f||r.byUid===f);
+      cnt.textContent=L.length+' deletion'+(L.length===1?'':'s');
+      list.innerHTML=L.length?L.map(r=>{
+        const wm=String(r.where||'').match(/^walls\/([^/]+)\//);const wallOf=wm?(names[wm[1]]||wm[1]):'';
+        return '<div style="padding:8px 0;border-top:1px solid var(--seam)">'
+          +'<div style="color:var(--txt)"><b>'+esc(r.by||'?')+'</b> deleted '+(r.who?('<b>'+esc(r.who)+'</b>&rsquo;s'):'a')+' '+where(r.where)+(wallOf?(' on '+esc(wallOf)+'&rsquo;s wall'):'')
+          +' <span class="muted" style="font-size:12px">&middot; '+new Date(r.ts).toLocaleString()+'</span></div>'
+          +'<div style="margin-top:3px;padding:6px 10px;background:#0b0b0e;border-left:3px solid var(--hot);border-radius:4px;white-space:pre-wrap;word-break:break-word">'+(r.t?esc(r.t):'<span class="muted">(no text)</span>')+'</div>'
+          +(r.postTs?'<div class="muted" style="font-size:11px;margin-top:2px">posted '+new Date(r.postTs).toLocaleString()+'</div>':'')+'</div>';}).join('')
+        :'<div style="padding:6px 0">Nothing deleted yet.</div>';
+    }
+    who.onchange=draw;
+    statsAuth.onAuthStateChanged(async u=>{
+      if(!u||hooked)return;hooked=true;
+      try{const ls=await db.ref('lockers').once('value');ls.forEach(c=>{const v=c.val();if(v&&v.name)names[c.key]=String(v.name);});}catch(e){}
+      db.ref('reports').orderByChild('del').equalTo(1).on('value',s=>{
+        const L=[];s.forEach(c=>{const v=c.val();if(v&&v.del)L.push(v);});
+        L.sort((a,b)=>(b.ts||0)-(a.ts||0));rows=L;
+        const mods={};L.forEach(r=>{if(r.byUid)mods[r.byUid]=r.by||r.byUid;});
+        const cur=who.value;who.innerHTML='<option value="">All mods</option>'+Object.keys(mods).map(k=>'<option value="'+esc(k)+'"'+(k===cur?' selected':'')+'>'+esc(mods[k])+'</option>').join('');
+        draw();
+      },e=>{list.innerHTML='<span class="err">Could not read the log ('+esc(e&&e.message||e)+').</span>';});
+    });
+  })();
   setInterval(statsLoad,60000);
 })();
 </script>
