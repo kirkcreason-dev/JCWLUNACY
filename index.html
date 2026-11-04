@@ -2593,7 +2593,7 @@ function observeReveals(){
       const c=e.target.closest('.ep');if(!c)return;
       const watch='https://www.youtube.com/watch?v='+c.dataset.id;
       if(location.protocol==='file:'){window.open(watch,'_blank');return;}
-      frameWrap.innerHTML=`<div class="ifw"><iframe src="https://www.youtube.com/embed/${c.dataset.id}?autoplay=1&rel=0&playsinline=1" referrerpolicy="origin" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
+      frameWrap.innerHTML=`<div class="ifw"><iframe src="https://www.youtube.com/embed/${c.dataset.id}?autoplay=1&rel=0&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}" onload="window.jcwYtListen&&window.jcwYtListen(this)" referrerpolicy="origin" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
       nowEl.innerHTML='Now playing \u00b7 '+c.dataset.t+' &nbsp;\u00b7&nbsp; <a href="'+watch+'" target="_blank" rel="noopener" style="color:var(--cyan);">Open on YouTube \u2197</a>';
       hubShow(c.dataset.id,c.dataset.t);
       ytActions(c.dataset.id);
@@ -3877,6 +3877,23 @@ function observeReveals(){
     try{setTimeout(function(){if(window.toast)toast('\u2705 Daily check-in \u00b7 +'+ckPts+((d.streak||1)>1?(' \u00b7 '+d.streak+'-day streak'):''),3600);},1800);}catch(_e){}
   })();
 
+  /* REAL PLAYBACK ONLY (owner 11/04: "fix the glitch"): an episode that
+     won't play (removed, private, region-locked) used to count as watched
+     just by leaving the player open 10 minutes, so badge hunters farmed the
+     broken ones. The YouTube player now reports its own clock (enablejsapi),
+     and only seconds where that clock actually moves count toward a watch. */
+  (function(){
+    window.jcwYtListen=function(fr){
+      let n=0;const hi=()=>{try{fr.contentWindow.postMessage(JSON.stringify({event:'listening',id:'jcwep',channel:'widget'}),'*');}catch(_e){}if(++n<6)setTimeout(hi,1500);};hi();
+    };
+    window.addEventListener('message',function(e){
+      if(!/^https:\/\/www\.youtube(-nocookie)?\.com$/.test(e.origin||''))return;
+      let d=e.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(_e){return;}}
+      const inf=d&&d.info;if(!inf||typeof inf!=='object')return;
+      if(typeof inf.currentTime==='number')window.__ytCT=inf.currentTime;
+      if(typeof inf.playerState==='number')window.__ytState=inf.playerState;
+    });
+  })();
   /* ================= EPISODE HUB ================= */
   let HUB_M=[["jcw-lunacy-logo-shirt","JCW Lunacy Logo Shirt","Photoroom_20260310_115906_b73fc165-374f-4e68-a2e9-2664a0f5476f.png"],
     ["black-jcw-lunacy-embroidered-hoodie","Lunacy Hoodie","Photoroom_20260310_122048.png"],
@@ -3916,7 +3933,7 @@ function observeReveals(){
         const dk=new Date().toLocaleDateString('en-CA',{timeZone:'America/Detroit'}).replace(/-/g,'');
         fbDB.ref('stats/epDays/'+dk).transaction(v=>(v||0)+1);
         fbDB.ref('stats/eps/'+ek+'/title').set(title||String(id));
-        window.__epWatch=ek;
+        window.__epWatch=ek;window.__ytCT=0;window.__epLastCT=0;
       }
     }catch(e){}
   }
@@ -3924,7 +3941,7 @@ function observeReveals(){
   if(hubNextEl)hubNextEl.addEventListener('click',e=>{
     const b=e.target.closest('button[data-ep]');if(!b)return;
     const frameWrap=document.getElementById('ep-frame');
-    frameWrap.innerHTML=`<div class="ifw"><iframe src="https://www.youtube.com/embed/${b.dataset.ep}?autoplay=1&rel=0&playsinline=1" referrerpolicy="origin" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
+    frameWrap.innerHTML=`<div class="ifw"><iframe src="https://www.youtube.com/embed/${b.dataset.ep}?autoplay=1&rel=0&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}" onload="window.jcwYtListen&&window.jcwYtListen(this)" referrerpolicy="origin" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
     document.getElementById('ep-now').innerHTML='Now playing \u00b7 '+b.dataset.t;
     hubShow(b.dataset.ep,b.dataset.t);
     ytActions(b.dataset.ep);
@@ -4572,6 +4589,9 @@ function observeReveals(){
      set from the house collection, the way the Duke does. */
   const JCW_HOUSE={'oYrNiXZywhexmLqRQO7j1iyA1Bh1':1,'TwkyqKXbJ6NV8VNewfofluB1sji2':1,'LmjvpMlKlVNpyoXajb74P5guaqu2':1};
   function isHouseUid(uid){return !!(uid&&JCW_HOUSE[uid]);}
+  /* owner 11/04: Nocturnal Deadhead quit - his page, posts and spot on every list are gone for everyone (both accounts) */
+  const JCW_GONE={'LmjvpMlKlVNpyoXajb74P5guaqu2':1,'TwkyqKXbJ6NV8VNewfofluB1sji2':1};
+  window.JCW_GONE=JCW_GONE;
   window.jcwIsHouseUid=isHouseUid;
   /* owner 10/26: only Digital Duke adds or removes mods. Nocturnal (both his
      accounts) keeps the house card powers but no longer manages mods. */
@@ -4697,7 +4717,7 @@ function observeReveals(){
   }
   /* same test from a locker we already have in hand (leaderboard, profile pages) */
   function jcwBlockedMeIn(v){try{return !!(v&&v.blocked&&lkUser&&(+v.blocked[lkUser.uid]||0)>0&&!jcwBlockExempt());}catch(e){return false;}}
-  function jcwHidden(uid){return jcwBlocked(uid)||jcwBlockedMe(uid);}
+  function jcwHidden(uid){return !!(uid&&JCW_GONE[uid])||jcwBlocked(uid)||jcwBlockedMe(uid);}
   window.jcwHidden=jcwHidden;window.jcwBlockExempt=jcwBlockExempt;
   let __bmPaintT=0;
   function jcwBlockRepaint(){
@@ -5461,6 +5481,7 @@ function observeReveals(){
       const snap=await fbDB.ref('lockers').once('value');
       const rows=[];snap.forEach(c=>{const v=c.val();if(v&&(v.pts||v.name)&&c.key!=='oYrNiXZywhexmLqRQO7j1iyA1Bh1'&&c.key!=='zRLXcejE4dWQRL0l07Bo19SO5j52'){v.__k=c.key;rows.push(v);}});   /* Digital Duke + Creaso Norse Tech (the house) stay off the board */
       rows.sort((a,b)=>(b.pts||0)-(a.pts||0));
+      {const keep0=rows.filter(x=>!JCW_GONE[x.__k]);rows.length=0;keep0.forEach(x=>rows.push(x));}
       if(lkUser){const keep=rows.filter(x=>!(x.__k!==lkUser.uid&&(jcwBlocked(x.__k)||jcwBlockedMeIn(x))));rows.length=0;keep.forEach(x=>rows.push(x));}
       host.innerHTML=mine+(rows.length?rows.slice(0,20).map((x,i)=>
         '<div style="display:flex;gap:10px;padding:7px 2px;border-bottom:1px dashed rgba(240,179,43,.14);align-items:baseline;">'
@@ -6139,7 +6160,7 @@ function observeReveals(){
       profNames().catch(()=>({})),
       (lkUser?safe(fbDB.ref('relations/'+lkUser.uid+'/'+uid).once('value')):Promise.resolve(null))
     ]).then(rs=>{
-      const v=rs[0]&&rs[0].val();if(!v){host.innerHTML='<p>No such Juggalo.</p>';return;}
+      const v=rs[0]&&rs[0].val();if(!v||JCW_GONE[uid]){host.innerHTML='<p>No such Juggalo.</p>';return;}
       const rel=(rs[1]&&rs[1].val())||{};const all=rs[3]||{};
       const myRel=rs[4]&&rs[4].val();
       const posts=[];if(rs[2])rs[2].forEach(c=>{const pv=c.val()||{};if(pv.u&&(jcwHidden(pv.u)||jcwBlockedMeIn((rs[3]||{})[pv.u])))return;posts.push(Object.assign({__k:c.key},pv));});posts.reverse();
@@ -6447,7 +6468,8 @@ function observeReveals(){
         const hb=setInterval(()=>{
           if(document.hidden)return;
           if(hbTotal<1800){hbTotal+=15;fbDB.ref('stats/duration').transaction(v=>(v||0)+15);}
-          if(window.__epWatch&&document.querySelector('.ep-player.on')){
+          const __ct=+window.__ytCT||0,__adv=__ct-(+window.__epLastCT||0);window.__epLastCT=__ct;
+          if(window.__epWatch&&document.querySelector('.ep-player.on')&&__adv>=10&&__adv<=40){   /* the video's own clock moved: a real watch */
             fbDB.ref('stats/eps/'+window.__epWatch+'/secs').transaction(v=>(v||0)+15);
             try{
               const ek=window.__epWatch;
