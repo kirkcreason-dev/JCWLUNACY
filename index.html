@@ -4584,11 +4584,20 @@ function observeReveals(){
   /* Mods may delete general posts and their own, but never another mod's.
      Only Digital Duke can remove a mod's chat message or wall post; a mod who
      objects to one reports it instead (owner's rule, 9/30). */
-  function canDelPost(author){
+  function modOverPost(author){
     if(!lkUser||!isMod())return false;
     if(lkUser.uid==='oYrNiXZywhexmLqRQO7j1iyA1Bh1')return true;   /* Digital Duke */
     if(!author||author===lkUser.uid)return true;
     return !isModUid(author);
+  }
+  /* Mods who keep the badge and the mod tools but can't delete anyone else's
+     posts (owner's call, 11/4): Nocturnal Deadhead, both accounts. They can
+     still report, dismiss reports and ban. */
+  const JCW_NO_DELETE={'LmjvpMlKlVNpyoXajb74P5guaqu2':1,'TwkyqKXbJ6NV8VNewfofluB1sji2':1};
+  function canDelPost(author){
+    if(!modOverPost(author))return false;
+    if(JCW_NO_DELETE[lkUser.uid])return !!author&&author===lkUser.uid;
+    return true;
   }
   window.jcwCanDelPost=canDelPost;
   /* ---- MOD ACTIVITY (owner's rule 9/30): a mod who goes 30 days straight
@@ -5227,8 +5236,9 @@ function observeReveals(){
             +'<div style="margin-top:9px;">'
               +((top.whoUid&&top.whoUid!==lkUser.uid&&!isModUid(top.whoUid))?('<button data-repban="'+esc(top.whoUid)+'" data-bann="'+esc(author)+'" style="font-size:11px;padding:3px 8px;margin-right:6px;cursor:pointer;border-color:var(--hot);color:var(--hot);">Ban author</button>'):'')
               +(top.k&&canDelPost(top.whoUid||'')?('<button data-repdel="'+esc(top.where?'':top.k)+'" data-repwhere="'+esc(top.where||'')+'" data-repid="'+esc(ids)+'" style="font-size:11px;padding:3px 8px;margin-right:6px;cursor:pointer;">'+(gone&&!top.where?'Clear':(top.where?'Delete wall post':'Delete message'))+'</button>'):'')
-              +(top.k&&!canDelPost(top.whoUid||'')?'<span style="font-size:11px;color:var(--gold);margin-right:8px;">Mod post &middot; only Digital Duke can remove it</span>':'')
-              +(canDelPost(top.whoUid||'')?'<button data-repok="'+esc(ids)+'" style="font-size:11px;padding:3px 8px;cursor:pointer;">Dismiss</button>':'')
+              +(top.k&&!modOverPost(top.whoUid||'')?'<span style="font-size:11px;color:var(--gold);margin-right:8px;">Mod post &middot; only Digital Duke can remove it</span>':'')
+              +(top.k&&modOverPost(top.whoUid||'')&&!canDelPost(top.whoUid||'')?'<span style="font-size:11px;color:var(--gold);margin-right:8px;">Deleting is off for your account &middot; Digital Duke can remove it</span>':'')
+              +(modOverPost(top.whoUid||'')?'<button data-repok="'+esc(ids)+'" style="font-size:11px;padding:3px 8px;cursor:pointer;">Dismiss</button>':'')
             +'</div></div>';
         }).join('');
     }catch(e){}
@@ -5258,7 +5268,7 @@ function observeReveals(){
       const rb=e.target.closest('[data-repban]');
       if(rb&&fbDB&&isMod()){window.jcwBanOpen(rb.getAttribute('data-repban'),rb.getAttribute('data-bann'));return;}
       const d=e.target.closest('[data-repdel]');
-      if(d&&fbDB&&isMod()){
+      if(d&&fbDB&&isMod()&&!JCW_NO_DELETE[lkUser.uid]){
         if(!confirm('Delete the reported message and close these reports?'))return;
         const path=d.dataset.repwhere?d.dataset.repwhere:(d.dataset.repdel?'chat/'+d.dataset.repdel:'');
         if(path&&/^(chat\/[A-Za-z0-9_-]+|walls\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+)$/.test(path))fbDB.ref(path).remove()
