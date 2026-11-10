@@ -2276,7 +2276,7 @@ window.jcwAutoName=function(uid){var s=String(uid||''),h=0;for(var i=0;i<s.lengt
 </script>
 <script>
 /* ================= ROUTER ================= */
-const ROUTES=['home','episodes','clips','events','crew','games','merch','cards','vote','locker','lunatics','studio','about','profile']; /* 'ppv' removed for now — re-add to restore the PPV tab */
+const ROUTES=['home','episodes','clips','events','crew','games','merch','cards','vote','locker','lunatics','about','profile']; /* 'ppv' removed for now — re-add to restore the PPV tab */
 function route(){
   let r=(location.hash||'#home').slice(1);
   if(r.indexOf('u-')===0){window.__profUid=r.slice(2);r='profile';}
@@ -3716,7 +3716,7 @@ function observeReveals(){
       const pill=document.getElementById('ps-pill');
       if(pill)pill.classList.toggle('on',live&&!!window.__lkPremOn&&(location.hash||'')!=='#lunatics');
       const pt=document.getElementById('ps-pill-t');if(pt){const t='Lunatics '+NAME[n.kind];if(pt.textContent!==t)pt.textContent=t;}
-      const nav=document.getElementById('nav-studio');if(nav)nav.style.display=can?'':'none';
+      const nav=document.getElementById('nav-studio');if(nav)nav.style.display='none';   /* owner 11/10: Studio tab removed (code kept; change 'none' back to can?'':'none' and re-add 'studio' to ROUTES to restore) */
       /* members: the screen at the top of the Lunatics page */
       const host=document.getElementById('lun-preshow');
       if(host){
