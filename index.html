@@ -1707,7 +1707,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <div class="lo-hero">
       <span class="lo-kick">&#9733; JCW &middot; Members only</span>
       <h2>The <em>Lunatics</em> Only</h2>
-      <p>The inner circle of the carnival &mdash; the games, the arcade, the radio and the cards nobody else gets &mdash; and you can watch PPVs right here.</p>
+      <p>The inner circle of the carnival &mdash; the games, the arcade, the radio and the cards nobody else gets &mdash; and you can watch the live preshow and post show right here.</p>
     </div>
     <div class="lk-prem-body"><p style="text-align:center;color:#9d94ad;">Loading&hellip;</p></div>
   </section>
@@ -2227,7 +2227,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   </div>
 </div>
 
-<a id="ps-pill" href="#lunatics"><span class="ps-live">LIVE</span> <span id="ps-pill-t">Lunatics PPV</span></a>
+<a id="ps-pill" href="#lunatics"><span class="ps-live">LIVE</span> <span id="ps-pill-t">PPV</span></a>
 <div id="sup-modal" aria-modal="true" role="dialog">
   <div class="dm-box">
     <div class="dm-hd"><button class="sup-back" id="sup-back">&larr; All</button><b id="sup-with">Creaso Norse Tech</b><button class="cx" id="sup-close" aria-label="Close">&times;</button></div>
@@ -3607,7 +3607,7 @@ function observeReveals(){
   }
   /* the screen as non-members see it: locked */
   function loLockedTv(){
-    return '<div class="lo-tv"><div class="lo-tv-top"><span class="lo-onair"><i></i>Live</span><span class="lo-tv-title">Lunatics PPV</span><span class="lo-tv-brand">JCW Lunacy</span></div>'
+    return '<div class="lo-tv"><div class="lo-tv-top"><span class="lo-onair"><i></i>Live</span><span class="lo-tv-title">PPV</span><span class="lo-tv-brand">JCW Lunacy</span></div>'
       +'<div class="lo-screen"><div class="lo-static"></div><div class="lo-scan"></div><div class="lo-scr-in"><div class="lo-lock">&#9733;</div>'
       +'<div class="lo-scr-k">The Lunatics screen</div><div class="lo-scr-t">PPV</div>'
       +'<div class="lo-scr-s">Lunatics watch PPVs together right here, along with everything else in the membership.</div></div></div></div>';
@@ -3715,7 +3715,7 @@ function observeReveals(){
       const can=CAN();
       const pill=document.getElementById('ps-pill');
       if(pill)pill.classList.toggle('on',live&&!!window.__lkPremOn&&(location.hash||'')!=='#lunatics');
-      const pt=document.getElementById('ps-pill-t');if(pt){const t='Lunatics '+NAME[n.kind];if(pt.textContent!==t)pt.textContent=t;}
+      const pt=document.getElementById('ps-pill-t');if(pt){const t=NAME[n.kind];if(pt.textContent!==t)pt.textContent=t;}
       const nav=document.getElementById('nav-studio');if(nav)nav.style.display='none';   /* owner 11/10: Studio tab removed (code kept; change 'none' back to can?'':'none' and re-add 'studio' to ROUTES to restore) */
       /* members: the screen at the top of the Lunatics page */
       const host=document.getElementById('lun-preshow');
@@ -3724,7 +3724,7 @@ function observeReveals(){
         if(window.__lkPremOn){
           const title=esc(DEF[n.kind]);
           const src=live?embed(cur.src):'';
-          h='<div class="lo-tv'+(live?' live':'')+'"><div class="lo-tv-top"><span class="lo-onair"><i></i>'+(live?'Live':'Off air')+'</span><span class="lo-tv-title">'+(live?title:'Lunatics PPV')+'</span><span class="lo-tv-brand">JCW Lunacy</span></div><div class="lo-screen">';
+          h='<div class="lo-tv'+(live?' live':'')+'"><div class="lo-tv-top"><span class="lo-onair"><i></i>'+(live?'Live':'Off air')+'</span><span class="lo-tv-title">'+(live?title:'PPV')+'</span><span class="lo-tv-brand">JCW Lunacy</span></div><div class="lo-screen">';
           if(live&&src){
             h+='<iframe src="'+esc(src)+'" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen title="'+title+'"></iframe>';
           }else{
