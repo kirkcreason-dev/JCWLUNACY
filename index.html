@@ -1707,7 +1707,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
     <div class="lo-hero">
       <span class="lo-kick">&#9733; JCW &middot; Members only</span>
       <h2>The <em>Lunatics</em> Only</h2>
-      <p>The inner circle of the carnival &mdash; the games, the arcade, the radio and the cards nobody else gets &mdash; and you can watch the live preshow and post show right here.</p>
+      <p>The inner circle of the carnival &mdash; the games, the arcade, the radio and the cards nobody else gets &mdash; and you can watch PPVs right here.</p>
     </div>
     <div class="lk-prem-body"><p style="text-align:center;color:#9d94ad;">Loading&hellip;</p></div>
   </section>
@@ -2227,7 +2227,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
   </div>
 </div>
 
-<a id="ps-pill" href="#lunatics"><span class="ps-live">LIVE</span> <span id="ps-pill-t">Lunatics Preshow</span></a>
+<a id="ps-pill" href="#lunatics"><span class="ps-live">LIVE</span> <span id="ps-pill-t">Lunatics PPV</span></a>
 <div id="sup-modal" aria-modal="true" role="dialog">
   <div class="dm-box">
     <div class="dm-hd"><button class="sup-back" id="sup-back">&larr; All</button><b id="sup-with">Creaso Norse Tech</b><button class="cx" id="sup-close" aria-label="Close">&times;</button></div>
@@ -3607,10 +3607,10 @@ function observeReveals(){
   }
   /* the screen as non-members see it: locked */
   function loLockedTv(){
-    return '<div class="lo-tv"><div class="lo-tv-top"><span class="lo-onair"><i></i>Live</span><span class="lo-tv-title">Lunatics Live &mdash; Preshow &amp; Post Show</span><span class="lo-tv-brand">JCW Lunacy</span></div>'
+    return '<div class="lo-tv"><div class="lo-tv-top"><span class="lo-onair"><i></i>Live</span><span class="lo-tv-title">Lunatics PPV</span><span class="lo-tv-brand">JCW Lunacy</span></div>'
       +'<div class="lo-screen"><div class="lo-static"></div><div class="lo-scan"></div><div class="lo-scr-in"><div class="lo-lock">&#9733;</div>'
-      +'<div class="lo-scr-k">The Lunatics screen</div><div class="lo-scr-t">Preshow &amp; Post Show</div>'
-      +'<div class="lo-scr-s">Lunatics watch the preshow and post show together right here, along with everything else in the membership.</div></div></div></div>';
+      +'<div class="lo-scr-k">The Lunatics screen</div><div class="lo-scr-t">PPV</div>'
+      +'<div class="lo-scr-s">Lunatics watch PPVs together right here, along with everything else in the membership.</div></div></div></div>';
   }
   function loJoin(btnHtml,chk){
     return '<div class="lo-join"><div class="lo-join-l"><h3>What you get</h3><ul>'
@@ -3686,8 +3686,8 @@ function observeReveals(){
     const CAN=()=>!!(lkUser&&STREAMERS[lkUser.uid]);
     let ps=null,ref=null,refUid=null,sel=null;
     const esc=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
-    const NAME={pre:'Preshow',post:'Post Show'};
-    const DEF={pre:'Lunatics Live Preshow',post:'Lunatics Post Show'};
+    const NAME={pre:'PPV',post:'PPV'};   /* owner 11/10: the Lunatics screen is the PPV screen */
+    const DEF={pre:'JCW Lunacy PPV',post:'JCW Lunacy PPV'};
     function norm(v){
       v=v||{};
       const sh=x=>({title:String((x&&x.title)||''),src:String((x&&x.src)||''),when:String((x&&x.when)||'')});
@@ -3722,18 +3722,18 @@ function observeReveals(){
       if(host){
         let h='';
         if(window.__lkPremOn){
-          const title=esc(cur.title||DEF[n.kind]);
+          const title=esc(DEF[n.kind]);
           const src=live?embed(cur.src):'';
-          h='<div class="lo-tv'+(live?' live':'')+'"><div class="lo-tv-top"><span class="lo-onair"><i></i>'+(live?'Live':'Off air')+'</span><span class="lo-tv-title">'+(live?title:'Lunatics Live &mdash; Preshow &amp; Post Show')+'</span><span class="lo-tv-brand">JCW Lunacy</span></div><div class="lo-screen">';
+          h='<div class="lo-tv'+(live?' live':'')+'"><div class="lo-tv-top"><span class="lo-onair"><i></i>'+(live?'Live':'Off air')+'</span><span class="lo-tv-title">'+(live?title:'Lunatics PPV')+'</span><span class="lo-tv-brand">JCW Lunacy</span></div><div class="lo-screen">';
           if(live&&src){
             h+='<iframe src="'+esc(src)+'" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen title="'+title+'"></iframe>';
           }else{
             h+='<div class="lo-static"></div><div class="lo-scan"></div><div class="lo-scr-in">';
             const ups=['pre','post'].filter(k=>n[k].when);
             if(live)h+='<div class="lo-scr-k">'+NAME[n.kind]+' &middot; live now</div><div class="lo-scr-t">'+title+'</div>'+(isYT(cur.src)?'<div class="lo-scr-s">This stream can&rsquo;t play on the Lunatics screen.</div>':'<a class="btn gold" href="'+esc(cur.src)+'" target="_blank" rel="noopener">Watch the stream</a>');
-            else if(ups.length===1){const k=ups[0];h+='<div class="lo-scr-k">Next '+NAME[k].toLowerCase()+'</div><div class="lo-scr-t">'+esc(n[k].title||DEF[k])+'</div><div class="lo-scr-w">'+esc(n[k].when)+'</div><div class="lo-scr-s">Goes live right here on this screen.</div>';}
-            else if(ups.length)h+='<div class="lo-scr-k">Coming up on this screen</div><div class="lo-ups">'+ups.map(k=>'<div class="lo-up"><span>'+NAME[k]+'</span><b>'+esc(n[k].title||DEF[k])+'</b><em>'+esc(n[k].when)+'</em></div>').join('')+'</div>';
-            else h+='<div class="lo-scr-k">Off air</div><div class="lo-scr-t">Lunatics Live</div><div class="lo-scr-s">The preshow and the post show play right here on this screen when they go live.</div>';
+            else if(ups.length===1){const k=ups[0];h+='<div class="lo-scr-k">Next '+NAME[k]+'</div><div class="lo-scr-t">'+esc(DEF[k])+'</div><div class="lo-scr-w">'+esc(n[k].when)+'</div><div class="lo-scr-s">Goes live right here on this screen.</div>';}
+            else if(ups.length)h+='<div class="lo-scr-k">Coming up on this screen</div><div class="lo-ups">'+ups.map(k=>'<div class="lo-up"><span>'+NAME[k]+'</span><b>'+esc(DEF[k])+'</b><em>'+esc(n[k].when)+'</em></div>').join('')+'</div>';
+            else h+='<div class="lo-scr-k">Off air</div><div class="lo-scr-t">PPV</div><div class="lo-scr-s">PPVs play right here on this screen when they go live.</div>';
             h+='</div>';
           }
           h+='</div>'+(live&&src?'<div class="lo-tv-help">Stream stuck or showing an error? <button type="button" data-ps-reload>&#8635; Reload player</button> <a href="'+esc(cur.src)+'" target="_blank" rel="noopener">Watch on '+(/twitch\.tv/i.test(cur.src)?'Twitch':/kick\.com/i.test(cur.src)?'Kick':'the stream page')+' &#8599;</a></div>':'')
