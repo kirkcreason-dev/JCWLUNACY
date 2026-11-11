@@ -1529,6 +1529,17 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offse
           <button class="btn line" id="au-logout" style="margin-top:12px;">Log out</button>
           <p>Your points sync across every device.</p>
           <div id="lk-blocked" style="margin-top:10px;font-size:13px;"></div>
+          <button id="au-em-open" style="display:block;background:none;border:none;color:var(--acid);font-size:12px;text-decoration:underline;cursor:pointer;padding:0;margin-top:10px;">Change my email</button>
+          <div id="au-em-box" style="display:none;margin-top:12px;padding:12px;border:1px solid rgba(124,255,0,.4);border-radius:10px;background:rgba(124,255,0,.05);">
+            <p style="font-size:13px;line-height:1.6;margin:0 0 10px;">Type your new email and your password. We&rsquo;ll send a link to the <b>new</b> email &mdash; click it and your account switches over. Until then you keep logging in with your current email. Your points, cards and badges stay with you.</p>
+            <input type="email" id="au-em-new" placeholder="New email" autocomplete="email" style="width:100%;background:#000;border:1px solid rgba(124,255,0,.4);color:#fff;border-radius:8px;padding:9px 10px;font:inherit;">
+            <input type="password" id="au-em-pass" placeholder="Your password" autocomplete="current-password" style="width:100%;margin-top:8px;background:#000;border:1px solid rgba(124,255,0,.4);color:#fff;border-radius:8px;padding:9px 10px;font:inherit;">
+            <div style="display:flex;gap:8px;margin-top:10px;">
+              <button class="btn line" id="au-em-cancel" style="flex:1;">Cancel</button>
+              <button class="btn gold" id="au-em-go" style="flex:1;">Send the link</button>
+            </div>
+            <p id="au-em-msg" style="min-height:16px;font-size:12px;margin:8px 0 0;"></p>
+          </div>
           <button id="au-del-open" style="background:none;border:none;color:var(--hot,#ff3fa4);font-size:12px;text-decoration:underline;cursor:pointer;padding:0;margin-top:10px;">Delete my account</button>
           <div id="au-del-box" style="display:none;margin-top:12px;padding:12px;border:1px solid rgba(255,63,164,.5);border-radius:10px;background:rgba(255,63,164,.07);">
             <p style="color:#ffd1e8;font-size:13px;line-height:1.6;margin:0 0 10px;"><b>This is forever.</b> Your points, badges, cards, allies and wall get wiped and your login is destroyed. If you&rsquo;re a Lunatic, cancel your membership first (Lunatics Only &rarr; <b>Manage or cancel my membership</b>) or Stripe keeps billing you.</p>
@@ -3729,7 +3740,7 @@ function observeReveals(){
             h+='<iframe src="'+esc(src)+'" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen title="'+title+'"></iframe>';
           }else{
             h+='<div class="lo-static"></div><div class="lo-scan"></div><div class="lo-scr-in">';
-            const ups=['pre','post'].filter(k=>n[k].when);
+            const ups=[];   /* owner 11/10: PPV screen - the old preshow/post show times aren't listed */
             if(live)h+='<div class="lo-scr-k">'+NAME[n.kind]+' &middot; live now</div><div class="lo-scr-t">'+title+'</div>'+(isYT(cur.src)?'<div class="lo-scr-s">This stream can&rsquo;t play on the Lunatics screen.</div>':'<a class="btn gold" href="'+esc(cur.src)+'" target="_blank" rel="noopener">Watch the stream</a>');
             else if(ups.length===1){const k=ups[0];h+='<div class="lo-scr-k">Next '+NAME[k]+'</div><div class="lo-scr-t">'+esc(DEF[k])+'</div><div class="lo-scr-w">'+esc(n[k].when)+'</div><div class="lo-scr-s">Goes live right here on this screen.</div>';}
             else if(ups.length)h+='<div class="lo-scr-k">Coming up on this screen</div><div class="lo-ups">'+ups.map(k=>'<div class="lo-up"><span>'+NAME[k]+'</span><b>'+esc(DEF[k])+'</b><em>'+esc(n[k].when)+'</em></div>').join('')+'</div>';
@@ -3852,6 +3863,10 @@ function observeReveals(){
       });
     }
     if(e.target.id==='au-logout'){ if(fbAuth)fbAuth.signOut(); }
+    if(e.target.id==='au-em-open'||e.target.id==='au-em-cancel'){
+      const b=document.getElementById('au-em-box');if(b){const show=e.target.id==='au-em-open'&&b.style.display==='none';b.style.display=show?'block':'none';if(!show){const m=document.getElementById('au-em-msg');if(m)m.textContent='';}}
+    }
+    if(e.target.id==='au-em-go'&&window.jcwChangeEmail)window.jcwChangeEmail();
     if(e.target.id==='au-del-open'){
       const b=document.getElementById('au-del-box');
       const opening=!b||b.style.display==='none';
@@ -4180,6 +4195,39 @@ function observeReveals(){
       });
       return true;
     }catch(_e){return false;}
+  };
+
+  /* ===== change email (a member asked, 11/11): reauth with the password, then
+     Firebase emails a link to the NEW address; the login switches only when
+     they click it (verifyBeforeUpdateEmail), so a typo can't lock anyone out.
+     Same account and uid, so points, cards and badges don't move. ===== */
+  window.jcwChangeEmail=async function(){
+    const say=(m,ok)=>{const el=document.getElementById('au-em-msg');if(el){el.textContent=m;el.style.color=ok?'var(--acid)':'#ffd1e8';}};
+    const btn=document.getElementById('au-em-go');
+    try{
+      if(!fbAuth||!fbAuth.currentUser){say('Not signed in.');return;}
+      const user=fbAuth.currentUser;
+      const neu=String((document.getElementById('au-em-new')||{}).value||'').trim();
+      const pass=(document.getElementById('au-em-pass')||{}).value||'';
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(neu)){say('Type a real email address.');return;}
+      if(neu.toLowerCase()===String(user.email||'').toLowerCase()){say('That\u2019s already your email.');return;}
+      if(!pass){say('Enter your password too.');return;}
+      if(btn)btn.disabled=true;
+      say('Checking password\u2026');
+      await user.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(user.email,pass));
+      say('Sending the link\u2026');
+      try{await user.verifyBeforeUpdateEmail(neu,{url:'https://jcwlunacy.net/#locker'});}
+      catch(e1){const c1=(e1&&e1.code)||'';if(/continue-uri|unauthorized-domain/.test(c1))await user.verifyBeforeUpdateEmail(neu);else throw e1;}   /* link back to the site if that domain is allowed, plain link if not */
+      say('Link sent to '+neu+'. Open that email and click the link to finish. (Check spam.) After that, log in with your new email.',true);
+      const p=document.getElementById('au-em-pass');if(p)p.value='';
+    }catch(err){
+      const code=(err&&err.code)||'';
+      if(code==='auth/wrong-password'||code==='auth/invalid-credential'||code==='auth/invalid-login-credentials')say('Wrong password.');
+      else if(code==='auth/email-already-in-use')say('Another account already uses that email.');
+      else if(code==='auth/invalid-email')say('That email doesn\u2019t look right.');
+      else if(code==='auth/too-many-requests')say('Too many tries \u2014 wait a minute.');
+      else say('Could not change it: '+String((err&&err.message)||'unknown error').replace('Firebase: ',''));
+    }finally{if(btn)btn.disabled=false;}
   };
 
   /* ===== account deletion: reauth -> wipe own data -> destroy login ===== */
