@@ -8608,7 +8608,7 @@ route();
        that comes back lands in the owner's gifts, not the helper's. Cards only — no
        points from the stash. ---- */
     const STASH_OWNER='oYrNiXZywhexmLqRQO7j1iyA1Bh1';
-    const STASH_HELPERS={'itHFBTk2VoNLKk2ZYQbLDZJU6iU2':1};   /* 3-ZEE */
+    const STASH_HELPERS={};   /* owner 11/21: 3-ZEE can no longer trade from the stash (was 'itHFBTk2VoNLKk2ZYQbLDZJU6iU2') */
     let __stash=false,__stashName='Digital Duke';
     function canStash(toUid){const u=curUser();return !!(u&&STASH_HELPERS[u.uid]&&toUid!==STASH_OWNER);}
     function stashName(){
