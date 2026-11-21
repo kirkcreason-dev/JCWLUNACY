@@ -3393,7 +3393,7 @@ function observeReveals(){
           let gGain=0;
           Object.keys(RATE).forEach(function(k){
             const was=nn(d.gpaid[k]),now=gNow[k];
-            if(now>was){gGain+=Math.min(now-was,40)*RATE[k];d.gpaid[k]=now;ch=true;}
+            if(now>was){const step=Math.min(now-was,40);gGain+=step*RATE[k];d.gpaid[k]=was+step;ch=true;}   /* pay 40 at a time; the rest pays on the next check instead of being thrown away (owner 11/21, 3-ZEE's Tic Tac Toe wins) */
           });
           if(gGain){
             d.pts=(d.pts||0)+gGain;
@@ -8618,6 +8618,8 @@ route();
     function openTradeUI(toUid,toName,wantId){
       if(!curUser()){toast('Log into your Locker first');location.hash='#locker';return;}
       buildCatalog();
+      /* a limited card you already own can't be traded for (one per person) - say so instead of opening an empty trade window */
+      try{if(wantId&&!isHouse()&&window.jcwCardCap&&window.jcwCardCap(wantId)&&((((lkGet().cards||{})[wantId])||{}).n||0)>=1){toast('You already own '+((catById(wantId)||{}).name||'this card')+' \u2014 limited cards are one per person.',4200);return;}}catch(_e){}
       __stash=false;
       const stashOk=canStash(toUid);
       if(stashOk)stashName();
