@@ -3194,7 +3194,12 @@ function observeReveals(){
         const cat=window.jcwCardCatalog?window.jcwCardCatalog():null;
         /* 1/1s: a numbered card with only one ever made */
         if(cat&&cat.length){let ones=0;cat.forEach(function(c){if(c&&(+c.cap===1)){const o=cards[c.id];if(o&&(+o.n||0)>0)ones++;}});
-          if(ones>=1)add('oneofone');if(ones>=5)add('oneofone5');}
+          if(ones>=1)add('oneofone');if(ones>=5)add('oneofone5');
+          /* 1/1 badges are for holding them, not for borrowing them: once the
+             cloud copy of your cards has loaded, drop the badge if you no
+             longer hold enough (Kirk, after the "Five of a Kind" lending ring). */
+          if(lkCloudReady&&lkUser&&!isHouseUid(lkUser.uid)){const keep=d.badges.filter(function(b){return !((b==='oneofone5'&&ones<5)||(b==='oneofone'&&ones<1));});
+            if(keep.length!==d.badges.length){d.badges=keep;ch=true;}}}
         if(cat&&cat.length){
           const pool=cat.filter(function(c){return c&&!c.giftOnly&&!c.cap;});
           if(pool.length&&pool.every(function(c){const o=cards[c.id];return o&&(+o.n||0)>0;}))add('fullset');
@@ -6894,7 +6899,7 @@ function observeReveals(){
                 Object.keys(lc).forEach(k=>{if(lc[k])out[k]=lc[k];});
                 Object.keys(cc).forEach(k=>{if(!cc[k])return;const c=cc[k],l=out[k];
                   const m={n:c.n||0,foil:!!(c.foil||(l&&l.foil))};
-                  const s=[].concat(c.serials||[],(l&&l.serials)||[]).filter((x,i,a)=>a.indexOf(x)===i);if(s.length)m.serials=s;
+                  const s=[].concat(c.serials||[],(l&&l.serials)||[]).filter((x,i,a)=>a.indexOf(x)===i);if(s.length&&m.n>0)m.serials=s;
                   out[k]=m;});
                 merged.cards=out;
                 const cs=window.jcwDecCards(cloud.swapped||{}),ls=d.swapped||{},sw={};
@@ -8806,7 +8811,11 @@ route();
       for(const o of offs){if(window.jcwCardCap&&window.jcwCardCap(o)&&(((d.cards[o]||{}).n)||0)>=1){toast('You already have '+((catById(o)||{}).name||'that one')+' — limited cards are one per person',4200);return;}}
       const tp=Math.max(0,Math.min(999999,Math.floor(+t.pts||0)));
       const wantFoils=wants.map(w=>!!(d.cards[w]&&d.cards[w].foil));
-      if(!isHouse()){wants.forEach(w=>{const mw=d.cards[w];mw.n-=1;if(mw.n<=0)delete d.cards[w];else d.cards[w]=mw;});}
+      if(!isHouse()){wants.forEach(w=>{const mw=d.cards[w];mw.n-=1;
+        /* keep the key at n:0 — a deleted key looks "never seen" to the cloud
+           merge, so another open device pushed the traded card straight back
+           (how 1/1s ended up in two collections) */
+        if(mw.n<=0)d.cards[w]={n:0,foil:false};else d.cards[w]=mw;});}
       offs.forEach((o,i)=>{const got=d.cards[o]||{n:0,foil:false};got.n=(got.n||0)+1;if(offF[i])got.foil=true;d.cards[o]=got;});
       lkSet(d);
       /* points go through the main Locker so the cloud total syncs up */
